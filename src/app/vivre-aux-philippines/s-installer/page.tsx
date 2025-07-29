@@ -38,7 +38,7 @@ const InstallerPage = async () => {
         titlePart1="S'installer aux"
         titlePart2="Philippines"
         subtitle={page.subtitle || "De la demande de visa à la recherche de votre nouveau chez-vous, toutes les clés pour une expatriation réussie."}
-        imageUrl={page.hero_image_url || "/imagesHero/Nouveau-Depart-aux-Philippines.webp"}
+        imageUrl={page.hero_image_url || "/imagesHero/nouveau-depart-aux-philippines.webp"}
       />
 
       <div className="bg-muted py-20 -mt-20 relative z-20 rounded-t-2xl">

@@ -39,7 +39,7 @@ const QuandPartirPage = async () => {
         titlePart2="Philippines"
         titlePart2Color="accent"
         subtitle={page.subtitle || "Le guide ultime pour choisir la période idéale en fonction de la météo, de l'affluence et de vos envies."}
-        imageUrl={page.hero_image_url || "/imagesHero/Meteo-Contrastee-aux-Philippines.webp"}
+        imageUrl={page.hero_image_url || "/imagesHero/meteo-contrastee-aux-philippines.webp"}
       />
 
       <div className="bg-muted py-20 -mt-20 relative z-20 rounded-t-2xl">

@@ -39,7 +39,7 @@ const BudgetPage = async () => {
         titlePart2="Budget"
         titlePart2Color="accent"
         subtitle={page.subtitle || "Découvrez comment voyager-aux-philippines aux Philippines sans vous ruiner, que vous soyez backpacker ou en quête de confort."}
-        imageUrl={page.hero_image_url || "/imagesHero/maitriser-son-budget-aux-Philippines.webp"}
+        imageUrl={page.hero_image_url || "/imagesHero/maitriser-son-budget-aux-philippines.webp"}
       />
 
       <div className="bg-muted py-20 -mt-20 relative z-20 rounded-t-2xl">
