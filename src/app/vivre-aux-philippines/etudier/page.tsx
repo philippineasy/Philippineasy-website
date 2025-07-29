@@ -38,7 +38,7 @@ const EtudierPage = async () => {
         titlePart1="Étudier aux"
         titlePart2="Philippines"
         subtitle={page.subtitle || "Un cadre d'études internationalement reconnu et une expérience culturelle unique pour les étudiants du monde entier."}
-        imageUrl="/imagesHero/ou et comment étudier aux philippines.webp"
+        imageUrl="/imagesHero/ou-et-comment-etudier-aux-philippines.webp"
       />
 
       <div className="bg-muted py-20 -mt-20 relative z-20 rounded-t-2xl">

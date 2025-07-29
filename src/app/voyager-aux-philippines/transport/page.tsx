@@ -39,7 +39,7 @@ const TransportPage = async () => {
         titlePart2="Philippines"
         titlePart2Color="accent"
         subtitle={page.subtitle || "Maîtrisez l'art de naviguer dans l'archipel, que ce soit par les airs, par la mer ou par la route."}
-        imageUrl="/imagesHero/comment voyager aux Philippines.webp"
+        imageUrl="/imagesHero/comment-voyager-aux-Philippines.webp"
       />
 
       <div className="bg-muted py-20 -mt-20 relative z-20 rounded-t-2xl">
