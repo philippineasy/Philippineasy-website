@@ -38,7 +38,7 @@ const TravaillerPage = async () => {
         titlePart1="Travailler aux"
         titlePart2="Philippines"
         subtitle={page.subtitle || "Du salariat à l'entrepreneuriat, découvrez les opportunités professionnelles qui vous attendent dans l'archipel."}
-        imageUrl="/imagesHero/Travailleur-etranger-aux-Philippines.webp"
+        imageUrl={page.hero_image_url || "/imagesHero/Travailleur-etranger-aux-Philippines.webp"}
       />
 
       <div className="bg-muted py-20 -mt-20 relative z-20 rounded-t-2xl">
