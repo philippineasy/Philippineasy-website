@@ -25,7 +25,7 @@ const siteConfig = {
   name: "Philippin'Easy",
   url: "https://philippineasy.com",
   description: "Explorez les Philippines comme jamais auparavant avec des itinéraires personnalisés, des conseils de voyage, et une communauté active pour vivre, voyager, et s'installer.",
-  ogImage: "https://philippineasy.com/imagesHero/couple%20rencontre%20aux%20Philippines.webp",
+  ogImage: "https://philippineasy.com/imagesHero/couple-rencontre-aux-Philippines.webp",
   links: {
     twitter: "https://twitter.com/philippineasy",
     // github: "https://github.com/user/repo",

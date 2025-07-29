@@ -38,7 +38,7 @@ const InvestirPage = async () => {
         titlePart1="Investir aux"
         titlePart2="Philippines"
         subtitle={page.subtitle || "Un marché en pleine croissance offrant des opportunités uniques pour les investisseurs avisés."}
-        imageUrl="/imagesHero/comment investir aux philippines.webp"
+        imageUrl="/imagesHero/comment-investir-aux-philippines.webp"
       />
 
       <div className="bg-muted py-20 -mt-20 relative z-20 rounded-t-2xl">
