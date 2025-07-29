@@ -39,7 +39,7 @@ const SanteSecuritePage = async () => {
         titlePart2="Sécurité"
         titlePart2Color="accent"
         subtitle={page.subtitle || "Nos conseils pour voyager l'esprit tranquille et faire face à tous les imprévus."}
-        imageUrl="/imagesHero/securite-et-sante-aux-Philippines.webp"
+        imageUrl={page.hero_image_url || "/imagesHero/securite-et-sante-aux-philippines.webp"}
       />
 
       <div className="bg-muted py-20 -mt-20 relative z-20 rounded-t-2xl">

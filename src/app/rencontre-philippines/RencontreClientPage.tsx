@@ -98,7 +98,7 @@ const RencontreClientPage = () => {
         titlePart1="Nos"
         titlePart2="Rencontres"
         subtitle="Trouvez votre moitié aux Philippines"
-        imageUrl="/imagesHero/couple-rencontre-aux-Philippines.webp"
+        imageUrl="/imagesHero/couple-rencontre-aux-philippines.webp"
       />
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-20">

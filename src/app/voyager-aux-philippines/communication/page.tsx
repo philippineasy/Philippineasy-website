@@ -39,7 +39,7 @@ const CommunicationPage = async () => {
         titlePart2="Philippines"
         titlePart2Color="accent"
         subtitle={page.subtitle || "De la carte SIM locale aux bases du Tagalog, tous nos conseils pour échanger et rester connecté."}
-        imageUrl="/imagesHero/Antennes-reseaux-aux-Philippines.webp"
+        imageUrl={page.hero_image_url || "/imagesHero/antennes-reseaux-aux-philippines.webp"}
       />
 
       <div className="bg-muted py-20 -mt-20 relative z-20 rounded-t-2xl">
