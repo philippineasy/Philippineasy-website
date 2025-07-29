@@ -1,0 +1,106 @@
+Instructions pour connecter n8n à l'API d'ingestion d'articles :
+
+**1. Point d'API (Webhook URL) :**
+   - L'URL de votre point d'API sera : `VOTRE_URL_DU_SITE/api/n8n/articles`
+   - Remplacez `VOTRE_URL_DU_SITE` par l'URL de base de votre site web (par exemple, `https://www.votresite.com` ou `http://localhost:3000` si vous testez en local).
+
+**2. Méthode HTTP :**
+   - Utilisez la méthode `POST`.
+
+**3. Authentification (Header) :**
+   - Vous devez inclure une clé API dans les en-têtes de votre requête.
+   - Nom de l'en-tête : `X-N8N-API-Key`
+   - Valeur de l'en-tête : `VOTRE_CLE_API_N8N`
+     - **Important :** Vous devrez définir cette clé API dans vos variables d'environnement sur le serveur où votre site est déployé (par exemple, dans un fichier `.env.local` pour le développement, ou dans les configurations de votre hébergeur comme Vercel/Netlify). La variable d'environnement doit être nommée `N8N_API_KEY`.
+
+**4. Corps de la Requête (JSON) :**
+   - Le corps de la requête doit être un objet JSON avec les champs suivants :
+     ```json
+     {
+       "title": "Titre de l'article",
+       "content": {
+         "time": 1678886400000,
+         "blocks": [
+           {
+             "id": "block1",
+             "type": "header",
+             "data": {
+               "text": "Votre titre de section",
+               "level": 2
+             }
+           },
+           {
+             "id": "block2",
+             "type": "paragraph",
+             "data": {
+               "text": "Contenu du paragraphe."
+             }
+           },
+           {
+             "id": "block3",
+             "type": "image",
+             "data": {
+               "file": {
+                 "url": "URL_DE_L_IMAGE_TELEVERSEE_SUR_SUPABASE"
+               },
+               "caption": "Légende de l'image",
+               "withBorder": false,
+               "stretched": false,
+               "withBackground": false
+             }
+           },
+           {
+             "id": "block4",
+             "type": "list",
+             "data": {
+               "style": "unordered",
+               "items": [
+                 "Élément de liste 1",
+                 "Élément de liste 2"
+               ]
+             }
+           },
+           {
+             "id": "block5",
+             "type": "quote",
+             "data": {
+               "text": "Ceci est une citation.",
+               "caption": "Source de la citation"
+             }
+           }
+         ],
+         "version": "2.28.2"
+       },
+       "slug": "titre-de-l-article-slugifie",
+       "category_id": 1,
+       "image_url": "URL_DE_L_IMAGE_PRINCIPALE_TELEVERSEE_SUR_SUPABASE",
+       "status": "published"
+     }
+     ```
+   - **`title` (string) :** Le titre de l'article.
+   - **`content` (object) :** Le contenu de l'article au format JSON d'Editor.js. C'est le même format que celui utilisé par l'éditeur sur le site. Vous devrez structurer le contenu scrappé dans ce format.
+   - **`slug` (string) :** Un slug unique pour l'URL de l'article (par exemple, `mon-super-article`). Il est recommandé de le générer à partir du titre.
+   - **`category_id` (number) :** L'ID numérique de la catégorie à laquelle l'article appartient. Vous devrez récupérer ces IDs depuis votre base de données Supabase (table `categories`).
+   - **`image_url` (string) :** L'URL publique de l'image principale (thumbnail) de l'article. **Ceci doit être une URL directe vers une image déjà téléversée.**
+   - **`status` (string) :** Le statut de l'article (par exemple, `"published"`, `"draft"`, `"pending"`).
+
+**5. Gestion des Images avec n8n :**
+   - Avant d'envoyer les données de l'article à l'API, n8n devra téléverser les images (l'image principale et les images intégrées dans le contenu) vers votre bucket Supabase Storage.
+   - Vous utiliserez le nœud "Supabase" dans n8n (ou une requête HTTP directe) pour téléverser les fichiers.
+   - Une fois téléversées, Supabase vous fournira une URL publique pour chaque image. C'est cette URL que vous devrez inclure dans les champs `image_url` et dans les blocs `image` du `content`.
+
+**6. Récupération des IDs de Catégorie :**
+   - Pour obtenir les `category_id` nécessaires, vous pouvez soit :
+     - Exécuter une requête SQL directe sur votre base de données Supabase pour lister les catégories et leurs IDs.
+     - Créer un petit point d'API sur votre site qui expose les catégories (si ce n'est pas déjà fait) et que n8n pourrait interroger.
+
+**Exemple de flux n8n (aperçu conceptuel) :**
+1.  **Trigger :** Webhook, Cron, RSS, etc.
+2.  **HTTP Request (Scraping) :** Récupère le contenu du site source.
+3.  **Code / Function Node :** Traite le contenu scrappé et le formate en JSON Editor.js (`content`), génère le `slug`, extrait le `title`.
+4.  **Supabase Node (Upload Image) :** Téléverse l'image principale et les images du contenu vers Supabase Storage. Récupère les URLs publiques.
+5.  **Code / Function Node :** Assemble toutes les données (y compris les URLs des images et le `category_id` obtenu précédemment).
+6.  **HTTP Request (POST) :** Envoie le JSON final à `VOTRE_URL_DU_SITE/api/n8n/articles` avec l'en-tête `X-N8N-API-Key`.
+7.  **Telegram Node :** Envoie une notification si l'article est en attente d'une image ou si une erreur survient.
+
+N'oubliez pas de configurer la variable d'environnement `N8N_API_KEY` sur votre serveur.

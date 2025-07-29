@@ -1,0 +1,23 @@
+# See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
+#
+# Please note: A disallow command in robots.txt is a suggestion for search engine crawlers.
+# It does not guarantee that the disallowed pages will not be indexed.
+
+User-agent: *
+Allow: /
+
+# Disallow sensitive pages
+Disallow: /admin/
+Disallow: /profil/
+Disallow: /checkout/
+Disallow: /connexion/
+Disallow: /auth/
+Disallow: /recherche/
+Disallow: /rencontre-philippines/messages/
+Disallow: /rencontre-philippines/likes/
+Disallow: /rencontre-philippines/swipe/
+Disallow: /rencontre-philippines/en-attente/
+Disallow: /rencontre-philippines/inscription/
+Disallow: /api/
+
+Sitemap: https://philippineasy.com/sitemap.xml

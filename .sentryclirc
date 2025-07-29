@@ -1,0 +1,6 @@
+# This file is required for the Sentry CLI to work.
+# You can generate an auth token here: https://sentry.io/settings/account/api/auth-tokens/
+# Paste your token below.
+
+[auth]
+token=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
