@@ -54,6 +54,62 @@ export async function POST(req: NextRequest) {
       }
     }
   }
+
+  // Handle marketplace payments
+  if (event.type === 'payment_intent.succeeded') {
+    const paymentIntent = event.data.object as Stripe.PaymentIntent;
+    const userId = paymentIntent.metadata?.userId;
+    const cartItems = paymentIntent.metadata?.cartItems;
+
+    if (userId && cartItems) {
+      try {
+        const parsedCartItems = JSON.parse(cartItems);
+        
+        // Create order
+        const { data: order, error: orderError } = await supabaseAdmin
+          .from('orders')
+          .insert({
+            user_id: userId,
+            total_amount: paymentIntent.amount / 100, // Convert from cents
+            status: 'succeeded',
+            stripe_payment_intent_id: paymentIntent.id,
+            shipping_address: paymentIntent.shipping || null,
+          })
+          .select('id')
+          .single();
+
+        if (orderError || !order) {
+          console.error(`Failed to create order for payment intent ${paymentIntent.id}:`, orderError);
+          return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
+        }
+
+        // Create order items
+        const orderItemsToInsert = parsedCartItems.map((item: any) => ({
+          order_id: order.id,
+          product_id: item.product.id,
+          vendor_id: item.product.vendor_id,
+          quantity: item.quantity,
+          price: item.product.price,
+        }));
+
+        const { error: itemsError } = await supabaseAdmin
+          .from('order_items')
+          .insert(orderItemsToInsert);
+
+        if (itemsError) {
+          console.error(`Failed to create order items for order ${order.id}:`, itemsError);
+          return NextResponse.json({ error: 'Failed to create order items' }, { status: 500 });
+        }
+
+        console.log(`Successfully processed marketplace order ${order.id} for payment intent ${paymentIntent.id}`);
+      } catch (parseError) {
+        console.error(`Failed to parse cart items for payment intent ${paymentIntent.id}:`, parseError);
+        return NextResponse.json({ error: 'Invalid cart data' }, { status: 500 });
+      }
+    } else {
+      console.log(`Payment intent ${paymentIntent.id} missing required metadata (userId or cartItems)`);
+    }
+  }
   
   // Handle subscription deletion
   if (event.type === 'customer.subscription.deleted') {
