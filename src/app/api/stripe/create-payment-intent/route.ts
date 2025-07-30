@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { createClient } from '@supabase/supabase-js';
+import { cookies } from 'next/headers';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-06-30.basil',
 });
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 type CartItem = {
   product: {
@@ -20,6 +27,14 @@ export async function POST(request: Request) {
 
     if (!cart || !Array.isArray(cart) || cart.length === 0) {
       return NextResponse.json({ error: 'Invalid cart data.' }, { status: 400 });
+    }
+
+    // Get authenticated user
+    const cookieStore = cookies();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
     }
 
     // In a real application, you would fetch product prices from your database
@@ -49,9 +64,8 @@ export async function POST(request: Request) {
       },
       metadata: {
         // Pass cart details and user ID to the webhook
-        cart: JSON.stringify(cart),
-        // In a real app, you'd get the user ID from the session
-        // userId: 'user_id_placeholder', 
+        userId: user.id,
+        cartItems: JSON.stringify(cart),
       }
     });
 
