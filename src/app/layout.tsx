@@ -25,7 +25,7 @@ const siteConfig = {
   name: "Philippin'Easy",
   url: "https://philippineasy.com",
   description: "Explorez les Philippines comme jamais auparavant avec des itinéraires personnalisés, des conseils de voyage, et une communauté active pour vivre, voyager, et s'installer.",
-  ogImage: "https://philippineasy.com/imagesHero/couple-rencontre-aux-Philippines.webp",
+  ogImage: "https://philippineasy.com/imagesHero/couple-rencontre-aux-philippines.webp",
   links: {
     twitter: "https://twitter.com/philippineasy",
     // github: "https://github.com/user/repo",
@@ -86,22 +86,22 @@ export const metadata: Metadata = {
     creator: "@philippineasy",
   },
   icons: {
-    icon: '/logo-philippineasy.webp',
-    shortcut: '/logo-philippineasy.webp',
-    apple: '/logo-philippineasy.webp',
+    icon: '/logo-philippineasy.png',
+    shortcut: '/logo-philippineasy.png',
+    apple: '/logo-philippineasy.png',
     other: [
       {
         rel: 'apple-touch-icon-precomposed',
-        url: '/logo-philippineasy.webp',
+        url: '/logo-philippineasy.png',
       },
       {
         rel: 'icon',
-        url: '/logo-philippineasy.webp',
+        url: '/logo-philippineasy.png',
         sizes: '32x32',
       },
       {
         rel: 'icon',
-        url: '/logo-philippineasy.webp',
+        url: '/logo-philippineasy.png',
         sizes: '16x16',
       },
     ],
