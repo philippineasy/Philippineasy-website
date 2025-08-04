@@ -2,8 +2,10 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
   })
 
   const supabase = createServerClient(
@@ -15,30 +17,36 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
+          // If the cookie is set, update the request and response
           request.cookies.set({
             name,
             value,
             ...options,
           })
-          supabaseResponse = NextResponse.next({
-            request,
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
           })
-          supabaseResponse.cookies.set({
+          response.cookies.set({
             name,
             value,
             ...options,
           })
         },
         remove(name: string, options: CookieOptions) {
+          // If the cookie is removed, update the request and response
           request.cookies.set({
             name,
             value: '',
             ...options,
           })
-          supabaseResponse = NextResponse.next({
-            request,
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
           })
-          supabaseResponse.cookies.set({
+          response.cookies.set({
             name,
             value: '',
             ...options,
@@ -48,14 +56,9 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // IMPORTANT: Avoid writing any logic between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
-
+  // This will refresh the session if expired - required for Server Components
+  // It also returns the session data, which is useful for protecting routes
   await supabase.auth.getUser()
 
-  // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
-  // creating a new response object with NextResponse.next() make sure to copy
-  // over the cookies as well.
-  return supabaseResponse
+  return response
 }
