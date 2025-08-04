@@ -30,7 +30,7 @@ const Editor = ({ data, onChange, holder }: EditorProps) => {
       holder: holder,
       tools: {
         paragraph: { // Add Paragraph tool
-          class: Paragraph,
+          class: Paragraph as any, // Type cast to fix build error
           inlineToolbar: true,
         },
         header: Header,
