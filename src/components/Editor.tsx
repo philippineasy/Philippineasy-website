@@ -28,6 +28,7 @@ const Editor = ({ data, onChange, holder }: EditorProps) => {
     }
     const editor = new EditorJS({
       holder: holder,
+      defaultBlock: 'paragraph', // Set paragraph as the default block
       tools: {
         paragraph: { // Add Paragraph tool
           class: Paragraph as any, // Type cast to fix build error
