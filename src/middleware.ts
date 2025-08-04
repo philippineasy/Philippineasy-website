@@ -1,7 +1,16 @@
-import { type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/utils/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
+  const { pathname, origin } = request.nextUrl;
+
+  // Redirect www to non-www
+  if (origin.startsWith('https://www.')) {
+    const newOrigin = origin.replace('https://www.', 'https://');
+    const newUrl = new URL(pathname, newOrigin);
+    return NextResponse.redirect(newUrl, 301);
+  }
+
   return await updateSession(request)
 }
 
