@@ -57,14 +57,9 @@ export default async function ForumCategoryPage({
         <div className="text-center">
           <h1 className="text-3xl font-bold">Catégorie non trouvée ou vide</h1>
           <p className="mt-4 text-muted-foreground">La catégorie que vous cherchez n'existe pas ou ne contient aucun sujet.</p>
-          <div className="mt-6 flex justify-center gap-4">
-            <Link href="/forum-sur-les-philippines" className="inline-block px-6 py-3 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80">
-              Retour aux forums
-            </Link>
-            <Link href={`/forum-sur-les-philippines/nouveau-sujet?category_slug=${slug}`} className="inline-block px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
-              Créer un nouveau sujet
-            </Link>
-          </div>
+          <Link href="/forum-sur-les-philippines" className="mt-6 inline-block px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
+            Retour aux forums
+          </Link>
         </div>
       </main>
     );
