@@ -82,6 +82,9 @@ export async function generateMetadata({
   return {
     title: `${article.title} | Philippin'Easy`,
     description,
+    alternates: {
+      canonical: `/article/${article.slug}`,
+    },
     openGraph: {
       title: article.title,
       description,

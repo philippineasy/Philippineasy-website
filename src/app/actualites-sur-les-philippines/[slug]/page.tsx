@@ -22,6 +22,9 @@ export async function generateMetadata({
   return {
     title: `${category.name} | Philippin'Easy`,
     description: category.description || `Articles et informations sur ${category.name}.`,
+    alternates: {
+      canonical: `/actualites-sur-les-philippines/${slug}`,
+    },
   };
 }
 
