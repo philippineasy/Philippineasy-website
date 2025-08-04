@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { OutputData } from '@editorjs/editorjs';
 import { getArticleBySlug } from '@/services/articleService';
 import { getAllCategories } from '@/services/categoryService';
@@ -28,7 +28,6 @@ interface Category {
 }
 
 const EditArticlePage = () => {
-  const supabase = createClient();
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { getAllArticlesForAdmin, deleteArticle } from '@/services/articleService';
 import { getAllCategories } from '@/services/categoryService';
 import { generateArticleUrl } from '@/lib/utils';
@@ -36,7 +36,6 @@ interface Category {
 }
 
 const AdminArticlesPage = () => {
-  const supabase = createClient();
   const [articles, setArticles] = useState<Article[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);

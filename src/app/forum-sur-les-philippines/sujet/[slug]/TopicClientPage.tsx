@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { getTopicBySlug, getPostsByTopicId, addForumPost, deleteForumPost, updateForumPost, lockForumTopic, pinForumTopic, deleteForumTopic } from '@/services/forumService';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -128,7 +128,6 @@ const renderPostContent = (content: string) => {
   };
   
   const PostComponent = ({ post, postNumber, onQuote, user, profile, onPostUpdate }: { post: Post, postNumber: number, onQuote: (postId: number, author: string, content: string) => void, user: User | null, profile: Profile | null, onPostUpdate: () => void }) => {
-    const supabase = createClient();
     const [isEditing, setIsEditing] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [editContent, setEditContent] = useState<OutputData | undefined>(undefined);
@@ -235,7 +234,6 @@ const renderPostContent = (content: string) => {
   };
 
 export const TopicClientPage = ({ initialTopic, initialPosts }: TopicClientPageProps) => {
-  const supabase = createClient();
   const { user, profile } = useAuth();
   const router = useRouter();
   const [topic, setTopic] = useState<Topic>(initialTopic);

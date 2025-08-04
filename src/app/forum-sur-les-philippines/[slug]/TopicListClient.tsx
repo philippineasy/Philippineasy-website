@@ -7,7 +7,7 @@ import { getTopicsByCategorySlug, deleteForumTopic, lockForumTopic, pinForumTopi
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faSearch, faThumbtack, faLock, faUnlock, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@/contexts/AuthContext';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import Modal from '@/components/layout/Modal';
 import toast from 'react-hot-toast';
 import { CustomSelect, SelectOption } from '@/components/shared/CustomSelect';
@@ -68,7 +68,6 @@ const SORT_OPTIONS: SelectOption[] = [
 ];
 
 export const TopicListClient = ({ slug, initialTopics }: TopicListClientProps) => {
-  const supabase = createClient();
   const { user, profile } = useAuth();
   const [topics, setTopics] = useState<Topic[]>(initialTopics);
   const [loading, setLoading] = useState(false);

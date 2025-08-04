@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { addTopicAndRevalidate } from '@/app/actions/forumActions';
 import { getCategoryBySlug } from '@/services/categoryService';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import toast from 'react-hot-toast';
@@ -24,7 +24,6 @@ interface Category {
 const NewTopicPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const supabase = createClient();
   const [category, setCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);

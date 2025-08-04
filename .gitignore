@@ -36,3 +36,5 @@ sentry-wizard-installation-error-*.log
 # Archives
 *.zip
 *.tar.gz
+src/app/realtime-test/page.tsx
+src/lib/supabaseBrowser.ts

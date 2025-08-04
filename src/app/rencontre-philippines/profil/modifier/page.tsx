@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { DatingProfile, Interest, DatingPhoto } from '@/types';
 import CitySelector from '@/components/shared/CitySelector';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { updateDatingProfile, UpdateDatingProfilePayload, uploadNewPhoto, deletePhoto } from '../actions';
 import toast from 'react-hot-toast';
@@ -46,8 +46,6 @@ const EditDatingProfilePage = () => {
   useEffect(() => {
     const fetchProfileData = async () => {
       if (!user) return;
-      
-      const supabase = createClient();
       
       const { data: profileData, error: profileError } = await supabase
         .from('dating_profiles')
@@ -153,7 +151,6 @@ const EditDatingProfilePage = () => {
         throw new Error(result.error);
       }
       // Refresh photos list
-      const supabase = createClient();
       const { data: allPhotos } = await supabase
         .from('dating_photos')
         .select('*')

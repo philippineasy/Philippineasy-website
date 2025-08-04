@@ -11,7 +11,7 @@ import { faFacebookF, faXTwitter, faWhatsapp, faLinkedinIn } from '@fortawesome/
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { recordArticleView } from '@/services/articleService';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import ArticleContentRenderer from '@/components/shared/ArticleContentRenderer';
 import TableOfContents from '@/components/shared/TableOfContents';
 import EditArticleButton from '@/components/shared/EditArticleButton';
@@ -25,7 +25,6 @@ interface ArticlePageClientProps {
 
 const ArticlePageClient = ({ article, basePath }: ArticlePageClientProps) => {
   const { user } = useAuth();
-  const supabase = createClient();
   const [currentUrl, setCurrentUrl] = useState('');
 
   useEffect(() => {

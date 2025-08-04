@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { getAllUsers, updateUserRole, banUser, unbanUser } from '@/services/userService';
 import toast from 'react-hot-toast';
 import { CustomSelect, SelectOption } from '@/components/shared/CustomSelect';
@@ -26,7 +26,6 @@ const ROLE_OPTIONS: SelectOption[] = [
 ];
 
 const AdminUsersPage = () => {
-  const supabase = createClient();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [userRoles, setUserRoles] = useState<Record<number, string>>({});

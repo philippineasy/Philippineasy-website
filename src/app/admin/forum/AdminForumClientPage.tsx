@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faChevronRight, faChevronDown, faEdit, faTrash, faThumbtack, faLock, faUnlock } from '@fortawesome/free-solid-svg-icons';
 import { deleteForumTopic, lockForumTopic, pinForumTopic, deleteForumCategory } from '@/services/forumService';
 import { getTopicsByCategorySlugAction } from '@/app/actions/forumActions';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import Modal from '@/components/layout/Modal';
 import { EditForumCategoryModal } from '@/components/admin/EditForumCategoryModal';
 import toast from 'react-hot-toast';
@@ -36,7 +36,6 @@ interface AdminForumClientPageProps {
 }
 
 export const AdminForumClientPage = ({ initialCategories }: AdminForumClientPageProps) => {
-  const supabase = createClient();
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [modal, setModal] = useState<{ isOpen: boolean, type: string, data: Category | null }>({ isOpen: false, type: '', data: null });
   const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean, message: string, onConfirm: () => void }>({ isOpen: false, message: '', onConfirm: () => {} });

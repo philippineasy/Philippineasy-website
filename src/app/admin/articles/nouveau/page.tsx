@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { getAllCategories } from '@/services/categoryService';
 import { createArticleAction } from '@/app/actions/articleActions';
 import toast from 'react-hot-toast';
@@ -22,7 +22,6 @@ interface Category {
 }
 
 const NewArticlePage = () => {
-  const supabase = createClient();
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);

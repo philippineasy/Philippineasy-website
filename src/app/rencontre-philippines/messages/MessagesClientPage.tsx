@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import { Message, Profile } from '@/types';
 import ConversationPanel from '@/components/dating/ConversationPanel';
@@ -33,7 +33,6 @@ const TimeDisplay = ({ date }: { date: string | null | undefined }) => {
 const MessagesClientPage = ({ initialMatches, currentUserId }: { initialMatches: MatchWithLastMessage[], currentUserId: string }) => {
   const [matches, setMatches] = useState(initialMatches);
   const [selectedMatch, setSelectedMatch] = useState<MatchWithLastMessage | null>(null);
-  const supabase = createClient();
   const router = useRouter();
 
   useEffect(() => {

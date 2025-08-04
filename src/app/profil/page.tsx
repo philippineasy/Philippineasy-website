@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { getTopicsByUserId, getPostsByUserId } from '@/services/forumService';
 import { getOrdersByUserId } from '@/services/orderService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -74,7 +74,6 @@ interface Order {
 }
 
 const ProfilPage = () => {
-  const supabase = createClient();
   const { user, profile, loading, signOut, updateLocalProfile } = useAuth();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [recentTopics, setRecentTopics] = useState<Topic[]>([]);

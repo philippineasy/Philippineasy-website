@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getTopicBySlug, getPostsByTopicId } from '@/services/forumService';
 import { updateTopicAction } from '@/app/actions/forumActions';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
@@ -22,7 +22,6 @@ const EditTopicPage = () => {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
-  const supabase = createClient();
 
   const [topic, setTopic] = useState<Topic | null>(null);
   const [title, setTitle] = useState('');

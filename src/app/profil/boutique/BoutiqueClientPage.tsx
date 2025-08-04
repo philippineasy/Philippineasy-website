@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 import { handleDeleteProduct } from './modifier-produit/[id]/actions';
 import ConfirmationModal from '@/components/shared/ConfirmationModal';
 import { handleUpdateVendorProfile } from './actions';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 
 // Types
 type Vendor = {
@@ -130,7 +130,6 @@ export function BoutiqueClientPage({ vendor, initialProducts, monthlySales, mont
   const [orders, setOrders] = useState<OrderItem[]>([]);
   const [activeTab, setActiveTab] = useState('overview');
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
-  const supabase = createClient();
 
   useEffect(() => {
     if (activeTab === 'orders') {

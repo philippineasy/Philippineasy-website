@@ -4,11 +4,10 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faNewspaper, faUsers, faComments } from '@fortawesome/free-solid-svg-icons';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 
 const AdminDashboardPage = () => {
-  const supabase = createClient();
   const [stats, setStats] = useState({
     articles: { total: 0, published: 0, draft: 0, scheduled: 0 },
     users: { total: 0, online: 0 },
