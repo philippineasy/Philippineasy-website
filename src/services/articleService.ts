@@ -230,24 +230,9 @@ export const createArticleFromN8n = async (supabase: SupabaseClient, articleData
 
 export const getHomepageArticles = async (supabase: SupabaseClient) => {
     try {
-        // Fetch category IDs
-        const { data: bestDealsCategories, error: bestDealsCatError } = await supabase
-            .from('categories')
-            .select('id')
-            .eq('main_category', 'meilleurs-plans-aux-philippines');
-
-        const { data: newsCategories, error: newsCatError } = await supabase
-            .from('categories')
-            .select('id')
-            .eq('main_category', 'actualites-sur-les-philippines');
-
-        if (bestDealsCatError || newsCatError) {
-            console.error('Error fetching homepage category IDs:', bestDealsCatError || newsCatError);
-            throw bestDealsCatError || newsCatError;
-        }
-
-        const bestDealsCategoryIds = bestDealsCategories.map(c => c.id);
-        const newsCategoryIds = newsCategories.map(c => c.id);
+        // Hardcoded category IDs for performance
+        const bestDealsCategoryIds = [14, 15, 16, 17];
+        const newsCategoryIds = [11];
 
         // Setup queries
         const bestDealsQuery = supabase
