@@ -66,8 +66,15 @@ const EditArticlePage = () => {
           setArticle(null);
         } else {
           const fetchedArticle = articleResult.data as Article;
-          // Ensure content is a valid OutputData object, allowing for empty blocks
-          if (!fetchedArticle.content || typeof fetchedArticle.content !== 'object' || !fetchedArticle.content.blocks) {
+          // Ensure content is a valid OutputData object
+          if (typeof fetchedArticle.content === 'string') {
+            try {
+              fetchedArticle.content = JSON.parse(fetchedArticle.content);
+            } catch (error) {
+              console.error("Failed to parse article content, initializing as empty:", error);
+              fetchedArticle.content = { blocks: [] };
+            }
+          } else if (!fetchedArticle.content || typeof fetchedArticle.content !== 'object' || !fetchedArticle.content.blocks) {
             fetchedArticle.content = { blocks: [] };
           }
           setArticle(fetchedArticle);
