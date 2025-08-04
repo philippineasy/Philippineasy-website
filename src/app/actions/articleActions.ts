@@ -31,29 +31,14 @@ function isValidStatus(status: any): status is ArticleStatus {
   return ['published', 'draft', 'archived'].includes(status);
 }
 
-export async function createArticleAction(formData: FormData) {
+export async function createArticleAction(articleData: ArticleCreate, imageFile: File) {
   const supabase = createClient();
-
-  const status = formData.get('status');
-  if (typeof status !== 'string' || !isValidStatus(status)) {
-    return { success: false, error: "Statut invalide fourni." };
-  }
-
-  const rawFormData: ArticleCreate = {
-    title: formData.get('title') as string,
-    content: JSON.parse(formData.get('content') as string),
-    slug: formData.get('slug') as string,
-    category_id: parseInt(formData.get('category') as string, 10),
-    status: status,
-  };
-  
-  const imageFile = formData.get('image-upload') as File;
 
   if (!imageFile || imageFile.size === 0) {
     return { success: false, error: "L'image à la une est obligatoire." };
   }
 
-  const { data, error } = await createArticleInService(supabase, rawFormData, imageFile);
+  const { data, error } = await createArticleInService(supabase, articleData, imageFile);
 
   if (error) {
     return { success: false, error: error.message };
@@ -162,26 +147,10 @@ export async function getArticlesByCategory(categoryId: number): Promise<{ artic
   return { articles };
 }
 
-export async function updateArticleAction(articleId: number, formData: FormData) {
+export async function updateArticleAction(articleId: number, updates: ArticleUpdate, imageFile: File | null) {
   const supabase = createClient();
 
-  const status = formData.get('status');
-  if (typeof status !== 'string' || !isValidStatus(status)) {
-    return { success: false, error: "Statut invalide fourni." };
-  }
-
-  const rawFormData: ArticleUpdate = {
-    title: formData.get('title') as string,
-    content: JSON.parse(formData.get('content') as string),
-    slug: formData.get('slug') as string,
-    category_id: parseInt(formData.get('category') as string, 10),
-    status: status,
-    image: formData.get('current-image-url') as string,
-  };
-
-  const imageFile = formData.get('image-upload') as File | null;
-
-  const { data, error } = await updateArticleInService(supabase, articleId, rawFormData, imageFile);
+  const { data, error } = await updateArticleInService(supabase, articleId, updates, imageFile);
 
   if (error) {
     return { success: false, error: error.message };

@@ -67,24 +67,13 @@ const NewArticlePage = () => {
       title: formData.get('title') as string,
       slug: formData.get('slug') as string,
       category_id: parseInt(formData.get('category') as string, 10),
-      status: status,
+      status: status as 'draft' | 'published' | 'archived',
       content: content,
-      imageFile: imageFile,
     };
 
-    // We need to handle the file upload separately if we don't use FormData
-    // For now, let's create a new FormData object just for the action
-    const actionFormData = new FormData();
-    actionFormData.append('title', articleData.title);
-    actionFormData.append('slug', articleData.slug);
-    actionFormData.append('category', articleData.category_id.toString());
-    actionFormData.append('status', articleData.status);
-    actionFormData.append('content', JSON.stringify(articleData.content));
-    if (articleData.imageFile) {
-      actionFormData.append('image-upload', articleData.imageFile);
-    }
+    
 
-    const result = await createArticleAction(actionFormData);
+    const result = await createArticleAction(articleData, imageFile);
 
     if (result.success) {
       toast.success('Article créé avec succès !');
