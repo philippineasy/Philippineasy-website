@@ -2,7 +2,6 @@
 
 import { memo, useEffect, useRef } from 'react';
 import EditorJS, { OutputData } from '@editorjs/editorjs';
-import { createClient } from '@/utils/supabase/client';
 import Header from '@editorjs/header';
 import List from '@editorjs/list';
 import Quote from '@editorjs/quote';
@@ -20,7 +19,6 @@ interface EditorProps {
 
 const Editor = ({ data, onChange, holder }: EditorProps) => {
   const ref = useRef<EditorJS | null>(null);
-  const supabase = createClient();
 
   useEffect(() => {
     if (ref.current) {
@@ -36,7 +34,7 @@ const Editor = ({ data, onChange, holder }: EditorProps) => {
           class: ImageTool,
           config: {
             uploader: {
-              uploadByFile: (file: File) => uploadImage(supabase, file),
+              uploadByFile: uploadImage,
             },
           },
         },
