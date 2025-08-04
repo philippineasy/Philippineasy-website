@@ -202,7 +202,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
               <div className="flex-1 md:hidden"></div>
 
               <div className="flex justify-end items-center space-x-4">
-                <button onClick={() => setIsSearchModalOpen(true)} className="text-foreground hover:text-primary focus:outline-none hidden md:block">
+                <button onClick={() => setIsSearchModalOpen(true)} className="text-foreground hover:text-primary focus:outline-none hidden md:block" aria-label="Rechercher sur le site">
                   <FontAwesomeIcon icon={faSearch} className="text-xl" />
                 </button>
                 {loading ? (
@@ -264,7 +264,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
                       <FontAwesomeIcon icon={faSignInAlt} className="mr-2 opacity-80" /> Connexion
                   </Link>
                 )}
-              <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label={isMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}>
                 <FontAwesomeIcon icon={isMenuOpen ? faTimes : faBars} className="text-2xl text-foreground" />
               </button>
               </div>
