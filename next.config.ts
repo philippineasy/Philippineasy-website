@@ -102,7 +102,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.tawk.to https://*.sentry.io; style-src 'self' 'unsafe-inline' https://embed.tawk.to; img-src * data:; font-src 'self' data: https://embed.tawk.to; connect-src * wss://*.tawk.to;",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.tawk.to https://*.sentry.io https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://embed.tawk.to; img-src * data:; font-src 'self' data: https://embed.tawk.to; connect-src * wss://*.tawk.to;",
           },
           {
             key: 'Strict-Transport-Security',
