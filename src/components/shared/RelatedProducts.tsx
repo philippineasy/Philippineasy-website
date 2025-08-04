@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { Product } from '@/types';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { getRelatedProducts } from '@/services/productService';
 import { ProductCard } from './ProductCard';
 
@@ -13,7 +13,6 @@ interface RelatedProductsProps {
 
 const RelatedProducts = ({ categoryId, currentProductId }: RelatedProductsProps) => {
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
-  const supabase = createClient();
 
   useEffect(() => {
     const fetchRelated = async () => {

@@ -1,9 +1,16 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { usePremium } from '../usePremium';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 
 // Mock dependencies
-jest.mock('@/utils/supabase/client');
+jest.mock('@/utils/supabase/client', () => ({
+  supabase: {
+    auth: {
+      getUser: jest.fn(),
+    },
+    from: jest.fn(),
+  },
+}));
 
 describe('usePremium Hook', () => {
   let getUserMock: jest.Mock;
@@ -13,18 +20,13 @@ describe('usePremium Hook', () => {
   let singleMock: jest.Mock;
 
   beforeEach(() => {
-    getUserMock = jest.fn();
+    getUserMock = supabase.auth.getUser as jest.Mock;
+    fromMock = supabase.from as jest.Mock;
+
     singleMock = jest.fn();
     eqMock = jest.fn().mockReturnValue({ single: singleMock });
     selectMock = jest.fn().mockReturnValue({ eq: eqMock });
-    fromMock = jest.fn().mockReturnValue({ select: selectMock });
-
-    (createClient as jest.Mock).mockReturnValue({
-      auth: {
-        getUser: getUserMock,
-      },
-      from: fromMock,
-    });
+    fromMock.mockReturnValue({ select: selectMock });
   });
 
   afterEach(() => {

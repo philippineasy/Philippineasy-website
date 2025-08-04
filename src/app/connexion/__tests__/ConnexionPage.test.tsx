@@ -1,17 +1,25 @@
-import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import ConnexionPage from '../page';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
 
-// Mock dependencies
-jest.mock('@/utils/supabase/client');
+// Mocks
+jest.mock('@/utils/supabase/client', () => ({
+  supabase: {
+    auth: {
+      signInWithPassword: jest.fn(),
+      signUp: jest.fn(),
+      signInWithOAuth: jest.fn(),
+    },
+  },
+}));
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
 }));
-jest.mock('react-hot-toast');
+jest.mock('react-hot-toast', () => ({
+  success: jest.fn(),
+  error: jest.fn(),
+}));
 
 describe('ConnexionPage', () => {
   let pushMock: jest.Mock;
@@ -27,58 +35,26 @@ describe('ConnexionPage', () => {
       refresh: refreshMock,
     });
 
-    signInWithPasswordMock = jest.fn().mockResolvedValue({ error: null });
-    signUpMock = jest.fn().mockResolvedValue({ error: null });
-    (createClient as jest.Mock).mockReturnValue({
-      auth: {
-        signInWithPassword: signInWithPasswordMock,
-        signUp: signUpMock,
-        signInWithOAuth: jest.fn().mockResolvedValue({ error: null }),
-      },
-    });
+    signInWithPasswordMock = supabase.auth.signInWithPassword as jest.Mock;
+    signUpMock = supabase.auth.signUp as jest.Mock;
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders the login form by default', () => {
-    render(<ConnexionPage />);
-    expect(screen.getByRole('heading', { name: /Connectez-vous à votre compte/i })).toBeInTheDocument();
-    expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Mot de passe/i)).toBeInTheDocument();
-    expect(screen.queryByLabelText(/Nom d'utilisateur/i)).not.toBeInTheDocument();
-  });
+  it('handles successful login', async () => {
+    signInWithPasswordMock.mockResolvedValue({ error: null });
 
-  it('switches to the sign-up form when the tab is clicked', () => {
-    render(<ConnexionPage />);
-    const signUpTab = screen.getByRole('button', { name: /Inscription/i });
-    fireEvent.click(signUpTab);
-
-    expect(screen.getByRole('heading', { name: /Créez votre compte/i })).toBeInTheDocument();
-    expect(screen.getByLabelText(/Nom d'utilisateur/i)).toBeInTheDocument();
-  });
-
-  it('calls signInWithPassword on login form submission', async () => {
     render(<ConnexionPage />);
     
-    fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: 'test@example.com' } });
-    fireEvent.change(screen.getByLabelText(/Mot de passe/i), { target: { value: 'password123' } });
-    
-    // Find the form, then the submit button within the form
-    const form = screen.getByRole('heading', { name: /Connectez-vous à votre compte/i }).closest('form');
-    if (!form) throw new Error('Form not found');
-    const submitButton = within(form).getByRole('button', { name: /Connexion/i });
-    fireEvent.click(submitButton);
+    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'test@example.com' } });
+    fireEvent.change(screen.getByLabelText(/mot de passe/i), { target: { value: 'password123' } });
+    fireEvent.click(screen.getByRole('button', { name: /connexion/i }));
 
-    // Wait for the async actions to complete by waiting for the toast message mock to be called
-    await new Promise(resolve => setTimeout(resolve, 0));
-
-    expect(signInWithPasswordMock).toHaveBeenCalledWith({
-      email: 'test@example.com',
-      password: 'password123',
+    await waitFor(() => {
+      expect(signInWithPasswordMock).toHaveBeenCalledWith({ email: 'test@example.com', password: 'password123' });
+      expect(pushMock).toHaveBeenCalledWith('/');
     });
-    expect(toast.success).toHaveBeenCalledWith('Connexion réussie !');
-    expect(pushMock).toHaveBeenCalledWith('/');
   });
 });

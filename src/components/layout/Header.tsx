@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faSignInAlt, faBars, faTimes, faBell } from '@fortawesome/free-solid-svg-icons';
 import { getNotifications, getUnreadNotificationCount, markAsRead, markAllAsRead } from '@/services/notificationService';
@@ -43,7 +43,6 @@ interface Notification {
 }
 
 const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
-  const supabase = createClient();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const { user, isAdmin, loading } = useAuth();

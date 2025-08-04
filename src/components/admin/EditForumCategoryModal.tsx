@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { updateForumCategory } from '@/services/forumService';
 import Modal from '@/components/layout/Modal';
 import { Input } from '@/components/ui/Input';
@@ -23,7 +23,6 @@ interface EditCategoryModalProps {
 }
 
 export const EditForumCategoryModal = ({ category, isOpen, onClose, onSuccess }: EditCategoryModalProps) => {
-  const supabase = createClient();
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [description, setDescription] = useState('');

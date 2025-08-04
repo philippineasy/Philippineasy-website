@@ -6,7 +6,7 @@ import { DatingProfile, DatingPhoto } from '@/types';
 import ConfirmationModal from '@/components/shared/ConfirmationModal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faSpinner, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { uploadDatingGalleryImage } from '@/services/uploadService';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -29,7 +29,6 @@ const PhotoGallery = ({ profile, isOwnProfile }: PhotoGalleryProps) => {
     const file = event.target.files[0];
     setIsUploading(true);
 
-    const supabase = createClient();
     const newImageUrl = await uploadDatingGalleryImage(supabase, file, user.id);
 
     if (newImageUrl) {
@@ -53,7 +52,6 @@ const PhotoGallery = ({ profile, isOwnProfile }: PhotoGalleryProps) => {
   const confirmDelete = async () => {
     if (!photoToDelete) return;
 
-    const supabase = createClient();
     const { error } = await supabase.from('dating_photos').delete().eq('id', photoToDelete.id);
 
     if (error) {

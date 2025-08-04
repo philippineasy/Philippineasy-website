@@ -1,7 +1,6 @@
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { DatingProfile, DatingQuestionAnswer, Interest } from '@/types';
 
-const supabase = createClient();
 
 export const checkHasProfile = async (userId: string) => {
   const { data, error } = await supabase

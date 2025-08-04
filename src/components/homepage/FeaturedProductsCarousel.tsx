@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { ProductCard } from '@/components/shared/ProductCard';
 import Link from 'next/link';
 
@@ -21,7 +21,6 @@ export const FeaturedProductsCarousel = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClient();
 
   useEffect(() => {
     const fetchProducts = async () => {

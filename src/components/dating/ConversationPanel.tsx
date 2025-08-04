@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { Message, Profile, Reaction } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import Image from 'next/image';
@@ -14,7 +14,6 @@ interface ConversationPanelProps {
 }
 
 const ConversationPanel = ({ otherUser }: ConversationPanelProps) => {
-  const supabase = createClient();
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');

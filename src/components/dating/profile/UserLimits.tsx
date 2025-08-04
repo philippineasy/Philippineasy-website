@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { DATING_CONFIG } from '@/config/dating';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane, faStar, faCrown } from '@fortawesome/free-solid-svg-icons';
@@ -20,7 +20,6 @@ const UserLimits = () => {
   useEffect(() => {
     if (user) {
       const fetchLimits = async () => {
-        const supabase = createClient();
         const { data, error } = await supabase
           .from('profiles')
           .select('plan, dating_profiles ( message_daily_count, last_super_like_at )')

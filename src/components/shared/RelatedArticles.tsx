@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { Article } from '@/types';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { getRelatedArticles } from '@/services/articleService';
 import ArticleCard from './ArticleCard';
 
@@ -13,7 +13,6 @@ interface RelatedArticlesProps {
 
 const RelatedArticles = ({ categoryId, currentArticleId }: RelatedArticlesProps) => {
   const [relatedArticles, setRelatedArticles] = useState<Article[]>([]);
-  const supabase = createClient();
 
   useEffect(() => {
     const fetchRelated = async () => {

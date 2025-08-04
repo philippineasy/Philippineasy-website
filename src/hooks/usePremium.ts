@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { Profile } from '@/types';
 
 export const usePremium = () => {
@@ -8,7 +8,6 @@ export const usePremium = () => {
 
   useEffect(() => {
     const checkPremiumStatus = async () => {
-      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
 
       if (user) {

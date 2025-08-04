@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePremium } from '@/hooks/usePremium';
-import { createClient } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faLock, faCrown } from '@fortawesome/free-solid-svg-icons';
 
@@ -24,7 +24,6 @@ const ProfileViewers = () => {
   useEffect(() => {
     if (user) {
       const fetchViewers = async () => {
-        const supabase = createClient();
         // Fetch the last 5 unique viewers
         const { data, error } = await supabase.rpc('get_profile_viewers', { p_user_id: user.id, p_limit: 5 });
 
