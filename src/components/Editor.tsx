@@ -8,6 +8,7 @@ import List from '@editorjs/list';
 import Quote from '@editorjs/quote';
 import ImageTool from '@editorjs/image';
 import Table from '@editorjs/table';
+import Paragraph from '@editorjs/paragraph'; // Import Paragraph
 import { uploadImage } from '@/services/uploadService';
 import Embed from '@editorjs/embed';
 import Delimiter from '@editorjs/delimiter';
@@ -28,6 +29,10 @@ const Editor = ({ data, onChange, holder }: EditorProps) => {
     const editor = new EditorJS({
       holder: holder,
       tools: {
+        paragraph: { // Add Paragraph tool
+          class: Paragraph,
+          inlineToolbar: true,
+        },
         header: Header,
         list: List,
         quote: Quote,
