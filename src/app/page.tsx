@@ -187,7 +187,7 @@ export default async function HomePage() {
                     <Image src="https://randomuser.me/api/portraits/men/32.jpg" alt="Photo de Pierre D., entrepreneur digital à Cebu" fill className="rounded-full object-cover" sizes="80px" />
                 </div>
                 <p className="text-muted-foreground italic mb-4 text-sm">"M'installer à Cebu a été la meilleure décision. Le coût de la vie, le climat, la gentillesse des gens... mon entreprise en ligne me permet d'en profiter pleinement."</p>
-                <h4 className="font-bold">Pierre D., 42 ans</h4>
+                <h3 className="font-bold">Pierre D., 42 ans</h3>
                 <p className="text-xs text-muted-foreground">Entrepreneur digital à Cebu</p>
               </div>
               <div className="bg-card p-6 rounded-lg shadow-lg text-center">
@@ -195,7 +195,7 @@ export default async function HomePage() {
                     <Image src="https://randomuser.me/api/portraits/women/68.jpg" alt="Photo de Sophie L., voyageuse en couple aux Philippines" fill className="rounded-full object-cover" sizes="80px" />
                 </div>
                 <p className="text-muted-foreground italic mb-4 text-sm">"Notre voyage de 3 semaines était incroyable ! L'outil itinéraire de Philippin'Easy nous a vraiment aidés à organiser notre séjour à Palawan et Bohol."</p>
-                <h4 className="font-bold">Sophie L., 29 ans</h4>
+                <h3 className="font-bold">Sophie L., 29 ans</h3>
                 <p className="text-xs text-muted-foreground">Voyageuse en couple</p>
               </div>
               <div className="bg-card p-6 rounded-lg shadow-lg text-center">
@@ -203,7 +203,7 @@ export default async function HomePage() {
                     <Image src="https://randomuser.me/api/portraits/men/45.jpg" alt="Photo de Marc T., futur retraité aux Philippines" fill className="rounded-full object-cover" sizes="80px" />
                 </div>
                 <p className="text-muted-foreground italic mb-4 text-sm">"Le forum est une mine d'or ! J'ai trouvé toutes les réponses à mes questions sur le visa SRRV et des contacts utiles avant mon départ à la retraite."</p>
-                <h4 className="font-bold">Marc T., 63 ans</h4>
+                <h3 className="font-bold">Marc T., 63 ans</h3>
                 <p className="text-xs text-muted-foreground">Futur retraité aux Philippines</p>
               </div>
             </div>
