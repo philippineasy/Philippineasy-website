@@ -21,8 +21,8 @@ const Footer = () => {
               Votre guide complet pour vivre et voyager aux Philippines. Une communauté passionnée prête à vous accompagner.
             </p>
             <div className="flex space-x-4">
-              <a href="https://www.facebook.com/share/1RfoyAcYFU/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition duration-300"><FontAwesomeIcon icon={faFacebookF} /></a>
-              <a href="https://www.instagram.com/philippineseasy?igsh=MWYwNDg2eThiemdleg%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition duration-300"><FontAwesomeIcon icon={faInstagram} /></a>
+              <a href="https://www.facebook.com/share/1RfoyAcYFU/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-gray-400 hover:text-white transition duration-300"><FontAwesomeIcon icon={faFacebookF} /></a>
+              <a href="https://www.instagram.com/philippineseasy?igsh=MWYwNDg2eThiemdleg%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-gray-400 hover:text-white transition duration-300"><FontAwesomeIcon icon={faInstagram} /></a>
             </div>
           </div>
           <div>
@@ -59,7 +59,7 @@ const Footer = () => {
             <form className="mb-4">
               <div className="flex">
                 <input type="email" className="px-4 py-2 w-full bg-gray-800 text-white rounded-l-lg focus:outline-none placeholder-gray-500" placeholder="Votre email" />
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition duration-300"><FontAwesomeIcon icon={faPaperPlane} /></button>
+                <button type="submit" aria-label="Subscribe to newsletter" className="px-4 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition duration-300"><FontAwesomeIcon icon={faPaperPlane} /></button>
               </div>
             </form>
             <p className="text-gray-500 text-sm">En vous inscrivant, vous acceptez notre politique de confidentialité.</p>

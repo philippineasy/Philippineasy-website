@@ -20,10 +20,11 @@ export default async function HomePage() {
       {/* Hero Section */}
       <section className="relative hero flex items-center justify-center text-center px-4 h-[90vh]">
         <Image
-          src="https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86"
+          src="/imagesHero/hero-home.jpg"
           alt="Vue aérienne d'une plage de sable blanc aux Philippines avec des bateaux traditionnels bangka"
           fill
           priority
+          fetchPriority="high"
           className="object-cover z-0"
           sizes="100vw"
         />

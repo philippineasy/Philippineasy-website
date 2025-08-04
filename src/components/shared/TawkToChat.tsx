@@ -9,7 +9,7 @@ const TawkToChat = () => {
     s1.async = true;
     s1.src = 'https://embed.tawk.to/68898021711618192cf5c36b/1j1chp1lr';
     s1.charset = 'UTF-8';
-    s1.setAttribute('crossorigin', '*');
+    s1.crossOrigin = 'anonymous';
     s0.parentNode?.insertBefore(s1, s0);
   }, []);
 
