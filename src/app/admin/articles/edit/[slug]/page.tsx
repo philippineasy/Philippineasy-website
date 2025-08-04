@@ -7,7 +7,7 @@ import { supabase } from '@/utils/supabase/client';
 import { OutputData } from '@editorjs/editorjs';
 import { getArticleBySlug } from '@/services/articleService';
 import { getAllCategories } from '@/services/categoryService';
-import { updateArticleAction } from '@/app/actions/articleActions';
+import { updateArticleAndRevalidate } from '@/app/actions/articleActions';
 import toast from 'react-hot-toast';
 import DynamicEditor from '@/components/shared/DynamicEditor';
 import { CustomSelect, SelectOption } from '@/components/shared/CustomSelect';
@@ -105,24 +105,23 @@ const EditArticlePage = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!formRef.current || !article || !isDirty) {
+    if (!article || !isDirty) {
       toast("Aucune modification à enregistrer.");
       return;
     }
     setIsSaving(true);
 
     try {
-      const formData = new FormData(formRef.current);
-      
-      // Add editor content and current image URL to FormData
-      formData.set('content', JSON.stringify(article.content));
-      formData.set('current-image-url', article.image);
-      formData.set('status', article.status); // Ensure status is in FormData
-      if (thumbnailFile) {
-        formData.set('image-upload', thumbnailFile);
-      }
+      const updates = {
+        title: (formRef.current?.elements.namedItem('title') as HTMLInputElement)?.value,
+        slug: (formRef.current?.elements.namedItem('slug') as HTMLInputElement)?.value,
+        category_id: parseInt((formRef.current?.elements.namedItem('category') as HTMLSelectElement)?.value, 10),
+        status: article.status,
+        content: article.content,
+        imageFile: thumbnailFile,
+      };
 
-      const result = await updateArticleAction(article.id, formData);
+      const result = await updateArticleAndRevalidate(article.id, updates);
 
       if (result.success) {
         toast.success('Article mis à jour avec succès !');

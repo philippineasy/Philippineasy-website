@@ -71,7 +71,7 @@ import { OutputData } from '@editorjs/editorjs';
 type ArticleUpdates = {
   title?: string;
   content?: OutputData; // Editor.js data
-  imageFile?: File;
+  imageFile?: File | null;
   // Keep other potential fields from the form if necessary
   slug?: string;
   category_id?: number;
