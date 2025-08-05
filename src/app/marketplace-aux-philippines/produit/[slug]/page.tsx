@@ -6,6 +6,7 @@ import { ProductInteraction } from './ProductInteraction';
 import { ProductReviews } from './ProductReviews';
 import RelatedProducts from '@/components/shared/RelatedProducts';
 import { ProductViewTracker } from './ProductViewTracker';
+import ProductJsonLd from '@/components/shared/ProductJsonLd';
 import type { Metadata } from 'next';
 
 export async function generateMetadata({
@@ -122,58 +123,10 @@ export default async function ProductDetailPage({
   const product = await getProductBySlug(supabase, slug);
   const hasPurchased = await checkUserHasPurchased(supabase, user?.id || '', product.id);
 
-  const reviews = product.product_reviews || [];
-  const averageRating = reviews.length > 0
-    ? reviews.reduce((acc: number, review: any) => acc + review.rating, 0) / reviews.length
-    : null;
-  const reviewCount = reviews.length;
-
-  const jsonLd: any = {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    name: product.name,
-    description: product.description,
-    image: product.image_urls?.[0] || '',
-    offers: {
-      '@type': 'Offer',
-      price: product.price,
-      priceCurrency: 'EUR',
-      availability: 'https://schema.org/InStock',
-      seller: {
-        '@type': 'Organization',
-        name: product.vendor.name,
-      },
-    },
-  };
-
-  if (reviewCount > 0 && averageRating) {
-    jsonLd.aggregateRating = {
-      '@type': 'AggregateRating',
-      ratingValue: averageRating.toFixed(1),
-      reviewCount: reviewCount,
-    };
-    jsonLd.review = reviews.map((review: any) => ({
-      '@type': 'Review',
-      reviewRating: {
-        '@type': 'Rating',
-        ratingValue: review.rating,
-      },
-      author: {
-        '@type': 'Person',
-        name: review.profiles.username,
-      },
-      reviewBody: review.comment,
-      datePublished: review.created_at,
-    }));
-  }
-
   return (
     <div className="container mx-auto px-4 py-16">
       <ProductViewTracker productId={product.id} />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <ProductJsonLd product={product} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         <div>
           <div className="w-full h-96 relative rounded-lg overflow-hidden shadow-lg">

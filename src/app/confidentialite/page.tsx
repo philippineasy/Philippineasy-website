@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import WebPageJsonLd from '@/components/shared/WebPageJsonLd';
 
 export const metadata: Metadata = {
   title: "Politique de Confidentialité - Philippin'Easy",
@@ -8,6 +9,11 @@ export const metadata: Metadata = {
 const ConfidentialitePage = () => {
   return (
     <div className="bg-white">
+      <WebPageJsonLd
+        title={metadata.title as string}
+        description={metadata.description as string}
+        path="/confidentialite"
+      />
       <div className="container mx-auto px-4 py-12 md:py-20">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-center mb-10 text-primary">Politique de Confidentialité</h1>
