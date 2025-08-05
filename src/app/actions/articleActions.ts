@@ -82,10 +82,15 @@ export async function updateArticleAndRevalidate(
   const updatesForService: ArticleUpdate = { ...updates };
   delete (updatesForService as any).imageFile;
 
-  // Si l'article passe à 'publié' et que la date de publication n'est pas déjà définie
+  // Si l'article passe à 'publié', on vérifie s'il faut mettre à jour la date de publication
   if (updates.status === 'published') {
     const { data: currentArticle } = await supabase.from('articles').select('published_at').eq('id', articleId).single();
-    if (!currentArticle?.published_at) {
+    
+    const epochTime = new Date('1971-01-01').getTime();
+    const publishedTime = currentArticle?.published_at ? new Date(currentArticle.published_at).getTime() : 0;
+
+    // Mettre à jour la date si elle n'existe pas ou si c'est une date "epoch" (ex: 1970)
+    if (!currentArticle?.published_at || publishedTime < epochTime) {
       updatesForService.published_at = new Date().toISOString();
     }
   }
