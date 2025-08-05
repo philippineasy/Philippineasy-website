@@ -12,6 +12,7 @@ import { faUserCircle, faEdit, faRoute, faPlus, faComments, faStar, faMapSigns, 
 import Modal from '@/components/layout/Modal';
 import toast from 'react-hot-toast';
 import ConfirmationModal from '@/components/shared/ConfirmationModal';
+import ProfileJsonLd from '@/components/shared/ProfileJsonLd';
 
 interface PostContent {
   blocks: {
@@ -216,6 +217,7 @@ const ProfilPage = () => {
 
   return (
     <>
+      <ProfileJsonLd profile={profile} />
       <main className="container mx-auto px-4 py-16 pt-32">
         <h1 className="text-3xl md:text-4xl font-bold mb-10">
           Bienvenue sur votre Espace, <span className="text-primary">{profile.username}</span> !

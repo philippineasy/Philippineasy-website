@@ -8,7 +8,7 @@ interface JsonLdProps {
 const JsonLd = ({ article, basePath }: JsonLdProps) => {
   const extractText = (content: string | EditorJSContent): string => {
     if (typeof content === 'string') {
-      return content.substring(0, 160) + '...';
+      return content;
     }
     let text = '';
     for (const block of content?.blocks || []) {
@@ -16,13 +16,37 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
         text += block.data.text.replace(/<[^>]+>/g, '') + ' ';
       }
     }
-    return text.trim().substring(0, 160) + '...';
+    return text.trim();
   };
 
   const description = extractText(article.content);
+  const siteUrl = 'https://philippineasy.com';
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
+  const breadcrumbList = {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Accueil',
+        item: siteUrl,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: article.category?.name || 'Catégorie',
+        item: `${siteUrl}/${basePath}/${article.category?.slug}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: article.title,
+        item: `${siteUrl}/${basePath}/${article.category?.slug}/${article.slug}`,
+      },
+    ],
+  };
+
+  const newsArticle = {
     '@type': 'NewsArticle',
     headline: article.title,
     image: [article.image],
@@ -39,14 +63,22 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
       name: "Philippin'Easy",
       logo: {
         '@type': 'ImageObject',
-        url: 'https://philippineasy.com/logo.webp', // Replace with your actual logo URL
+        url: `${siteUrl}/logo-philippineasy.png`,
       },
     },
     description: description,
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `https://philippineasy.com/${basePath}/${article.category?.slug}/${article.slug}`,
+      '@id': `${siteUrl}/${basePath}/${article.category?.slug}/${article.slug}`,
     },
+  };
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      newsArticle,
+      breadcrumbList
+    ]
   };
 
   return (
