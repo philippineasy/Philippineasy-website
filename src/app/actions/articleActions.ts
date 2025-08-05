@@ -38,7 +38,12 @@ export async function createArticleAction(articleData: ArticleCreate, imageFile:
     return { success: false, error: "L'image à la une est obligatoire." };
   }
 
-  const { data, error } = await createArticleInService(supabase, articleData, imageFile);
+  const dataToCreate: ArticleCreate = {
+    ...articleData,
+    published_at: articleData.status === 'published' ? new Date().toISOString() : undefined,
+  };
+
+  const { data, error } = await createArticleInService(supabase, dataToCreate, imageFile);
 
   if (error) {
     return { success: false, error: error.message };
@@ -60,7 +65,7 @@ type ArticleUpdates = {
   // Keep other potential fields from the form if necessary
   slug?: string;
   category_id?: number;
-  status?: string;
+  status?: ArticleStatus;
 };
 
 export async function updateArticleAndRevalidate(
@@ -72,13 +77,20 @@ export async function updateArticleAndRevalidate(
   if (updates.status && !isValidStatus(updates.status)) {
     return { success: false, error: "Statut invalide fourni." };
   }
-  
-  const imageFile = updates.imageFile || null;
-  // Create a new object without the imageFile property to avoid passing it to the service
-  const updatesForService = { ...updates };
-  delete updatesForService.imageFile;
 
-  const { data, error } = await updateArticleInService(supabase, articleId, updatesForService as ArticleUpdate, imageFile);
+  const imageFile = updates.imageFile || null;
+  const updatesForService: ArticleUpdate = { ...updates };
+  delete (updatesForService as any).imageFile;
+
+  // Si l'article passe à 'publié' et que la date de publication n'est pas déjà définie
+  if (updates.status === 'published') {
+    const { data: currentArticle } = await supabase.from('articles').select('published_at').eq('id', articleId).single();
+    if (!currentArticle?.published_at) {
+      updatesForService.published_at = new Date().toISOString();
+    }
+  }
+
+  const { data, error } = await updateArticleInService(supabase, articleId, updatesForService, imageFile);
 
   if (error) {
     console.error('Error updating article:', error);
