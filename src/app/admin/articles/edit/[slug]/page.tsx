@@ -20,6 +20,7 @@ interface Article {
   status: string;
   category_id: number;
   content: OutputData;
+  published_at?: string | null;
 }
 
 interface Category {
@@ -119,7 +120,7 @@ const EditArticlePage = () => {
     setIsSaving(true);
 
     try {
-      const updates = {
+      const updates: any = {
         title: (formRef.current?.elements.namedItem('title') as HTMLInputElement)?.value,
         slug: (formRef.current?.elements.namedItem('slug') as HTMLInputElement)?.value,
         category_id: parseInt((formRef.current?.elements.namedItem('category') as HTMLSelectElement)?.value, 10),
@@ -127,6 +128,15 @@ const EditArticlePage = () => {
         content: article.content,
         imageFile: thumbnailFile,
       };
+
+      // Check if the article should have its published_at date updated
+      if (article.status === 'published') {
+        const epochTime = new Date('1971-01-01').getTime();
+        const publishedTime = article.published_at ? new Date(article.published_at).getTime() : 0;
+        if (!article.published_at || publishedTime < epochTime) {
+          updates.published_at = new Date().toISOString();
+        }
+      }
 
       const result = await updateArticleAndRevalidate(article.id, updates);
 

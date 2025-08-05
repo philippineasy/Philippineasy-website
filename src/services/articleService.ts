@@ -163,10 +163,6 @@ export const updateArticle = async (supabase: SupabaseClient, articleId: number,
             updateData.reading_time = calculateReadingTime(updates.content);
         }
         
-        // The 'published_at' field should not be updated on every edit. 
-        // The database should have an 'updated_at' field that is automatically managed.
-        // updateData.published_at = new Date().toISOString();
-
         if (Object.keys(updateData).length === 0) {
             const { data: currentData, error: currentError } = await supabase.from('articles').select(ARTICLE_WITH_CATEGORY_SELECT).eq('id', articleId).single();
             return { data: currentData, error: currentError };
