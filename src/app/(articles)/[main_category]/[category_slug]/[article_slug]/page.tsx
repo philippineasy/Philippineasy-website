@@ -23,28 +23,29 @@ const getMainCategoryPath = (mainCategorySlug: string | null) => {
     }
 };
 
-export async function generateStaticParams() {
-  const supabase = createBuildClient();
-  const { data: articles } = await supabase
-    .from('articles')
-    .select('slug, category:categories(slug, main_category)')
-    .eq('status', 'published');
+// This function is being removed to disable static generation for this page.
+// export async function generateStaticParams() {
+//   const supabase = createBuildClient();
+//   const { data: articles } = await supabase
+//     .from('articles')
+//     .select('slug, category:categories(slug, main_category)')
+//     .eq('status', 'published');
 
-  if (!articles) {
-    return [];
-  }
+//   if (!articles) {
+//     return [];
+//   }
 
-  return articles.map(article => {
-    const categoryObject = Array.isArray(article.category) ? article.category[0] : article.category;
-    if (!categoryObject) return null;
+//   return articles.map(article => {
+//     const categoryObject = Array.isArray(article.category) ? article.category[0] : article.category;
+//     if (!categoryObject) return null;
 
-    return {
-      main_category: getMainCategoryPath(categoryObject.main_category),
-      category_slug: categoryObject.slug,
-      article_slug: article.slug,
-    }
-  }).filter(Boolean);
-}
+//     return {
+//       main_category: getMainCategoryPath(categoryObject.main_category),
+//       category_slug: categoryObject.slug,
+//       article_slug: article.slug,
+//     }
+//   }).filter(Boolean);
+// }
 
 export async function generateMetadata({
   params,
@@ -109,7 +110,7 @@ export async function generateMetadata({
   };
 }
 
-export const revalidate = 3600;
+export const revalidate = 0;
 
 export default async function ArticlePage({
   params,
