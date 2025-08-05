@@ -120,6 +120,7 @@ const EditArticlePage = () => {
     setIsSaving(true);
 
     try {
+      const publishedAtValue = (formRef.current?.elements.namedItem('published_at') as HTMLInputElement)?.value;
       const updates: any = {
         title: (formRef.current?.elements.namedItem('title') as HTMLInputElement)?.value,
         slug: (formRef.current?.elements.namedItem('slug') as HTMLInputElement)?.value,
@@ -127,16 +128,8 @@ const EditArticlePage = () => {
         status: article.status,
         content: article.content,
         imageFile: thumbnailFile,
+        published_at: publishedAtValue ? new Date(publishedAtValue).toISOString() : new Date().toISOString(),
       };
-
-      // Check if the article should have its published_at date updated
-      if (article.status === 'published') {
-        const epochTime = new Date('1971-01-01').getTime();
-        const publishedTime = article.published_at ? new Date(article.published_at).getTime() : 0;
-        if (!article.published_at || publishedTime < epochTime) {
-          updates.published_at = new Date().toISOString();
-        }
-      }
 
       const result = await updateArticleAndRevalidate(article.id, updates);
 
@@ -190,6 +183,16 @@ const EditArticlePage = () => {
               options={statusOptions}
               value={article.status}
               onChange={(value) => handleInputChange('status', value)}
+            />
+          </div>
+          <div className="mt-4">
+            <label htmlFor="published_at" className="block text-sm font-medium text-foreground">Date de publication</label>
+            <input
+              type="datetime-local"
+              id="published_at"
+              name="published_at"
+              defaultValue={article.published_at ? new Date(article.published_at).toISOString().slice(0, 16) : ''}
+              className="mt-1 block w-full px-4 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-primary"
             />
           </div>
           <div className="mt-6 flex justify-end">

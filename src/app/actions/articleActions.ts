@@ -95,15 +95,30 @@ export async function updateArticleAndRevalidate(
 
   // Revalidate paths to show the updated article
   revalidatePath('/admin/articles');
-  if (data && data.slug && data.category && typeof data.category === 'object' && 'slug' in data.category) {
-    const categorySlug = (data.category as { slug: string }).slug;
-    revalidatePath(`/actualites/${categorySlug}`);
-    revalidatePath(`/actualites/${categorySlug}/${data.slug}`);
-    revalidatePath(`/meilleurs-plans/${categorySlug}/${data.slug}`);
-    revalidatePath(`/vivre-aux-philippines/${categorySlug}/${data.slug}`);
-    revalidatePath(`/voyager-aux-philippines/${categorySlug}/${data.slug}`);
+  if (data?.slug) {
+    // Revalidate all possible article paths to be safe
+    const articleSlug = data.slug;
+    revalidatePath(`/actualites-sur-les-philippines/${articleSlug}`);
+    revalidatePath(`/meilleurs-plans-aux-philippines/${articleSlug}`);
+    revalidatePath(`/vivre-aux-philippines/${articleSlug}`);
+    revalidatePath(`/voyager-aux-philippines/${articleSlug}`);
+
+    // Revalidate main listing pages
+    revalidatePath('/actualites-sur-les-philippines');
+    revalidatePath('/meilleurs-plans-aux-philippines');
+    revalidatePath('/vivre-aux-philippines');
+    revalidatePath('/voyager-aux-philippines');
+
+    // Revalidate generic article structure if category data is available
+    if (data.category && typeof data.category === 'object' && 'main_category' in data.category && 'slug' in data.category) {
+        const mainCategory = (data.category as any).main_category;
+        const categorySlug = (data.category as any).slug;
+        if (mainCategory && categorySlug) {
+            revalidatePath(`/${mainCategory}/${categorySlug}/${articleSlug}`);
+        }
+    }
   }
-  revalidatePath('/');
+  revalidatePath('/'); // Revalidate homepage
 
 
   return { success: true, data };
