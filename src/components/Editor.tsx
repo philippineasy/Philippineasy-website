@@ -23,9 +23,7 @@ const Editor = ({ data, onChange, holder }: EditorProps) => {
   const ref = useRef<EditorJS | null>(null);
 
   useEffect(() => {
-    if (ref.current) {
-      return;
-    }
+    // Initialize editor
     const editor = new EditorJS({
       holder: holder,
       defaultBlock: 'paragraph', // Set paragraph as the default block
@@ -145,13 +143,14 @@ const Editor = ({ data, onChange, holder }: EditorProps) => {
     });
     ref.current = editor;
 
+    // Cleanup
     return () => {
       if (ref.current && ref.current.destroy) {
         ref.current.destroy();
-        ref.current = null;
       }
+      ref.current = null;
     };
-  }, [data, holder, onChange]);
+  }, []);
 
   return <div id={holder} className="prose max-w-none" />;
 };
