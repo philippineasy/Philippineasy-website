@@ -32,7 +32,43 @@ const ProductJsonLd = ({ product }: ProductJsonLdProps) => {
         '@type': 'Organization',
         name: product.vendor.name,
       },
-      url: `https://philippineasy.com/marketplace-aux-philippines/produit/${product.slug}`
+      url: `https://philippineasy.com/marketplace-aux-philippines/produit/${product.slug}`,
+      priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0], // Valid for one year
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: {
+          '@type': 'MonetaryAmount',
+          value: '5.00',
+          currency: 'EUR',
+        },
+        shippingDestination: {
+          '@type': 'DefinedRegion',
+          addressCountry: 'FR',
+        },
+        deliveryTime: {
+          '@type': 'ShippingDeliveryTime',
+          handlingTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 0,
+            maxValue: 1,
+            unitCode: 'DAY',
+          },
+          transitTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 3,
+            maxValue: 5,
+            unitCode: 'DAY',
+          },
+        },
+      },
+    },
+    hasMerchantReturnPolicy: {
+        '@type': 'MerchantReturnPolicy',
+        applicableCountry: 'FR',
+        returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+        merchantReturnDays: 14,
+        returnMethod: 'https://schema.org/ReturnByMail',
+        returnFees: 'https://schema.org/ReturnFeesCustomerResponsibility',
     },
   };
 

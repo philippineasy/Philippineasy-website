@@ -49,6 +49,7 @@ async function getProductBySlug(supabase: ReturnType<typeof createClient>, slug:
     .select(`
       id,
       name,
+      slug,
       description,
       price,
       image_urls,
