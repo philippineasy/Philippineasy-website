@@ -2,16 +2,19 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/utils/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
-  const { pathname, origin } = request.nextUrl;
+  const { headers } = request;
+  const host = headers.get('host');
+  const isHttps = headers.get('x-forwarded-proto') === 'https' || process.env.NODE_ENV === 'development';
 
-  // Redirect www to non-www
-  if (origin.startsWith('https://www.')) {
-    const newOrigin = origin.replace('https://www.', 'https://');
-    const newUrl = new URL(pathname, newOrigin);
-    return NextResponse.redirect(newUrl, 301);
+  // Rediriger www vers non-www et http vers https
+  if (host?.startsWith('www.') || !isHttps) {
+    const newHost = host?.replace('www.', '');
+    const protocol = 'https';
+    const newUrl = new URL(request.nextUrl.pathname, `${protocol}://${newHost}`);
+    return NextResponse.redirect(newUrl.toString(), 301);
   }
 
-  return await updateSession(request)
+  return await updateSession(request);
 }
 
 export const config = {

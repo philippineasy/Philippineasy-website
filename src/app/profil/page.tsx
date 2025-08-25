@@ -146,8 +146,8 @@ const ProfilPage = () => {
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(fileName, avatarFile, {
-          cacheControl: '3600',
-          upsert: true,
+          cacheControl: '31536000',
+          upsert: false,
         });
 
       if (uploadError) {

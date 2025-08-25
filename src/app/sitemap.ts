@@ -14,7 +14,7 @@ type SitemapEntry = {
 };
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const currentDate = new Date().toISOString();
+  const currentDate = new Date('2024-08-25T00:00:00.000Z').toISOString();
 
   // Static pages with their associated images
   const staticPages: SitemapEntry[] = [
@@ -284,16 +284,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   })) ?? [];
 
-  // Add a special sitemap entry for all local images
-  const localImages = getLocalImages();
-  const imagesSitemapEntry: SitemapEntry = {
-    url: `${BASE_URL}/images`,
-    lastModified: currentDate,
-    changeFrequency: 'monthly',
-    priority: 0.5,
-    images: localImages,
-  };
-
   // Convert to MetadataRoute.Sitemap format (removes images property for compatibility)
   const allPages = [
     ...staticPages,
@@ -304,13 +294,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...forumCategoryPages,
     ...productPages,
     ...productCategoryPages,
-    imagesSitemapEntry,
   ];
 
-  // Transform to the expected format, keeping the images information in a way that Next.js can handle
-  return allPages.map(({ images, ...rest }) => ({
-    ...rest,
-    // Note: Next.js doesn't natively support images in sitemap, but this structure prepares for XML sitemap generation
-    ...(images && images.length > 0 ? { alternates: { media: images.map(img => ({ url: img })) } } : {}),
-  })) as MetadataRoute.Sitemap;
+  return allPages as MetadataRoute.Sitemap;
 }
