@@ -6,6 +6,17 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 });
 
 const nextConfig: NextConfig = {
+  reactStrictMode: true,
+
+  async rewrites() {
+    return [
+      {
+        source: "/images/articles/:path*",
+        destination:
+          "https://byxjlsbmhixdehbisvjp.supabase.co/storage/v1/object/public/articles/:path*",
+      },
+    ];
+  },
   async redirects() {
     return [
       {
