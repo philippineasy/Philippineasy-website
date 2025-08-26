@@ -8,13 +8,15 @@ const escapeXml = (url: string) => {
   return url.replace(/[&<>"']/g, (c) => {
     switch (c) {
       case '&':
-        return '&';
+        return '&amp;';
       case '<':
-        return '<';
+        return '&lt;';
       case '>':
-        return '>';
+        return '&gt;';
       case '"':
-        return '"';
+        return '&quot;';
+      case "'":
+        return '&apos;';
       default:
         return c;
     }
