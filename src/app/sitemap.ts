@@ -4,6 +4,23 @@ import { createBuildClient } from '@/utils/supabase/build-client';
 const supabase = createBuildClient();
 const BASE_URL = 'https://philippineasy.com';
 
+const escapeXml = (url: string) => {
+  return url.replace(/[&<>"']/g, (c) => {
+    switch (c) {
+      case '&':
+        return '&';
+      case '<':
+        return '<';
+      case '>':
+        return '>';
+      case '"':
+        return '"';
+      default:
+        return c;
+    }
+  });
+};
+
 // Extended sitemap type to support images
 type SitemapEntry = {
   url: string;
@@ -296,5 +313,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...productCategoryPages,
   ];
 
-  return allPages as MetadataRoute.Sitemap;
+  // Escape URLs for XML compatibility
+  const escapedPages = allPages.map(page => {
+    if (!page) return null;
+    return {
+      ...page,
+      url: escapeXml(page.url),
+      images: page.images?.map(escapeXml),
+    };
+  }).filter(Boolean) as SitemapEntry[];
+
+  return escapedPages as MetadataRoute.Sitemap;
 }
