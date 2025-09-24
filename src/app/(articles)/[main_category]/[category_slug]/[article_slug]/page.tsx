@@ -112,11 +112,15 @@ export async function generateMetadata({
 
 export const revalidate = 0;
 
-export default async function ArticlePage({
-  params,
-}: {
-  params: { main_category: string; category_slug: string; article_slug: string };
-}) {
+interface ArticlePageProps {
+  params: {
+    main_category: string;
+    category_slug: string;
+    article_slug: string;
+  };
+}
+
+export default async function ArticlePage({ params }: ArticlePageProps) {
   const { main_category, article_slug } = params;
   const supabase = createClient();
   const { data: article } = await getArticleBySlug(supabase, article_slug);
