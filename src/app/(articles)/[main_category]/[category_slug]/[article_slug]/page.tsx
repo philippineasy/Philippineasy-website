@@ -50,9 +50,9 @@ const getMainCategoryPath = (mainCategorySlug: string | null) => {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ main_category: string; category_slug: string; article_slug: string }>;
+  params: { main_category: string; category_slug: string; article_slug: string };
 }): Promise<Metadata> {
-  const { article_slug } = await params;
+  const { main_category, category_slug, article_slug } = params;
   const supabase = createClient();
   const { data: article } = await getArticleBySlug(supabase, article_slug);
 
@@ -84,7 +84,7 @@ export async function generateMetadata({
     title: `${article.title} | Philippin'Easy`,
     description,
     alternates: {
-      canonical: `/article/${article.slug}`,
+      canonical: `/${main_category}/${category_slug}/${article_slug}`,
     },
     openGraph: {
       title: article.title,
@@ -115,9 +115,9 @@ export const revalidate = 0;
 export default async function ArticlePage({
   params,
 }: {
-  params: Promise<{ main_category: string; category_slug: string; article_slug: string }>;
+  params: { main_category: string; category_slug: string; article_slug: string };
 }) {
-  const { main_category, article_slug } = await params;
+  const { main_category, article_slug } = params;
   const supabase = createClient();
   const { data: article } = await getArticleBySlug(supabase, article_slug);
 

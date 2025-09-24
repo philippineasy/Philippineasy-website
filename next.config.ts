@@ -94,6 +94,11 @@ const nextConfig: NextConfig = {
         destination: '/meilleurs-plans-aux-philippines/:slug*',
         permanent: true,
       },
+      {
+        source: '/article/:slug*',
+        destination: '/actualites-sur-les-philippines/actualites/:slug*',
+        permanent: true,
+      },
     ];
   },
   async headers() {
