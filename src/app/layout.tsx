@@ -85,6 +85,9 @@ export const metadata: Metadata = {
     images: [siteConfig.ogImage],
     creator: "@philippineasy",
   },
+  alternates: {
+    canonical: '/',
+  },
   icons: {
     icon: '/logo-philippineasy.png',
     shortcut: '/logo-philippineasy.png',
