@@ -50,9 +50,9 @@ const getMainCategoryPath = (mainCategorySlug: string | null) => {
 export async function generateMetadata({
   params,
 }: {
-  params: { main_category: string; category_slug: string; article_slug: string };
+  params: Promise<{ main_category: string; category_slug: string; article_slug: string }>;
 }): Promise<Metadata> {
-  const { main_category, category_slug, article_slug } = params;
+  const { main_category, category_slug, article_slug } = await params;
   const supabase = createClient();
   const { data: article } = await getArticleBySlug(supabase, article_slug);
 
@@ -117,9 +117,9 @@ export const revalidate = 0;
 export default async function ArticlePage({
   params,
 }: {
-  params: { main_category: string; category_slug: string; article_slug: string };
+  params: Promise<{ main_category: string; category_slug: string; article_slug: string }>;
 }) {
-  const { main_category, article_slug } = params;
+  const { main_category, article_slug } = await params;
   const supabase = createClient();
   const { data: article } = await getArticleBySlug(supabase, article_slug);
 
