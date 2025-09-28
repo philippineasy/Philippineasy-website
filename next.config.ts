@@ -95,8 +95,8 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
-        source: '/article/:slug',
-        destination: '/actualites-sur-les-philippines/actualites/:slug',
+        source: '/article/:slug*',
+        destination: '/actualites-sur-les-philippines/actualites/:slug*',
         permanent: true,
       },
     ];
