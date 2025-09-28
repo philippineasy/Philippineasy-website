@@ -248,6 +248,32 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     })) || []);
 
+  /* ---------- Dynamic: Vendeurs ---------- */
+  const { data: vendors } = await supabase
+    .from('vendors')
+    .select('id, updated_at');
+
+  const vendorPages: SitemapEntry[] =
+    (vendors?.map(({ id, updated_at }) => ({
+      url: `${BASE_URL}/marketplace-aux-philippines/vendeur/${id}`,
+      lastModified: new Date(updated_at).toISOString(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    })) || []);
+
+  /* ---------- Dynamic: Profils Rencontre ---------- */
+  const { data: profiles } = await supabase
+    .from('dating_profiles')
+    .select('id, updated_at');
+
+  const profilePages: SitemapEntry[] =
+    (profiles?.map(({ id, updated_at }) => ({
+      url: `${BASE_URL}/rencontre-philippines/profil/${id}`,
+      lastModified: new Date(updated_at).toISOString(),
+      changeFrequency: 'daily' as const,
+      priority: 0.7,
+    })) || []);
+
   /* ---------- Merge + escape ---------- */
   const allPages = [
     ...staticPages,
@@ -258,6 +284,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...forumCategoryPages,
     ...productPages,
     ...productCategoryPages,
+    ...vendorPages,
+    ...profilePages,
   ];
 
   const escapedPages = allPages

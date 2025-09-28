@@ -7,7 +7,6 @@ User-agent: *
 Allow: /
 
 # Disallow sensitive pages
-Disallow: /images/
 Disallow: /admin/
 Disallow: /profil/
 Disallow: /checkout/
