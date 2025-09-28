@@ -110,9 +110,6 @@ export const metadata: Metadata = {
     ],
   },
   manifest: '/site.webmanifest',
-  alternates: {
-    canonical: '/',
-  },
 };
 
 export default async function RootLayout({
