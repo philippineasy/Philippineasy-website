@@ -73,7 +73,7 @@ type SitemapEntry = {
 /* ---------- Route ---------- */
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const currentDate = new Date('2024-08-25T00:00:00.000Z').toISOString();
+  const currentDate = new Date().toISOString();
 
   // Pages statiques
   const staticPages: SitemapEntry[] = [

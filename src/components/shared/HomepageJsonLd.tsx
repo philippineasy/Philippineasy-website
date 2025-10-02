@@ -6,9 +6,12 @@ const HomepageJsonLd = () => {
     name: "Philippin'Easy",
     url: siteUrl,
     logo: `${siteUrl}/logo-philippineasy.png`,
+    description: "La communauté francophone des Philippines - Guide complet pour voyager, vivre et s'épanouir dans l'archipel.",
     sameAs: [
-      // Add social media links here when available
-      // e.g., "https://www.facebook.com/philippineasy",
+      "https://www.facebook.com/philippineasy",
+      "https://twitter.com/philippineasy",
+      "https://www.instagram.com/philippineasy",
+      "https://www.youtube.com/@philippineasy",
     ],
   };
 

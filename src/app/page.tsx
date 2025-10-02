@@ -5,6 +5,7 @@ import { faHome, faPassport, faMapMarkedAlt, faUniversity, faPlaneDeparture, faU
 import { createClient } from '@/utils/supabase/server';
 import { getHomepageArticles } from '@/services/articleService';
 import dynamic from 'next/dynamic';
+import HomepageJsonLd from '@/components/shared/HomepageJsonLd';
 
 const BestDealsSection = dynamic(() => import('@/components/homepage/BestDealsSection').then(mod => mod.BestDealsSection));
 const FeaturedNewsSection = dynamic(() => import('@/components/homepage/FeaturedNewsSection').then(mod => mod.FeaturedNewsSection));
@@ -17,6 +18,7 @@ export default async function HomePage() {
 
   return (
     <div>
+      <HomepageJsonLd />
       {/* Hero Section */}
       <section className="relative hero flex items-center justify-center text-center px-4 h-[90vh]">
         <Image

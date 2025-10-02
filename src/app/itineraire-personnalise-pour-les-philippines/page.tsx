@@ -6,6 +6,9 @@ import { faMagic, faLock, faDownload } from '@fortawesome/free-solid-svg-icons';
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import { CustomSelect, SelectOption } from '@/components/shared/CustomSelect';
 
+// Metadata for SEO - Note: Metadata must be in a separate layout.tsx or use Next.js App Router patterns
+// Since this is a 'use client' component, metadata should be in a parent layout
+
 const travelTypeOptions: SelectOption[] = [
   { value: 'solo', label: 'Voyage solo' },
   { value: 'couple', label: 'En couple' },
