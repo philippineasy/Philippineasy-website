@@ -27,7 +27,6 @@ export async function GET() {
         slug,
         title,
         published_at,
-        updated_at,
         category:categories(
           slug,
           main_category
@@ -76,7 +75,7 @@ export async function GET() {
       <news:publication_date>${publicationDate}</news:publication_date>
       <news:title>${escapedTitle}</news:title>
     </news:news>
-    <lastmod>${article.updated_at || article.published_at}</lastmod>
+    <lastmod>${article.published_at}</lastmod>
   </url>`;
       })
       .filter(Boolean)
