@@ -4,8 +4,34 @@ import ArticleList from '@/components/shared/ArticleList';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Actualités | Philippin\'Easy',
-  description: 'Restez à jour sur les dernières informations concernant les Philippines.',
+  title: 'Actualités Philippines : Dernières Infos & Nouveautés | Philippin\'Easy',
+  description: 'Suivez l\'actualité des Philippines en français : dernières news, événements, politique, économie, tourisme et culture philippine.',
+  keywords: [
+    'actualités Philippines',
+    'news Philippines',
+    'événements Philippines',
+    'politique Philippines',
+    'économie Philippines',
+    'culture philippine',
+    'tourisme Philippines',
+  ],
+  alternates: {
+    canonical: 'https://philippineasy.com/actualites-sur-les-philippines',
+  },
+  openGraph: {
+    title: 'Actualités Philippines : Dernières Infos',
+    description: 'Suivez l\'actualité des Philippines en français : news, événements et culture.',
+    url: 'https://philippineasy.com/actualites-sur-les-philippines',
+    siteName: "Philippin'Easy",
+    locale: 'fr_FR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Actualités Philippines',
+    description: 'Dernières nouvelles sur les Philippines',
+    site: '@philippineasy',
+  },
 };
 
 export const revalidate = 3600; // Revalidate every hour

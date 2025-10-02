@@ -2,6 +2,58 @@ import { createClient } from '@/utils/supabase/server';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { ProductCard } from '@/components/shared/ProductCard';
+import type { Metadata } from 'next';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const supabase = createClient();
+  const vendorId = parseInt(id, 10);
+
+  const { data: vendor } = await supabase
+    .from('vendors')
+    .select('name, description, logo_url')
+    .eq('id', vendorId)
+    .eq('status', 'approved')
+    .single();
+
+  if (!vendor) {
+    return {
+      title: 'Vendeur non trouvé',
+    };
+  }
+
+  const canonicalUrl = `https://philippineasy.com/marketplace-aux-philippines/vendeur/${id}`;
+  const description = vendor.description || `Découvrez tous les produits de ${vendor.name} sur notre marketplace Philippines.`;
+
+  return {
+    title: `${vendor.name} - Vendeur Philippines | Philippin'Easy`,
+    description,
+    keywords: ['vendeur Philippines', vendor.name, 'marketplace Philippines', 'acheter Philippines'],
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: `${vendor.name} - Vendeur Philippines`,
+      description,
+      url: canonicalUrl,
+      siteName: "Philippin'Easy",
+      locale: 'fr_FR',
+      type: 'website',
+      images: vendor.logo_url ? [{ url: vendor.logo_url, width: 400, height: 400, alt: vendor.name }] : [],
+    },
+    twitter: {
+      card: 'summary',
+      title: `${vendor.name} - Vendeur`,
+      description,
+      site: '@philippineasy',
+      images: vendor.logo_url ? [vendor.logo_url] : [],
+    },
+  };
+}
 
 async function getVendorDetails(supabase: ReturnType<typeof createClient>, vendorId: number) {
   const { data: vendor, error } = await supabase

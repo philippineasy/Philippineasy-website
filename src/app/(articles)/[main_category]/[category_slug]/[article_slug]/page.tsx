@@ -78,19 +78,50 @@ export async function generateMetadata({
     return text.trim().substring(0, 160) + '...';
   };
 
+  const extractKeywords = (content: any, title: string, categoryName?: string): string[] => {
+    const baseKeywords = ['Philippines', 'Philippin\'Easy'];
+    const titleWords = title.toLowerCase().split(' ').filter(w => w.length > 4);
+    if (categoryName) {
+      baseKeywords.push(categoryName);
+    }
+    return [...new Set([...baseKeywords, ...titleWords])].slice(0, 10);
+  };
+
   const description = extractText(article.content);
+  const keywords = extractKeywords(article.content, article.title, article.category?.name);
 
   const canonicalUrl = `https://philippineasy.com/${main_category}/${category_slug}/${article_slug}`;
 
   return {
     title: `${article.title} | Philippin'Easy`,
     description,
+    keywords,
+    authors: [
+      {
+        name: article.author?.username || "Philippin'Easy",
+        url: 'https://philippineasy.com',
+      },
+    ],
     alternates: {
       canonical: canonicalUrl,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     },
     openGraph: {
       title: article.title,
       description,
+      url: canonicalUrl,
+      siteName: "Philippin'Easy",
+      locale: 'fr_FR',
       images: [
         {
           url: article.image,
@@ -101,13 +132,17 @@ export async function generateMetadata({
       ],
       type: 'article',
       publishedTime: article.published_at,
+      modifiedTime: article.updated_at || article.published_at,
       authors: [article.author?.username || "Philippin'Easy"],
+      section: article.category?.name,
     },
     twitter: {
       card: 'summary_large_image',
       title: article.title,
       description,
       images: [article.image],
+      creator: '@philippineasy',
+      site: '@philippineasy',
     },
   };
 }

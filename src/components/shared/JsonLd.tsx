@@ -46,6 +46,9 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
     ],
   };
 
+  const wordCount = description.split(' ').length;
+  const readingTime = Math.ceil(wordCount / 200); // Average reading speed
+
   const newsArticle = {
     '@type': 'NewsArticle',
     headline: article.title,
@@ -56,6 +59,7 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
       {
         '@type': 'Person',
         name: article.author?.username || "Philippin'Easy",
+        url: siteUrl,
       },
     ],
     publisher: {
@@ -64,13 +68,22 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
       logo: {
         '@type': 'ImageObject',
         url: `${siteUrl}/logo-philippineasy.png`,
+        width: 250,
+        height: 60,
       },
+      url: siteUrl,
     },
-    description: description,
+    description: description.substring(0, 200),
+    articleBody: description,
+    wordCount: wordCount,
+    timeRequired: `PT${readingTime}M`,
+    inLanguage: 'fr-FR',
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': `${siteUrl}/${basePath}/${article.category?.slug}/${article.slug}`,
     },
+    articleSection: article.category?.name,
+    keywords: ['Philippines', article.category?.name, article.title].filter(Boolean).join(', '),
   };
 
   const jsonLd = {

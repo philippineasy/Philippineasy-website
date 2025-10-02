@@ -1,21 +1,69 @@
 import { NextResponse } from 'next/server';
 
-export async function POST() {
+/**
+ * IndexNow API - Notification instantanée aux moteurs de recherche
+ * Supporté par: Bing, Yandex, Seznam, Naver
+ * Docs: https://www.indexnow.org/
+ */
+export async function POST(request: Request) {
   try {
-    const sitemapUrl = 'https://philippineasy.com/sitemap.xml';
-    const googlePingUrl = `http://www.google.com/ping?sitemap=${sitemapUrl}`;
+    const body = await request.json();
+    const { url, urls } = body;
 
-    const res = await fetch(googlePingUrl);
+    const indexNowKey = process.env.INDEXNOW_KEY || 'votre-cle-unique-indexnow';
+    const host = 'philippineasy.com';
 
-    if (res.ok) {
-      console.log('Sitemap pinged successfully.');
-      return NextResponse.json({ message: 'Sitemap pinged successfully.' }, { status: 200 });
+    const urlList = urls || (url ? [url] : [`https://${host}/sitemap.xml`]);
+
+    const indexNowUrl = 'https://api.indexnow.org/indexnow';
+
+    const indexNowResponse = await fetch(indexNowUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        host,
+        key: indexNowKey,
+        keyLocation: `https://${host}/${indexNowKey}.txt`,
+        urlList,
+      }),
+    });
+
+    const results = {
+      indexNow: {
+        status: indexNowResponse.status,
+        success: indexNowResponse.ok,
+        message: indexNowResponse.ok
+          ? 'URLs soumises avec succès à IndexNow (Bing, Yandex)'
+          : 'Erreur lors de la soumission à IndexNow',
+      },
+      submitted: urlList.length,
+      urls: urlList,
+    };
+
+    if (indexNowResponse.ok) {
+      console.log('✅ IndexNow submission successful:', urlList);
+      return NextResponse.json({
+        success: true,
+        message: `${urlList.length} URL(s) soumise(s) pour indexation rapide`,
+        ...results
+      }, { status: 200 });
     } else {
-      console.error('Failed to ping sitemap.');
-      return NextResponse.json({ message: 'Failed to ping sitemap.' }, { status: 500 });
+      console.error('❌ IndexNow submission failed:', indexNowResponse.status);
+      return NextResponse.json({
+        success: false,
+        message: 'Erreur lors de la soumission',
+        ...results
+      }, { status: 500 });
     }
+
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ message: 'An error occurred.' }, { status: 500 });
+    console.error('❌ Error in ping API:', error);
+    return NextResponse.json({
+      success: false,
+      message: 'Erreur serveur lors de la soumission',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }

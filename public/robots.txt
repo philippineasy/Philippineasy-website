@@ -21,3 +21,4 @@ Disallow: /rencontre-philippines/inscription/
 Disallow: /api/
 
 Sitemap: https://philippineasy.com/sitemap.xml
+Sitemap: https://philippineasy.com/news-sitemap.xml

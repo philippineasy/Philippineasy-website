@@ -21,9 +21,30 @@ export async function generateMetadata({
     };
   }
 
+  const canonicalUrl = `https://philippineasy.com/forum-sur-les-philippines/${slug}`;
+  const description = category.description || `Discussions et sujets sur ${category.name} : posez vos questions, partagez vos expériences avec la communauté francophone des Philippines.`;
+
   return {
-    title: `${category.name} | Forum Philippin'Easy`,
-    description: `Discussions et sujets dans la catégorie ${category.name}.`,
+    title: `${category.name} - Forum Philippines | Philippin'Easy`,
+    description,
+    keywords: ['forum Philippines', category.name, 'discussion Philippines', 'communauté', 'questions Philippines'],
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: `${category.name} - Forum Philippines`,
+      description,
+      url: canonicalUrl,
+      siteName: "Philippin'Easy",
+      locale: 'fr_FR',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary',
+      title: `${category.name} - Forum`,
+      description,
+      site: '@philippineasy',
+    },
   };
 }
 

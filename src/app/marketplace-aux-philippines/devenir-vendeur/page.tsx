@@ -1,6 +1,37 @@
 import { createClient } from '@/utils/supabase/server';
 import Link from 'next/link';
 import VendorApplicationClientPage from './VendorApplicationClientPage';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Devenir Vendeur sur Marketplace Philippines | Philippin\'Easy',
+  description: 'Vendez vos produits sur la marketplace Philippines leader en France. Inscription gratuite, commission équitable, accès à une communauté de passionnés des Philippines.',
+  keywords: [
+    'devenir vendeur Philippines',
+    'vendre sur marketplace',
+    'e-commerce Philippines',
+    'inscription vendeur',
+    'vendre produits philippins',
+    'commerce en ligne Philippines',
+  ],
+  alternates: {
+    canonical: 'https://philippineasy.com/marketplace-aux-philippines/devenir-vendeur',
+  },
+  openGraph: {
+    title: 'Devenir Vendeur - Marketplace Philippines',
+    description: 'Vendez vos produits Philippines en France. Inscription gratuite et accès à une large communauté.',
+    url: 'https://philippineasy.com/marketplace-aux-philippines/devenir-vendeur',
+    siteName: "Philippin'Easy",
+    locale: 'fr_FR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Devenir Vendeur Philippines',
+    description: 'Vendez vos produits sur la marketplace',
+    site: '@philippineasy',
+  },
+};
 
 export default async function DevenirVendeurPage() {
   const supabase = createClient();

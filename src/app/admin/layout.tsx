@@ -2,6 +2,14 @@ import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTachometerAlt, faNewspaper, faUsers, faComments, faStore, faTags, faImage, faChartLine, faHeart } from '@fortawesome/free-solid-svg-icons';
 import { createClient } from '@/utils/supabase/server';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function AdminLayout({
   children,

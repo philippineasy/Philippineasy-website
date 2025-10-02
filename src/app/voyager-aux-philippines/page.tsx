@@ -5,8 +5,46 @@ import { VoyagerClientPage } from './VoyagerClientPage';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Voyager aux Philippines | Philippin\'Easy',
-  description: 'Guides de voyage, conseils et destinations pour votre voyage aux Philippines.',
+  title: 'Voyager aux Philippines : Guide Complet & Destinations | Philippin\'Easy',
+  description: 'Découvrez nos guides de voyage complets pour les Philippines : destinations incontournables, conseils pratiques, budget, transport, et itinéraires personnalisés.',
+  keywords: [
+    'voyage Philippines',
+    'destinations Philippines',
+    'guide voyage Philippines',
+    'tourisme Philippines',
+    'itinéraire Philippines',
+    'Palawan',
+    'Boracay',
+    'Cebu',
+    'Manille',
+    'budget voyage Philippines',
+  ],
+  alternates: {
+    canonical: 'https://philippineasy.com/voyager-aux-philippines',
+  },
+  openGraph: {
+    title: 'Voyager aux Philippines : Guide Complet & Destinations',
+    description: 'Découvrez nos guides de voyage complets pour les Philippines : destinations, conseils, budget et itinéraires.',
+    url: 'https://philippineasy.com/voyager-aux-philippines',
+    siteName: "Philippin'Easy",
+    locale: 'fr_FR',
+    type: 'website',
+    images: [
+      {
+        url: 'https://philippineasy.com/imagesHero/comment-voyager-aux-philippines.webp',
+        width: 1200,
+        height: 630,
+        alt: 'Voyager aux Philippines',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Voyager aux Philippines : Guide Complet',
+    description: 'Guides de voyage, destinations et conseils pour les Philippines',
+    images: ['https://philippineasy.com/imagesHero/comment-voyager-aux-philippines.webp'],
+    site: '@philippineasy',
+  },
 };
 
 export const revalidate = 3600; // Revalidate every hour

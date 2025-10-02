@@ -4,8 +4,45 @@ import { VivreClientPage } from './VivreClientPage';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Vivre aux Philippines | Philippin\'Easy',
-  description: 'Conseils et informations pour s\'installer et vivre aux Philippines.',
+  title: 'Vivre aux Philippines : S\'installer, Travailler & Expatriation | Philippin\'Easy',
+  description: 'Tout savoir pour vivre et s\'installer aux Philippines : visas, travail, immobilier, coût de la vie, expatriation, retraite. Guide complet pour expatriés.',
+  keywords: [
+    'vivre aux Philippines',
+    's\'installer aux Philippines',
+    'expatriation Philippines',
+    'retraite Philippines',
+    'travailler aux Philippines',
+    'visa Philippines',
+    'coût de la vie Philippines',
+    'immobilier Philippines',
+    'investir Philippines',
+  ],
+  alternates: {
+    canonical: 'https://philippineasy.com/vivre-aux-philippines',
+  },
+  openGraph: {
+    title: 'Vivre aux Philippines : Guide Expatriation & Installation',
+    description: 'Tout savoir pour vivre et s\'installer aux Philippines : visas, travail, immobilier, coût de la vie.',
+    url: 'https://philippineasy.com/vivre-aux-philippines',
+    siteName: "Philippin'Easy",
+    locale: 'fr_FR',
+    type: 'website',
+    images: [
+      {
+        url: 'https://philippineasy.com/imagesHero/nouveau-depart-aux-philippines.webp',
+        width: 1200,
+        height: 630,
+        alt: 'Vivre aux Philippines',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Vivre aux Philippines : Guide Expatriation',
+    description: 'Tout pour s\'installer et vivre aux Philippines',
+    images: ['https://philippineasy.com/imagesHero/nouveau-depart-aux-philippines.webp'],
+    site: '@philippineasy',
+  },
 };
 
 export const revalidate = 3600; // Revalidate every hour

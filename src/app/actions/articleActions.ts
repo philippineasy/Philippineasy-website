@@ -53,6 +53,40 @@ export async function createArticleAction(articleData: ArticleCreate, imageFile:
   revalidatePath('/admin/articles');
   revalidatePath('/actualites'); // Or wherever articles are listed
 
+  // Si l'article est publié, soumettre à IndexNow ET Google pour indexation rapide
+  if (data && articleData.status === 'published') {
+    try {
+      // Récupérer les infos de catégorie pour construire l'URL
+      const { data: article } = await supabase
+        .from('articles')
+        .select('slug, category:categories(slug, main_category)')
+        .eq('id', data.id)
+        .single();
+
+      if (article && article.category) {
+        const categoryObj = Array.isArray(article.category) ? article.category[0] : article.category;
+        const mainCategory = categoryObj.main_category || 'actualites-sur-les-philippines';
+        const fullUrl = `https://philippineasy.com/${mainCategory}/${categoryObj.slug}/${article.slug}`;
+
+        // 1. Soumettre à IndexNow (Bing, Yandex)
+        const { submitNewArticle } = await import('@/utils/seo/indexnow');
+        await submitNewArticle(article.slug, mainCategory, categoryObj.slug);
+        console.log('✅ Article soumis à IndexNow (Bing/Yandex)');
+
+        // 2. Soumettre à Google Indexing API (nouveau !)
+        const { submitToGoogleIndexing } = await import('@/utils/seo/google-indexing');
+        const googleResult = await submitToGoogleIndexing(fullUrl);
+        if (googleResult.success) {
+          console.log('✅ Article soumis à Google Indexing API (indexation en 2-5 min)');
+        } else {
+          console.warn('⚠️ Google Indexing API a échoué:', googleResult.message);
+        }
+      }
+    } catch (indexError) {
+      console.error('⚠️ Erreur lors de la soumission (article créé quand même):', indexError);
+    }
+  }
+
   return { success: true, data };
 }
 
@@ -116,6 +150,38 @@ export async function updateArticleAndRevalidate(
         if (mainCategory && categorySlug) {
             revalidatePath(`/${mainCategory}/${categorySlug}/${articleSlug}`);
         }
+    }
+
+    // Si l'article vient d'être publié (status changed to published), soumettre à IndexNow ET Google
+    if (updates.status === 'published') {
+      try {
+        // Récupérer les infos complètes
+        const { data: article } = await supabase
+          .from('articles')
+          .select('slug, category:categories(slug, main_category)')
+          .eq('id', articleId)
+          .single();
+
+        if (article && article.category) {
+          const categoryObj = Array.isArray(article.category) ? article.category[0] : article.category;
+          const mainCategory = categoryObj.main_category || 'actualites-sur-les-philippines';
+          const fullUrl = `https://philippineasy.com/${mainCategory}/${categoryObj.slug}/${article.slug}`;
+
+          // 1. Soumettre à IndexNow
+          const { submitNewArticle } = await import('@/utils/seo/indexnow');
+          await submitNewArticle(article.slug, mainCategory, categoryObj.slug);
+          console.log('✅ Article mis à jour soumis à IndexNow');
+
+          // 2. Soumettre à Google
+          const { submitToGoogleIndexing } = await import('@/utils/seo/google-indexing');
+          const googleResult = await submitToGoogleIndexing(fullUrl);
+          if (googleResult.success) {
+            console.log('✅ Article mis à jour soumis à Google Indexing API');
+          }
+        }
+      } catch (indexError) {
+        console.error('⚠️ Erreur lors de la mise à jour:', indexError);
+      }
     }
   }
   revalidatePath('/'); // Revalidate homepage

@@ -3,8 +3,34 @@ import { MarketplaceClientPage } from './MarketplaceClientPage';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Marketplace | Philippin\'Easy',
-  description: 'Achetez et vendez des produits et services en lien avec les Philippines.',
+  title: 'Marketplace Philippines : Achat & Vente de Produits | Philippin\'Easy',
+  description: 'Marketplace française pour les Philippines : achetez et vendez des produits, services, souvenirs et articles pour votre voyage ou expatriation. Livraison internationale.',
+  keywords: [
+    'marketplace Philippines',
+    'acheter Philippines',
+    'vendre Philippines',
+    'e-commerce Philippines',
+    'produits philippins',
+    'souvenirs Philippines',
+    'boutique en ligne Philippines',
+  ],
+  alternates: {
+    canonical: 'https://philippineasy.com/marketplace-aux-philippines',
+  },
+  openGraph: {
+    title: 'Marketplace Philippines : Achat & Vente',
+    description: 'Marketplace française pour acheter et vendre des produits en lien avec les Philippines.',
+    url: 'https://philippineasy.com/marketplace-aux-philippines',
+    siteName: "Philippin'Easy",
+    locale: 'fr_FR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Marketplace Philippines',
+    description: 'Achat et vente de produits Philippines',
+    site: '@philippineasy',
+  },
 };
 
 async function getProducts(supabase: ReturnType<typeof createClient>) {

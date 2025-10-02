@@ -21,9 +21,30 @@ export async function generateMetadata({
     };
   }
 
+  const canonicalUrl = `https://philippineasy.com/marketplace-aux-philippines/categorie/${slug}`;
+  const description = category.description || `Découvrez tous les produits ${category.name} disponibles sur notre marketplace Philippines : achat sécurisé, livraison rapide.`;
+
   return {
-    title: `${category.name} | Marketplace Philippin'Easy`,
-    description: category.description || `Produits dans la catégorie ${category.name}.`,
+    title: `${category.name} - Marketplace Philippines | Philippin'Easy`,
+    description,
+    keywords: ['marketplace Philippines', category.name, 'acheter Philippines', 'produits philippins', 'e-commerce'],
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: `${category.name} - Marketplace Philippines`,
+      description,
+      url: canonicalUrl,
+      siteName: "Philippin'Easy",
+      locale: 'fr_FR',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${category.name} - Marketplace`,
+      description,
+      site: '@philippineasy',
+    },
   };
 }
 

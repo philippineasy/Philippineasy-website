@@ -6,8 +6,35 @@ import { MeilleursPlansClientPage } from './MeilleursPlansClientPage';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Meilleurs Plans aux Philippines | Philippin\'Easy',
-  description: 'Découvrez les meilleurs plans pour votre voyage ou votre vie aux Philippines.',
+  title: 'Meilleurs Plans Philippines : Hébergements, Activités & Bons Plans | Philippin\'Easy',
+  description: 'Les meilleurs bons plans pour les Philippines : hébergements pas chers, activités incontournables, excursions, transports et services pour expatriés.',
+  keywords: [
+    'bons plans Philippines',
+    'hébergement Philippines',
+    'activités Philippines',
+    'excursions Philippines',
+    'transport Philippines',
+    'hôtels Philippines pas cher',
+    'meilleures plages Philippines',
+    'services expatriés Philippines',
+  ],
+  alternates: {
+    canonical: 'https://philippineasy.com/meilleurs-plans-aux-philippines',
+  },
+  openGraph: {
+    title: 'Meilleurs Plans Philippines : Bons Plans & Activités',
+    description: 'Découvrez les meilleurs bons plans pour les Philippines : hébergements, activités, excursions et services.',
+    url: 'https://philippineasy.com/meilleurs-plans-aux-philippines',
+    siteName: "Philippin'Easy",
+    locale: 'fr_FR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Meilleurs Plans Philippines',
+    description: 'Les meilleurs bons plans pour les Philippines',
+    site: '@philippineasy',
+  },
 };
 
 export const revalidate = 3600; // Revalidate every hour

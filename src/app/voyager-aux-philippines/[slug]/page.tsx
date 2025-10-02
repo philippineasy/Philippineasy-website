@@ -18,11 +18,33 @@ export async function generateMetadata({
     };
   }
 
+  const canonicalUrl = `https://philippineasy.com/voyager-aux-philippines/${slug}`;
+  const description = category.description || `Découvrez nos articles et conseils sur ${category.name} pour voyager aux Philippines.`;
+
   return {
-    title: `${category.name} | Philippin'Easy`,
-    description: category.description || `Articles et informations sur ${category.name}.`,
+    title: `${category.name} | Voyager aux Philippines | Philippin'Easy`,
+    description,
+    keywords: ['Philippines', 'voyage Philippines', category.name, 'guide voyage', 'tourisme Philippines'],
     alternates: {
-      canonical: `/voyager-aux-philippines/${slug}`,
+      canonical: canonicalUrl,
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
+    openGraph: {
+      title: `${category.name} | Voyager aux Philippines`,
+      description,
+      url: canonicalUrl,
+      siteName: "Philippin'Easy",
+      locale: 'fr_FR',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${category.name} | Voyager aux Philippines`,
+      description,
+      site: '@philippineasy',
     },
   };
 }
