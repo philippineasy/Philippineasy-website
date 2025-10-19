@@ -2,8 +2,23 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/utils/supabase/middleware';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 
+// Helper: mappe les slugs de catégories principales à leurs chemins
+// Accepte à la fois le format court ('actualites') et long ('actualites-sur-les-philippines')
 const getMainCategoryPath = (mainCategorySlug: string | null) => {
   if (!mainCategorySlug) return 'actualites-sur-les-philippines';
+
+  // Normaliser : si déjà au format long, le retourner tel quel
+  const longFormats = [
+    'actualites-sur-les-philippines',
+    'meilleurs-plans-aux-philippines',
+    'vivre-aux-philippines',
+    'voyager-aux-philippines'
+  ];
+  if (longFormats.includes(mainCategorySlug)) {
+    return mainCategorySlug;
+  }
+
+  // Sinon, mapper depuis le format court
   switch (mainCategorySlug) {
     case 'actualites':
       return 'actualites-sur-les-philippines';
@@ -20,17 +35,9 @@ const getMainCategoryPath = (mainCategorySlug: string | null) => {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const { headers } = request;
-  const host = headers.get('host');
-  const isHttps = headers.get('x-forwarded-proto') === 'https' || process.env.NODE_ENV === 'development';
 
-  // Rediriger www vers non-www et http vers https
-  if (host?.startsWith('www.') || !isHttps) {
-    const newHost = host?.replace('www.', '');
-    const protocol = 'https';
-    const newUrl = new URL(pathname, `${protocol}://${newHost}`);
-    return NextResponse.redirect(newUrl.toString(), 301);
-  }
+  // NOTE: Les redirections www→non-www et http→https sont gérées par vercel.json
+  // au niveau CDN pour de meilleures performances. Ne pas dupliquer ici.
 
   // Redirection pour les anciens articles /article/:slug
   if (pathname.startsWith('/article/')) {

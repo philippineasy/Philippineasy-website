@@ -10,9 +10,41 @@ import { NextResponse } from 'next/server';
 import { createBuildClient } from '@/utils/supabase/build-client';
 
 const BASE_URL = 'https://philippineasy.com';
-const HOURS_LIMIT = 48; // Articles des 48 dernières heures pour Google News
+const HOURS_LIMIT = 48; // Articles des 48 dernières heures pour Google News (recommandé)
+const FALLBACK_DAYS = 7; // Si aucun article dans les 48h, on étend à 7 jours pour éviter sitemap vide
 
 /* ---------- Helpers (réutilisés depuis sitemap.ts) ---------- */
+
+// Helper: mappe les slugs de catégories principales à leurs chemins
+// Accepte à la fois le format court ('actualites') et long ('actualites-sur-les-philippines')
+const getMainCategoryPath = (mainCategorySlug: string | null) => {
+  if (!mainCategorySlug) return 'actualites-sur-les-philippines';
+
+  // Normaliser : si déjà au format long, le retourner tel quel
+  const longFormats = [
+    'actualites-sur-les-philippines',
+    'meilleurs-plans-aux-philippines',
+    'vivre-aux-philippines',
+    'voyager-aux-philippines'
+  ];
+  if (longFormats.includes(mainCategorySlug)) {
+    return mainCategorySlug;
+  }
+
+  // Sinon, mapper depuis le format court
+  switch (mainCategorySlug) {
+    case 'actualites':
+      return 'actualites-sur-les-philippines';
+    case 'meilleurs-plans':
+      return 'meilleurs-plans-aux-philippines';
+    case 'vivre':
+      return 'vivre-aux-philippines';
+    case 'voyager':
+      return 'voyager-aux-philippines';
+    default:
+      return 'actualites-sur-les-philippines';
+  }
+};
 
 // Echappement XML
 const escapeXml = (str: string) =>
@@ -72,11 +104,11 @@ export async function GET() {
     const supabase = createBuildClient();
 
     // Calculer la date limite (48h en arrière)
-    const limitDate = new Date();
+    let limitDate = new Date();
     limitDate.setHours(limitDate.getHours() - HOURS_LIMIT);
 
     // Récupérer les articles récents (publiés dans les 48 dernières heures)
-    const { data: articles, error } = await supabase
+    let { data: articles, error } = await supabase
       .from('articles')
       .select(`
         slug,
@@ -98,6 +130,32 @@ export async function GET() {
       return new NextResponse('Error generating news sitemap', { status: 500 });
     }
 
+    // Si aucun article dans les 48h, étendre à 7 jours pour éviter un sitemap vide
+    // (Google Search Console génère une erreur "Balise XML manquante" avec un sitemap vide)
+    if (!articles || articles.length === 0) {
+      limitDate = new Date();
+      limitDate.setDate(limitDate.getDate() - FALLBACK_DAYS);
+
+      const fallback = await supabase
+        .from('articles')
+        .select(`
+          slug,
+          title,
+          published_at,
+          image,
+          category:categories(
+            slug,
+            main_category
+          )
+        `)
+        .eq('status', 'published')
+        .gte('published_at', limitDate.toISOString())
+        .order('published_at', { ascending: false })
+        .limit(10); // Limite à 10 articles pour le fallback
+
+      articles = fallback.data;
+    }
+
     // Construire le XML du sitemap
     const xmlEntries = articles
       ?.map((article) => {
@@ -107,7 +165,7 @@ export async function GET() {
 
         if (!categoryObj) return null;
 
-        const mainCategory = categoryObj.main_category || 'actualites-sur-les-philippines';
+        const mainCategory = getMainCategoryPath(categoryObj.main_category);
         const url = `${BASE_URL}/${mainCategory}/${categoryObj.slug}/${article.slug}`;
 
         // Échapper les caractères spéciaux XML dans le titre et l'URL

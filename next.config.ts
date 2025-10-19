@@ -94,11 +94,24 @@ const nextConfig: NextConfig = {
         destination: '/meilleurs-plans-aux-philippines/:slug*',
         permanent: true,
       },
+      // Redirections spécifiques pour les anciennes URLs indexées par Google
       {
-        source: '/article/:slug*',
-        destination: '/actualites-sur-les-philippines/actualites/:slug*',
+        source: '/meilleurs-plans/activites-excursions',
+        destination: '/meilleurs-plans-aux-philippines/activites-excursions',
         permanent: true,
       },
+      {
+        source: '/meilleurs-plans/hebergements',
+        destination: '/meilleurs-plans-aux-philippines/hebergements',
+        permanent: true,
+      },
+      {
+        source: '/images',
+        destination: '/',
+        permanent: true,
+      },
+      // NOTE: /article/:slug* est géré dynamiquement par middleware.ts
+      // car nous devons interroger la DB pour trouver la bonne catégorie
     ];
   },
   async headers() {

@@ -7,8 +7,23 @@ import { notFound } from 'next/navigation';
 import JsonLd from '@/components/shared/JsonLd';
 import { Article } from '@/types';
 
+// Helper: mappe les slugs de catégories principales à leurs chemins
+// Accepte à la fois le format court ('actualites') et long ('actualites-sur-les-philippines')
 const getMainCategoryPath = (mainCategorySlug: string | null) => {
-    if (!mainCategorySlug) return 'actualites-sur-les-philippines'; // Fallback
+    if (!mainCategorySlug) return 'actualites-sur-les-philippines';
+
+    // Normaliser : si déjà au format long, le retourner tel quel
+    const longFormats = [
+      'actualites-sur-les-philippines',
+      'meilleurs-plans-aux-philippines',
+      'vivre-aux-philippines',
+      'voyager-aux-philippines'
+    ];
+    if (longFormats.includes(mainCategorySlug)) {
+      return mainCategorySlug;
+    }
+
+    // Sinon, mapper depuis le format court
     switch (mainCategorySlug) {
       case 'actualites':
         return 'actualites-sur-les-philippines';
@@ -19,7 +34,7 @@ const getMainCategoryPath = (mainCategorySlug: string | null) => {
       case 'voyager':
         return 'voyager-aux-philippines';
       default:
-        return 'actualites-sur-les-philippines'; // Fallback for any other case
+        return 'actualites-sur-les-philippines';
     }
 };
 

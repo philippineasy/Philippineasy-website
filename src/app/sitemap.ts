@@ -121,16 +121,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // Helper: mappe les slugs de catégories principales à leurs chemins
+  // Accepte à la fois le format court ('actualites') et long ('actualites-sur-les-philippines')
   const getMainCategoryPath = (mainCategorySlug: string | null) => {
     if (!mainCategorySlug) return 'actualites-sur-les-philippines';
+
+    // Normaliser : si déjà au format long, le retourner tel quel
+    const longFormats = [
+      'actualites-sur-les-philippines',
+      'meilleurs-plans-aux-philippines',
+      'vivre-aux-philippines',
+      'voyager-aux-philippines'
+    ];
+    if (longFormats.includes(mainCategorySlug)) {
+      return mainCategorySlug;
+    }
+
+    // Sinon, mapper depuis le format court
     switch (mainCategorySlug) {
       case 'actualites':
         return 'actualites-sur-les-philippines';
-      case 'meilleurs-plans-aux-philippines':
+      case 'meilleurs-plans':
         return 'meilleurs-plans-aux-philippines';
-      case 'vivre-aux-philippines':
+      case 'vivre':
         return 'vivre-aux-philippines';
-      case 'voyager-aux-philippines':
+      case 'voyager':
         return 'voyager-aux-philippines';
       default:
         return 'actualites-sur-les-philippines';
