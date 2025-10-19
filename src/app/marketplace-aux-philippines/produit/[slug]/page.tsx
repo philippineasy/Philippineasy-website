@@ -10,6 +10,7 @@ import ProductJsonLd from '@/components/shared/ProductJsonLd';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
 import type { Metadata } from 'next';
+import { generateProductMetaDescription } from '@/utils/seo/metaDescriptionGenerator';
 
 export async function generateMetadata({
   params,
@@ -26,12 +27,38 @@ export async function generateMetadata({
     };
   }
 
+  // Récupérer la catégorie du produit pour la meta description
+  const { data: categoryData } = await supabase
+    .from('product_categories')
+    .select('name')
+    .eq('id', product.category_id)
+    .single();
+
+  const categoryName = categoryData?.name;
+
+  const description = generateProductMetaDescription(
+    product.name,
+    product.description,
+    product.price,
+    categoryName,
+    { maxLength: 155, addEllipsis: true }
+  );
+
+  const canonicalUrl = `https://philippineasy.com/marketplace-aux-philippines/produit/${slug}`;
+
   return {
     title: `${product.name} | Marketplace Philippin'Easy`,
-    description: product.description,
+    description,
+    keywords: ['marketplace Philippines', product.name, categoryName || '', 'acheter Philippines', 'produits philippins'],
+    alternates: {
+      canonical: canonicalUrl,
+    },
     openGraph: {
       title: product.name,
-      description: product.description,
+      description,
+      url: canonicalUrl,
+      siteName: "Philippin'Easy",
+      locale: 'fr_FR',
       images: [
         {
           url: product.image_urls?.[0] || '',
@@ -41,6 +68,13 @@ export async function generateMetadata({
         },
       ],
       type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: product.name,
+      description,
+      images: [product.image_urls?.[0] || ''],
+      site: '@philippineasy',
     },
   };
 }

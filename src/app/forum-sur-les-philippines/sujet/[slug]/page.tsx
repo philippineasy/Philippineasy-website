@@ -7,6 +7,7 @@ import type { Metadata } from 'next';
 import ForumJsonLd from '@/components/shared/ForumJsonLd';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
 import { ForumTopic, ForumPost } from '@/types';
+import { generateForumTopicMetaDescription } from '@/utils/seo/metaDescriptionGenerator';
 
 // ✅ params en Promise pour generateMetadata
 export async function generateMetadata({
@@ -24,9 +25,46 @@ export async function generateMetadata({
     };
   }
 
+  // Récupérer le premier post pour générer une description intelligente
+  const { data: posts } = await supabase
+    .from('forum_posts')
+    .select('content')
+    .eq('topic_id', topic.id)
+    .order('created_at', { ascending: true })
+    .limit(1);
+
+  const firstPostContent = posts?.[0]?.content;
+
+  const description = generateForumTopicMetaDescription(
+    topic.title,
+    firstPostContent,
+    topic.category?.name,
+    { maxLength: 155, addEllipsis: true }
+  );
+
+  const canonicalUrl = `https://philippineasy.com/forum-sur-les-philippines/sujet/${slug}`;
+
   return {
     title: `${topic.title} | Forum Philippin'Easy`,
-    description: `Discussion sur ${topic.title}.`,
+    description,
+    keywords: ['forum Philippines', topic.title, topic.category?.name || '', 'discussion', 'communauté Philippines'],
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: topic.title,
+      description,
+      url: canonicalUrl,
+      siteName: "Philippin'Easy",
+      locale: 'fr_FR',
+      type: 'article',
+    },
+    twitter: {
+      card: 'summary',
+      title: topic.title,
+      description,
+      site: '@philippineasy',
+    },
   };
 }
 

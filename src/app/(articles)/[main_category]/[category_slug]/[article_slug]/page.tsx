@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import JsonLd from '@/components/shared/JsonLd';
 import { Article } from '@/types';
+import { generateArticleMetaDescription } from '@/utils/seo/metaDescriptionGenerator';
 
 // Helper: mappe les slugs de catégories principales à leurs chemins
 // Accepte à la fois le format court ('actualites') et long ('actualites-sur-les-philippines')
@@ -78,20 +79,13 @@ export async function generateMetadata({
     };
   }
 
-  const extractText = (content: any): string => {
-    let text = '';
-    if (typeof content === 'string') {
-      return content.substring(0, 160) + '...';
-    }
-    if (content?.blocks) {
-      for (const block of content.blocks) {
-        if (block.type === 'paragraph' && block.data?.text) {
-          text += block.data.text.replace(/<[^>]+>/g, '') + ' ';
-        }
-      }
-    }
-    return text.trim().substring(0, 160) + '...';
-  };
+  // Générer une meta description optimisée automatiquement
+  const description = generateArticleMetaDescription(
+    article.title,
+    article.content,
+    article.category?.name,
+    { maxLength: 155, addEllipsis: true }
+  );
 
   const extractKeywords = (content: any, title: string, categoryName?: string): string[] => {
     const baseKeywords = ['Philippines', 'Philippin\'Easy'];
@@ -102,7 +96,6 @@ export async function generateMetadata({
     return [...new Set([...baseKeywords, ...titleWords])].slice(0, 10);
   };
 
-  const description = extractText(article.content);
   const keywords = extractKeywords(article.content, article.title, article.category?.name);
 
   const canonicalUrl = `https://philippineasy.com/${main_category}/${category_slug}/${article_slug}`;
