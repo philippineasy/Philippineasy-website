@@ -1,11 +1,9 @@
 'use client';
 
-'use client';
-
 import Link from 'next/link';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronRight, faSpinner, faLink } from '@fortawesome/free-solid-svg-icons';
+import { faLink } from '@fortawesome/free-solid-svg-icons';
 import { faFacebookF, faXTwitter, faWhatsapp, faLinkedinIn } from '@fortawesome/free-brands-svg-icons';
 
 import { useEffect, useMemo, useState } from 'react';
@@ -16,6 +14,7 @@ import ArticleContentRenderer from '@/components/shared/ArticleContentRenderer';
 import TableOfContents from '@/components/shared/TableOfContents';
 import EditArticleButton from '@/components/shared/EditArticleButton';
 import RelatedArticles from './RelatedArticles';
+import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { Article, EditorJSContent } from '@/types';
 
 interface ArticlePageClientProps {
@@ -49,6 +48,25 @@ const ArticlePageClient = ({ article, basePath }: ArticlePageClientProps) => {
     }
   }, [article, user, supabase]);
 
+  // Construire les items du breadcrumb
+  const breadcrumbItems: Array<{ href?: string; label: string }> = [
+    { href: '/', label: 'Accueil' },
+    { href: `/${basePath}`, label: article.category.main_category || basePath },
+  ];
+
+  // Ajouter la catégorie seulement si elle est différente de la catégorie principale
+  if (article.category.main_category && article.category.slug !== article.category.main_category.toLowerCase()) {
+    breadcrumbItems.push({
+      href: `/${basePath}/${article.category.slug}`,
+      label: article.category.name,
+    });
+  }
+
+  // Ajouter le titre de l'article (sans lien, dernier élément)
+  breadcrumbItems.push({
+    label: article.title,
+  });
+
   return (
     <main className="container mx-auto px-4 py-12 md:py-16 pt-32">
       <div className="lg:flex lg:space-x-8">
@@ -60,27 +78,7 @@ const ArticlePageClient = ({ article, basePath }: ArticlePageClientProps) => {
         </aside>
 
         <article className="w-full lg:flex-grow bg-card rounded-lg shadow-xl p-6 md:p-10">
-          <nav className="text-sm mb-4 breadcrumb-container" aria-label="Breadcrumb">
-            <ol className="list-none p-0 inline-flex items-center">
-              <li className="flex items-center">
-                <Link href="/" className="text-muted-foreground hover:text-orange-500">Accueil</Link>
-                <FontAwesomeIcon icon={faChevronRight} className="w-2.5 h-2.5 mx-3 text-primary" />
-              </li>
-              <li className="flex items-center">
-                <Link href={`/${basePath}`} className="text-muted-foreground hover:text-orange-500">{article.category.main_category || basePath}</Link>
-                <FontAwesomeIcon icon={faChevronRight} className="w-2.5 h-2.5 mx-3 text-primary" />
-              </li>
-              {article.category.main_category && article.category.slug !== article.category.main_category.toLowerCase() && (
-                <li className="flex items-center">
-                  <Link href={`/${basePath}/${article.category.slug}`} className="text-muted-foreground hover:text-orange-500">{article.category.name}</Link>
-                  <FontAwesomeIcon icon={faChevronRight} className="w-2.5 h-2.5 mx-3 text-primary" />
-                </li>
-              )}
-              <li className="flex items-center">
-                <span className="text-foreground font-medium truncate max-w-[150px] sm:max-w-[200px]">{article.title}</span>
-              </li>
-            </ol>
-          </nav>
+          <Breadcrumb items={breadcrumbItems} />
 
           <header className="mb-8 border-b pb-8">
             <div className="flex justify-between items-start mb-4">

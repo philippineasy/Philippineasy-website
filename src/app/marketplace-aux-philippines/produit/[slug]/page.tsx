@@ -7,6 +7,8 @@ import { ProductReviews } from './ProductReviews';
 import RelatedProducts from '@/components/shared/RelatedProducts';
 import { ProductViewTracker } from './ProductViewTracker';
 import ProductJsonLd from '@/components/shared/ProductJsonLd';
+import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
 import type { Metadata } from 'next';
 
 export async function generateMetadata({
@@ -54,6 +56,11 @@ async function getProductBySlug(supabase: ReturnType<typeof createClient>, slug:
       price,
       image_urls,
       category_id,
+      product_categories (
+        id,
+        name,
+        slug
+      ),
       vendors (
         id,
         name
@@ -88,10 +95,11 @@ async function getProductBySlug(supabase: ReturnType<typeof createClient>, slug:
     profiles: Array.isArray(r.profiles) ? r.profiles[0] : r.profiles,
   }));
 
-  return { 
-    ...productData, 
+  return {
+    ...productData,
     vendor: Array.isArray(productData.vendors) ? productData.vendors[0] : productData.vendors,
     product_reviews: formattedReviews,
+    category: Array.isArray(productData.product_categories) ? productData.product_categories[0] : productData.product_categories,
   };
 }
 
@@ -124,10 +132,33 @@ export default async function ProductDetailPage({
   const product = await getProductBySlug(supabase, slug);
   const hasPurchased = await checkUserHasPurchased(supabase, user?.id || '', product.id);
 
+  const breadcrumbItems: Array<{ href?: string; label: string }> = [
+    { href: '/', label: 'Accueil' },
+    { href: '/marketplace-aux-philippines', label: 'Marketplace' },
+  ];
+
+  if (product.category) {
+    breadcrumbItems.push({
+      href: `/marketplace-aux-philippines/categorie/${product.category.slug}`,
+      label: product.category.name,
+    });
+  }
+
+  breadcrumbItems.push({
+    label: product.name,
+  });
+
+  const breadcrumbJsonLdItems = breadcrumbItems.map(item => ({
+    name: item.label,
+    item: item.href || `/marketplace-aux-philippines/produit/${slug}`,
+  }));
+
   return (
-    <div className="container mx-auto px-4 py-16">
+    <div className="container mx-auto px-4 py-16 pt-32">
       <ProductViewTracker productId={product.id} />
+      <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
       <ProductJsonLd product={product} />
+      <Breadcrumb items={breadcrumbItems} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         <div>
           <div className="w-full h-96 relative rounded-lg overflow-hidden shadow-lg">

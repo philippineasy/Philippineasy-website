@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import ArticleList from '@/components/shared/ArticleList';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
 
 interface CategoryPageProps {
   slug: string;
@@ -35,23 +36,16 @@ const CategoryPage = async ({ slug, basePath, pageTitle }: CategoryPageProps) =>
     { label: category.name },
   ];
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: breadcrumbItems.map((item, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      name: item.label,
-      item: `${typeof window !== 'undefined' ? window.location.origin : ''}${item.href || ''}`,
-    })),
-  };
+  // Items pour le JSON-LD breadcrumb
+  const breadcrumbJsonLdItems = [
+    { name: 'Accueil', item: '/' },
+    { name: pageTitle, item: `/${basePath}` },
+    { name: category.name, item: `/${basePath}/${slug}` },
+  ];
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
       {category.heroImage && (
         <section className="relative h-64 md:h-80">
           <Image src={category.heroImage} alt={category.name} fill className="object-cover" priority />

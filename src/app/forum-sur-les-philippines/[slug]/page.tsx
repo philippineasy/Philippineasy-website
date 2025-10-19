@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import { getTopicsByCategorySlug, getForumCategoryBySlug } from '@/services/forumService';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { TopicListClient } from '@/app/forum-sur-les-philippines/[slug]/TopicListClient';
+import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
 import type { Metadata } from 'next';
 
 // ✅ generateMetadata avec params en Promise
@@ -102,8 +103,15 @@ export default async function ForumCategoryPage({
     { label: category.name },
   ];
 
+  const breadcrumbJsonLdItems = [
+    { name: 'Accueil', item: '/' },
+    { name: 'Forums', item: '/forum-sur-les-philippines' },
+    { name: category.name, item: `/forum-sur-les-philippines/${slug}` },
+  ];
+
   return (
     <main className="container mx-auto px-4 py-16 pt-32">
+      <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
       <Breadcrumb items={breadcrumbItems} />
 
       <div className="mb-6 flex justify-between items-center">

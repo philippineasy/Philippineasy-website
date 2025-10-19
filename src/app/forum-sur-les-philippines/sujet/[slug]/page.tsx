@@ -5,6 +5,7 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { TopicClientPage } from '@/app/forum-sur-les-philippines/sujet/[slug]/TopicClientPage';
 import type { Metadata } from 'next';
 import ForumJsonLd from '@/components/shared/ForumJsonLd';
+import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
 import { ForumTopic, ForumPost } from '@/types';
 
 // ✅ params en Promise pour generateMetadata
@@ -67,8 +68,16 @@ export default async function ForumTopicPage({
     { label: topic.title },
   ];
 
+  const breadcrumbJsonLdItems = [
+    { name: 'Accueil', item: '/' },
+    { name: 'Forums', item: '/forum-sur-les-philippines' },
+    { name: topic.category?.name || 'Catégorie', item: `/forum-sur-les-philippines/${topic.category?.slug || ''}` },
+    { name: topic.title, item: `/forum-sur-les-philippines/sujet/${slug}` },
+  ];
+
   return (
     <main className="container mx-auto px-4 py-16 pt-32">
+      <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
       <ForumJsonLd topic={topic as ForumTopic} posts={initialPosts as ForumPost[] || []} />
       <Breadcrumb items={breadcrumbItems} />
       <TopicClientPage initialTopic={topic} initialPosts={initialPosts || []} />

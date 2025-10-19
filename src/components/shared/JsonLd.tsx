@@ -1,4 +1,5 @@
 import { Article, EditorJSContent } from '@/types';
+import BreadcrumbJsonLd from './BreadcrumbJsonLd';
 
 interface JsonLdProps {
   article: Article;
@@ -22,29 +23,21 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
   const description = extractText(article.content);
   const siteUrl = 'https://philippineasy.com';
 
-  const breadcrumbList = {
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Accueil',
-        item: siteUrl,
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: article.category?.name || 'Catégorie',
-        item: `${siteUrl}/${basePath}/${article.category?.slug}`,
-      },
-      {
-        '@type': 'ListItem',
-        position: 3,
-        name: article.title,
-        item: `${siteUrl}/${basePath}/${article.category?.slug}/${article.slug}`,
-      },
-    ],
-  };
+  // Breadcrumb items pour le JSON-LD
+  const breadcrumbItems = [
+    {
+      name: 'Accueil',
+      item: '/',
+    },
+    {
+      name: article.category?.name || 'Catégorie',
+      item: `/${basePath}/${article.category?.slug}`,
+    },
+    {
+      name: article.title,
+      item: `/${basePath}/${article.category?.slug}/${article.slug}`,
+    },
+  ];
 
   const wordCount = description.split(' ').length;
   const readingTime = Math.ceil(wordCount / 200); // Average reading speed
@@ -88,17 +81,17 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
 
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@graph': [
-      newsArticle,
-      breadcrumbList
-    ]
+    ...newsArticle,
   };
 
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-    />
+    <>
+      <BreadcrumbJsonLd items={breadcrumbItems} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+    </>
   );
 };
 
