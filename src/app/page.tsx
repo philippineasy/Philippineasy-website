@@ -22,13 +22,14 @@ export default async function HomePage() {
       {/* Hero Section */}
       <section className="relative hero flex items-center justify-center text-center px-4 h-[90vh]">
         <Image
-          src="/imagesHero/hero-home.jpg"
+          src="/imagesHero/hero-home.webp"
           alt="Vue aérienne d'une plage de sable blanc aux Philippines avec des bateaux traditionnels bangka"
           fill
           priority
           fetchPriority="high"
           className="object-cover z-0"
           sizes="100vw"
+          quality={85}
         />
         <div className="absolute inset-0 bg-black opacity-50 z-10"></div>
         <div className="relative z-20">
