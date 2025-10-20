@@ -11,6 +11,9 @@ const BestDealsSection = dynamic(() => import('@/components/homepage/BestDealsSe
 const FeaturedNewsSection = dynamic(() => import('@/components/homepage/FeaturedNewsSection').then(mod => mod.FeaturedNewsSection));
 const FeaturedProductsCarousel = dynamic(() => import('@/components/homepage/FeaturedProductsCarousel').then(mod => mod.FeaturedProductsCarousel));
 
+// Enable ISR (Incremental Static Regeneration) for better performance
+export const revalidate = 300; // Revalidate every 5 minutes (300 seconds)
+
 export default async function HomePage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
