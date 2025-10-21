@@ -58,6 +58,20 @@
     "tailwindcss-animate": "^1.0.7",
     "zod": "^4.0.9"
   },
+  "browserslist": {
+    "production": [
+      "chrome >= 90",
+      "edge >= 90",
+      "firefox >= 90",
+      "safari >= 15",
+      "ios >= 15"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
   "devDependencies": {
     "@babel/preset-env": "^7.28.0",
     "@babel/preset-react": "^7.27.1",
