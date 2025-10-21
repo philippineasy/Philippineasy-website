@@ -41,12 +41,13 @@ export const FeaturedNewsSection = ({ initialFeaturedItems }: FeaturedNewsSectio
         <EditableWrapper key={article.id} item={article} type="article" onUpdate={handleItemUpdate} onReplace={handleItemReplace}>
           <div className="news-card bg-card rounded-lg shadow-lg overflow-hidden h-full flex flex-col">
             <div className="relative h-40">
-              <Image 
-                src={article.image || 'https://via.placeholder.com/300x200'} 
-                alt={article.title} 
-                fill 
-                className="object-cover" 
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+              <Image
+                src={article.image || 'https://via.placeholder.com/300x200'}
+                alt={article.title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
+                quality={70}
               />
             </div>
             <div className="p-4 flex flex-col flex-grow">

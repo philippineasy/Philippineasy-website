@@ -7,7 +7,6 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  swcMinify: true, // Enable SWC minification for smaller bundles
 
   // Production optimizations
   compiler: {
@@ -190,6 +189,9 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60, // Cache optimized images for 60 seconds
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840], // Responsive breakpoints
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384], // Icon/thumbnail sizes
+    // Lower default quality for better compression (Google PageSpeed recommendation)
+    // Individual images can override with quality prop
+    unoptimized: false,
     domains: [
       'byxjlsbmhixdehbisvjp.supabase.co',
       'images.unsplash.com',
@@ -199,6 +201,8 @@ const nextConfig: NextConfig = {
       'ui-avatars.com',
       'lh3.googleusercontent.com',
     ],
+    // Configure loader options for better compression
+    loaderFile: undefined,
   },
 };
 

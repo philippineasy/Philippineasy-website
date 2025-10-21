@@ -55,7 +55,8 @@ const ArticleCard = ({ article, basePath, priority = false }: ArticleCardProps) 
           alt={article.title}
           fill
           className="object-cover card-image"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 450px"
+          quality={70}
           priority={priority}
         />
       </Link>
