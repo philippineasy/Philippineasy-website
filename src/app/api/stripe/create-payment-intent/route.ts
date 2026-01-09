@@ -67,6 +67,11 @@ export async function POST(request: Request) {
 
   } catch (error: any) {
     console.error('Error creating payment intent:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    // Return more details for debugging
+    return NextResponse.json({
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+      type: error.type || error.name
+    }, { status: 500 });
   }
 }
