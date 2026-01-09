@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { createClient } from '@/utils/supabase/server';
+import { createClientForRouteHandler } from '@/utils/supabase/server';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-08-27.basil',
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     }
 
     // Get authenticated user using server-side Supabase client with cookies
-    const supabase = createClient();
+    const supabase = await createClientForRouteHandler();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
