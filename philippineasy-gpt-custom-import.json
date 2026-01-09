@@ -1,0 +1,436 @@
+{
+  "name": "Philippineasy - GPT Custom Import",
+  "active": false,
+  "versionId": "gpt-custom-v1",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "philippineasy-article",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "id": "webhook-001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [260, 400],
+      "webhookId": "philippineasy-article",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "header-auth-001",
+          "name": "Philippineasy API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Valider les champs requis\n// Support pour appels directs ($json) et via MCP ($json.body)\nconst data = $json.body || $json;\n\nconst requiredFields = ['title', 'slug', 'content_editorjs', 'image_prompts'];\nconst missing = requiredFields.filter(field => !data[field]);\n\nif (missing.length > 0) {\n  throw new Error(`Champs requis manquants: ${missing.join(', ')}`);\n}\n\n// Valider les prompts d'images\nif (!data.image_prompts.thumbnail) {\n  throw new Error('image_prompts.thumbnail est requis');\n}\n\n// Valider content_editorjs\nif (!data.content_editorjs.blocks || !Array.isArray(data.content_editorjs.blocks)) {\n  throw new Error('content_editorjs.blocks doit être un tableau');\n}\n\nconsole.log('Validation OK:', data.title);\n\nreturn [{ json: data }];"
+      },
+      "id": "validate-001",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Créer 3 items pour générer les 3 images en parallèle\nconst data = $json;\n\nreturn [\n  { \n    json: { \n      ...data, \n      image_type: 'thumbnail', \n      prompt: data.image_prompts.thumbnail, \n      size: '1792x1024' \n    } \n  },\n  { \n    json: { \n      ...data, \n      image_type: 'section_1', \n      prompt: data.image_prompts.image_section_1, \n      position: data.image_positions?.image_section_1, \n      size: '1024x1024' \n    } \n  },\n  { \n    json: { \n      ...data, \n      image_type: 'section_2', \n      prompt: data.image_prompts.image_section_2, \n      position: data.image_positions?.image_section_2, \n      size: '1024x1024' \n    } \n  }\n];"
+      },
+      "id": "split-images-001",
+      "name": "Split for Images",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 400]
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash-image-preview",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash-image-preview"
+        },
+        "prompt": "={{ $json.prompt }}",
+        "options": {}
+      },
+      "id": "generate-image-001",
+      "name": "Generate Image",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [920, 400],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "i0JCbDdO2QGcsU53",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "resize",
+        "resizeOption": "maximumArea",
+        "width": 1600,
+        "options": {
+          "format": "webp",
+          "quality": 85
+        }
+      },
+      "id": "convert-webp-001",
+      "name": "Convert to WebP",
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1.1,
+      "position": [1140, 400],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "GPT-3.5-TURBO"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Tu es expert SEO pour Google Images. Génère un nom de fichier COURT et optimisé.\n\nRÈGLES STRICTES:\n- MAXIMUM 5 mots séparés par des tirets\n- Uniquement le SUJET VISIBLE de l'image (pas de termes techniques)\n- IGNORER complètement: 16:9, panoramique, photorealistic, documentary, resolution, style, lighting, golden hour, etc.\n- Inclure \"philippines\" si pertinent au contexte\n- Minuscules, pas d'accents, tirets entre mots\n\nEXEMPLES CORRECTS:\n- plage-boracay-philippines\n- riziere-banaue-paysage\n- manila-rue-jeepney\n- coucher-soleil-palawan\n\nArticle: {{ $('Split for Images').item.json.title }}\nType d'image: {{ $('Split for Images').item.json.image_type }}\nPrompt image: {{ $('Split for Images').item.json.prompt }}\n\nRetourne UNIQUEMENT le nom, sans extension, sans explication."
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 50,
+          "temperature": 0.3
+        }
+      },
+      "id": "generate-seo-name-001",
+      "name": "Generate SEO Name",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [1360, 400],
+      "credentials": {
+        "openAiApi": {
+          "id": "ZxSYZtBStDBWN5Uu",
+          "name": "OpenAi account 3"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Parser le nom SEO généré par GPT - SANS timestamp pour noms propres\nlet rawName = 'philippines-image';\ntry {\n  rawName = $json.message?.content || $json.content || $json.text || rawName;\n} catch (e) {\n  console.log('Erreur récupération nom SEO:', e.message);\n}\n\n// Nettoyer le nom: minuscules, pas d'accents, tirets, pas de chiffres\nconst seoName = String(rawName)\n  .trim()\n  .toLowerCase()\n  .normalize('NFD')\n  .replace(/[\\u0300-\\u036f]/g, '')\n  .replace(/[0-9]/g, '')              // Supprimer tous les chiffres\n  .replace(/[^a-z-]/g, '-')           // Garder que lettres et tirets\n  .replace(/-+/g, '-')                // Pas de tirets multiples\n  .replace(/^-|-$/g, '')              // Pas de tirets début/fin\n  .substring(0, 60);\n\n// Récupérer les données depuis Split for Images\nlet splitData = {};\ntry {\n  splitData = $('Split for Images').item.json || {};\n} catch (e) {\n  console.log('Erreur récupération splitData:', e.message);\n}\n\n// Prefix selon le type d'image (thumbnail_ ou rien)\nconst prefix = splitData.image_type === 'thumbnail' ? 'thumbnail-' : '';\n\n// Nom final sans timestamp\nconst finalName = prefix + seoName;\n\n// Récupérer les données binaires depuis Convert to WebP\nlet binaryData = {};\ntry {\n  binaryData = $('Convert to WebP').item.binary || {};\n} catch (e) {\n  console.log('Erreur récupération binary:', e.message);\n}\n\n// En mode runOnceForEachItem avec binary, retourner {json, binary} sans tableau\nreturn { \n  json: { \n    seo_name: finalName,\n    image_type: splitData.image_type || 'unknown',\n    position: splitData.position || null\n  },\n  binary: binaryData\n};"
+      },
+      "id": "parse-seo-name-001",
+      "name": "Parse SEO Name",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1580, 400],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://byxjlsbmhixdehbisvjp.supabase.co/storage/v1/object/articles/{{ $json.seo_name }}.webp",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "image/webp"
+            },
+            {
+              "name": "x-upsert",
+              "value": "true"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "id": "upload-supabase-001",
+      "name": "Upload to Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1800, 400],
+      "credentials": {
+        "supabaseApi": {
+          "id": "Y37r8teOb0npvPKk",
+          "name": "Supabase account"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Construire le résultat de l'image uploadée avec vérification\nconst splitData = $('Split for Images').item.json;\nconst imageType = splitData.image_type;\nconst position = splitData.position;\n\n// Récupérer le nom SEO\nlet seoName;\ntry {\n  seoName = $('Parse SEO Name').item.json.seo_name;\n} catch (e) {\n  seoName = `${imageType}-${Date.now()}`;\n}\n\n// Vérifier si l'upload a réussi\nconst uploadResult = $json;\nconst uploadSuccess = uploadResult && !uploadResult.error && uploadResult.Key;\n\nif (!uploadSuccess) {\n  console.log('Upload failed for', imageType, '- using placeholder');\n}\n\nconst url = uploadSuccess \n  ? `https://byxjlsbmhixdehbisvjp.supabase.co/storage/v1/object/public/articles/${seoName}.webp`\n  : null;\n\n// En mode runOnceForEachItem, retourner l'objet directement (pas de wrapper json)\nreturn { \n  image_type: imageType, \n  url: url, \n  position: position || null, \n  seo_name: seoName,\n  success: uploadSuccess\n};"
+      },
+      "id": "build-image-result-001",
+      "name": "Build Image Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2020, 400],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "all_images",
+        "options": {}
+      },
+      "id": "collect-images-001",
+      "name": "Collect All Images",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [2240, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Agréger les 3 images dans un objet structuré\n// Le node Aggregate a collecté les images dans all_images\nconst allImages = $json.all_images || [];\nconst images = {};\n\nconsole.log('Nombre d images collectées:', allImages.length);\n\nfor (const item of allImages) {\n  const imageType = item.image_type;\n  if (imageType && item.url) {\n    images[imageType] = {\n      url: item.url,\n      position: item.position,\n      seo_name: item.seo_name\n    };\n    console.log('Image ajoutée:', imageType, item.url);\n  } else {\n    console.log('Image ignorée (pas d URL):', imageType);\n  }\n}\n\n// Récupérer les données de l'article depuis Validate Input\nlet articleData;\ntry {\n  articleData = $('Validate Input').first().json;\n} catch (e) {\n  console.error('Erreur récupération articleData:', e.message);\n  articleData = {};\n}\n\nconsole.log('Images finales:', JSON.stringify(images));\n\nreturn [{ \n  json: { \n    ...articleData, \n    images: images \n  } \n}];"
+      },
+      "id": "aggregate-images-001",
+      "name": "Aggregate Images",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2460, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Injecter les images dans le contenu EditorJS\nconst content = JSON.parse(JSON.stringify($json.content_editorjs));\nconst images = $json.images || {};\n\nlet h2Count = 0;\nconst newBlocks = [];\n\nfor (let i = 0; i < content.blocks.length; i++) {\n  const block = content.blocks[i];\n  newBlocks.push(block);\n\n  if (block.type === 'header' && block.data.level === 2) {\n    h2Count++;\n\n    // Image après 2ème H2\n    if (h2Count === 2 && images.section_1) {\n      newBlocks.push({\n        id: `img-s1-${Date.now()}`,\n        type: 'image',\n        data: {\n          file: { url: images.section_1.url },\n          caption: images.section_1.position?.caption || '',\n          stretched: false,\n          withBorder: false,\n          withBackground: false\n        }\n      });\n    }\n\n    // Image après 4ème H2\n    if (h2Count === 4 && images.section_2) {\n      newBlocks.push({\n        id: `img-s2-${Date.now()}`,\n        type: 'image',\n        data: {\n          file: { url: images.section_2.url },\n          caption: images.section_2.position?.caption || '',\n          stretched: false,\n          withBorder: false,\n          withBackground: false\n        }\n      });\n    }\n  }\n}\n\ncontent.blocks = newBlocks;\n\nreturn [{\n  json: {\n    ...$json,\n    content_editorjs: content,\n    thumbnail_url: images.thumbnail?.url || ''\n  }\n}];"
+      },
+      "id": "inject-images-001",
+      "name": "Inject Images",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2680, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Préparer les données finales pour insertion\nconst aiData = $json;\n\n// Utiliser thumbnail_url\nconst imageUrl = aiData.thumbnail_url || 'https://placehold.co/1792x1024/1e40af/white?text=Philippineasy';\n\n// Calculer le temps de lecture\nconst content = aiData.content_editorjs;\nlet wordCount = 0;\nif (content && content.blocks) {\n  for (const block of content.blocks) {\n    if (block.type === 'paragraph' || block.type === 'header') {\n      const text = block.data?.text || '';\n      wordCount += text.split(/\\s+/).filter(w => w.length > 0).length;\n    } else if (block.type === 'list' && block.data?.items) {\n      wordCount += block.data.items.join(' ').split(/\\s+/).filter(w => w.length > 0).length;\n    } else if (block.type === 'quote' && block.data?.text) {\n      wordCount += block.data.text.split(/\\s+/).filter(w => w.length > 0).length;\n    }\n  }\n}\n\n// Temps de lecture: 200 mots/minute\nconst readingTime = Math.max(1, Math.ceil(wordCount / 200));\n\nreturn [{\n  json: {\n    title: aiData.title,\n    slug: aiData.slug,\n    content: JSON.stringify(aiData.content_editorjs),\n    category_id: aiData.category_id || 11,\n    image: imageUrl,\n    status: aiData.status || 'draft',\n    source: 'gpt-custom',\n    source_url: `claude-${aiData.slug}`,\n    reading_time: readingTime,\n    meta_description: aiData.meta_description || ''\n  }\n}];"
+      },
+      "id": "format-final-001",
+      "name": "Format Final Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2900, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://byxjlsbmhixdehbisvjp.supabase.co/rest/v1/articles",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"title\": {{ JSON.stringify($json.title) }},\n  \"slug\": {{ JSON.stringify($json.slug) }},\n  \"content\": {{ JSON.stringify($json.content) }},\n  \"category_id\": {{ $json.category_id }},\n  \"image\": {{ JSON.stringify($json.image) }},\n  \"status\": {{ JSON.stringify($json.status) }},\n  \"source\": {{ JSON.stringify($json.source) }},\n  \"source_url\": {{ JSON.stringify($json.source_url) }},\n  \"reading_time\": {{ $json.reading_time }},\n  \"published_at\": {{ JSON.stringify(new Date().toISOString()) }}\n}",
+        "options": {}
+      },
+      "id": "insert-supabase-001",
+      "name": "Insert to Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3120, 400],
+      "credentials": {
+        "supabaseApi": {
+          "id": "Y37r8teOb0npvPKk",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Réponse finale pour le webhook (sera renvoyée à ChatGPT)\nconst article = $json;\n\nreturn [{\n  json: {\n    success: true,\n    message: `Article \"${article.title}\" créé avec succès!`,\n    article_id: article.id || 'created',\n    slug: article.slug,\n    url: `https://philippineasy.com/articles/${article.slug}`,\n    status: article.status,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "respond-webhook-001",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3340, 400]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Split for Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split for Images": {
+      "main": [
+        [
+          {
+            "node": "Generate Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Image": {
+      "main": [
+        [
+          {
+            "node": "Convert to WebP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to WebP": {
+      "main": [
+        [
+          {
+            "node": "Generate SEO Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate SEO Name": {
+      "main": [
+        [
+          {
+            "node": "Parse SEO Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse SEO Name": {
+      "main": [
+        [
+          {
+            "node": "Upload to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Build Image Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Image Result": {
+      "main": [
+        [
+          {
+            "node": "Collect All Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect All Images": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Images": {
+      "main": [
+        [
+          {
+            "node": "Inject Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inject Images": {
+      "main": [
+        [
+          {
+            "node": "Format Final Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Final Data": {
+      "main": [
+        [
+          {
+            "node": "Insert to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "pinData": {}
+}

@@ -83,13 +83,13 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
         }
 
-        // Create order items
+        // Create order items (using simplified cart format: {id, qty, price, vendor_id})
         const orderItemsToInsert = parsedCartItems.map((item: any) => ({
           order_id: order.id,
-          product_id: item.product.id,
-          vendor_id: item.product.vendor_id,
-          quantity: item.quantity,
-          price: item.product.price,
+          product_id: item.id,
+          vendor_id: item.vendor_id,
+          quantity: item.qty,
+          price: item.price,
         }));
 
         const { error: itemsError } = await supabaseAdmin

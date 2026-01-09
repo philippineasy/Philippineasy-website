@@ -1,0 +1,583 @@
+{
+  "name": "Philippineasy - Article Automation Complete",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "Schedule Daily 8AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        250,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Définition des sources dynamiques Philippines\nconst sources = [\n  {\n    type: 'rss',\n    url: 'https://www.philippines-tourisme.fr/feed/',\n    name: 'Philippines Tourisme FR'\n  },\n  {\n    type: 'rss',\n    url: 'https://www.expat.com/fr/destination/asie/philippines/feed/actualites.xml',\n    name: 'Expat Philippines'\n  },\n  {\n    type: 'html_dynamic',\n    url: 'https://www.rappler.com/nation/',\n    name: 'Rappler Nation'\n  }\n];\n\nreturn sources.map(source => ({ json: source }));"
+      },
+      "id": "b2c3d4e5-f6g7-8901-bcde-f12345678901",
+      "name": "Define Sources",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        450,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.type }}",
+              "operation": "equals",
+              "value2": "rss"
+            }
+          ]
+        }
+      },
+      "id": "c3d4e5f6-g7h8-9012-cdef-123456789012",
+      "name": "Switch by Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        650,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {}
+      },
+      "id": "d4e5f6g7-h8i9-0123-defg-234567890123",
+      "name": "RSS Feed Read",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        850,
+        250
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "method": "POST",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "fireCrawlApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"url\": \"{{ $json.url }}\",\n  \"formats\": [\"markdown\", \"html\"],\n  \"onlyMainContent\": true\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "e5f6g7h8-i9j0-1234-efgh-345678901234",
+      "name": "FireCrawl Scrape",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        850,
+        550
+      ],
+      "credentials": {
+        "fireCrawlApi": {
+          "id": "YXRmcf1SnkuMtkhy",
+          "name": "FireCrawl API"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "f6g7h8i9-j0k1-2345-fghi-456789012345",
+      "name": "Merge All Sources",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1050,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalisation des données de toutes les sources\nconst items = $input.all();\nconst normalized = [];\n\nfor (const item of items) {\n  const data = item.json;\n  \n  let normalizedItem = {};\n  \n  // RSS Feed\n  if (data.title && data.link && data.content) {\n    normalizedItem = {\n      source_url: data.link || data.guid,\n      raw_title: data.title,\n      raw_content: data.content || data.contentSnippet || data.description,\n      publication_date: data.pubDate || data.isoDate || new Date().toISOString(),\n      source_name: $node[\"Define Sources\"].json.name || 'Unknown'\n    };\n  }\n  // FireCrawl\n  else if (data.markdown || data.html) {\n    normalizedItem = {\n      source_url: data.url || $node[\"Define Sources\"].json.url,\n      raw_title: data.title || 'Article from ' + data.url,\n      raw_content: data.markdown || data.html,\n      publication_date: new Date().toISOString(),\n      source_name: $node[\"Define Sources\"].json.name || 'Rappler'\n    };\n  }\n  \n  if (normalizedItem.source_url) {\n    normalized.push({ json: normalizedItem });\n  }\n}\n\nreturn normalized;"
+      },
+      "id": "g7h8i9j0-k1l2-3456-ghij-567890123456",
+      "name": "Normalize Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1250,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "dateTime": [
+            {
+              "value1": "={{ $json.publication_date }}",
+              "operation": "afterOrEquals",
+              "value2": "={{ $now.minus(7, 'days').toISO() }}"
+            }
+          ]
+        }
+      },
+      "id": "h8i9j0k1-l2m3-4567-hijk-678901234567",
+      "name": "Filter Last 7 Days",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1450,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT * FROM articles WHERE source_url = '{{ $json.source_url }}' LIMIT 1",
+        "options": {}
+      },
+      "id": "i9j0k1l2-m3n4-5678-ijkl-789012345678",
+      "name": "Check Duplicate in Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1650,
+        400
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "Y37r8teOb0npvPKk",
+          "name": "Supabase API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.length || 0 }}",
+              "operation": "equals",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "j0k1l2m3-n4o5-6789-jklm-890123456789",
+      "name": "If Not Duplicate",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1850,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "anthropicApi",
+        "model": "claude-3-5-sonnet-20241022",
+        "prompt": "=Tu es un rédacteur SEO expert pour Philippineasy.com, un site francophone sur les Philippines.\n\n## MISSION\nRéécris cet article en français pour un public francophone intéressé par les Philippines.\n\n## ARTICLE SOURCE\nTitre: {{ $node[\"Normalize Data\"].json.raw_title }}\nContenu: {{ $node[\"Normalize Data\"].json.raw_content }}\n\n## RÈGLES DE RÉDACTION\n\n### Structure obligatoire\n1. **Titre H1** : Accrocheur, unique, optimisé SEO (max 60 chars)\n2. **Introduction** : 2-3 phrases engageantes\n3. **Corps** :\n   - 3-5 sections avec titres H2\n   - Sous-sections H3 si nécessaire\n   - Paragraphes courts (3-4 phrases max)\n   - Listes à puces pour les conseils/étapes\n   - Citations avec sources si pertinent\n   - Tableaux pour comparatifs/prix\n4. **Conclusion** : Résumé + call-to-action\n\n### SEO\n- Mot-clé principal naturellement intégré\n- Meta description : 150-160 caractères exactement\n- Slug : max 75 chars, lowercase, tirets\n\n### Ton\n- Informatif mais accessible\n- Tutoiement du lecteur\n- Références culturelles philippines\n- Conseils pratiques concrets\n\n## FORMAT DE SORTIE JSON STRICT\n{\n  \"title\": \"Titre H1 accrocheur\",\n  \"slug\": \"slug-seo-optimise\",\n  \"meta_description\": \"Description de 150-160 caractères pour le SEO...\",\n  \"category_id\": 11,\n  \"status\": \"draft\",\n  \"image_prompt\": \"Description détaillée pour DALL-E: paysage Philippines montrant...\",\n  \"content_editorjs\": {\n    \"time\": {{ $now.toMillis() }},\n    \"blocks\": [\n      { \"id\": \"intro1\", \"type\": \"paragraph\", \"data\": { \"text\": \"Introduction engageante...\" } },\n      { \"id\": \"h2-1\", \"type\": \"header\", \"data\": { \"text\": \"Premier titre de section\", \"level\": 2 } },\n      { \"id\": \"p1\", \"type\": \"paragraph\", \"data\": { \"text\": \"Contenu de la section...\" } },\n      { \"id\": \"list1\", \"type\": \"list\", \"data\": { \"style\": \"unordered\", \"items\": [\"Point 1\", \"Point 2\"] } },\n      { \"id\": \"h2-2\", \"type\": \"header\", \"data\": { \"text\": \"Deuxième section\", \"level\": 2 } },\n      { \"id\": \"quote1\", \"type\": \"quote\", \"data\": { \"text\": \"Citation pertinente\", \"caption\": \"Source\" } },\n      { \"id\": \"table1\", \"type\": \"table\", \"data\": { \"content\": [[\"Col1\", \"Col2\"], [\"Val1\", \"Val2\"]] } },\n      { \"id\": \"conclusion\", \"type\": \"paragraph\", \"data\": { \"text\": \"Conclusion avec CTA...\" } }\n    ],\n    \"version\": \"2.28.2\"\n  }\n}\n\nRéponds UNIQUEMENT avec le JSON, sans markdown ni explications.",
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 4096
+        }
+      },
+      "id": "k1l2m3n4-o5p6-7890-klmn-901234567890",
+      "name": "Claude AI Processing",
+      "type": "n8n-nodes-base.anthropic",
+      "typeVersion": 1,
+      "position": [
+        2050,
+        400
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "anthropic-credential-id",
+          "name": "Anthropic API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parser la réponse Claude et extraire le JSON\nconst response = $json.content || $json.text || $json.message?.content || '';\n\nlet parsed;\ntry {\n  // Extraire JSON si entouré de markdown\n  const jsonMatch = response.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    parsed = JSON.parse(jsonMatch[0]);\n  } else {\n    parsed = JSON.parse(response);\n  }\n} catch (error) {\n  throw new Error('Failed to parse AI response: ' + error.message);\n}\n\nreturn [{ json: parsed }];"
+      },
+      "id": "l2m3n4o5-p6q7-8901-lmno-012345678901",
+      "name": "Parse AI Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2250,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "resource": "image",
+        "operation": "generate",
+        "model": "dall-e-3",
+        "prompt": "={{ $json.image_prompt }}",
+        "options": {
+          "size": "1792x1024",
+          "quality": "standard",
+          "style": "vivid"
+        }
+      },
+      "id": "m3n4o5p6-q7r8-9012-mnop-123456789012",
+      "name": "DALL-E Generate Image",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        2450,
+        400
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "ZxSYZtBStDBWN5Uu",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Calculer le temps de lecture\nconst content = $node[\"Parse AI Response\"].json.content_editorjs;\nlet wordCount = 0;\n\nif (content && content.blocks) {\n  for (const block of content.blocks) {\n    if (block.type === 'paragraph' || block.type === 'header') {\n      const text = block.data.text || '';\n      wordCount += text.split(/\\s+/).length;\n    } else if (block.type === 'list') {\n      const items = block.data.items || [];\n      wordCount += items.join(' ').split(/\\s+/).length;\n    }\n  }\n}\n\n// Temps de lecture: 200 mots/minute\nconst readingTime = Math.ceil(wordCount / 200);\n\nconst aiData = $node[\"Parse AI Response\"].json;\nconst imageUrl = $json.data?.[0]?.url || $json.url || '';\nconst sourceUrl = $node[\"Normalize Data\"].json.source_url;\n\nreturn [{\n  json: {\n    title: aiData.title,\n    slug: aiData.slug,\n    content: aiData.content_editorjs,\n    content_preview: aiData.meta_description,\n    category_id: aiData.category_id,\n    image: imageUrl,\n    status: aiData.status,\n    source: 'n8n',\n    source_url: sourceUrl,\n    reading_time: readingTime,\n    published_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "n4o5p6q7-r8s9-0123-nopq-234567890123",
+      "name": "Format Final Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2650,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "tableId": "articles",
+        "columns": "title,slug,content,content_preview,category_id,image,status,source,source_url,reading_time,published_at",
+        "options": {}
+      },
+      "id": "o5p6q7r8-s9t0-1234-opqr-345678901234",
+      "name": "Insert to Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2850,
+        400
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "Y37r8teOb0npvPKk",
+          "name": "Supabase API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const articleTitle = $node[\"Format Final Data\"].json.title;\nconst articleSlug = $node[\"Format Final Data\"].json.slug;\n\nconsole.log(`✅ Article créé avec succès: ${articleTitle}`);\nconsole.log(`🔗 Slug: ${articleSlug}`);\n\nreturn [{ \n  json: { \n    success: true,\n    message: `Article \"${articleTitle}\" créé avec succès`,\n    slug: articleSlug,\n    timestamp: new Date().toISOString()\n  } \n}];"
+      },
+      "id": "p6q7r8s9-t0u1-2345-pqrs-456789012345",
+      "name": "Success Notification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3050,
+        400
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "q7r8s9t0-u1v2-3456-qrst-567890123456",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        250,
+        650
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const error = $json.error || {};\nconst executionId = $json.execution?.id || 'unknown';\nconst workflowName = $json.workflow?.name || 'Unknown Workflow';\nconst nodeName = error.node || 'Unknown Node';\nconst errorMessage = error.message || 'No error message';\n\nconst logEntry = {\n  timestamp: new Date().toISOString(),\n  workflow: workflowName,\n  execution_id: executionId,\n  node: nodeName,\n  error: errorMessage,\n  stack: error.stack || 'No stack trace'\n};\n\nconsole.error('❌ WORKFLOW ERROR:', JSON.stringify(logEntry, null, 2));\n\nreturn [{ json: logEntry }];"
+      },
+      "id": "r8s9t0u1-v2w3-4567-rstu-678901234567",
+      "name": "Log Error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        450,
+        650
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "tableId": "workflow_errors",
+        "columns": "timestamp,workflow,execution_id,node,error,stack",
+        "options": {}
+      },
+      "id": "s9t0u1v2-w3x4-5678-stuv-789012345678",
+      "name": "Save Error to DB",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        650,
+        650
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "Y37r8teOb0npvPKk",
+          "name": "Supabase API"
+        }
+      },
+      "continueOnFail": true
+    }
+  ],
+  "connections": {
+    "Schedule Daily 8AM": {
+      "main": [
+        [
+          {
+            "node": "Define Sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Define Sources": {
+      "main": [
+        [
+          {
+            "node": "Switch by Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch by Type": {
+      "main": [
+        [
+          {
+            "node": "RSS Feed Read",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        [
+          {
+            "node": "FireCrawl Scrape",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Feed Read": {
+      "main": [
+        [
+          {
+            "node": "Merge All Sources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FireCrawl Scrape": {
+      "main": [
+        [
+          {
+            "node": "Merge All Sources",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge All Sources": {
+      "main": [
+        [
+          {
+            "node": "Normalize Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Data": {
+      "main": [
+        [
+          {
+            "node": "Filter Last 7 Days",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Last 7 Days": {
+      "main": [
+        [
+          {
+            "node": "Check Duplicate in Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Duplicate in Supabase": {
+      "main": [
+        [
+          {
+            "node": "If Not Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Not Duplicate": {
+      "main": [
+        [
+          {
+            "node": "Claude AI Processing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude AI Processing": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Response": {
+      "main": [
+        [
+          {
+            "node": "DALL-E Generate Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DALL-E Generate Image": {
+      "main": [
+        [
+          {
+            "node": "Format Final Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Final Data": {
+      "main": [
+        [
+          {
+            "node": "Insert to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Success Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Error": {
+      "main": [
+        [
+          {
+            "node": "Save Error to DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "current"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "philippineasy",
+      "name": "Philippineasy"
+    },
+    {
+      "id": "content-automation",
+      "name": "Content Automation"
+    },
+    {
+      "id": "ai-powered",
+      "name": "AI Powered"
+    }
+  ],
+  "pinData": {},
+  "versionId": "1.0.0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "philippineasy-production"
+  }
+}

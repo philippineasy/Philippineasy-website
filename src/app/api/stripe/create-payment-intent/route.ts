@@ -46,6 +46,14 @@ export async function POST(request: Request) {
     // For a marketplace, you would typically use Stripe Connect and create a charge
     // on behalf of a connected account. This is a simplified example.
     // In a real scenario, you would need the vendor's connected Stripe account ID.
+    // Simplify cart data for Stripe metadata (max 500 chars per value)
+    const simplifiedCart = cart.map((item: any) => ({
+      id: item.product.id,
+      qty: item.quantity,
+      price: item.product.price,
+      vendor_id: item.product.vendor_id || item.product.vendors?.id || null
+    }));
+
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency: 'eur',
@@ -57,9 +65,9 @@ export async function POST(request: Request) {
         enabled: true,
       },
       metadata: {
-        // Pass cart details and user ID to the webhook
+        // Pass simplified cart details and user ID to the webhook
         userId: user.id,
-        cartItems: JSON.stringify(cart),
+        cartItems: JSON.stringify(simplifiedCart),
       }
     });
 

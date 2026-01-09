@@ -1,0 +1,419 @@
+{
+  "example_article_complete": {
+    "title": "Les 10 plus belles plages des Philippines à découvrir en 2026",
+    "slug": "plus-belles-plages-philippines-2026",
+    "meta_description": "Découvre les 10 plages paradisiaques des Philippines : Boracay, El Nido, Siargao... Guide complet avec conseils pratiques et meilleures périodes pour visiter.",
+    "category_id": 11,
+    "status": "draft",
+    "image_prompt": "Stunning panoramic view of a pristine white sand beach in the Philippines at sunset, crystal clear turquoise water, palm trees, traditional Filipino bangka boat in the foreground, dramatic clouds, tropical paradise atmosphere, photorealistic, vibrant colors",
+    "content_editorjs": {
+      "time": 1704700800000,
+      "blocks": [
+        {
+          "id": "intro-para-1",
+          "type": "paragraph",
+          "data": {
+            "text": "Les Philippines abritent plus de 7 000 îles, dont certaines des plages les plus spectaculaires au monde. Eaux turquoise, sable blanc poudreux et palmiers majestueux : le paradis existe bel et bien, et il se trouve dans l'archipel philippin."
+          }
+        },
+        {
+          "id": "intro-para-2",
+          "type": "paragraph",
+          "data": {
+            "text": "Que tu sois amateur de farniente, passionné de plongée ou surfeur dans l'âme, tu trouveras forcément ton bonheur parmi ces 10 destinations incontournables. Prépare ta crème solaire, on t'emmène à la découverte des plus belles plages des Philippines !"
+          }
+        },
+        {
+          "id": "h2-white-beach",
+          "type": "header",
+          "data": {
+            "text": "1. White Beach, Boracay - Le joyau retrouvé",
+            "level": 2
+          }
+        },
+        {
+          "id": "para-boracay-1",
+          "type": "paragraph",
+          "data": {
+            "text": "Après une fermeture controversée en 2018 pour réhabilitation environnementale, White Beach à Boracay a retrouvé sa splendeur d'antan. Cette plage de 4 km de long offre un sable blanc immaculé si fin qu'il ressemble à de la poudre de sucre."
+          }
+        },
+        {
+          "id": "list-boracay-activities",
+          "type": "list",
+          "data": {
+            "style": "unordered",
+            "items": [
+              "Kitesurfing et planche à voile sur Bulabog Beach",
+              "Couchers de soleil spectaculaires depuis Station 1",
+              "Vie nocturne animée à Station 2",
+              "Island hopping vers les îles environnantes"
+            ]
+          }
+        },
+        {
+          "id": "para-boracay-tip",
+          "type": "paragraph",
+          "data": {
+            "text": "<b>Conseil pratique</b> : Visite Boracay entre novembre et mai pour éviter la saison des typhons. Réserve ton hébergement au moins 3 mois à l'avance, l'île est très prisée."
+          }
+        },
+        {
+          "id": "h2-el-nido",
+          "type": "header",
+          "data": {
+            "text": "2. El Nido, Palawan - L'écrin de lagons cachés",
+            "level": 2
+          }
+        },
+        {
+          "id": "para-elnido-1",
+          "type": "paragraph",
+          "data": {
+            "text": "El Nido n'est pas une simple plage, c'est un véritable sanctuaire naturel composé de 45 îles et îlots. Les falaises karstiques calcaires qui émergent des eaux turquoise créent un paysage digne d'un film d'aventure."
+          }
+        },
+        {
+          "id": "h3-tours",
+          "type": "header",
+          "data": {
+            "text": "Les tours incontournables",
+            "level": 3
+          }
+        },
+        {
+          "id": "table-tours",
+          "type": "table",
+          "data": {
+            "content": [
+              ["Tour", "Highlights", "Prix approximatif"],
+              ["Tour A", "Big Lagoon, Secret Lagoon, Shimizu Island", "1 200 PHP"],
+              ["Tour C", "Hidden Beach, Matinloc Shrine, Secret Beach", "1 400 PHP"],
+              ["Tour D", "Cadlao Lagoon, Paradise Beach, Nat Nat Beach", "1 200 PHP"]
+            ]
+          }
+        },
+        {
+          "id": "quote-elnido",
+          "type": "quote",
+          "data": {
+            "text": "El Nido est l'endroit le plus proche du paradis que j'ai jamais visité. Les lagons cachés et les plages secrètes donnent l'impression d'être un explorateur moderne.",
+            "caption": "Marie, voyageuse française, blog \"Carnets de voyage\""
+          }
+        },
+        {
+          "id": "h2-siargao",
+          "type": "header",
+          "data": {
+            "text": "3. Cloud 9, Siargao - Le paradis des surfeurs",
+            "level": 2
+          }
+        },
+        {
+          "id": "para-siargao-1",
+          "type": "paragraph",
+          "data": {
+            "text": "Siargao s'est imposée comme LA destination surf des Philippines. La célèbre vague de Cloud 9 attire des surfeurs du monde entier, mais l'île offre bien plus que des spots de surf."
+          }
+        },
+        {
+          "id": "list-siargao",
+          "type": "list",
+          "data": {
+            "style": "ordered",
+            "items": [
+              "Essaie le surf sur Cloud 9 (même débutant, des écoles proposent des cours)",
+              "Explore les piscines naturelles de Magpupungko à marée basse",
+              "Visite le lagon de Sugba et fais du paddle",
+              "Détends-toi sur la plage de Naked Island (littéralement un banc de sable)"
+            ]
+          }
+        },
+        {
+          "id": "h2-coron",
+          "type": "header",
+          "data": {
+            "text": "4. Kayangan Lake et Twin Lagoon, Coron",
+            "level": 2
+          }
+        },
+        {
+          "id": "para-coron-1",
+          "type": "paragraph",
+          "data": {
+            "text": "Techniquement un lac et non une plage, Kayangan Lake mérite amplement sa place dans ce classement. Régulièrement élu \"lac le plus pur d'Asie\", il offre une eau cristalline entourée de falaises karstiques impressionnantes."
+          }
+        },
+        {
+          "id": "para-coron-2",
+          "type": "paragraph",
+          "data": {
+            "text": "Twin Lagoon, accessible via une petite échelle au-dessus d'une paroi rocheuse, révèle un phénomène unique : deux lagons connectés où l'eau douce rencontre l'eau salée, créant une thermocline visible à l'œil nu."
+          }
+        },
+        {
+          "id": "delimiter-1",
+          "type": "delimiter",
+          "data": {}
+        },
+        {
+          "id": "h2-practical",
+          "type": "header",
+          "data": {
+            "text": "Informations pratiques pour ton voyage",
+            "level": 2
+          }
+        },
+        {
+          "id": "h3-when",
+          "type": "header",
+          "data": {
+            "text": "Quand partir ?",
+            "level": 3
+          }
+        },
+        {
+          "id": "para-when",
+          "type": "paragraph",
+          "data": {
+            "text": "La meilleure période pour visiter les plages philippines s'étend de novembre à mai, pendant la saison sèche. Évite absolument juillet-septembre, période des typhons. Décembre à février offre les températures les plus clémentes (25-28°C)."
+          }
+        },
+        {
+          "id": "h3-budget",
+          "type": "header",
+          "data": {
+            "text": "Budget à prévoir",
+            "level": 3
+          }
+        },
+        {
+          "id": "table-budget",
+          "type": "table",
+          "data": {
+            "content": [
+              ["Poste de dépense", "Budget routard", "Budget confort"],
+              ["Hébergement/nuit", "500-800 PHP", "2 000-4 000 PHP"],
+              ["Repas/jour", "300-500 PHP", "800-1 500 PHP"],
+              ["Island hopping", "1 200-1 500 PHP", "2 500-4 000 PHP"],
+              ["Transport inter-îles", "Variable", "Variable"]
+            ]
+          }
+        },
+        {
+          "id": "h3-tips",
+          "type": "header",
+          "data": {
+            "text": "Conseils essentiels",
+            "level": 3
+          }
+        },
+        {
+          "id": "list-tips",
+          "type": "list",
+          "data": {
+            "style": "unordered",
+            "items": [
+              "Apporte une crème solaire biodégradable (obligatoire dans certaines zones protégées)",
+              "Prévois du cash : beaucoup d'îles n'ont pas de distributeurs",
+              "Réserve tes tours d'island hopping la veille pour de meilleurs prix",
+              "Emporte un sac étanche pour protéger ton téléphone et appareil photo",
+              "Respecte l'environnement : pas de plastique à usage unique, ne touche pas les coraux"
+            ]
+          }
+        },
+        {
+          "id": "delimiter-2",
+          "type": "delimiter",
+          "data": {}
+        },
+        {
+          "id": "conclusion-1",
+          "type": "paragraph",
+          "data": {
+            "text": "Les Philippines regorgent de plages paradisiaques qui n'attendent que toi. Chaque île, chaque lagune raconte une histoire différente et offre des expériences uniques. Que tu choisisses l'animation de Boracay, l'aventure d'El Nido ou les vagues de Siargao, tu vivras des moments inoubliables."
+          }
+        },
+        {
+          "id": "conclusion-2",
+          "type": "paragraph",
+          "data": {
+            "text": "Alors, prêt à faire tes valises ? N'oublie pas de consulter nos autres guides sur Philippineasy pour préparer au mieux ton voyage. Et surtout, voyage de manière responsable pour que ces merveilles restent intactes pour les générations futures. Maayong pagbiyahe ! (Bon voyage en Cebuano 🇵🇭)"
+          }
+        }
+      ],
+      "version": "2.28.2"
+    }
+  },
+  "minimal_example": {
+    "title": "Exemple minimal d'article",
+    "slug": "exemple-minimal-article",
+    "meta_description": "Ceci est un exemple minimal montrant la structure de base d'un article EditorJS pour Philippineasy.",
+    "category_id": 11,
+    "status": "draft",
+    "content_editorjs": {
+      "time": 1704700800000,
+      "blocks": [
+        {
+          "id": "p1",
+          "type": "paragraph",
+          "data": {
+            "text": "Introduction de l'article avec une accroche engageante."
+          }
+        },
+        {
+          "id": "h2-1",
+          "type": "header",
+          "data": {
+            "text": "Premier titre de section",
+            "level": 2
+          }
+        },
+        {
+          "id": "p2",
+          "type": "paragraph",
+          "data": {
+            "text": "Contenu de la première section avec des informations pertinentes."
+          }
+        },
+        {
+          "id": "list1",
+          "type": "list",
+          "data": {
+            "style": "unordered",
+            "items": [
+              "Premier point important",
+              "Deuxième point important",
+              "Troisième point important"
+            ]
+          }
+        },
+        {
+          "id": "conclusion",
+          "type": "paragraph",
+          "data": {
+            "text": "Conclusion de l'article avec un call-to-action."
+          }
+        }
+      ],
+      "version": "2.28.2"
+    }
+  },
+  "block_types_reference": {
+    "paragraph": {
+      "id": "unique-id",
+      "type": "paragraph",
+      "data": {
+        "text": "Texte du paragraphe. Peut contenir du <b>gras</b>, de l'<i>italique</i>, des <a href=\"url\">liens</a>."
+      }
+    },
+    "header_h2": {
+      "id": "unique-id",
+      "type": "header",
+      "data": {
+        "text": "Titre de niveau 2",
+        "level": 2
+      }
+    },
+    "header_h3": {
+      "id": "unique-id",
+      "type": "header",
+      "data": {
+        "text": "Titre de niveau 3",
+        "level": 3
+      }
+    },
+    "list_unordered": {
+      "id": "unique-id",
+      "type": "list",
+      "data": {
+        "style": "unordered",
+        "items": [
+          "Premier élément",
+          "Deuxième élément",
+          "Troisième élément"
+        ]
+      }
+    },
+    "list_ordered": {
+      "id": "unique-id",
+      "type": "list",
+      "data": {
+        "style": "ordered",
+        "items": [
+          "Première étape",
+          "Deuxième étape",
+          "Troisième étape"
+        ]
+      }
+    },
+    "quote": {
+      "id": "unique-id",
+      "type": "quote",
+      "data": {
+        "text": "Citation textuelle ou témoignage important",
+        "caption": "Auteur de la citation ou source"
+      }
+    },
+    "table": {
+      "id": "unique-id",
+      "type": "table",
+      "data": {
+        "content": [
+          ["En-tête 1", "En-tête 2", "En-tête 3"],
+          ["Donnée 1.1", "Donnée 1.2", "Donnée 1.3"],
+          ["Donnée 2.1", "Donnée 2.2", "Donnée 2.3"]
+        ]
+      }
+    },
+    "delimiter": {
+      "id": "unique-id",
+      "type": "delimiter",
+      "data": {}
+    },
+    "image": {
+      "id": "unique-id",
+      "type": "image",
+      "data": {
+        "file": {
+          "url": "https://example.com/image.jpg"
+        },
+        "caption": "Légende de l'image",
+        "withBorder": false,
+        "stretched": false,
+        "withBackground": false
+      }
+    }
+  },
+  "notes": {
+    "important_rules": [
+      "Chaque block DOIT avoir un ID unique",
+      "Le timestamp 'time' est en millisecondes (Unix timestamp * 1000)",
+      "La version EditorJS doit être '2.28.2'",
+      "Les IDs peuvent être générés avec: crypto.randomUUID() ou des strings uniques",
+      "Le contenu HTML dans 'text' est autorisé pour les balises: <b>, <i>, <a>, <code>",
+      "Pour les headers, level peut être de 1 à 6",
+      "Pour les listes, style peut être 'ordered' ou 'unordered'",
+      "Les tableaux doivent avoir des lignes de longueur uniforme"
+    ],
+    "seo_guidelines": [
+      "Titre H1 (title): max 60 caractères",
+      "Slug: max 75 caractères, lowercase, tirets uniquement",
+      "Meta description: exactement 150-160 caractères",
+      "Utiliser H2 pour les sections principales (3-5 par article)",
+      "Utiliser H3 pour les sous-sections si nécessaire",
+      "Inclure des listes pour améliorer la lisibilité",
+      "Ajouter des tableaux pour les comparatifs/données",
+      "Citations pour crédibilité et engagement"
+    ],
+    "content_structure": [
+      "Introduction: 2-3 paragraphes accrocheurs",
+      "Corps: 3-5 sections H2 avec contenu développé",
+      "Utiliser des listes pour les conseils/étapes",
+      "Ajouter des tableaux pour les informations structurées",
+      "Inclure des citations/témoignages si pertinent",
+      "Conclusion: résumé + call-to-action",
+      "Ton: tutoiement, informatif mais accessible"
+    ]
+  }
+}
