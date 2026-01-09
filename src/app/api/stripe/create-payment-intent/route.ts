@@ -1,16 +1,10 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
+import { createClient } from '@/utils/supabase/server';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-08-27.basil',
 });
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 type CartItem = {
   product: {
@@ -29,8 +23,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid cart data.' }, { status: 400 });
     }
 
-    // Get authenticated user
-    const cookieStore = cookies();
+    // Get authenticated user using server-side Supabase client with cookies
+    const supabase = createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
