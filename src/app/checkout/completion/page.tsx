@@ -2,13 +2,13 @@
 
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useCart } from '@/contexts/CartContext';
 
-export default function CompletionPage() {
+function CompletionContent() {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
-  const [status, setStatus] = useState('loading');
+  const [status, setStatus] = useState<'loading' | 'succeeded' | 'processing' | 'failed'>('loading');
 
   useEffect(() => {
     const paymentStatus = searchParams.get('redirect_status');
@@ -16,7 +16,7 @@ export default function CompletionPage() {
       setStatus('succeeded');
       clearCart();
     } else if (paymentStatus === 'processing') {
-        setStatus('processing');
+      setStatus('processing');
     } else {
       setStatus('failed');
     }
@@ -32,7 +32,9 @@ export default function CompletionPage() {
         <div>
           <h1 className="text-3xl font-bold text-green-500 mb-4">Paiement Réussi !</h1>
           <p className="text-lg mb-8">Merci pour votre commande. Vous recevrez bientôt une confirmation par e-mail.</p>
-          <Link href="/marketplace" className="text-primary hover:underline">Continuer vos achats</Link>
+          <Link href="/marketplace-aux-philippines" className="text-primary hover:underline">
+            Continuer vos achats
+          </Link>
         </div>
       )}
       {status === 'processing' && (
@@ -45,10 +47,18 @@ export default function CompletionPage() {
       {status === 'failed' && (
         <div>
           <h1 className="text-3xl font-bold text-red-500 mb-4">Échec du Paiement</h1>
-          <p className="text-lg mb-8">Votre paiement n'a pas pu être traité. Veuillez réessayer ou contacter le support.</p>
+          <p className="text-lg mb-8">Votre paiement n&apos;a pas pu être traité. Veuillez réessayer ou contacter le support.</p>
           <Link href="/checkout" className="text-primary hover:underline">Réessayer le paiement</Link>
         </div>
       )}
     </div>
+  );
+}
+
+export default function CompletionPage() {
+  return (
+    <Suspense fallback={<div className="text-center py-16">Chargement...</div>}>
+      <CompletionContent />
+    </Suspense>
   );
 }
