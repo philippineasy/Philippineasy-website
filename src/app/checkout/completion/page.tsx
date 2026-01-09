@@ -2,22 +2,29 @@
 
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useRef } from 'react';
 import { useCart } from '@/contexts/CartContext';
 
 function CompletionContent() {
   const searchParams = useSearchParams();
   const { clearCart } = useCart();
   const [status, setStatus] = useState<'loading' | 'succeeded' | 'processing' | 'failed'>('loading');
+  const hasProcessed = useRef(false);
 
   useEffect(() => {
+    // Prevent running multiple times
+    if (hasProcessed.current) return;
+
     const paymentStatus = searchParams.get('redirect_status');
     if (paymentStatus === 'succeeded') {
+      hasProcessed.current = true;
       setStatus('succeeded');
       clearCart();
     } else if (paymentStatus === 'processing') {
+      hasProcessed.current = true;
       setStatus('processing');
-    } else {
+    } else if (paymentStatus) {
+      hasProcessed.current = true;
       setStatus('failed');
     }
   }, [searchParams, clearCart]);
