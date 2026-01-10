@@ -117,7 +117,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const results = await Promise.all([
     getCategoriesByMainCategory(supabase, 'voyager-aux-philippines'),
     getCategoriesByMainCategory(supabase, 'vivre-aux-philippines'),

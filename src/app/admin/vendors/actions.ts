@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 export async function handleVendorApproval(vendorId: number, userId: string, status: 'approved' | 'rejected') {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // 1. Update the vendor status
   const { error: vendorError } = await supabase

@@ -14,7 +14,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: category } = await getProductCategoryBySlug(supabase, slug);
 
   if (!category) {
@@ -56,7 +56,7 @@ export default async function MarketplaceCategoryPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: products, error } = await getProductsByCategorySlug(supabase, slug);
 
   if (error || !products || products.length === 0) {

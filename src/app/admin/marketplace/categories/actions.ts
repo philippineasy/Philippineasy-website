@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import slugify from 'slugify';
 
 export async function handleAddCategory(name: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const slug = slugify(name, { lower: true, strict: true });
 
   const { data, error } = await supabase
@@ -23,7 +23,7 @@ export async function handleAddCategory(name: string) {
 }
 
 export async function handleDeleteCategory(id: number) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { error } = await supabase
     .from('product_categories')

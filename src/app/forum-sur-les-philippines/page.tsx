@@ -38,7 +38,7 @@ export const revalidate = 3600; // Revalidate every hour
 
 // This is now a Server Component
 const ForumsPage = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   // Fetch data on the server
   const { data: forumCategories, error } = await getForumCategories(supabase);
 

@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import { notFound, redirect } from 'next/navigation';
 import Image from 'next/image';
 
-async function getOrderDetails(supabase: ReturnType<typeof createClient>, orderId: number, userId: string) {
+async function getOrderDetails(supabase: Awaited<ReturnType<typeof createClient>>, orderId: number, userId: string) {
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .select('*')
@@ -37,7 +37,7 @@ async function getOrderDetails(supabase: ReturnType<typeof createClient>, orderI
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = createClient();
+  const supabase = await createClient();
   const orderId = parseInt(id, 10);
 
   const { data: { user } } = await supabase.auth.getUser();

@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 export async function getBusRoutes(filters: { departureCity?: string; arrivalCity?: string; date?: string; company?: string; }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   let query = supabase.from('bus_routes').select('*');
 
   if (filters.departureCity) {
@@ -60,7 +60,7 @@ export async function getBusRoutes(filters: { departureCity?: string; arrivalCit
 }
 
 export async function addBusRoute(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {

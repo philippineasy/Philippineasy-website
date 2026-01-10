@@ -3,7 +3,7 @@ import { getForumCategories } from '@/services/forumService';
 import { AdminForumClientPage } from './AdminForumClientPage';
 
 const AdminForumPage = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: categories, error } = await getForumCategories(supabase);
 
   if (error) {

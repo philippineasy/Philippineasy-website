@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import Link from 'next/link';
 
 const AdminDatingReportsPage = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: reports, error } = await supabase
     .from('reported_messages')

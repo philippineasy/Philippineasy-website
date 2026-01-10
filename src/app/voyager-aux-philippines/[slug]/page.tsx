@@ -9,7 +9,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: category } = await getArticleCategoryBySlug(supabase, slug);
 
   if (!category) {

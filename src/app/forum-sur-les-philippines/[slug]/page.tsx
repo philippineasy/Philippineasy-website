@@ -13,7 +13,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: category } = await getForumCategoryBySlug(supabase, slug);
 
   if (!category) {
@@ -56,7 +56,7 @@ export default async function ForumCategoryPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: initialTopics, error } = await getTopicsByCategorySlug(supabase, slug, 1);
 
   if (error) {

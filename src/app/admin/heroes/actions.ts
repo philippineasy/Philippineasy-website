@@ -5,7 +5,7 @@ import { uploadPageHero } from '@/services/uploadService';
 import { revalidatePath } from 'next/cache';
 
 export async function updateHeroImage(pageSlug: string, formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

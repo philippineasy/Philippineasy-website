@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 
-export async function getProductsByCategorySlug(supabase: ReturnType<typeof createClient>, slug: string) {
+export async function getProductsByCategorySlug(supabase: Awaited<ReturnType<typeof createClient>>, slug: string) {
   return supabase
     .from('products')
     .select(`
@@ -16,14 +16,14 @@ export async function getProductsByCategorySlug(supabase: ReturnType<typeof crea
     .eq('product_categories.slug', slug);
 }
 
-export async function getAllProducts(supabase: ReturnType<typeof createClient>) {
+export async function getAllProducts(supabase: Awaited<ReturnType<typeof createClient>>) {
   return supabase
     .from('products')
     .select('slug, updated_at')
     .eq('status', 'published');
 }
 
-export async function getRelatedProducts(supabase: ReturnType<typeof createClient>, categoryId: number, currentProductId: number) {
+export async function getRelatedProducts(supabase: Awaited<ReturnType<typeof createClient>>, categoryId: number, currentProductId: number) {
   return supabase
     .from('products')
     .select(`

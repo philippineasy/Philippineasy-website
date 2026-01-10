@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'URL parameter is required' }, { status: 400 });
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   try {
     const { data, error } = await supabase

@@ -10,7 +10,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const supabase = createClient();
+  const supabase = await createClient();
   const vendorId = parseInt(id, 10);
 
   const { data: vendor } = await supabase
@@ -55,7 +55,7 @@ export async function generateMetadata({
   };
 }
 
-async function getVendorDetails(supabase: ReturnType<typeof createClient>, vendorId: number) {
+async function getVendorDetails(supabase: Awaited<ReturnType<typeof createClient>>, vendorId: number) {
   const { data: vendor, error } = await supabase
     .from('vendors')
     .select(`
@@ -84,7 +84,7 @@ async function getVendorDetails(supabase: ReturnType<typeof createClient>, vendo
 
 export default async function VendorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = createClient();
+  const supabase = await createClient();
   const vendorId = parseInt(id, 10);
   const vendor = await getVendorDetails(supabase, vendorId);
 

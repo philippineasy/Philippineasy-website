@@ -10,7 +10,7 @@ export default async function MessagePage({
 }) {
   const { id: otherUserId } = await params;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {

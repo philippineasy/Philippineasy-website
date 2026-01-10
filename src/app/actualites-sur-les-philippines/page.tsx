@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 export const revalidate = 3600; // Revalidate every hour
 
 export default async function ActualitesPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: articles, error } = await getArticlesByCategorySlug(supabase, 'actualites');
 
   if (error) {

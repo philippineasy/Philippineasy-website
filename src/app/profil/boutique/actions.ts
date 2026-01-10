@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import slugify from 'slugify';
 
 export async function handleUpdateVendorProfile(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

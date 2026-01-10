@@ -15,7 +15,7 @@ interface CategoryPageProps {
 export const revalidate = 3600;
 
 const CategoryPage = async ({ slug, basePath, pageTitle }: CategoryPageProps) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: articles, error } = await getArticlesByCategorySlug(supabase, slug);
 
   if (error || !articles || articles.length === 0) {

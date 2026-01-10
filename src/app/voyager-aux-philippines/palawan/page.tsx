@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 const PalawanPage = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: articles, error } = await getArticlesByCategorySlug(supabase, 'palawan');
 
   if (error) {

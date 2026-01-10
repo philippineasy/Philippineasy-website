@@ -50,7 +50,7 @@ export const metadata: Metadata = {
 export const revalidate = 3600; // Revalidate every hour
 
 const VoyagerPage = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: destinations, error } = await getCategoriesByMainCategory(supabase, 'voyager-aux-philippines');
 
   if (error) {

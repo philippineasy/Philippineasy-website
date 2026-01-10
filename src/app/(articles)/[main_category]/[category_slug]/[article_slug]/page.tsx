@@ -69,7 +69,7 @@ export async function generateMetadata({
   params: Promise<{ main_category: string; category_slug: string; article_slug: string }>;
 }): Promise<Metadata> {
   const { main_category, category_slug, article_slug } = await params;
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: article } = await getArticleBySlug(supabase, article_slug);
 
   if (!article) {
@@ -163,7 +163,7 @@ export default async function ArticlePage({
   params: Promise<{ main_category: string; category_slug: string; article_slug: string }>;
 }) {
   const { main_category, article_slug } = await params;
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: article } = await getArticleBySlug(supabase, article_slug);
 
   if (!article) {

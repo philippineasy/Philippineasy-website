@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { BoutiqueClientPage } from './BoutiqueClientPage';
 
-async function getVendorData(supabase: ReturnType<typeof createClient>, userId: string) {
+async function getVendorData(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
   const { data: vendor, error: vendorError } = await supabase
     .from('vendors')
     .select('*')
@@ -38,7 +38,7 @@ async function getVendorData(supabase: ReturnType<typeof createClient>, userId: 
 }
 
 export default async function BoutiquePage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

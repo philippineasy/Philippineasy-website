@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { DatingProfile } from '@/types';
 
 export async function reportUser(reporterId: string, reportedId: string, reason: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from('reported_messages').insert({
     reporter_id: reporterId,
     reported_user_id: reportedId,
@@ -28,7 +28,7 @@ export type UpdateDatingProfilePayload = Partial<Omit<DatingProfile, 'interests'
 };
 
 export async function updateDatingProfile(formData: UpdateDatingProfilePayload) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
@@ -117,7 +117,7 @@ export async function updateDatingProfile(formData: UpdateDatingProfilePayload) 
 }
 
 export async function uploadNewPhoto(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
@@ -177,7 +177,7 @@ export async function uploadNewPhoto(formData: FormData) {
 }
 
 export async function deletePhoto(photoId: number, imageUrl: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
@@ -238,7 +238,7 @@ export async function deletePhoto(photoId: number, imageUrl: string) {
 }
 
 export async function getSubscription() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
@@ -279,7 +279,7 @@ export async function cancelSubscription(subscriptionId: string) {
 }
 
 export async function unmatchUser(matchId: number) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
@@ -302,7 +302,7 @@ export async function unmatchUser(matchId: number) {
 }
 
 export async function blockUser(blockedUserId: string) {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -343,7 +343,7 @@ export async function blockUser(blockedUserId: string) {
 }
 
 export async function likeUser(toUserId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
@@ -366,7 +366,7 @@ export async function likeUser(toUserId: string) {
 }
 
 export async function superLikeUser(toUserId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {

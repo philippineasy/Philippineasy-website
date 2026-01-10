@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import slugify from 'slugify';
 
 export async function handleUpdateProduct(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const productId = parseInt(formData.get('productId') as string, 10);
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -77,7 +77,7 @@ export async function handleUpdateProduct(formData: FormData) {
 }
 
 export async function handleDeleteProduct(productId: number) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

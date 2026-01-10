@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 export async function approvePhoto(photoId: number) {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   // First, update the photo status to 'approved'
   const { data: updatedPhoto, error: updateError } = await supabase
@@ -76,7 +76,7 @@ export async function approvePhoto(photoId: number) {
 }
 
 export async function rejectPhoto(photoId: number) {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   const { error } = await supabase
     .from('dating_photos')

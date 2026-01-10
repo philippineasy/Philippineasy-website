@@ -48,7 +48,7 @@ export const metadata: Metadata = {
 export const revalidate = 3600; // Revalidate every hour
 
 const VivrePage = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: categories, error } = await getCategoriesByMainCategory(supabase, 'vivre-aux-philippines');
 
   if (error) {

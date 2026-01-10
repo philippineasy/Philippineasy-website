@@ -40,7 +40,7 @@ export const metadata: Metadata = {
 export const revalidate = 3600; // Revalidate every hour
 
 const MeilleursPlansPage = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: categories, error } = await getCategoriesByMainCategory(supabase, 'meilleurs-plans-aux-philippines');
 
   if (error) {

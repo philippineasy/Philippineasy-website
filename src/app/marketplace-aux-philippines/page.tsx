@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   },
 };
 
-async function getProducts(supabase: ReturnType<typeof createClient>) {
+async function getProducts(supabase: Awaited<ReturnType<typeof createClient>>) {
   const { data, error } = await supabase
     .from('products')
     .select(`
@@ -56,7 +56,7 @@ async function getProducts(supabase: ReturnType<typeof createClient>) {
   return data.map(p => ({ ...p, vendors: Array.isArray(p.vendors) ? p.vendors[0] : p.vendors }));
 }
 
-async function getCategories(supabase: ReturnType<typeof createClient>) {
+async function getCategories(supabase: Awaited<ReturnType<typeof createClient>>) {
     const { data, error } = await supabase
         .from('product_categories')
         .select('id, name, slug');
@@ -69,7 +69,7 @@ async function getCategories(supabase: ReturnType<typeof createClient>) {
 }
 
 export default async function MarketplacePage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const products = await getProducts(supabase);
   const categories = await getCategories(supabase);
 

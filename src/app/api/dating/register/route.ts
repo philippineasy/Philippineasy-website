@@ -4,7 +4,7 @@ import { DatingProfile } from '@/types';
 
 export async function POST(request: Request) {
   console.log('API route /api/dating/register called');
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {

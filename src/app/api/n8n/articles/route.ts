@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import { createArticleFromN8n } from '@/services/articleService'; // This function will be created next
 
 export async function POST(request: Request) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Basic API Key authentication
   const n8nApiKey = request.headers.get('X-N8N-API-Key');

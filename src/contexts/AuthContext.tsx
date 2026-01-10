@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/utils/supabase/client';
 import type { User } from '@supabase/supabase-js';
@@ -26,45 +26,89 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    setLoading(true);
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
+  // Fetch profile and vendor status for a user
+  const fetchUserData = useCallback(async (currentUser: User) => {
+    try {
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single();
 
-      if (currentUser) {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', currentUser.id)
-          .single();
-        setProfile(profileData as Profile);
+      setProfile(profileData as Profile);
 
-        if (profileData) {
-          setIsAdmin(profileData.role === 'super_admin' || profileData.role === 'editor');
-          const { data: vendorData } = await supabase
-            .from('vendors')
-            .select('id')
-            .eq('user_id', currentUser.id)
-            .eq('status', 'approved')
-            .maybeSingle();
-          setIsVendor(!!vendorData);
-        } else {
-          setIsVendor(false);
-          setIsAdmin(false);
-        }
+      if (profileData) {
+        setIsAdmin(profileData.role === 'super_admin' || profileData.role === 'editor');
+        const { data: vendorData } = await supabase
+          .from('vendors')
+          .select('id')
+          .eq('user_id', currentUser.id)
+          .eq('status', 'approved')
+          .maybeSingle();
+        setIsVendor(!!vendorData);
       } else {
-        setProfile(null);
         setIsVendor(false);
         setIsAdmin(false);
       }
-      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      setProfile(null);
+      setIsVendor(false);
+      setIsAdmin(false);
+    }
+  }, []);
+
+  // Clear user data
+  const clearUserData = useCallback(() => {
+    setUser(null);
+    setProfile(null);
+    setIsVendor(false);
+    setIsAdmin(false);
+  }, []);
+
+  useEffect(() => {
+    // Get initial session on mount
+    const initializeAuth = async () => {
+      try {
+        const { data: { user: initialUser } } = await supabase.auth.getUser();
+
+        if (initialUser) {
+          setUser(initialUser);
+          await fetchUserData(initialUser);
+        } else {
+          clearUserData();
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        clearUserData();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    // Listen for auth state changes
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const currentUser = session?.user ?? null;
+
+      // Skip INITIAL_SESSION as we handle it above
+      if (event === 'INITIAL_SESSION') {
+        return;
+      }
+
+      if (currentUser) {
+        setUser(currentUser);
+        await fetchUserData(currentUser);
+      } else {
+        clearUserData();
+      }
     });
 
     return () => {
       authListener?.subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, [fetchUserData, clearUserData]);
 
   const signOut = async () => {
     // Navigate away first to avoid a flash of logged-out content

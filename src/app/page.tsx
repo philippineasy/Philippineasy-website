@@ -15,7 +15,7 @@ const FeaturedProductsCarousel = dynamic(() => import('@/components/homepage/Fea
 export const revalidate = 300; // Revalidate every 5 minutes (300 seconds)
 
 export default async function HomePage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const { bestDeals, featuredItems } = await getHomepageArticles(supabase);
 

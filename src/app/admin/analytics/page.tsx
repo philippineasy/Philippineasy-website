@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import { getArticleAnalytics } from '@/services/articleService';
 
 const AnalyticsPage = async () => {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: analytics } = await getArticleAnalytics(supabase);
 
     return (

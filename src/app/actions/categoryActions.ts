@@ -37,7 +37,7 @@ export async function updateCategoryAndRevalidate(
 }
 
 export async function getCategories() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.from('categories').select('*');
   return { data, error };
 }

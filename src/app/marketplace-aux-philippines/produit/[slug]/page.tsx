@@ -18,7 +18,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = createClient();
+  const supabase = await createClient();
   const product = await getProductBySlug(supabase, slug);
 
   if (!product) {
@@ -79,7 +79,7 @@ export async function generateMetadata({
   };
 }
 
-async function getProductBySlug(supabase: ReturnType<typeof createClient>, slug: string) {
+async function getProductBySlug(supabase: Awaited<ReturnType<typeof createClient>>, slug: string) {
   const { data, error } = await supabase
     .from('products')
     .select(`
@@ -137,7 +137,7 @@ async function getProductBySlug(supabase: ReturnType<typeof createClient>, slug:
   };
 }
 
-async function checkUserHasPurchased(supabase: ReturnType<typeof createClient>, userId: string, productId: number) {
+async function checkUserHasPurchased(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, productId: number) {
   if (!userId) return false;
 
   const { data, error } = await supabase
@@ -161,7 +161,7 @@ export default async function ProductDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const product = await getProductBySlug(supabase, slug);
   const hasPurchased = await checkUserHasPurchased(supabase, user?.id || '', product.id);

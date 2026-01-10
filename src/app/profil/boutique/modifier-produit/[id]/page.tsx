@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { notFound } from 'next/navigation';
 import { EditProductForm } from './EditProductForm';
 
-async function getProductById(supabase: ReturnType<typeof createClient>, productId: number) {
+async function getProductById(supabase: Awaited<ReturnType<typeof createClient>>, productId: number) {
   const { data, error } = await supabase
     .from('products')
     .select('*')
@@ -16,7 +16,7 @@ async function getProductById(supabase: ReturnType<typeof createClient>, product
   return data;
 }
 
-async function getProductCategories(supabase: ReturnType<typeof createClient>) {
+async function getProductCategories(supabase: Awaited<ReturnType<typeof createClient>>) {
   const { data, error } = await supabase
     .from('product_categories')
     .select('id, name')
@@ -31,7 +31,7 @@ async function getProductCategories(supabase: ReturnType<typeof createClient>) {
 
 export default async function ModifierProduitPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = createClient();
+  const supabase = await createClient();
   const productId = parseInt(id, 10);
 
   const { data: { user } } = await supabase.auth.getUser();

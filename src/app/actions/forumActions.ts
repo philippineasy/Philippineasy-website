@@ -18,7 +18,7 @@ import {
  * @returns The result of the add post operation.
  */
 export async function addPostAndRevalidate(topicId: number, userId: string, content: string) {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data, error } = await addForumPostService(supabase, topicId, userId, content);
 
     if (!error) {
@@ -41,7 +41,7 @@ export async function addPostAndRevalidate(topicId: number, userId: string, cont
  * @returns The result of the add topic operation.
  */
 export async function addTopicAndRevalidate(categoryId: number, userId: string, title: string, content: string) {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data, error } = await addForumTopicService(supabase, categoryId, userId, title, content);
 
     if (!error) {
@@ -64,7 +64,7 @@ export async function addTopicAndRevalidate(categoryId: number, userId: string, 
  * @returns The topics data.
  */
 export async function getTopicsByCategorySlugAction(slug: string, page: number = 1, limit: number = 15) {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data, error } = await getTopicsByCategorySlugService(supabase, slug, page, limit);
     
     if (error) {
@@ -75,7 +75,7 @@ export async function getTopicsByCategorySlugAction(slug: string, page: number =
 }
 
 export async function updateTopicAction(topicId: number, postId: number, title: string, content: string) {
-    const supabase = createClient();
+    const supabase = await createClient();
 
     const topicUpdateResult = await updateTopicDetailsService(supabase, topicId, { title });
     if (topicUpdateResult.error) {

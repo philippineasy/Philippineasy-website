@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import { PhotosClient } from './PhotosClient';
 
 const AdminDatingPhotosPage = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: photos, error } = await supabase
     .from('dating_photos')

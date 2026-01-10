@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 export async function trackProductView(productId: number) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   const { error } = await supabase.from('product_views').insert({
@@ -21,7 +21,7 @@ export async function trackProductView(productId: number) {
 }
 
 export async function handleAddReview(productId: number, rating: number, comment: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {

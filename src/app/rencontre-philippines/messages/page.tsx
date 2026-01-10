@@ -4,7 +4,7 @@ import MessagesClientPage from './MessagesClientPage';
 import { Message } from '@/types';
 
 export default async function MessagesPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
 

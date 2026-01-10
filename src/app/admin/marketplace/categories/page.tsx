@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { CategoryManagementClient } from './CategoryManagementClient';
 
-async function getProductCategories(supabase: ReturnType<typeof createClient>) {
+async function getProductCategories(supabase: Awaited<ReturnType<typeof createClient>>) {
   const { data, error } = await supabase
     .from('product_categories')
     .select('*')
@@ -16,7 +16,7 @@ async function getProductCategories(supabase: ReturnType<typeof createClient>) {
 }
 
 export default async function AdminProductCategoriesPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

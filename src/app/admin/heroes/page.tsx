@@ -4,7 +4,7 @@ import { HeroCard } from '@/app/admin/heroes/HeroCard';
 import { getAllPages } from '@/services/pageService';
 
 const HeroesAdminPage = async () => {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: groupedPages, error } = await getAllPages(supabase);
 
     if (error || !groupedPages) {

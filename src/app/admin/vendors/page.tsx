@@ -3,7 +3,7 @@ import { VendorManagementClient, PendingVendor } from './VendorManagementClient'
 import { redirect } from 'next/navigation';
 import { Toaster } from 'react-hot-toast';
 
-async function getPendingVendors(supabase: ReturnType<typeof createClient>): Promise<PendingVendor[]> {
+async function getPendingVendors(supabase: Awaited<ReturnType<typeof createClient>>): Promise<PendingVendor[]> {
   const { data, error } = await supabase
     .from('vendors')
     .select(`
@@ -36,7 +36,7 @@ async function getPendingVendors(supabase: ReturnType<typeof createClient>): Pro
 }
 
 export default async function AdminVendorsPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {

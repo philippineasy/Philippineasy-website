@@ -9,7 +9,7 @@ import { getPageBySlug } from '@/services/pageService';
 import { notFound } from 'next/navigation';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: page } = await getPageBySlug(supabase, 'quand-partir');
 
   if (!page) {
@@ -25,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const QuandPartirPage = async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: page } = await getPageBySlug(supabase, 'quand-partir');
 
   if (!page) {

@@ -15,7 +15,7 @@ import type { ArticleCreate, ArticleUpdate } from '@/types';
  * @returns The article data or null.
  */
 export async function getArticleBySlugAction(slug: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await getArticleBySlugFromService(supabase, slug);
 
   if (error) {
@@ -32,7 +32,7 @@ function isValidStatus(status: any): status is ArticleStatus {
 }
 
 export async function createArticleAction(articleData: ArticleCreate, imageFile: File) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   if (!imageFile || imageFile.size === 0) {
     return { success: false, error: "L'image à la une est obligatoire." };
@@ -107,7 +107,7 @@ export async function updateArticleAndRevalidate(
   articleId: number,
   updates: ArticleUpdates
 ) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   if (updates.status && !isValidStatus(updates.status)) {
     return { success: false, error: "Statut invalide fourni." };
@@ -193,7 +193,7 @@ export async function updateArticleAndRevalidate(
 import type { Article } from '@/types';
 
 export async function searchArticles(searchTerm: string): Promise<{ articles: Article[] }> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('articles')
     .select('id, title, slug, image, published_at, content, category:categories(id, name, slug)')
@@ -216,7 +216,7 @@ export async function searchArticles(searchTerm: string): Promise<{ articles: Ar
 }
 
 export async function getArticlesByCategory(categoryId: number): Promise<{ articles: Article[] }> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('articles')
     .select('id, title, slug, image, published_at, content, category:categories(id, name, slug)')
@@ -237,7 +237,7 @@ export async function getArticlesByCategory(categoryId: number): Promise<{ artic
 }
 
 export async function updateArticleAction(articleId: number, updates: ArticleUpdate, imageFile: File | null) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data, error } = await updateArticleInService(supabase, articleId, updates, imageFile);
 

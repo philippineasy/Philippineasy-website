@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 import slugify from 'slugify';
 
 export async function handleAddProduct(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // 1. Get user and vendor info
   const { data: { user } } = await supabase.auth.getUser();
