@@ -61,10 +61,20 @@ interface Post {
   }[];
 }
 
-interface Itinerary {
-  id: number;
-  title: string;
-  createdAt: string;
+interface ItineraryGeneration {
+  id: string;
+  preferences: {
+    duration: string;
+    travelType: string;
+    tripStyle: string;
+  };
+  selected_variant: string;
+  offer_type: string;
+  amount_paid: number;
+  payment_status: string;
+  status: string;
+  created_at: string;
+  delivered_at: string | null;
 }
 
 interface Order {
@@ -81,8 +91,9 @@ const ProfilPage = () => {
   const [recentPosts, setRecentPosts] = useState<Post[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
-  const [savedItineraries] = useState<Itinerary[]>([]);
-  const [itineraryToDelete, setItineraryToDelete] = useState<Itinerary | null>(null);
+  const [savedItineraries, setSavedItineraries] = useState<ItineraryGeneration[]>([]);
+  const [itineraryToDelete, setItineraryToDelete] = useState<ItineraryGeneration | null>(null);
+  const [isRedelivering, setIsRedelivering] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -109,8 +120,22 @@ const ProfilPage = () => {
             setOrders(ordersData || []);
         }
       };
+      const fetchItineraries = async () => {
+        const { data: itinerariesData, error: itinerariesError } = await supabase
+          .from('itinerary_generations')
+          .select('id, preferences, selected_variant, offer_type, amount_paid, payment_status, status, created_at, delivered_at')
+          .eq('user_id', user.id)
+          .eq('payment_status', 'completed')
+          .order('created_at', { ascending: false });
+        if (itinerariesError) {
+          console.error('Erreur chargement itinéraires:', itinerariesError);
+        } else {
+          setSavedItineraries(itinerariesData || []);
+        }
+      };
       fetchForumActivity();
       fetchOrders();
+      fetchItineraries();
     }
   }, [user, supabase]);
 
@@ -180,7 +205,7 @@ const ProfilPage = () => {
     setIsSavingProfile(false);
   };
   
-  const handleDeleteRequest = (itinerary: Itinerary) => {
+  const handleDeleteRequest = (itinerary: ItineraryGeneration) => {
     setItineraryToDelete(itinerary);
   };
 
@@ -188,6 +213,66 @@ const ProfilPage = () => {
     // This is a placeholder as itinerary logic is not fully implemented
     toast.error("La suppression d'itinéraire n'est pas encore fonctionnelle.");
     setItineraryToDelete(null);
+  };
+
+  const handleRedeliverItinerary = async (itineraryId: string) => {
+    if (!user?.email) {
+      toast.error("Email non disponible");
+      return;
+    }
+    setIsRedelivering(itineraryId);
+    try {
+      const response = await fetch('/api/itinerary/deliver', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          generation_id: itineraryId,
+          delivery_method: 'email',
+          email: user.email,
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        toast.success("Itinéraire renvoyé par email !");
+      } else {
+        toast.error(data.error || "Erreur lors de l'envoi");
+      }
+    } catch (err) {
+      toast.error("Erreur lors de l'envoi");
+    } finally {
+      setIsRedelivering(null);
+    }
+  };
+
+  const getDurationLabel = (duration: string): string => {
+    const labels: Record<string, string> = {
+      '3-days': '3-5 jours',
+      '1-week': '1 semaine',
+      '10-days': '10 jours',
+      '2-weeks': '2 semaines',
+      '3-weeks': '3 semaines',
+      '1-month': '1 mois',
+      'more': '+1 mois',
+    };
+    return labels[duration] || duration;
+  };
+
+  const getOfferLabel = (offer: string): string => {
+    const labels: Record<string, string> = {
+      'express': 'Express',
+      'premium': 'Premium',
+      'conciergerie': 'Conciergerie',
+    };
+    return labels[offer] || offer;
+  };
+
+  const getVariantLabel = (variant: string): string => {
+    const labels: Record<string, string> = {
+      'relax': 'Relax',
+      'balanced': 'Équilibré',
+      'adventure': 'Aventure',
+    };
+    return labels[variant] || variant;
   };
 
   if (loading) {
@@ -253,24 +338,59 @@ const ProfilPage = () => {
 
             <div className="bg-card p-6 rounded-lg shadow-md">
               <h2 className="text-2xl font-semibold mb-6 border-b pb-3 flex items-center">
-                <FontAwesomeIcon icon={faRoute} className="text-accent mr-3 text-2xl" /> Mes Itinéraires Sauvegardés
+                <FontAwesomeIcon icon={faRoute} className="text-accent mr-3 text-2xl" /> Mes Itinéraires Achetés
               </h2>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {savedItineraries.length > 0 ? (
                   savedItineraries.map((itinerary) => (
-                    <div key={itinerary.id} className="border p-3 rounded-md hover:bg-muted flex justify-between items-center">
-                      <div>
-                        <Link href={`/itineraire?id=${itinerary.id}`} className="font-medium text-primary hover:underline">{itinerary.title}</Link>
-                        <p className="text-xs text-muted-foreground">Créé le: {itinerary.createdAt}</p>
+                    <div key={itinerary.id} className="border-2 border-primary/20 p-4 rounded-lg hover:border-primary/40 transition-all">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                        <div className="flex-grow">
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                              itinerary.selected_variant === 'relax' ? 'bg-blue-100 text-blue-700' :
+                              itinerary.selected_variant === 'balanced' ? 'bg-green-100 text-green-700' :
+                              'bg-orange-100 text-orange-700'
+                            }`}>
+                              {getVariantLabel(itinerary.selected_variant)}
+                            </span>
+                            <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-semibold">
+                              {getOfferLabel(itinerary.offer_type)}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {getDurationLabel(itinerary.preferences?.duration)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Acheté le {new Date(itinerary.created_at).toLocaleDateString('fr-FR')} • {itinerary.amount_paid?.toFixed(2) || '0.00'}€
+                          </p>
+                          {itinerary.delivered_at && (
+                            <p className="text-xs text-green-600 mt-1">
+                              Envoyé le {new Date(itinerary.delivered_at).toLocaleDateString('fr-FR')}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleRedeliverItinerary(itinerary.id)}
+                            disabled={isRedelivering === itinerary.id}
+                            className="px-3 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary/90 disabled:opacity-50 flex items-center gap-1"
+                          >
+                            {isRedelivering === itinerary.id ? (
+                              <><i className="fas fa-spinner fa-spin"></i> Envoi...</>
+                            ) : (
+                              <><FontAwesomeIcon icon={faEdit} /> Renvoyer</>
+                            )}
+                          </button>
+                        </div>
                       </div>
-                      <button onClick={() => handleDeleteRequest(itinerary)} className="text-destructive hover:text-destructive/80 text-sm" title="Supprimer"><FontAwesomeIcon icon={faTrash} /></button>
                     </div>
                   ))
                 ) : (
-                  <p className="text-muted-foreground italic">Vous n'avez pas encore d'itinéraire sauvegardé.</p>
+                  <p className="text-muted-foreground italic">Vous n'avez pas encore d'itinéraire acheté.</p>
                 )}
               </div>
-              <Link href="/itineraire" className="mt-6 inline-block px-5 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition duration-300 font-semibold text-sm">
+              <Link href="/itineraire-personnalise-pour-les-philippines" className="mt-6 inline-block px-5 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition duration-300 font-semibold text-sm">
                 <FontAwesomeIcon icon={faPlus} className="mr-1" /> Créer un nouvel itinéraire
               </Link>
             </div>
@@ -415,7 +535,7 @@ const ProfilPage = () => {
       onConfirm={confirmDeleteItinerary}
       title="Confirmer la suppression"
     >
-      <p>Êtes-vous sûr de vouloir supprimer l'itinéraire "{itineraryToDelete.title}" ?</p>
+      <p>Êtes-vous sûr de vouloir supprimer cet itinéraire {getVariantLabel(itineraryToDelete.selected_variant)} ({getOfferLabel(itineraryToDelete.offer_type)}) ?</p>
     </ConfirmationModal>
   )}
 </>

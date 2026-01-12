@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagic, faLock, faSpinner, faCheck, faRocket, faStar, faCrown, faCircleInfo, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { faMagic, faLock, faSpinner, faCheck, faRocket, faStar, faCrown, faCircleInfo, faArrowRight, faUser } from '@fortawesome/free-solid-svg-icons';
 import { CustomSelect, SelectOption } from '@/components/shared/CustomSelect';
+import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
 import {
   PRICING_GRID,
   DURATION_LABELS,
@@ -71,6 +73,8 @@ const getRecommendedVariant = (style: string): 'relax' | 'balanced' | 'adventure
 };
 
 const ItinerairePage = () => {
+  const { user, loading: authLoading } = useAuth();
+
   const [showResult, setShowResult] = useState(false);
   const [travelType, setTravelType] = useState('');
   const [duration, setDuration] = useState<Duration | ''>('');
@@ -329,21 +333,47 @@ const ItinerairePage = () => {
           )}
 
           <div className="border-t border-primary/20 mt-6 pt-6 text-center">
-            <button
-              type="button"
-              onClick={handleGenerate}
-              disabled={isLoading}
-              className="w-full md:w-auto px-8 py-4 bg-accent text-card-foreground text-lg rounded-lg hover:bg-accent/90 transition duration-300 pulse-animation font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <><FontAwesomeIcon icon={faSpinner} className="mr-2 animate-spin" /> Generation en cours...</>
-              ) : (
-                <><FontAwesomeIcon icon={faMagic} className="mr-2" /> Generer mon Itineraire (Gratuit)</>
-              )}
-            </button>
-            <p className="text-sm text-muted-foreground mt-4">
-              <FontAwesomeIcon icon={faLock} className="mr-1" /> Vos donnees sont utilisees uniquement pour creer votre itineraire.
-            </p>
+            {authLoading ? (
+              <div className="py-4">
+                <FontAwesomeIcon icon={faSpinner} className="animate-spin text-primary text-2xl" />
+              </div>
+            ) : !user ? (
+              <div className="bg-blue-50 border-2 border-primary/30 rounded-xl p-6 mb-4">
+                <FontAwesomeIcon icon={faUser} className="text-primary text-3xl mb-3" />
+                <h3 className="text-lg font-semibold text-primary mb-2">Connectez-vous pour creer votre itineraire</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Un compte est necessaire pour generer et sauvegarder vos itineraires personnalises.
+                </p>
+                <Link
+                  href="/connexion?redirect=/itineraire-personnalise-pour-les-philippines"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 font-semibold transition-all"
+                >
+                  <FontAwesomeIcon icon={faUser} />
+                  Se connecter
+                </Link>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Pas encore de compte ? <Link href="/inscription" className="text-primary hover:underline">Inscrivez-vous gratuitement</Link>
+                </p>
+              </div>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={handleGenerate}
+                  disabled={isLoading}
+                  className="w-full md:w-auto px-8 py-4 bg-accent text-card-foreground text-lg rounded-lg hover:bg-accent/90 transition duration-300 pulse-animation font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? (
+                    <><FontAwesomeIcon icon={faSpinner} className="mr-2 animate-spin" /> Generation en cours...</>
+                  ) : (
+                    <><FontAwesomeIcon icon={faMagic} className="mr-2" /> Generer mon Itineraire (Gratuit)</>
+                  )}
+                </button>
+                <p className="text-sm text-muted-foreground mt-4">
+                  <FontAwesomeIcon icon={faLock} className="mr-1" /> Vos donnees sont utilisees uniquement pour creer votre itineraire.
+                </p>
+              </>
+            )}
           </div>
         </form>
 

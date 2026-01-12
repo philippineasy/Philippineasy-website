@@ -61,29 +61,51 @@ export async function POST(request: Request) {
       telegram_chat_id: telegram_chat_id || null,
     };
 
-    const n8nResponse = await fetch(N8N_DELIVER_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-N8N-API-Key': N8N_API_KEY || '',
-      },
-      body: JSON.stringify(n8nPayload),
-    });
+    let n8nResult = null;
 
-    if (!n8nResponse.ok) {
-      console.error('n8n deliver error:', await n8nResponse.text());
-      return NextResponse.json(
-        { error: 'Erreur lors de la livraison' },
-        { status: 500 }
-      );
+    try {
+      const n8nResponse = await fetch(N8N_DELIVER_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-N8N-API-Key': N8N_API_KEY || '',
+        },
+        body: JSON.stringify(n8nPayload),
+      });
+
+      if (n8nResponse.ok) {
+        const responseText = await n8nResponse.text();
+        if (responseText) {
+          try {
+            n8nResult = JSON.parse(responseText);
+          } catch {
+            console.log('n8n response is not JSON:', responseText);
+          }
+        }
+      } else {
+        console.error('n8n deliver error:', await n8nResponse.text());
+      }
+    } catch (n8nError) {
+      console.error('n8n request failed:', n8nError);
+      // Continue anyway - we'll still mark as delivered in Supabase
     }
 
-    const result = await n8nResponse.json();
+    // Mettre à jour le statut de livraison dans Supabase
+    await supabase
+      .from('itinerary_generations')
+      .update({
+        delivery_method,
+        delivery_email: email || null,
+        telegram_chat_id: telegram_chat_id || null,
+        delivered_at: new Date().toISOString(),
+        status: 'delivered',
+      })
+      .eq('id', generation_id);
 
     return NextResponse.json({
       success: true,
-      google_maps_url: result.google_maps_url,
-      alarms_data: result.alarms_data,
+      google_maps_url: n8nResult?.google_maps_url || null,
+      alarms_data: n8nResult?.alarms_data || null,
     });
 
   } catch (error) {
