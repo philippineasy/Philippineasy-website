@@ -38,3 +38,9 @@ sentry-wizard-installation-error-*.log
 *.tar.gz
 src/app/realtime-test/page.tsx
 src/lib/supabaseBrowser.ts
+
+# Local development files
+n8n-workflows/
+scripts/
+supabase/migrations/
+supabase/.temp/
