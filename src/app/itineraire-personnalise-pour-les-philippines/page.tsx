@@ -201,7 +201,7 @@ const ItinerairePage = () => {
       </p>
 
       {/* Comment ca marche */}
-      <div className="bg-gradient-to-r from-primary/5 to-accent/5 rounded-2xl p-6 md:p-8 mb-12 max-w-4xl mx-auto border border-primary/20">
+      <div className="bg-card rounded-2xl p-6 md:p-8 mb-12 max-w-4xl mx-auto border border-border shadow-sm">
         <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
           <FontAwesomeIcon icon={faCircleInfo} className="text-primary" />
           Comment ca marche ?
@@ -224,12 +224,12 @@ const ItinerairePage = () => {
             <p className="text-xs text-green-600 font-medium mt-1">GRATUIT</p>
           </div>
           <div className="text-center">
-            <div className="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-3">
-              <span className="text-xl font-bold text-accent">3</span>
+            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+              <span className="text-xl font-bold text-primary">3</span>
             </div>
             <h3 className="font-semibold mb-1">Debloquez le complet</h3>
             <p className="text-sm text-muted-foreground">Programme detaille, liens, conseils</p>
-            <p className="text-xs text-accent font-medium mt-1">DES 9,99€</p>
+            <p className="text-xs text-primary font-medium mt-1">DES 9,99€</p>
           </div>
         </div>
       </div>
