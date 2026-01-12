@@ -432,7 +432,7 @@ const ItinerairePage = () => {
                         : 'border-gray-200 hover:border-primary/50'
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center justify-between mb-4 mt-4">
                       <div className="flex items-center gap-2">
                         <FontAwesomeIcon icon={faRocket} className="text-blue-500" />
                         <span className="font-bold text-lg">{OFFER_LABELS.express.name}</span>
@@ -503,7 +503,7 @@ const ItinerairePage = () => {
                         : 'border-gray-200 hover:border-primary/50'
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center justify-between mb-4 mt-4">
                       <div className="flex items-center gap-2">
                         <FontAwesomeIcon icon={faCrown} className="text-purple-500" />
                         <span className="font-bold text-lg">{OFFER_LABELS.conciergerie.name}</span>
