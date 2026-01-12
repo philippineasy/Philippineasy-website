@@ -354,7 +354,7 @@ const ItinerairePage = () => {
             <p className="text-muted-foreground mb-6">3 propositions adaptees a vos preferences. Selectionnez celle qui vous plait !</p>
 
             {/* Previews des 3 variantes */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10 mt-6">
               {previews.map((preview) => (
                 <div
                   key={preview.variant}
@@ -371,7 +371,7 @@ const ItinerairePage = () => {
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between mb-3 mt-2">
+                  <div className="flex items-center justify-between mb-3 mt-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                       preview.variant === 'relax' ? 'bg-blue-100 text-blue-700' :
                       preview.variant === 'balanced' ? 'bg-green-100 text-green-700' :
@@ -422,7 +422,7 @@ const ItinerairePage = () => {
                   Choisissez votre formule pour <span className="text-primary">{DURATION_LABELS[duration as Duration]}</span>
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-6">
                   {/* EXPRESS */}
                   <div
                     onClick={() => setSelectedOffer('express')}
@@ -468,7 +468,7 @@ const ItinerairePage = () => {
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-accent text-primary border-2 border-primary px-4 py-1 rounded-full text-xs font-bold shadow-lg">
                       Recommande
                     </div>
-                    <div className="flex items-center justify-between mb-4 mt-2">
+                    <div className="flex items-center justify-between mb-4 mt-4">
                       <div className="flex items-center gap-2">
                         <FontAwesomeIcon icon={faStar} className="text-yellow-500" />
                         <span className="font-bold text-lg">{OFFER_LABELS.premium.name}</span>
