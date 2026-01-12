@@ -11,6 +11,34 @@ import ArticleList from '@/components/shared/ArticleList';
 export const metadata: Metadata = {
   title: 'Palawan : Le Joyau des Philippines',
   description: 'Découvrez Palawan, un paradis tropical aux Philippines. Ce guide complet vous aidera à planifier votre voyage pendant la saison sèche, avec des informations sur les meilleures plages, les activités incontournables et des conseils pratiques.',
+  alternates: {
+    canonical: 'https://philippineasy.com/voyager-aux-philippines/palawan',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    title: 'Palawan : Le Joyau des Philippines',
+    description: 'Découvrez Palawan, un paradis tropical aux Philippines. Ce guide complet vous aidera à planifier votre voyage pendant la saison sèche.',
+    url: 'https://philippineasy.com/voyager-aux-philippines/palawan',
+    siteName: "Philippin'Easy",
+    locale: 'fr_FR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Palawan : Le Joyau des Philippines',
+    description: 'Découvrez Palawan, un paradis tropical aux Philippines.',
+    site: '@philippineasy',
+  },
 };
 
 const PalawanPage = async () => {

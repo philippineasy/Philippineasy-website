@@ -11,6 +11,34 @@ import ArticleList from '@/components/shared/ArticleList';
 export const metadata: Metadata = {
   title: 'Conseils Pratiques pour votre Voyage aux Philippines',
   description: 'Maximisez votre expérience aux Philippines avec nos conseils pratiques. De la préparation de votre voyage à la sécurité sur place, ce guide est votre allié.',
+  alternates: {
+    canonical: 'https://philippineasy.com/voyager-aux-philippines/conseils-voyage',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    title: 'Conseils Pratiques pour votre Voyage aux Philippines',
+    description: 'Maximisez votre expérience aux Philippines avec nos conseils pratiques.',
+    url: 'https://philippineasy.com/voyager-aux-philippines/conseils-voyage',
+    siteName: "Philippin'Easy",
+    locale: 'fr_FR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Conseils Pratiques pour votre Voyage aux Philippines',
+    description: 'Maximisez votre expérience aux Philippines avec nos conseils pratiques.',
+    site: '@philippineasy',
+  },
 };
 
 const ConseilsPratiquesPage = async () => {

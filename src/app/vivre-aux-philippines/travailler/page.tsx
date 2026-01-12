@@ -18,9 +18,41 @@ export async function generateMetadata(): Promise<Metadata> {
     };
   }
 
+  const canonicalUrl = 'https://philippineasy.com/vivre-aux-philippines/travailler';
+  const description = page.subtitle || 'Guide pour travailler aux Philippines : emploi salarié et création d\'entreprise.';
+  const title = `${page.title} | Opportunités & Marché de l'Emploi`;
+
   return {
-    title: `${page.title} | Opportunités & Marché de l'Emploi`,
-    description: page.subtitle,
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonicalUrl,
+      siteName: "Philippin'Easy",
+      locale: 'fr_FR',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      site: '@philippineasy',
+    },
   };
 }
 

@@ -18,9 +18,41 @@ export async function generateMetadata(): Promise<Metadata> {
     };
   }
 
+  const canonicalUrl = 'https://philippineasy.com/vivre-aux-philippines/investir';
+  const description = page.subtitle || 'Guide pour investir aux Philippines : immobilier, bourse et création d\'entreprise.';
+  const title = `${page.title} | Immobilier, Bourse & Business`;
+
   return {
-    title: `${page.title} | Immobilier, Bourse & Business`,
-    description: page.subtitle,
+    title,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonicalUrl,
+      siteName: "Philippin'Easy",
+      locale: 'fr_FR',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      site: '@philippineasy',
+    },
   };
 }
 

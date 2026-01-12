@@ -9,6 +9,34 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: "Vivre aux Philippines en Famille | Guide Expatriés",
   description: "Tout ce que vous devez savoir pour vivre aux Philippines en famille : logement, scolarité, santé, budget, conseils pratiques.",
+  alternates: {
+    canonical: 'https://philippineasy.com/vivre-aux-philippines/famille',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    title: "Vivre aux Philippines en Famille | Guide Expatriés",
+    description: "Tout ce que vous devez savoir pour vivre aux Philippines en famille.",
+    url: 'https://philippineasy.com/vivre-aux-philippines/famille',
+    siteName: "Philippin'Easy",
+    locale: 'fr_FR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "Vivre aux Philippines en Famille",
+    description: "Tout ce que vous devez savoir pour vivre aux Philippines en famille.",
+    site: '@philippineasy',
+  },
 };
 
 const FamilleExpatPage = () => {

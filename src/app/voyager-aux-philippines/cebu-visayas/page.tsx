@@ -11,6 +11,34 @@ import ArticleList from '../../../components/shared/ArticleList';
 export const metadata: Metadata = {
   title: 'Cebu et les Visayas : Le Cœur des Philippines',
   description: 'Explorez Cebu et la région des Visayas, un archipel vibrant au cœur des Philippines. Découvrez des plages de sable blanc, une histoire riche et une culture unique.',
+  alternates: {
+    canonical: 'https://philippineasy.com/voyager-aux-philippines/cebu-visayas',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    title: 'Cebu et les Visayas : Le Cœur des Philippines',
+    description: 'Explorez Cebu et la région des Visayas, un archipel vibrant au cœur des Philippines.',
+    url: 'https://philippineasy.com/voyager-aux-philippines/cebu-visayas',
+    siteName: "Philippin'Easy",
+    locale: 'fr_FR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Cebu et les Visayas : Le Cœur des Philippines',
+    description: 'Explorez Cebu et la région des Visayas, un archipel vibrant au cœur des Philippines.',
+    site: '@philippineasy',
+  },
 };
 
 const CebuVisayasPage = async () => {

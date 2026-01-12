@@ -1,10 +1,26 @@
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
+import { createBuildClient } from '@/utils/supabase/build-client';
 import { getTopicsByCategorySlug, getForumCategoryBySlug } from '@/services/forumService';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { TopicListClient } from '@/app/forum-sur-les-philippines/[slug]/TopicListClient';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
 import type { Metadata } from 'next';
+
+export async function generateStaticParams() {
+  const supabase = createBuildClient();
+  const { data: categories } = await supabase
+    .from('forum_categories')
+    .select('slug');
+
+  if (!categories) {
+    return [];
+  }
+
+  return categories.map((category) => ({
+    slug: category.slug,
+  }));
+}
 
 // ✅ generateMetadata avec params en Promise
 export async function generateMetadata({
@@ -31,6 +47,17 @@ export async function generateMetadata({
     keywords: ['forum Philippines', category.name, 'discussion Philippines', 'communauté', 'questions Philippines'],
     alternates: {
       canonical: canonicalUrl,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     },
     openGraph: {
       title: `${category.name} - Forum Philippines`,

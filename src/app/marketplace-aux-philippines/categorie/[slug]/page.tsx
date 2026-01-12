@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
+import { createBuildClient } from '@/utils/supabase/build-client';
 import { notFound } from 'next/navigation';
 import { ProductCard } from '@/components/shared/ProductCard';
 import { getProductsByCategorySlug } from '@/services/productService';
@@ -6,6 +7,21 @@ import { getProductCategoryBySlug } from '@/services/categoryService';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
 import type { Metadata } from 'next';
+
+export async function generateStaticParams() {
+  const supabase = createBuildClient();
+  const { data: categories } = await supabase
+    .from('product_categories')
+    .select('slug');
+
+  if (!categories) {
+    return [];
+  }
+
+  return categories.map((category) => ({
+    slug: category.slug,
+  }));
+}
 
 // ✅ params en Promise
 export async function generateMetadata({
@@ -32,6 +48,17 @@ export async function generateMetadata({
     keywords: ['marketplace Philippines', category.name, 'acheter Philippines', 'produits philippins', 'e-commerce'],
     alternates: {
       canonical: canonicalUrl,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     },
     openGraph: {
       title: `${category.name} - Marketplace Philippines`,

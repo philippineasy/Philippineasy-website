@@ -11,6 +11,34 @@ import ArticleList from '@/components/shared/ArticleList';
 export const metadata: Metadata = {
   title: 'Siargao : La Capitale du Surf aux Philippines',
   description: 'Découvrez Siargao, l\'île de rêve pour les surfeurs et les amoureux de la nature. Ce guide vous aidera à planifier votre voyage pendant la saison verte, avec des informations sur les meilleurs spots de surf, les lagons et les piscines naturelles.',
+  alternates: {
+    canonical: 'https://philippineasy.com/voyager-aux-philippines/siargao',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    title: 'Siargao : La Capitale du Surf aux Philippines',
+    description: 'Découvrez Siargao, l\'île de rêve pour les surfeurs et les amoureux de la nature.',
+    url: 'https://philippineasy.com/voyager-aux-philippines/siargao',
+    siteName: "Philippin'Easy",
+    locale: 'fr_FR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Siargao : La Capitale du Surf aux Philippines',
+    description: 'Découvrez Siargao, l\'île de rêve pour les surfeurs et les amoureux de la nature.',
+    site: '@philippineasy',
+  },
 };
 
 const SiargaoPage = async () => {

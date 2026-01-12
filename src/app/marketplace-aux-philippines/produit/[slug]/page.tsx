@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
+import { createBuildClient } from '@/utils/supabase/build-client';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -11,6 +12,22 @@ import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
 import type { Metadata } from 'next';
 import { generateProductMetaDescription } from '@/utils/seo/metaDescriptionGenerator';
+
+export async function generateStaticParams() {
+  const supabase = createBuildClient();
+  const { data: products } = await supabase
+    .from('products')
+    .select('slug')
+    .eq('status', 'published');
+
+  if (!products) {
+    return [];
+  }
+
+  return products.map((product) => ({
+    slug: product.slug,
+  }));
+}
 
 export async function generateMetadata({
   params,
@@ -52,6 +69,17 @@ export async function generateMetadata({
     keywords: ['marketplace Philippines', product.name, categoryName || '', 'acheter Philippines', 'produits philippins'],
     alternates: {
       canonical: canonicalUrl,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     },
     openGraph: {
       title: product.name,

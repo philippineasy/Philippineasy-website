@@ -1,7 +1,24 @@
 import CategoryPage from '@/components/shared/CategoryPage';
 import { getArticleCategoryBySlug } from '@/services/categoryService';
 import { createClient } from '@/utils/supabase/server';
+import { createBuildClient } from '@/utils/supabase/build-client';
 import type { Metadata } from 'next';
+
+export async function generateStaticParams() {
+  const supabase = createBuildClient();
+  const { data: categories } = await supabase
+    .from('categories')
+    .select('slug')
+    .eq('main_category', 'voyager');
+
+  if (!categories) {
+    return [];
+  }
+
+  return categories.map((category) => ({
+    slug: category.slug,
+  }));
+}
 
 export async function generateMetadata({
   params,

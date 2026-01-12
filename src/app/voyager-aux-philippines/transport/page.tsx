@@ -18,9 +18,40 @@ export async function generateMetadata(): Promise<Metadata> {
     };
   }
 
+  const canonicalUrl = 'https://philippineasy.com/voyager-aux-philippines/transport';
+  const description = page.subtitle || 'Guide complet des transports aux Philippines : vols intérieurs, ferries, bus et vans.';
+
   return {
     title: page.title,
-    description: page.subtitle,
+    description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+    openGraph: {
+      title: page.title,
+      description,
+      url: canonicalUrl,
+      siteName: "Philippin'Easy",
+      locale: 'fr_FR',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: page.title,
+      description,
+      site: '@philippineasy',
+    },
   };
 }
 
