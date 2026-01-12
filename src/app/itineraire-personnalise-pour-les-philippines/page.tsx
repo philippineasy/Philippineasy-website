@@ -366,7 +366,7 @@ const ItinerairePage = () => {
                   }`}
                 >
                   {recommendedVariant === preview.variant && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-1 rounded-full text-xs font-bold shadow-lg">
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-accent text-primary border-2 border-primary px-4 py-1 rounded-full text-xs font-bold shadow-lg">
                       Recommande pour vous
                     </div>
                   )}
@@ -465,7 +465,7 @@ const ItinerairePage = () => {
                         : 'border-gray-200 hover:border-primary/50'
                     }`}
                   >
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-primary to-accent text-white px-4 py-1 rounded-full text-xs font-bold">
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-accent text-primary border-2 border-primary px-4 py-1 rounded-full text-xs font-bold shadow-lg">
                       Recommande
                     </div>
                     <div className="flex items-center justify-between mb-4 mt-2">
