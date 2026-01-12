@@ -2,9 +2,17 @@
 
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagic, faLock, faDownload, faSpinner, faCheck, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
-import { faWhatsapp, faTelegram } from '@fortawesome/free-brands-svg-icons';
+import { faMagic, faLock, faSpinner, faCheck, faRocket, faStar, faCrown, faCircleInfo, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { CustomSelect, SelectOption } from '@/components/shared/CustomSelect';
+import {
+  PRICING_GRID,
+  DURATION_LABELS,
+  OFFER_LABELS,
+  MODIFICATION_PRICES,
+  formatPrice,
+  type Duration,
+  type OfferType
+} from '@/config/itinerary-pricing';
 
 // Types pour les itinéraires
 interface ItineraryPreview {
@@ -15,9 +23,6 @@ interface ItineraryPreview {
   highlights: string[];
   teaser_days: { day: number; summary: string }[];
 }
-
-// Metadata for SEO - Note: Metadata must be in a separate layout.tsx or use Next.js App Router patterns
-// Since this is a 'use client' component, metadata should be in a parent layout
 
 const travelTypeOptions: SelectOption[] = [
   { value: 'solo', label: 'Voyage solo' },
@@ -37,21 +42,20 @@ const durationOptions: SelectOption[] = [
 ];
 
 const budgetOptions: SelectOption[] = [
-  { value: 'eco', label: 'Économique (< 800€)' },
+  { value: 'eco', label: 'Economique (< 800€)' },
   { value: 'standard', label: 'Standard (800€ - 1500€)' },
   { value: 'comfort', label: 'Confort (1500€ - 2500€)' },
   { value: 'luxury', label: 'Luxe (> 2500€)' },
 ];
 
 const tripStyleOptions: SelectOption[] = [
-  { value: 'relax', label: 'Détente et plage' },
+  { value: 'relax', label: 'Detente et plage' },
   { value: 'adventure', label: 'Aventure et nature' },
   { value: 'culture', label: 'Culture et histoire' },
-  { value: 'diving', label: 'Plongée / Snorkeling' },
-  { value: 'mix', label: 'Mix équilibré' },
+  { value: 'diving', label: 'Plongee / Snorkeling' },
+  { value: 'mix', label: 'Mix equilibre' },
 ];
 
-// Fonction pour déterminer l'itinéraire recommandé basé sur le style de voyage
 const getRecommendedVariant = (style: string): 'relax' | 'balanced' | 'adventure' => {
   switch (style) {
     case 'relax':
@@ -69,21 +73,21 @@ const getRecommendedVariant = (style: string): 'relax' | 'balanced' | 'adventure
 const ItinerairePage = () => {
   const [showResult, setShowResult] = useState(false);
   const [travelType, setTravelType] = useState('');
-  const [duration, setDuration] = useState('');
+  const [duration, setDuration] = useState<Duration | ''>('');
   const [budget, setBudget] = useState('');
   const [tripStyle, setTripStyle] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
   const [additionalInfo, setAdditionalInfo] = useState('');
 
-  // États pour la génération
+  // Etats pour la generation
   const [isLoading, setIsLoading] = useState(false);
   const [generationId, setGenerationId] = useState<string | null>(null);
   const [previews, setPreviews] = useState<ItineraryPreview[]>([]);
   const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
   const [recommendedVariant, setRecommendedVariant] = useState<string | null>(null);
+  const [selectedOffer, setSelectedOffer] = useState<OfferType>('express');
   const [error, setError] = useState<string | null>(null);
 
-  // Gestion des intérêts (max 3)
   const handleInterestChange = (value: string, checked: boolean) => {
     if (checked && interests.length < 3) {
       setInterests([...interests, value]);
@@ -93,7 +97,6 @@ const ItinerairePage = () => {
   };
 
   const handleGenerate = async () => {
-    // Validation
     if (!travelType || !duration || !budget || !tripStyle) {
       setError('Veuillez remplir tous les champs obligatoires.');
       return;
@@ -122,13 +125,12 @@ const ItinerairePage = () => {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Erreur lors de la génération');
+        throw new Error(data.error || 'Erreur lors de la generation');
       }
 
       setGenerationId(data.generation_id);
       setPreviews(data.previews);
 
-      // Déterminer et pré-sélectionner l'itinéraire recommandé
       const recommended = getRecommendedVariant(tripStyle);
       setRecommendedVariant(recommended);
       setSelectedVariant(recommended);
@@ -145,77 +147,179 @@ const ItinerairePage = () => {
     }
   };
 
+  const handlePayment = async (offer: OfferType) => {
+    if (!generationId || !selectedVariant || !duration) return;
+
+    const pricing = PRICING_GRID[offer][duration as Duration];
+    if (!pricing || pricing.price === 0) {
+      // Sur devis pour conciergerie +1 mois
+      window.location.href = '/contact?subject=conciergerie-voyage';
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/itinerary/payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          generation_id: generationId,
+          selected_variant: selectedVariant,
+          offer_type: offer,
+          duration: duration,
+          price_id: pricing.priceId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Erreur lors du paiement');
+      }
+
+      // Rediriger vers Stripe Checkout ou afficher le formulaire de paiement
+      // Pour l'instant on utilise le client_secret pour Elements
+      window.location.href = `/checkout/itinerary?client_secret=${data.clientSecret}&generation_id=${generationId}`;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erreur lors du paiement');
+    }
+  };
+
+  const currentPricing = duration ? {
+    express: PRICING_GRID.express[duration as Duration],
+    premium: PRICING_GRID.premium[duration as Duration],
+    conciergerie: PRICING_GRID.conciergerie[duration as Duration],
+  } : null;
+
   return (
     <main className="container mx-auto px-4 py-16">
-      <h1 className="text-4xl font-bold text-center mb-4">Créez Votre <span className="text-primary">Itinéraire Idéal</span></h1>
-      <p className="text-center text-lg text-muted-foreground mb-12 max-w-3xl mx-auto">
-        Laissez notre assistant IA concevoir le voyage de vos rêves aux Philippines. Indiquez vos préférences, nous faisons le reste !
+      {/* Header */}
+      <h1 className="text-4xl font-bold text-center mb-4">
+        Creez Votre <span className="text-primary">Itineraire Ideal</span> aux Philippines
+      </h1>
+      <p className="text-center text-lg text-muted-foreground mb-8 max-w-3xl mx-auto">
+        Notre assistant IA concoit le voyage de vos reves en quelques minutes. Indiquez vos preferences, choisissez votre formule, partez serein !
       </p>
 
+      {/* Comment ca marche */}
+      <div className="bg-gradient-to-r from-primary/5 to-accent/5 rounded-2xl p-6 md:p-8 mb-12 max-w-4xl mx-auto border border-primary/20">
+        <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+          <FontAwesomeIcon icon={faCircleInfo} className="text-primary" />
+          Comment ca marche ?
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="text-center">
+            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+              <span className="text-xl font-bold text-primary">1</span>
+            </div>
+            <h3 className="font-semibold mb-1">Decrivez votre voyage</h3>
+            <p className="text-sm text-muted-foreground">Remplissez le formulaire (2 min)</p>
+            <p className="text-xs text-green-600 font-medium mt-1">GRATUIT</p>
+          </div>
+          <div className="text-center">
+            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+              <span className="text-xl font-bold text-primary">2</span>
+            </div>
+            <h3 className="font-semibold mb-1">Recevez 3 propositions</h3>
+            <p className="text-sm text-muted-foreground">Notre IA cree 3 itineraires adaptes</p>
+            <p className="text-xs text-green-600 font-medium mt-1">GRATUIT</p>
+          </div>
+          <div className="text-center">
+            <div className="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-3">
+              <span className="text-xl font-bold text-accent">3</span>
+            </div>
+            <h3 className="font-semibold mb-1">Debloquez le complet</h3>
+            <p className="text-sm text-muted-foreground">Programme detaille, liens, conseils</p>
+            <p className="text-xs text-accent font-medium mt-1">DES 9,99€</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Formulaire */}
       <div className="bg-card rounded-xl shadow-2xl max-w-4xl mx-auto p-6 md:p-10 border-2 border-primary">
         <form className="space-y-6">
-          <h2 className="text-2xl font-semibold text-primary/90 mb-6 border-b border-primary/20 pb-3">Dites-nous ce que vous recherchez :</h2>
+          <h2 className="text-2xl font-semibold text-primary/90 mb-6 border-b border-primary/20 pb-3">
+            Dites-nous ce que vous recherchez :
+          </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-primary/90 mb-1 font-medium" htmlFor="travel-type-page">Type de voyage</label>
+              <label className="block text-primary/90 mb-1 font-medium">Type de voyage</label>
               <CustomSelect
                 options={travelTypeOptions}
                 value={travelType}
                 onChange={(value) => setTravelType(value as string)}
-                placeholder="Sélectionnez..."
+                placeholder="Selectionnez..."
               />
             </div>
             <div>
-              <label className="block text-primary/90 mb-1 font-medium" htmlFor="duration-page">Durée du séjour</label>
+              <label className="block text-primary/90 mb-1 font-medium">Duree du sejour</label>
               <CustomSelect
                 options={durationOptions}
                 value={duration}
-                onChange={(value) => setDuration(value as string)}
-                placeholder="Sélectionnez..."
+                onChange={(value) => setDuration(value as Duration)}
+                placeholder="Selectionnez..."
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-primary/90 mb-1 font-medium" htmlFor="budget-page">Budget (par personne, hors vol inter)</label>
+              <label className="block text-primary/90 mb-1 font-medium">Budget (par personne, hors vol inter)</label>
               <CustomSelect
                 options={budgetOptions}
                 value={budget}
                 onChange={(value) => setBudget(value as string)}
-                placeholder="Sélectionnez..."
+                placeholder="Selectionnez..."
               />
             </div>
             <div>
-              <label className="block text-primary/90 mb-1 font-medium" htmlFor="trip-style-page">Style de voyage principal</label>
+              <label className="block text-primary/90 mb-1 font-medium">Style de voyage principal</label>
               <CustomSelect
                 options={tripStyleOptions}
                 value={tripStyle}
                 onChange={(value) => setTripStyle(value as string)}
-                placeholder="Sélectionnez..."
+                placeholder="Selectionnez..."
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-primary/90 mb-2 font-medium">Vos centres d&apos;intérêt principaux (cochez jusqu&apos;à 3) :</label>
+            <label className="block text-primary/90 mb-2 font-medium">Vos centres d&apos;interet (max 3) :</label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <label className="flex items-center p-3 border border-primary/20 rounded-lg hover:bg-primary/10 hover:border-primary/60 cursor-pointer transition-all duration-150"><input type="checkbox" name="interests-page" value="beaches" checked={interests.includes('beaches')} onChange={(e) => handleInterestChange('beaches', e.target.checked)} className="mr-2 h-4 w-4 text-primary focus:ring-ring rounded" />Plages</label>
-              <label className="flex items-center p-3 border border-primary/20 rounded-lg hover:bg-primary/10 hover:border-primary/60 cursor-pointer transition-all duration-150"><input type="checkbox" name="interests-page" value="snorkeling" checked={interests.includes('snorkeling')} onChange={(e) => handleInterestChange('snorkeling', e.target.checked)} className="mr-2 h-4 w-4 text-primary focus:ring-ring rounded" />Plongée/Snorkel</label>
-              <label className="flex items-center p-3 border border-primary/20 rounded-lg hover:bg-primary/10 hover:border-primary/60 cursor-pointer transition-all duration-150"><input type="checkbox" name="interests-page" value="hiking" checked={interests.includes('hiking')} onChange={(e) => handleInterestChange('hiking', e.target.checked)} className="mr-2 h-4 w-4 text-primary focus:ring-ring rounded" />Randonnée/Nature</label>
-              <label className="flex items-center p-3 border border-primary/20 rounded-lg hover:bg-primary/10 hover:border-primary/60 cursor-pointer transition-all duration-150"><input type="checkbox" name="interests-page" value="culture" checked={interests.includes('culture')} onChange={(e) => handleInterestChange('culture', e.target.checked)} className="mr-2 h-4 w-4 text-primary focus:ring-ring rounded" />Culture/Histoire</label>
-              <label className="flex items-center p-3 border border-primary/20 rounded-lg hover:bg-primary/10 hover:border-primary/60 cursor-pointer transition-all duration-150"><input type="checkbox" name="interests-page" value="food" checked={interests.includes('food')} onChange={(e) => handleInterestChange('food', e.target.checked)} className="mr-2 h-4 w-4 text-primary focus:ring-ring rounded" />Gastronomie</label>
-              <label className="flex items-center p-3 border border-primary/20 rounded-lg hover:bg-primary/10 hover:border-primary/60 cursor-pointer transition-all duration-150"><input type="checkbox" name="interests-page" value="nightlife" checked={interests.includes('nightlife')} onChange={(e) => handleInterestChange('nightlife', e.target.checked)} className="mr-2 h-4 w-4 text-primary focus:ring-ring rounded" />Vie nocturne</label>
-              <label className="flex items-center p-3 border border-primary/20 rounded-lg hover:bg-primary/10 hover:border-primary/60 cursor-pointer transition-all duration-150"><input type="checkbox" name="interests-page" value="surfing" checked={interests.includes('surfing')} onChange={(e) => handleInterestChange('surfing', e.target.checked)} className="mr-2 h-4 w-4 text-primary focus:ring-ring rounded" />Surf</label>
-              <label className="flex items-center p-3 border border-primary/20 rounded-lg hover:bg-primary/10 hover:border-primary/60 cursor-pointer transition-all duration-150"><input type="checkbox" name="interests-page" value="offbeaten" checked={interests.includes('offbeaten')} onChange={(e) => handleInterestChange('offbeaten', e.target.checked)} className="mr-2 h-4 w-4 text-primary focus:ring-ring rounded" />Hors sentiers battus</label>
-              <label className="flex items-center p-3 border border-primary/20 rounded-lg hover:bg-primary/10 hover:border-primary/60 cursor-pointer transition-all duration-150"><input type="checkbox" name="interests-page" value="local" checked={interests.includes('local')} onChange={(e) => handleInterestChange('local', e.target.checked)} className="mr-2 h-4 w-4 text-primary focus:ring-ring rounded" />Rencontres locales</label>
+              {[
+                { value: 'beaches', label: 'Plages' },
+                { value: 'snorkeling', label: 'Plongee/Snorkel' },
+                { value: 'hiking', label: 'Randonnee/Nature' },
+                { value: 'culture', label: 'Culture/Histoire' },
+                { value: 'food', label: 'Gastronomie' },
+                { value: 'nightlife', label: 'Vie nocturne' },
+                { value: 'surfing', label: 'Surf' },
+                { value: 'offbeaten', label: 'Hors sentiers battus' },
+                { value: 'local', label: 'Rencontres locales' },
+              ].map((interest) => (
+                <label key={interest.value} className="flex items-center p-3 border border-primary/20 rounded-lg hover:bg-primary/10 hover:border-primary/60 cursor-pointer transition-all duration-150">
+                  <input
+                    type="checkbox"
+                    value={interest.value}
+                    checked={interests.includes(interest.value)}
+                    onChange={(e) => handleInterestChange(interest.value, e.target.checked)}
+                    className="mr-2 h-4 w-4 text-primary focus:ring-ring rounded"
+                  />
+                  {interest.label}
+                </label>
+              ))}
             </div>
           </div>
 
           <div>
-            <label className="block text-primary/90 mb-1 font-medium" htmlFor="additional-info-page">Préférences ou informations complémentaires ?</label>
-            <textarea id="additional-info-page" rows={3} value={additionalInfo} onChange={(e) => setAdditionalInfo(e.target.value)} className="w-full px-4 py-2 border border-primary/40 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring bg-primary/10 hover:border-primary focus:bg-card" placeholder="Ex: rythme souhaité (relax/intense), îles à éviter/privilégier, voyage avec enfants, besoins spécifiques..."></textarea>
+            <label className="block text-primary/90 mb-1 font-medium">Preferences ou informations complementaires ?</label>
+            <textarea
+              rows={3}
+              value={additionalInfo}
+              onChange={(e) => setAdditionalInfo(e.target.value)}
+              className="w-full px-4 py-2 border border-primary/40 rounded-lg focus:outline-none focus:ring-2 focus:ring-ring bg-primary/10 hover:border-primary focus:bg-card"
+              placeholder="Ex: rythme souhaite (relax/intense), iles a eviter/privilegier, voyage avec enfants..."
+            />
           </div>
 
           {error && (
@@ -225,25 +329,32 @@ const ItinerairePage = () => {
           )}
 
           <div className="border-t border-primary/20 mt-6 pt-6 text-center">
-            <button type="button" onClick={handleGenerate} disabled={isLoading} className="w-full md:w-auto px-8 py-4 bg-accent text-card-foreground text-lg rounded-lg hover:bg-accent/90 transition duration-300 pulse-animation font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+            <button
+              type="button"
+              onClick={handleGenerate}
+              disabled={isLoading}
+              className="w-full md:w-auto px-8 py-4 bg-accent text-card-foreground text-lg rounded-lg hover:bg-accent/90 transition duration-300 pulse-animation font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               {isLoading ? (
-                <><FontAwesomeIcon icon={faSpinner} className="mr-2 animate-spin" /> Génération en cours...</>
+                <><FontAwesomeIcon icon={faSpinner} className="mr-2 animate-spin" /> Generation en cours...</>
               ) : (
-                <><FontAwesomeIcon icon={faMagic} className="mr-2" /> Générer mon Itinéraire Magique !</>
+                <><FontAwesomeIcon icon={faMagic} className="mr-2" /> Generer mon Itineraire (Gratuit)</>
               )}
             </button>
             <p className="text-sm text-muted-foreground mt-4">
-              <FontAwesomeIcon icon={faLock} className="mr-1" /> Nous utilisons ces informations uniquement pour créer votre proposition d&apos;itinéraire.
+              <FontAwesomeIcon icon={faLock} className="mr-1" /> Vos donnees sont utilisees uniquement pour creer votre itineraire.
             </p>
           </div>
         </form>
 
+        {/* Resultats */}
         {showResult && previews.length > 0 && (
           <div id="itinerary-result" className="mt-10 border-t pt-8">
-            <h2 className="text-2xl font-semibold text-foreground mb-2">Choisissez Votre Itinéraire :</h2>
-            <p className="text-muted-foreground mb-6">Nous avons créé 3 propositions adaptées à vos préférences. Sélectionnez celle qui vous convient !</p>
+            <h2 className="text-2xl font-semibold text-foreground mb-2">Choisissez Votre Itineraire :</h2>
+            <p className="text-muted-foreground mb-6">3 propositions adaptees a vos preferences. Selectionnez celle qui vous plait !</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Previews des 3 variantes */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
               {previews.map((preview) => (
                 <div
                   key={preview.variant}
@@ -254,10 +365,9 @@ const ItinerairePage = () => {
                       : 'border-transparent hover:border-primary/50 hover:shadow-xl'
                   }`}
                 >
-                  {/* Badge Recommandé */}
                   {recommendedVariant === preview.variant && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-1 rounded-full text-xs font-bold shadow-lg">
-                      ⭐ Recommandé pour vous
+                      Recommande pour vous
                     </div>
                   )}
 
@@ -267,7 +377,7 @@ const ItinerairePage = () => {
                       preview.variant === 'balanced' ? 'bg-green-100 text-green-700' :
                       'bg-orange-100 text-orange-700'
                     }`}>
-                      {preview.variant === 'relax' ? '🧘 Relax' : preview.variant === 'balanced' ? '⚖️ Équilibré' : '🏔️ Aventure'}
+                      {preview.variant === 'relax' ? 'Relax' : preview.variant === 'balanced' ? 'Equilibre' : 'Aventure'}
                     </span>
                     {selectedVariant === preview.variant && (
                       <FontAwesomeIcon icon={faCheck} className="text-primary" />
@@ -289,13 +399,13 @@ const ItinerairePage = () => {
                   </div>
 
                   <div className="border-t border-primary/10 pt-3 mt-3">
-                    <p className="text-xs font-semibold text-primary/80 mb-2">Aperçu :</p>
+                    <p className="text-xs font-semibold text-primary/80 mb-2">Apercu :</p>
                     {preview.teaser_days?.map((day) => (
                       <p key={day.day} className="text-xs text-muted-foreground mb-1">
                         <strong>Jour {day.day}:</strong> {day.summary}
                       </p>
                     ))}
-                    <p className="text-xs text-muted-foreground italic mt-2">... et plus encore après déblocage</p>
+                    <p className="text-xs text-muted-foreground italic mt-2">... et plus encore apres deblocage</p>
                   </div>
 
                   <div className="mt-4 pt-3 border-t border-primary/10">
@@ -305,45 +415,155 @@ const ItinerairePage = () => {
               ))}
             </div>
 
-            {selectedVariant && (
-              <div className="mt-8 p-6 bg-primary/5 rounded-xl border border-primary/20">
-                <h3 className="text-xl font-semibold mb-4">
-                  Débloquez votre itinéraire <span className="text-primary">{selectedVariant === 'relax' ? 'Relax' : selectedVariant === 'balanced' ? 'Équilibré' : 'Aventure'}</span> pour <span className="text-primary font-bold">9.99€</span>
+            {/* Selection de l'offre */}
+            {selectedVariant && currentPricing && (
+              <div className="mt-8">
+                <h3 className="text-xl font-semibold mb-6 text-center">
+                  Choisissez votre formule pour <span className="text-primary">{DURATION_LABELS[duration as Duration]}</span>
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <div className="bg-card p-4 rounded-lg border border-primary/20">
-                    <h4 className="font-semibold text-primary mb-2">✅ Inclus immédiatement</h4>
-                    <ul className="text-sm text-muted-foreground space-y-1">
-                      <li>• Programme COMPLET jour par jour</li>
-                      <li>• Hébergements recommandés</li>
-                      <li>• Liens Google Maps pour chaque lieu</li>
-                      <li>• Conseils pratiques et budget détaillé</li>
-                      <li>• Livraison par Email ou Telegram</li>
-                    </ul>
-                  </div>
-                  <div className="bg-card p-4 rounded-lg border border-primary/20">
-                    <h4 className="font-semibold text-primary mb-2">🎁 Bonus offert</h4>
-                    <ul className="text-sm text-muted-foreground space-y-1">
-                      <li>• Résumé avancé des 2 autres itinéraires</li>
-                      <li>• Aperçu des jours 1-3 de chaque</li>
-                      <li>• Comparez sans regret !</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-4 justify-center">
-                  <button
-                    onClick={() => alert('Paiement Stripe - À implémenter')}
-                    className="px-8 py-4 bg-primary text-card-foreground rounded-lg hover:bg-primary/90 font-semibold transition-all text-lg shadow-lg hover:shadow-xl"
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* EXPRESS */}
+                  <div
+                    onClick={() => setSelectedOffer('express')}
+                    className={`bg-card p-6 rounded-xl border-2 cursor-pointer transition-all ${
+                      selectedOffer === 'express'
+                        ? 'border-primary shadow-lg scale-[1.02]'
+                        : 'border-gray-200 hover:border-primary/50'
+                    }`}
                   >
-                    <FontAwesomeIcon icon={faLock} className="mr-2" /> Débloquer mon itinéraire
-                  </button>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <FontAwesomeIcon icon={faRocket} className="text-blue-500" />
+                        <span className="font-bold text-lg">{OFFER_LABELS.express.name}</span>
+                      </div>
+                      <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">
+                        {OFFER_LABELS.express.badge}
+                      </span>
+                    </div>
+                    <p className="text-2xl font-bold text-primary mb-2">
+                      {formatPrice(currentPricing.express.price)}
+                    </p>
+                    <p className="text-sm text-muted-foreground mb-4">{OFFER_LABELS.express.description}</p>
+                    <ul className="space-y-2 mb-4">
+                      {OFFER_LABELS.express.features.map((feature, idx) => (
+                        <li key={idx} className="text-sm flex items-start gap-2">
+                          <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-xs text-red-500">Aucune modification incluse</p>
+                  </div>
+
+                  {/* PREMIUM */}
+                  <div
+                    onClick={() => setSelectedOffer('premium')}
+                    className={`bg-card p-6 rounded-xl border-2 cursor-pointer transition-all relative ${
+                      selectedOffer === 'premium'
+                        ? 'border-primary shadow-lg scale-[1.02]'
+                        : 'border-gray-200 hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-primary to-accent text-white px-4 py-1 rounded-full text-xs font-bold">
+                      Recommande
+                    </div>
+                    <div className="flex items-center justify-between mb-4 mt-2">
+                      <div className="flex items-center gap-2">
+                        <FontAwesomeIcon icon={faStar} className="text-yellow-500" />
+                        <span className="font-bold text-lg">{OFFER_LABELS.premium.name}</span>
+                      </div>
+                      <span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-full">
+                        {OFFER_LABELS.premium.badge}
+                      </span>
+                    </div>
+                    <p className="text-2xl font-bold text-primary mb-2">
+                      {formatPrice(currentPricing.premium.price)}
+                    </p>
+                    <p className="text-sm text-muted-foreground mb-4">{OFFER_LABELS.premium.description}</p>
+                    <ul className="space-y-2 mb-4">
+                      {OFFER_LABELS.premium.features.map((feature, idx) => (
+                        <li key={idx} className="text-sm flex items-start gap-2">
+                          <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-xs text-green-600 font-medium">
+                      {currentPricing.premium.modifications} modification{currentPricing.premium.modifications > 1 ? 's' : ''} incluse{currentPricing.premium.modifications > 1 ? 's' : ''}
+                    </p>
+                  </div>
+
+                  {/* CONCIERGERIE */}
+                  <div
+                    onClick={() => setSelectedOffer('conciergerie')}
+                    className={`bg-card p-6 rounded-xl border-2 cursor-pointer transition-all ${
+                      selectedOffer === 'conciergerie'
+                        ? 'border-primary shadow-lg scale-[1.02]'
+                        : 'border-gray-200 hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <FontAwesomeIcon icon={faCrown} className="text-purple-500" />
+                        <span className="font-bold text-lg">{OFFER_LABELS.conciergerie.name}</span>
+                      </div>
+                      <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full">
+                        {OFFER_LABELS.conciergerie.badge}
+                      </span>
+                    </div>
+                    <p className="text-2xl font-bold text-primary mb-2">
+                      {currentPricing.conciergerie.price > 0
+                        ? formatPrice(currentPricing.conciergerie.price)
+                        : 'Sur devis'
+                      }
+                    </p>
+                    <p className="text-sm text-muted-foreground mb-4">{OFFER_LABELS.conciergerie.description}</p>
+                    <ul className="space-y-2 mb-4">
+                      {OFFER_LABELS.conciergerie.features.map((feature, idx) => (
+                        <li key={idx} className="text-sm flex items-start gap-2">
+                          <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-xs text-green-600 font-medium">
+                      {currentPricing.conciergerie.modifications > 0
+                        ? `${currentPricing.conciergerie.modifications} modifications incluses`
+                        : 'Modifications illimitees'
+                      }
+                    </p>
+                  </div>
                 </div>
 
-                <p className="text-xs text-muted-foreground mt-4 text-center">
-                  💳 Paiement sécurisé par Stripe • Livraison instantanée par email ou Telegram
-                </p>
+                {/* Modifications supplementaires */}
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                  <p className="text-sm text-muted-foreground text-center">
+                    <strong>Besoin de plus de modifications ?</strong> Ajoutez-en a tout moment :
+                    {Object.entries(MODIFICATION_PRICES).map(([key, value], idx) => (
+                      <span key={key}>
+                        {idx > 0 && ' |'} {value.description} <strong>{formatPrice(value.price)}</strong>
+                      </span>
+                    ))}
+                  </p>
+                </div>
+
+                {/* Bouton de paiement */}
+                <div className="mt-8 text-center">
+                  <button
+                    onClick={() => handlePayment(selectedOffer)}
+                    className="px-10 py-4 bg-primary text-white text-lg rounded-lg hover:bg-primary/90 font-semibold transition-all shadow-lg hover:shadow-xl"
+                  >
+                    <FontAwesomeIcon icon={faArrowRight} className="mr-2" />
+                    {currentPricing[selectedOffer].price > 0
+                      ? `Debloquer pour ${formatPrice(currentPricing[selectedOffer].price)}`
+                      : 'Demander un devis'
+                    }
+                  </button>
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Paiement securise par Stripe • Livraison instantanee par email
+                  </p>
+                </div>
               </div>
             )}
           </div>
