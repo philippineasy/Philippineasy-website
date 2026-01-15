@@ -6,6 +6,30 @@ import { createClient } from '@/utils/supabase/server';
 import { getHomepageArticles } from '@/services/articleService';
 import dynamic from 'next/dynamic';
 import HomepageJsonLd from '@/components/shared/HomepageJsonLd';
+import FAQSchema from '@/components/shared/FAQSchema';
+
+const homepageFAQs = [
+  {
+    question: "Quel budget prévoir pour un voyage aux Philippines ?",
+    answer: "Pour un voyage de 2-3 semaines aux Philippines, comptez entre 1500€ et 3000€ tout compris (vols, hébergement, activités, repas). Le coût de la vie sur place est très abordable : environ 30-50€/jour pour un voyageur mid-range."
+  },
+  {
+    question: "Quel visa pour voyager aux Philippines en 2026 ?",
+    answer: "Les ressortissants français, belges, suisses et canadiens bénéficient d'un visa gratuit de 30 jours à l'arrivée. Il est possible de l'étendre jusqu'à 36 mois via des extensions successives auprès du Bureau of Immigration."
+  },
+  {
+    question: "Quelle est la meilleure période pour visiter les Philippines ?",
+    answer: "La meilleure période est la saison sèche de novembre à mai. Évitez juin à octobre (mousson). Pour Palawan et les Visayas, privilégiez janvier-avril. Pour le surf à Siargao, septembre-novembre offre les meilleures vagues."
+  },
+  {
+    question: "Comment s'expatrier aux Philippines ?",
+    answer: "Pour s'expatrier aux Philippines, plusieurs options de visa existent : le visa SRRV pour les retraités (dès 35 ans avec dépôt bancaire), le visa investisseur, ou le visa 13(a) par mariage avec un(e) Philippin(e). Notre guide complet détaille toutes les démarches."
+  },
+  {
+    question: "Quel est le coût de la vie aux Philippines pour un expatrié ?",
+    answer: "Un expatrié peut vivre confortablement aux Philippines avec 1000-1500€/mois à Cebu ou en province, et 1500-2500€/mois à Manille. Cela inclut le logement, la nourriture, les transports et les loisirs."
+  }
+];
 
 const BestDealsSection = dynamic(() => import('@/components/homepage/BestDealsSection').then(mod => mod.BestDealsSection));
 const FeaturedNewsSection = dynamic(() => import('@/components/homepage/FeaturedNewsSection').then(mod => mod.FeaturedNewsSection));
@@ -22,6 +46,7 @@ export default async function HomePage() {
   return (
     <div>
       <HomepageJsonLd />
+      <FAQSchema faqs={homepageFAQs} />
       {/* Hero Section */}
       <section className="relative hero flex items-center justify-center text-center px-4 h-[90vh]">
         <Image
@@ -37,10 +62,15 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-black opacity-50 z-10"></div>
         <div className="relative z-20">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
-            Découvrez les <span className="text-accent/90">Philippines</span> Autrement
+            Voyage & Expatriation aux <span className="text-accent/90">Philippines</span>
           </h1>
-          <p className="text-xl text-white mb-8 max-w-2xl mx-auto">
-            Votre guide complet pour voyager, vivre et vous épanouir dans l'archipel des 7 641 îles.
+          <p className="text-xl text-white mb-4 max-w-2xl mx-auto">
+            Le guide francophone #1 pour voyager, vivre et s'installer dans l'archipel aux 7 641 îles.
+          </p>
+          <p className="text-sm text-white/80 mb-8">
+            <span className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm">
+              <span className="text-accent">★</span> +10 000 voyageurs accompagnés depuis 2020
+            </span>
           </p>
           <div className="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4">
             <Link href="/vivre-aux-philippines" className="px-8 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition duration-300 text-lg font-semibold">

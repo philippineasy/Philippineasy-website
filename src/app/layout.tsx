@@ -23,8 +23,9 @@ const poppins = Poppins({
 
 const siteConfig = {
   name: "Philippin'Easy",
+  title: "Voyage & Expatriation Philippines 2026 | Guide Complet - Philippin'Easy",
   url: "https://philippineasy.com",
-  description: "Explorez les Philippines comme jamais auparavant avec des itinéraires personnalisés, des conseils de voyage, et une communauté active pour vivre, voyager, et s'installer.",
+  description: "Le guide francophone #1 pour voyager et vivre aux Philippines. Itinéraires IA personnalisés, visas, coût de la vie, forum communautaire. +10 000 voyageurs accompagnés.",
   ogImage: "https://philippineasy.com/imagesHero/couple-rencontre-aux-philippines.webp",
   links: {
     twitter: "https://twitter.com/philippineasy",
@@ -32,26 +33,29 @@ const siteConfig = {
   },
   keywords: [
     "Philippines",
-    "voyage Philippines",
+    "voyage Philippines 2026",
     "vivre aux Philippines",
     "s'installer aux Philippines",
     "expatriation Philippines",
-    "tourisme Philippines",
+    "coût de la vie Philippines",
+    "visa Philippines",
+    "itinéraire Philippines",
     "guide de voyage Philippines",
     "Manille",
     "Cebu",
     "Palawan",
     "Boracay",
+    "Siargao",
     "bons plans Philippines",
     "rencontre Philippines",
-    "forum Philippines",
+    "forum Philippines francophone",
   ],
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: siteConfig.name,
+    default: siteConfig.title,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -67,20 +71,21 @@ export const metadata: Metadata = {
     type: "website",
     locale: "fr_FR",
     url: siteConfig.url,
-    title: siteConfig.name,
+    title: siteConfig.title,
     description: siteConfig.description,
+    siteName: siteConfig.name,
     images: [
       {
         url: siteConfig.ogImage,
         width: 1200,
         height: 630,
-        alt: siteConfig.name,
+        alt: "Philippin'Easy - Guide voyage et expatriation Philippines",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: siteConfig.name,
+    title: siteConfig.title,
     description: siteConfig.description,
     images: [siteConfig.ogImage],
     creator: "@philippineasy",
