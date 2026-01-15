@@ -459,7 +459,7 @@ const ItinerairePage = () => {
                     className={`bg-card p-6 rounded-xl border-2 cursor-pointer transition-all ${
                       selectedOffer === 'express'
                         ? 'border-primary shadow-lg scale-[1.02]'
-                        : 'border-gray-200 hover:border-primary/50'
+                        : 'border-border hover:border-primary/50'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-4 mt-4">
@@ -492,7 +492,7 @@ const ItinerairePage = () => {
                     className={`bg-card p-6 rounded-xl border-2 cursor-pointer transition-all relative ${
                       selectedOffer === 'premium'
                         ? 'border-primary shadow-lg scale-[1.02]'
-                        : 'border-gray-200 hover:border-primary/50'
+                        : 'border-border hover:border-primary/50'
                     }`}
                   >
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-accent text-primary border-2 border-primary px-4 py-1 rounded-full text-xs font-bold shadow-lg">
@@ -530,7 +530,7 @@ const ItinerairePage = () => {
                     className={`bg-card p-6 rounded-xl border-2 cursor-pointer transition-all ${
                       selectedOffer === 'conciergerie'
                         ? 'border-primary shadow-lg scale-[1.02]'
-                        : 'border-gray-200 hover:border-primary/50'
+                        : 'border-border hover:border-primary/50'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-4 mt-4">
@@ -567,7 +567,7 @@ const ItinerairePage = () => {
                 </div>
 
                 {/* Modifications supplementaires */}
-                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                <div className="mt-6 p-4 bg-muted rounded-lg">
                   <p className="text-sm text-muted-foreground text-center">
                     <strong>Besoin de plus de modifications ?</strong> Ajoutez-en a tout moment :
                     {Object.entries(MODIFICATION_PRICES).map(([key, value], idx) => (

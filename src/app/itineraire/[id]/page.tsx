@@ -30,7 +30,7 @@ import dynamic from 'next/dynamic';
 const ItineraryMap = dynamic(() => import('@/components/itinerary/ItineraryMap'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[400px] rounded-xl bg-gray-100 flex items-center justify-center border-2 border-primary/20">
+    <div className="w-full h-[400px] rounded-xl bg-muted flex items-center justify-center border-2 border-primary/20">
       <div className="text-muted-foreground">Chargement de la carte...</div>
     </div>
   ),
@@ -271,11 +271,11 @@ export default function ItineraryPage({ params }: PageProps) {
   if (error) {
     return (
       <div className="container mx-auto px-4 py-16 pt-32 max-w-2xl">
-        <div className="bg-card p-8 rounded-xl border-2 border-red-200 text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FontAwesomeIcon icon={faExclamationTriangle} className="text-red-500 text-2xl" />
+        <div className="bg-card p-8 rounded-xl border-2 border-destructive/30 text-center">
+          <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <FontAwesomeIcon icon={faExclamationTriangle} className="text-destructive text-2xl" />
           </div>
-          <h1 className="text-xl font-bold text-red-600 mb-2">Erreur</h1>
+          <h1 className="text-xl font-bold text-destructive mb-2">Erreur</h1>
           <p className="text-muted-foreground mb-6">{error}</p>
           <Link
             href="/profil"
@@ -296,9 +296,9 @@ export default function ItineraryPage({ params }: PageProps) {
   const { selected_variant } = itinerary;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted">
       {/* Header sticky sous la navbar principale */}
-      <div className="bg-white border-b sticky top-32 z-20">
+      <div className="bg-card border-b sticky top-32 z-20">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -309,16 +309,16 @@ export default function ItineraryPage({ params }: PageProps) {
                 <FontAwesomeIcon icon={faArrowLeft} />
                 <span className="hidden sm:inline">Retour au profil</span>
               </Link>
-              <div className="h-6 w-px bg-gray-200" />
+              <div className="h-6 w-px bg-border" />
               <h1 className="font-bold text-lg text-primary truncate max-w-[200px] sm:max-w-none">
                 {selected_variant?.title || 'Mon Itinéraire'}
               </h1>
             </div>
 
             {/* Badge modifications */}
-            <div className="flex items-center gap-2 px-4 py-2 bg-green-50 rounded-lg border border-green-200">
-              <FontAwesomeIcon icon={faEdit} className="text-green-600 w-4 h-4" />
-              <span className="text-sm text-green-800">
+            <div className="flex items-center gap-2 px-4 py-2 bg-accent/20 rounded-lg border border-accent/40">
+              <FontAwesomeIcon icon={faEdit} className="text-accent w-4 h-4" />
+              <span className="text-sm text-foreground">
                 Modifications :{' '}
                 {isUnlimited ? (
                   <FontAwesomeIcon icon={faInfinity} className="w-4 h-4" />
@@ -391,19 +391,19 @@ export default function ItineraryPage({ params }: PageProps) {
                     {day.transport?.method && (
                       <div
                         id={`day-${day.day}-transport`}
-                        className="p-4 rounded-lg bg-blue-50 border border-blue-200"
+                        className="p-4 rounded-lg bg-primary/10 border border-primary/30"
                       >
                         <div className="flex items-center gap-2 mb-2">
-                          <FontAwesomeIcon icon={faBus} className="text-blue-600 w-4 h-4" />
-                          <span className="font-semibold text-blue-800">Transport</span>
+                          <FontAwesomeIcon icon={faBus} className="text-primary w-4 h-4" />
+                          <span className="font-semibold text-primary">Transport</span>
                         </div>
-                        <p className="text-blue-700">{day.transport.method}</p>
+                        <p className="text-foreground">{day.transport.method}</p>
                         {day.transport.from && day.transport.to && (
-                          <p className="text-sm text-blue-600 mt-1">
+                          <p className="text-sm text-muted-foreground mt-1">
                             {day.transport.from} → {day.transport.to}
                           </p>
                         )}
-                        <div className="flex gap-4 mt-2 text-sm text-blue-600">
+                        <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
                           {day.transport.duration && <span>⏱ {day.transport.duration}</span>}
                           {day.transport.cost && <span>💰 {day.transport.cost}</span>}
                           {day.transport.times && <span>🕐 Départs: {day.transport.times}</span>}
@@ -413,7 +413,7 @@ export default function ItineraryPage({ params }: PageProps) {
                             href={`https://maps.google.com/?q=${day.transport.coordinates.lat},${day.transport.coordinates.lng}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 mt-2 text-xs text-blue-600 hover:underline"
+                            className="inline-flex items-center gap-1 mt-2 text-xs text-primary hover:underline"
                           >
                             <FontAwesomeIcon icon={faMapMarkerAlt} className="w-3 h-3" />
                             Voir sur Google Maps
@@ -436,7 +436,7 @@ export default function ItineraryPage({ params }: PageProps) {
                             className={`p-4 rounded-lg transition-all duration-200 ${
                               selectedPointId === `day-${day.day}-act-${actIndex}`
                                 ? 'bg-primary/10 ring-2 ring-primary'
-                                : 'bg-gray-50 hover:bg-gray-100'
+                                : 'bg-muted hover:bg-muted/80'
                             }`}
                           >
                             <div className="flex items-start justify-between gap-4">
@@ -473,10 +473,10 @@ export default function ItineraryPage({ params }: PageProps) {
                                 </button>
                               ) : (
                                 <div className="relative group">
-                                  <button disabled className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed text-sm">
+                                  <button disabled className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted text-muted-foreground cursor-not-allowed text-sm">
                                     <FontAwesomeIcon icon={faLock} className="w-3 h-3" />
                                   </button>
-                                  <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                  <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-foreground text-background text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
                                     Passez en Premium pour modifier
                                   </div>
                                 </div>
@@ -490,7 +490,7 @@ export default function ItineraryPage({ params }: PageProps) {
                     {/* Repas */}
                     {(day.meals?.breakfast || day.meals?.lunch || day.meals?.dinner) && (
                       <div className="space-y-3">
-                        <h4 className="font-semibold text-orange-600 flex items-center gap-2">
+                        <h4 className="font-semibold text-accent flex items-center gap-2">
                           <FontAwesomeIcon icon={faUtensils} className="w-4 h-4" />
                           Où manger
                         </h4>
@@ -500,24 +500,24 @@ export default function ItineraryPage({ params }: PageProps) {
                               id={`day-${day.day}-breakfast`}
                               className={`p-3 rounded-lg ${
                                 selectedPointId === `day-${day.day}-breakfast`
-                                  ? 'bg-orange-100 ring-2 ring-orange-400'
-                                  : 'bg-orange-50'
+                                  ? 'bg-accent/30 ring-2 ring-accent'
+                                  : 'bg-accent/10'
                               }`}
                             >
-                              <p className="text-xs text-orange-600 mb-1">☀️ Petit-déjeuner</p>
-                              <p className="font-medium text-orange-800">{day.meals.breakfast.restaurant}</p>
+                              <p className="text-xs text-accent mb-1">☀️ Petit-déjeuner</p>
+                              <p className="font-medium text-foreground">{day.meals.breakfast.restaurant}</p>
                               {day.meals.breakfast.dish && (
-                                <p className="text-sm text-orange-700">{day.meals.breakfast.dish}</p>
+                                <p className="text-sm text-muted-foreground">{day.meals.breakfast.dish}</p>
                               )}
                               {day.meals.breakfast.cost && (
-                                <p className="text-xs text-orange-600 mt-1">{day.meals.breakfast.cost}</p>
+                                <p className="text-xs text-accent mt-1">{day.meals.breakfast.cost}</p>
                               )}
                               {day.meals.breakfast.coordinates && (
                                 <a
                                   href={`https://maps.google.com/?q=${day.meals.breakfast.coordinates.lat},${day.meals.breakfast.coordinates.lng}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 mt-1 text-xs text-orange-600 hover:underline"
+                                  className="inline-flex items-center gap-1 mt-1 text-xs text-accent hover:underline"
                                 >
                                   <FontAwesomeIcon icon={faMapMarkerAlt} className="w-2 h-2" />
                                   Maps
@@ -530,24 +530,24 @@ export default function ItineraryPage({ params }: PageProps) {
                               id={`day-${day.day}-lunch`}
                               className={`p-3 rounded-lg ${
                                 selectedPointId === `day-${day.day}-lunch`
-                                  ? 'bg-orange-100 ring-2 ring-orange-400'
-                                  : 'bg-orange-50'
+                                  ? 'bg-accent/30 ring-2 ring-accent'
+                                  : 'bg-accent/10'
                               }`}
                             >
-                              <p className="text-xs text-orange-600 mb-1">🌤 Déjeuner</p>
-                              <p className="font-medium text-orange-800">{day.meals.lunch.restaurant}</p>
+                              <p className="text-xs text-accent mb-1">🌤 Déjeuner</p>
+                              <p className="font-medium text-foreground">{day.meals.lunch.restaurant}</p>
                               {day.meals.lunch.dish && (
-                                <p className="text-sm text-orange-700">{day.meals.lunch.dish}</p>
+                                <p className="text-sm text-muted-foreground">{day.meals.lunch.dish}</p>
                               )}
                               {day.meals.lunch.cost && (
-                                <p className="text-xs text-orange-600 mt-1">{day.meals.lunch.cost}</p>
+                                <p className="text-xs text-accent mt-1">{day.meals.lunch.cost}</p>
                               )}
                               {day.meals.lunch.coordinates && (
                                 <a
                                   href={`https://maps.google.com/?q=${day.meals.lunch.coordinates.lat},${day.meals.lunch.coordinates.lng}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 mt-1 text-xs text-orange-600 hover:underline"
+                                  className="inline-flex items-center gap-1 mt-1 text-xs text-accent hover:underline"
                                 >
                                   <FontAwesomeIcon icon={faMapMarkerAlt} className="w-2 h-2" />
                                   Maps
@@ -560,24 +560,24 @@ export default function ItineraryPage({ params }: PageProps) {
                               id={`day-${day.day}-dinner`}
                               className={`p-3 rounded-lg ${
                                 selectedPointId === `day-${day.day}-dinner`
-                                  ? 'bg-orange-100 ring-2 ring-orange-400'
-                                  : 'bg-orange-50'
+                                  ? 'bg-accent/30 ring-2 ring-accent'
+                                  : 'bg-accent/10'
                               }`}
                             >
-                              <p className="text-xs text-orange-600 mb-1">🌙 Dîner</p>
-                              <p className="font-medium text-orange-800">{day.meals.dinner.restaurant}</p>
+                              <p className="text-xs text-accent mb-1">🌙 Dîner</p>
+                              <p className="font-medium text-foreground">{day.meals.dinner.restaurant}</p>
                               {day.meals.dinner.dish && (
-                                <p className="text-sm text-orange-700">{day.meals.dinner.dish}</p>
+                                <p className="text-sm text-muted-foreground">{day.meals.dinner.dish}</p>
                               )}
                               {day.meals.dinner.cost && (
-                                <p className="text-xs text-orange-600 mt-1">{day.meals.dinner.cost}</p>
+                                <p className="text-xs text-accent mt-1">{day.meals.dinner.cost}</p>
                               )}
                               {day.meals.dinner.coordinates && (
                                 <a
                                   href={`https://maps.google.com/?q=${day.meals.dinner.coordinates.lat},${day.meals.dinner.coordinates.lng}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 mt-1 text-xs text-orange-600 hover:underline"
+                                  className="inline-flex items-center gap-1 mt-1 text-xs text-accent hover:underline"
                                 >
                                   <FontAwesomeIcon icon={faMapMarkerAlt} className="w-2 h-2" />
                                   Maps
@@ -595,16 +595,16 @@ export default function ItineraryPage({ params }: PageProps) {
                         id={`day-${day.day}-accommodation`}
                         className={`p-4 rounded-lg ${
                           selectedPointId === `day-${day.day}-accommodation`
-                            ? 'bg-green-100 ring-2 ring-green-400'
-                            : 'bg-green-50'
+                            ? 'bg-secondary/30 ring-2 ring-secondary'
+                            : 'bg-secondary/10'
                         }`}
                       >
                         <div className="flex items-center gap-2 mb-2">
-                          <FontAwesomeIcon icon={faBed} className="text-green-600 w-4 h-4" />
-                          <span className="font-semibold text-green-800">Hébergement</span>
+                          <FontAwesomeIcon icon={faBed} className="text-secondary w-4 h-4" />
+                          <span className="font-semibold text-foreground">Hébergement</span>
                         </div>
-                        <p className="font-medium text-green-700">{day.accommodation.name}</p>
-                        <div className="flex gap-4 mt-1 text-sm text-green-600">
+                        <p className="font-medium text-foreground">{day.accommodation.name}</p>
+                        <div className="flex gap-4 mt-1 text-sm text-muted-foreground">
                           {day.accommodation.type && <span>{day.accommodation.type}</span>}
                           {day.accommodation.cost && <span>💰 {day.accommodation.cost}/nuit</span>}
                         </div>
@@ -613,7 +613,7 @@ export default function ItineraryPage({ params }: PageProps) {
                             href={`https://maps.google.com/?q=${day.accommodation.coordinates.lat},${day.accommodation.coordinates.lng}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 mt-2 text-xs text-green-600 hover:underline"
+                            className="inline-flex items-center gap-1 mt-2 text-xs text-secondary hover:underline"
                           >
                             <FontAwesomeIcon icon={faMapMarkerAlt} className="w-3 h-3" />
                             Voir sur Google Maps
@@ -641,15 +641,15 @@ export default function ItineraryPage({ params }: PageProps) {
 
         {/* Tips */}
         {selected_variant?.tips && selected_variant.tips.length > 0 && (
-          <div className="mt-8 p-6 bg-yellow-50 border border-yellow-200 rounded-xl">
-            <h3 className="font-semibold text-yellow-800 mb-3 flex items-center gap-2">
-              <FontAwesomeIcon icon={faLightbulb} className="text-yellow-600" />
+          <div className="mt-8 p-6 bg-accent/10 border border-accent/30 rounded-xl">
+            <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+              <FontAwesomeIcon icon={faLightbulb} className="text-accent" />
               Conseils pour votre voyage
             </h3>
             <ul className="space-y-2">
               {selected_variant.tips.map((tip, i) => (
-                <li key={i} className="text-sm text-yellow-700 flex items-start gap-2">
-                  <span className="text-yellow-500">•</span>
+                <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                  <span className="text-accent">•</span>
                   {tip}
                 </li>
               ))}
@@ -659,11 +659,11 @@ export default function ItineraryPage({ params }: PageProps) {
 
         {/* Info modifications Express */}
         {!canModify && itinerary.offer_type === 'express' && (
-          <div className="mt-8 p-6 bg-blue-50 border border-blue-200 rounded-xl text-center">
-            <h3 className="font-semibold text-blue-800 mb-2">
+          <div className="mt-8 p-6 bg-primary/10 border border-primary/30 rounded-xl text-center">
+            <h3 className="font-semibold text-foreground mb-2">
               Envie de personnaliser votre itinéraire ?
             </h3>
-            <p className="text-sm text-blue-700 mb-4">
+            <p className="text-sm text-muted-foreground mb-4">
               Avec l&apos;offre Express, vous ne pouvez pas modifier votre itinéraire.
               Passez en Premium ou Conciergerie pour bénéficier de modifications.
             </p>

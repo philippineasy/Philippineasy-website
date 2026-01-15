@@ -69,7 +69,7 @@ function ItineraryPaymentForm({ generationId }: PaymentFormProps) {
       </button>
 
       {message && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-center">
+        <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive text-center">
           {message}
         </div>
       )}
@@ -112,7 +112,7 @@ function CheckoutContent() {
   if (!clientSecret || !generationId) {
     return (
       <div className="container mx-auto px-4 py-16 max-w-2xl">
-        <div className="bg-card p-8 rounded-xl border-2 border-red-200 text-center">
+        <div className="bg-card p-8 rounded-xl border-2 border-destructive/30 text-center">
           <h1 className="text-2xl font-bold text-red-600 mb-4">Erreur</h1>
           <p className="text-muted-foreground mb-6">
             Parametres de paiement manquants. Veuillez recommencer la procedure.
@@ -155,7 +155,7 @@ function CheckoutContent() {
         </h1>
 
         {/* Resume de l'achat */}
-        <div className="bg-blue-50 p-4 rounded-lg mb-8">
+        <div className="bg-primary/10 p-4 rounded-lg mb-8">
           <h2 className="font-semibold text-primary mb-2">Votre achat :</h2>
           <div className="flex items-center gap-2 text-foreground">
             <FontAwesomeIcon icon={faCheckCircle} className="text-green-500" />
