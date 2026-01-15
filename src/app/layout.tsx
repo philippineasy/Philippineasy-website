@@ -14,6 +14,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { EditModeProvider } from '@/contexts/EditModeContext';
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
+import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
 config.autoAddCss = false;
 
 const poppins = Poppins({ 
@@ -149,7 +150,17 @@ export default async function RootLayout({
   }
   const navLinks = [
     { href: '/itineraire-personnalise-pour-les-philippines', label: 'Créer Itinéraire', special: true },
-    { 
+    {
+      label: 'Services',
+      href: '/services',
+      submenu: [
+        { href: '/services', label: 'Tous les services' },
+        { href: '/services#buddy', label: 'Buddy System', highlight: true },
+        { href: '/services#pack-ultime', label: 'Pack Ultime' },
+        { href: '/itineraire-personnalise-pour-les-philippines', label: 'Itinéraires IA' },
+      ]
+    },
+    {
       label: 'Voyager',
       href: '/voyager-aux-philippines',
       submenu: voyagerCats.map((c: Category) => ({ href: `/voyager-aux-philippines/${c.slug}`, label: c.name }))
@@ -185,6 +196,7 @@ export default async function RootLayout({
   return (
     <html lang="fr">
       <body className={`${poppins.className} bg-gray-100`}>
+        <GoogleAnalytics />
         <AuthProvider>
           <CartProvider>
             <EditModeProvider>

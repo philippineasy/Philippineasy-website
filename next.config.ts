@@ -136,7 +136,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.tawk.to https://*.sentry.io https://cdn.jsdelivr.net https://js.stripe.com; style-src 'self' 'unsafe-inline' https://embed.tawk.to; img-src * data:; font-src 'self' data: https://embed.tawk.to; connect-src * wss://*.tawk.to; frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://www.youtube.com https://youtube.com;",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.tawk.to https://*.sentry.io https://cdn.jsdelivr.net https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://embed.tawk.to; img-src * data:; font-src 'self' data: https://embed.tawk.to; connect-src * wss://*.tawk.to https://www.google-analytics.com https://analytics.google.com; frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://www.youtube.com https://youtube.com;",
           },
           {
             key: 'Strict-Transport-Security',
