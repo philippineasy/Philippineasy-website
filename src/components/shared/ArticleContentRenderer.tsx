@@ -107,6 +107,26 @@ const renderEditorJsData = (data: { blocks: Block[] }) => {
         );
       case 'delimiter':
         return <hr key={index} className="my-4" />;
+      case 'embed':
+        return (
+          <figure key={index} className="my-8 max-w-3xl mx-auto">
+            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+              <iframe
+                src={block.data.embed}
+                className="absolute inset-0 w-full h-full rounded-lg shadow-md"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title={block.data.caption || 'Vidéo intégrée'}
+              />
+            </div>
+            {block.data.caption && (
+              <figcaption className="text-center text-sm text-muted-foreground mt-2">
+                {block.data.caption}
+              </figcaption>
+            )}
+          </figure>
+        );
       default:
         return null;
     }
