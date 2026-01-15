@@ -1,7 +1,19 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClientForRouteHandler } from '@/utils/supabase/server';
+import { createServiceRoleClient } from '@/utils/supabase/service-role';
 import { PRICING_GRID, type Duration, type OfferType } from '@/config/itinerary-pricing';
+import { getClientIp, normalizeIp } from '@/utils/get-client-ip';
+
+// User ID exempté de la limite (super_admin)
+const EXEMPT_USER_ID = process.env.RATE_LIMIT_EXEMPT_USER_ID;
+
+// Type pour le résultat du rate limit
+interface RateLimitResult {
+  allowed: boolean;
+  attempts_count: number;
+  reset_at: string | null;
+}
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-08-27.basil',
@@ -72,6 +84,49 @@ export async function POST(request: Request) {
     }
 
     const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id || null;
+
+    // =====================================================
+    // RATE LIMITING PAR IP (2 tentatives/semaine)
+    // =====================================================
+    const clientIp = normalizeIp(await getClientIp());
+    const isExempt = userId && EXEMPT_USER_ID && userId === EXEMPT_USER_ID;
+
+    if (!isExempt) {
+      const supabaseAdmin = createServiceRoleClient();
+
+      // Vérifier le rate limit
+      const { data: rateLimit, error: rateLimitError } = await supabaseAdmin
+        .rpc('check_ip_rate_limit', { p_ip_address: clientIp, p_limit: 2, p_window_days: 7 })
+        .single() as { data: RateLimitResult | null; error: Error | null };
+
+      if (rateLimitError) {
+        console.error('Rate limit check error:', rateLimitError);
+        // Continue en cas d'erreur (fail-open)
+      } else if (rateLimit && !rateLimit.allowed && rateLimit.reset_at) {
+        const resetDate = new Date(rateLimit.reset_at).toLocaleDateString('fr-FR', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        return NextResponse.json({
+          error: 'Limite de tentatives atteinte',
+          message: `Vous avez atteint la limite de 2 tentatives de paiement test par semaine. Réessayez à partir du ${resetDate}.`,
+          code: 'RATE_LIMIT_EXCEEDED',
+          reset_at: rateLimit.reset_at
+        }, { status: 429 });
+      }
+
+      // Enregistrer la tentative
+      await supabaseAdmin.rpc('record_payment_attempt', {
+        p_ip: clientIp,
+        p_user_id: userId,
+        p_generation_id: generation_id,
+        p_metadata: { offer_type, duration }
+      });
+    }
 
     // Convertir le prix en centimes
     const amountInCents = Math.round(pricing.price * 100);
