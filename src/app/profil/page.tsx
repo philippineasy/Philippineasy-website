@@ -371,6 +371,12 @@ const ProfilPage = () => {
                           )}
                         </div>
                         <div className="flex gap-2">
+                          <Link
+                            href={`/itineraire/${itinerary.id}`}
+                            className="px-3 py-2 bg-accent text-primary text-sm rounded-lg hover:bg-accent/90 flex items-center gap-1 font-semibold"
+                          >
+                            <FontAwesomeIcon icon={faMapSigns} /> Voir
+                          </Link>
                           <button
                             onClick={() => handleRedeliverItinerary(itinerary.id)}
                             disabled={isRedelivering === itinerary.id}
