@@ -1,11 +1,18 @@
 import { createBrowserClient } from '@supabase/ssr'
 
-// Create a singleton Supabase client for the browser
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Supabase URL and/or anonymous key are not defined')
+export const createClient = () => {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  )
 }
 
-export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)
+// Singleton instance, lazy-initialized to avoid build-time errors
+let _instance: ReturnType<typeof createClient> | null = null
+
+export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
+  get(_, prop) {
+    if (!_instance) _instance = createClient()
+    return Reflect.get(_instance, prop)
+  },
+})
