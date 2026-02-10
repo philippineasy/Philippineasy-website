@@ -102,6 +102,7 @@ const toSeoImage = (sourceUrl: string, folder: 'articles' | 'products' | 'pages'
 export async function GET() {
   try {
     const supabase = createBuildClient();
+    if (!supabase) return new NextResponse('Supabase not configured', { status: 503 });
 
     // Calculer la date limite (48h en arrière)
     let limitDate = new Date();

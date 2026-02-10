@@ -41,6 +41,7 @@ const getMainCategoryPath = (mainCategorySlug: string | null) => {
 
 export async function generateStaticParams() {
   const supabase = createBuildClient();
+  if (!supabase) return [];
   const { data: articles } = await supabase
     .from('articles')
     .select('slug, category:categories(slug, main_category)')

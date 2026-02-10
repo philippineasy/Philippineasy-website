@@ -73,6 +73,7 @@ type SitemapEntry = {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createBuildClient();
+  if (!supabase) return [];
   const currentDate = new Date().toISOString();
 
   // Pages statiques

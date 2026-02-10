@@ -15,6 +15,7 @@ import { generateProductMetaDescription } from '@/utils/seo/metaDescriptionGener
 
 export async function generateStaticParams() {
   const supabase = createBuildClient();
+  if (!supabase) return [];
   const { data: products } = await supabase
     .from('products')
     .select('slug')

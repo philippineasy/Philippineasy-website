@@ -12,6 +12,7 @@ import { generateForumTopicMetaDescription } from '@/utils/seo/metaDescriptionGe
 
 export async function generateStaticParams() {
   const supabase = createBuildClient();
+  if (!supabase) return [];
   const { data: topics } = await supabase
     .from('forum_topics')
     .select('slug');

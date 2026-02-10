@@ -6,6 +6,7 @@ import type { Metadata } from 'next';
 
 export async function generateStaticParams() {
   const supabase = createBuildClient();
+  if (!supabase) return [];
   const { data: categories } = await supabase
     .from('categories')
     .select('slug')
