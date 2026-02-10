@@ -2,21 +2,23 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-08-27.basil',
-});
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: '2025-08-27.basil',
+  });
+}
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
-
-// Supabase admin client (bypass RLS)
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-const N8N_DELIVER_URL = process.env.N8N_ITINERARY_DELIVER_URL || 'http://localhost:5678/webhook/itinerary-deliver';
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 export async function POST(request: Request) {
+  const stripe = getStripe();
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+  const supabaseAdmin = getSupabaseAdmin();
   const body = await request.text();
   const signature = request.headers.get('stripe-signature')!;
 
