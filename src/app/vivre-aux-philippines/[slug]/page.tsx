@@ -10,7 +10,7 @@ export async function generateStaticParams() {
   const { data: categories } = await supabase
     .from('categories')
     .select('slug')
-    .eq('main_category', 'vivre');
+    .eq('main_category', 'vivre-aux-philippines');
 
   if (!categories) {
     return [];
