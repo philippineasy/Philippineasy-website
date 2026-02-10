@@ -1,7 +1,6 @@
 import { MetadataRoute } from 'next';
 import { createBuildClient } from '@/utils/supabase/build-client';
 
-const supabase = createBuildClient();
 const BASE_URL = 'https://philippineasy.com';
 
 /* ---------- Helpers ---------- */
@@ -73,6 +72,7 @@ type SitemapEntry = {
 /* ---------- Route ---------- */
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const supabase = createBuildClient();
   const currentDate = new Date().toISOString();
 
   // Pages statiques
