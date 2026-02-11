@@ -77,7 +77,7 @@ const VendeurConnexionPage = () => {
                     </div>
                     <div>
                       <label className="block text-foreground mb-2" htmlFor="password">Mot de passe</label>
-                      <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" placeholder="••••••••" required />
+                      <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" placeholder="••••••••" required autoComplete="current-password" />
                     </div>
                      <div className="flex items-center justify-between">
                         <a href="#" className="text-sm text-primary hover:underline">Mot de passe oublié ?</a>

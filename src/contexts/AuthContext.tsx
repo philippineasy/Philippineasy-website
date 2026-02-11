@@ -67,35 +67,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    // Get initial session on mount
-    const initializeAuth = async () => {
-      try {
-        const { data: { user: initialUser } } = await supabase.auth.getUser();
-
-        if (initialUser) {
-          setUser(initialUser);
-          await fetchUserData(initialUser);
-        } else {
-          clearUserData();
-        }
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-        clearUserData();
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initializeAuth();
-
-    // Listen for auth state changes
+    // Single source of truth: onAuthStateChange handles everything,
+    // including INITIAL_SESSION which fires when cookies are ready
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       const currentUser = session?.user ?? null;
-
-      // Skip INITIAL_SESSION as we handle it above
-      if (event === 'INITIAL_SESSION') {
-        return;
-      }
 
       if (currentUser) {
         setUser(currentUser);
@@ -103,6 +78,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         clearUserData();
       }
+      setLoading(false);
     });
 
     return () => {
