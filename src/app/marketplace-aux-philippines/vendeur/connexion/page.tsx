@@ -104,9 +104,11 @@ const VendeurConnexionPage = () => {
                 <button onClick={() => handleOAuthLogin('google')} disabled={loading} className="w-full flex items-center justify-center px-4 py-2 border border-border rounded-lg hover:bg-muted transition duration-300 text-foreground font-medium">
                   <FontAwesomeIcon icon={faGoogle} className="text-destructive mr-2" /> Continuer avec Google
                 </button>
+                {/* TODO: Réactiver quand l'app Facebook sera publiée (vérification d'entreprise requise)
                 <button onClick={() => handleOAuthLogin('facebook')} disabled={loading} className="w-full flex items-center justify-center px-4 py-2 border border-border rounded-lg hover:bg-muted transition duration-300 text-foreground font-medium">
                   <FontAwesomeIcon icon={faFacebookF} className="text-primary mr-2" /> Continuer avec Facebook
                 </button>
+                */}
               </div>
             </div>
 
