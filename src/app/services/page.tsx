@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -11,8 +13,9 @@ import {
   faArrowRight,
 } from '@fortawesome/free-solid-svg-icons';
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
-import ServiceCard from '@/components/services/ServiceCard';
+import ServiceCard, { Feature } from '@/components/services/ServiceCard';
 import FAQSchema from '@/components/shared/FAQSchema';
+import InfoTooltip from '@/components/ui/InfoTooltip';
 import {
   BUDDY_PRICING,
   VOYAGE_SEREIN_PRICING,
@@ -20,6 +23,20 @@ import {
   SERVICE_DETAILS,
   SERVICE_DURATION_LABELS,
 } from '@/config/services-pricing';
+
+// Descriptions détaillées pour les infobulles
+const TOOLTIPS = {
+  itineraireConciergerie: "Programme jour par jour 100% personnalisé, hébergements recommandés avec liens booking, Google Maps intégré, modifications illimitées, contact WhatsApp direct avec Hugo",
+  buddySystem: "2-4 calls de 30min avec un expatrié français vivant aux Philippines, contact WhatsApp direct avec votre buddy, conseils locaux personnalisés avant/pendant/après voyage",
+  suiviWhatsapp: "Support en temps réel pendant votre voyage : problèmes de transport, recommandations restaurants, urgences. Réponse garantie sous 2h max",
+  easyPlus: "-20% chez tous nos partenaires (hôtels, activités, transports), support prioritaire 24/7, guides premium offerts, assistant IA illimité WhatsApp/Telegram",
+  rencontrePremium: "Profil vérifié et mis en avant, likes illimités, voir qui vous a liké, filtres avancés (localisation, âge, centres d'intérêt), messagerie prioritaire",
+  guidePdf: "Guide complet et détaillé : Visa Philippines 2026, Coût de la vie détaillé, ou Destinations secrètes - format PDF téléchargeable et imprimable",
+  groupePrive: "Accès à vie au Discord/Telegram exclusif avec la communauté d'expats et voyageurs francophones aux Philippines - entraide, bons plans, rencontres",
+  itinerairePremium: "Itinéraire IA personnalisé avec modifications gratuites, export PDF, liens Google Maps, recommandations hébergements et restaurants",
+  callAvantDepart: "Call vidéo de 30min avec Hugo pour préparer votre voyage : derniers conseils, check-list personnalisée, réponse à toutes vos questions",
+  checklistPersonnalisee: "Liste complète et personnalisée : documents, vaccins, applications à télécharger, objets à emporter, budget à prévoir",
+};
 
 const serviceFAQs = [
   {
@@ -151,7 +168,11 @@ export default function ServicesPage() {
               <ServiceCard
                 name="Buddy Court Séjour"
                 description="3-5 jours"
-                features={['2 calls de 30min', 'WhatsApp 1 semaine', 'Conseils locaux personnalisés']}
+                features={[
+                  { text: '2 calls de 30min', tooltip: 'Calls vidéo avec votre buddy expatrié : 1 avant le départ + 1 pendant le voyage' },
+                  { text: 'WhatsApp 1 semaine', tooltip: TOOLTIPS.suiviWhatsapp },
+                  { text: 'Conseils locaux personnalisés', tooltip: 'Recommandations basées sur vos goûts : restaurants, activités, bonnes adresses testées par votre buddy' },
+                ]}
                 price={79}
                 icon="faUsers"
                 ctaText="Choisir"
@@ -161,10 +182,10 @@ export default function ServicesPage() {
                 name="Buddy Standard"
                 description="1-2 semaines"
                 features={[
-                  '3 calls de 30min',
-                  'WhatsApp 2 semaines',
-                  'Conseils locaux personnalisés',
-                  'Support pendant le voyage',
+                  { text: '3 calls de 30min', tooltip: 'Calls vidéo avec votre buddy : 1 avant départ + 1 à mi-parcours + 1 debriefing' },
+                  { text: 'WhatsApp 2 semaines', tooltip: TOOLTIPS.suiviWhatsapp },
+                  { text: 'Conseils locaux personnalisés', tooltip: 'Recommandations basées sur vos goûts : restaurants, activités, bonnes adresses testées par votre buddy' },
+                  { text: 'Support pendant le voyage', tooltip: 'Aide en cas de problème : traduction, négociation, urgences - votre buddy est joignable' },
                 ]}
                 price={119}
                 icon="faUsers"
@@ -177,11 +198,11 @@ export default function ServicesPage() {
                 name="Buddy Long Séjour"
                 description="3+ semaines"
                 features={[
-                  '4 calls de 30min',
-                  'WhatsApp 1 mois',
-                  'Conseils locaux personnalisés',
-                  'Support complet',
-                  'Réseau d\'entraide',
+                  { text: '4 calls de 30min', tooltip: 'Calls vidéo réguliers : préparation + pendant voyage + debriefing + suivi expatriation' },
+                  { text: 'WhatsApp 1 mois', tooltip: TOOLTIPS.suiviWhatsapp },
+                  { text: 'Conseils locaux personnalisés', tooltip: 'Recommandations basées sur vos goûts : restaurants, activités, bonnes adresses testées par votre buddy' },
+                  { text: 'Support complet', tooltip: 'Accompagnement total : recherche logement, démarches administratives, intégration locale' },
+                  { text: 'Réseau d\'entraide', tooltip: 'Accès au réseau de contacts de votre buddy : autres expats, locaux de confiance, bons plans exclusifs' },
                 ]}
                 price={149}
                 icon="faUsers"
@@ -206,10 +227,10 @@ export default function ServicesPage() {
                 name="Serein Court"
                 description="3-5 jours"
                 features={[
-                  'Itinéraire Premium inclus',
-                  'Call 30min avant départ',
-                  'Suivi WhatsApp 1 semaine',
-                  'Checklist personnalisée',
+                  { text: 'Itinéraire Premium inclus', tooltip: TOOLTIPS.itinerairePremium },
+                  { text: 'Call 30min avant départ', tooltip: TOOLTIPS.callAvantDepart },
+                  { text: 'Suivi WhatsApp 1 semaine', tooltip: TOOLTIPS.suiviWhatsapp },
+                  { text: 'Checklist personnalisée', tooltip: TOOLTIPS.checklistPersonnalisee },
                 ]}
                 price={99}
                 icon="faShieldAlt"
@@ -220,11 +241,11 @@ export default function ServicesPage() {
                 name="Serein Standard"
                 description="1-2 semaines"
                 features={[
-                  'Itinéraire Premium inclus',
-                  'Call 30min avant départ',
-                  'Suivi WhatsApp 2 semaines',
-                  'Checklist personnalisée',
-                  'Support en cas de problème',
+                  { text: 'Itinéraire Premium inclus', tooltip: TOOLTIPS.itinerairePremium },
+                  { text: 'Call 30min avant départ', tooltip: TOOLTIPS.callAvantDepart },
+                  { text: 'Suivi WhatsApp 2 semaines', tooltip: TOOLTIPS.suiviWhatsapp },
+                  { text: 'Checklist personnalisée', tooltip: TOOLTIPS.checklistPersonnalisee },
+                  { text: 'Support en cas de problème', tooltip: 'Assistance réactive si imprévu : annulation vol, problème hôtel, urgence médicale - on gère avec vous' },
                 ]}
                 price={149}
                 icon="faShieldAlt"
@@ -237,11 +258,11 @@ export default function ServicesPage() {
                 name="Serein Long"
                 description="3+ semaines"
                 features={[
-                  'Itinéraire Premium inclus',
-                  'Call 30min avant départ',
-                  'Suivi WhatsApp 3 semaines',
-                  'Checklist personnalisée',
-                  'Support prioritaire',
+                  { text: 'Itinéraire Premium inclus', tooltip: TOOLTIPS.itinerairePremium },
+                  { text: 'Call 30min avant départ', tooltip: TOOLTIPS.callAvantDepart },
+                  { text: 'Suivi WhatsApp 3 semaines', tooltip: TOOLTIPS.suiviWhatsapp },
+                  { text: 'Checklist personnalisée', tooltip: TOOLTIPS.checklistPersonnalisee },
+                  { text: 'Support prioritaire', tooltip: 'Réponse garantie sous 1h en cas d\'urgence, assistance VIP tout au long du voyage' },
                 ]}
                 price={199}
                 icon="faShieldAlt"
@@ -272,18 +293,26 @@ export default function ServicesPage() {
                 <p className="text-4xl font-bold text-foreground">369€</p>
               </div>
               <ul className="space-y-3 mb-6">
-                {[
-                  'Itinéraire Conciergerie',
-                  'Buddy System complet',
-                  'Suivi WhatsApp 2 sem.',
-                  'Easy+ 1 an',
-                  'Rencontre Premium 6 mois',
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-sm">
-                    <FontAwesomeIcon icon={faCheck} className="text-green-500" />
-                    {item}
-                  </li>
-                ))}
+                <li className="flex items-start gap-2 text-sm">
+                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Itinéraire Conciergerie <InfoTooltip content={TOOLTIPS.itineraireConciergerie} /></span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Buddy System complet <InfoTooltip content={TOOLTIPS.buddySystem} /></span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Suivi WhatsApp 2 sem. <InfoTooltip content={TOOLTIPS.suiviWhatsapp} /></span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Easy+ 1 an <InfoTooltip content={TOOLTIPS.easyPlus} /></span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Rencontre Premium 6 mois <InfoTooltip content={TOOLTIPS.rencontrePremium} /></span>
+                </li>
               </ul>
               <Link
                 href="#contact"
@@ -302,20 +331,34 @@ export default function ServicesPage() {
                 <p className="text-4xl font-bold text-primary">449€</p>
               </div>
               <ul className="space-y-3 mb-6">
-                {[
-                  'Itinéraire Conciergerie',
-                  'Buddy System complet',
-                  'Suivi WhatsApp 4 sem.',
-                  'Easy+ 1 an',
-                  'Rencontre Premium 6 mois',
-                  'Guide PDF au choix',
-                  'Groupe privé à vie',
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-sm">
-                    <FontAwesomeIcon icon={faCheck} className="text-primary" />
-                    {item}
-                  </li>
-                ))}
+                <li className="flex items-start gap-2 text-sm">
+                  <FontAwesomeIcon icon={faCheck} className="text-primary mt-0.5 flex-shrink-0" />
+                  <span>Itinéraire Conciergerie <InfoTooltip content={TOOLTIPS.itineraireConciergerie} /></span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <FontAwesomeIcon icon={faCheck} className="text-primary mt-0.5 flex-shrink-0" />
+                  <span>Buddy System complet <InfoTooltip content={TOOLTIPS.buddySystem} /></span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <FontAwesomeIcon icon={faCheck} className="text-primary mt-0.5 flex-shrink-0" />
+                  <span>Suivi WhatsApp 4 sem. <InfoTooltip content={TOOLTIPS.suiviWhatsapp} /></span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <FontAwesomeIcon icon={faCheck} className="text-primary mt-0.5 flex-shrink-0" />
+                  <span>Easy+ 1 an <InfoTooltip content={TOOLTIPS.easyPlus} /></span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <FontAwesomeIcon icon={faCheck} className="text-primary mt-0.5 flex-shrink-0" />
+                  <span>Rencontre Premium 6 mois <InfoTooltip content={TOOLTIPS.rencontrePremium} /></span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <FontAwesomeIcon icon={faCheck} className="text-primary mt-0.5 flex-shrink-0" />
+                  <span>Guide PDF au choix <InfoTooltip content={TOOLTIPS.guidePdf} /></span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <FontAwesomeIcon icon={faCheck} className="text-primary mt-0.5 flex-shrink-0" />
+                  <span>Groupe privé à vie <InfoTooltip content={TOOLTIPS.groupePrive} /></span>
+                </li>
               </ul>
               <Link
                 href="#contact"
@@ -331,20 +374,34 @@ export default function ServicesPage() {
                 <p className="text-4xl font-bold text-foreground">549€</p>
               </div>
               <ul className="space-y-3 mb-6">
-                {[
-                  'Itinéraire Conciergerie',
-                  'Buddy System complet',
-                  'Suivi WhatsApp illimité',
-                  'Easy+ 1 an',
-                  'Rencontre Premium 6 mois',
-                  'Tous les Guides PDF',
-                  'Groupe privé à vie',
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-sm">
-                    <FontAwesomeIcon icon={faCheck} className="text-green-500" />
-                    {item}
-                  </li>
-                ))}
+                <li className="flex items-start gap-2 text-sm">
+                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Itinéraire Conciergerie <InfoTooltip content={TOOLTIPS.itineraireConciergerie} /></span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Buddy System complet <InfoTooltip content={TOOLTIPS.buddySystem} /></span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Suivi WhatsApp illimité <InfoTooltip content="Support WhatsApp sans limite de durée - idéal pour l'expatriation. On reste avec vous aussi longtemps que nécessaire" /></span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Easy+ 1 an <InfoTooltip content={TOOLTIPS.easyPlus} /></span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Rencontre Premium 6 mois <InfoTooltip content={TOOLTIPS.rencontrePremium} /></span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Tous les Guides PDF <InfoTooltip content="Accès à l'intégralité de nos guides : Visa 2026, Coût de la vie, Destinations secrètes - valeur 50€ offerte" /></span>
+                </li>
+                <li className="flex items-start gap-2 text-sm">
+                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Groupe privé à vie <InfoTooltip content={TOOLTIPS.groupePrive} /></span>
+                </li>
               </ul>
               <Link
                 href="#contact"

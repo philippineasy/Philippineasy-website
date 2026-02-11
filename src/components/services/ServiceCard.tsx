@@ -3,11 +3,15 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faCrown, faUsers, faShieldAlt, faFileDownload, faStar } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
+import InfoTooltip from '@/components/ui/InfoTooltip';
+
+// Type pour les features avec ou sans tooltip
+export type Feature = string | { text: string; tooltip: string };
 
 interface ServiceCardProps {
   name: string;
   description: string;
-  features: string[];
+  features: Feature[];
   price: number | string;
   priceLabel?: string;
   badge?: string;
@@ -86,15 +90,23 @@ export default function ServiceCard({
       </div>
 
       <ul className="space-y-3 mb-6 flex-grow">
-        {features.map((feature, index) => (
-          <li key={index} className="flex items-start gap-3">
-            <FontAwesomeIcon
-              icon={faCheck}
-              className={`mt-1 text-sm ${highlighted ? 'text-primary' : 'text-green-500'}`}
-            />
-            <span className="text-sm text-foreground">{feature}</span>
-          </li>
-        ))}
+        {features.map((feature, index) => {
+          const text = typeof feature === 'string' ? feature : feature.text;
+          const tooltip = typeof feature === 'string' ? null : feature.tooltip;
+
+          return (
+            <li key={index} className="flex items-start gap-3">
+              <FontAwesomeIcon
+                icon={faCheck}
+                className={`mt-1 text-sm flex-shrink-0 ${highlighted ? 'text-primary' : 'text-green-500'}`}
+              />
+              <span className="text-sm text-foreground">
+                {text}
+                {tooltip && <InfoTooltip content={tooltip} />}
+              </span>
+            </li>
+          );
+        })}
       </ul>
 
       <Link
