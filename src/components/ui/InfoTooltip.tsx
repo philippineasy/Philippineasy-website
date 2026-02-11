@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import * as Tooltip from '@radix-ui/react-tooltip';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 
@@ -10,53 +10,31 @@ interface InfoTooltipProps {
 }
 
 export default function InfoTooltip({ content, className = '' }: InfoTooltipProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const tooltipRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLSpanElement>(null);
-
-  // Fermer le tooltip si on clique en dehors
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        tooltipRef.current &&
-        triggerRef.current &&
-        !tooltipRef.current.contains(event.target as Node) &&
-        !triggerRef.current.contains(event.target as Node)
-      ) {
-        setIsVisible(false);
-      }
-    };
-
-    if (isVisible) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isVisible]);
-
   return (
-    <span className="relative inline-block ml-1" ref={triggerRef}>
-      <FontAwesomeIcon
-        icon={faInfoCircle}
-        className={`text-muted-foreground hover:text-primary cursor-help text-xs transition-colors ${className}`}
-        onMouseEnter={() => setIsVisible(true)}
-        onMouseLeave={() => setIsVisible(false)}
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsVisible(!isVisible);
-        }}
-      />
-      {isVisible && (
-        <div
-          ref={tooltipRef}
-          className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-foreground text-background text-xs rounded-lg shadow-lg max-w-[250px] whitespace-normal text-center animate-in fade-in-0 zoom-in-95 duration-150"
-        >
-          {content}
-          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-foreground" />
-        </div>
-      )}
-    </span>
+    <Tooltip.Provider delayDuration={200} skipDelayDuration={100}>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild>
+          <button
+            type="button"
+            className={`inline-flex items-center justify-center ml-1.5 text-muted-foreground/60 hover:text-primary focus:text-primary focus:outline-none transition-colors duration-200 ${className}`}
+            aria-label="Plus d'informations"
+          >
+            <FontAwesomeIcon icon={faInfoCircle} className="text-[11px]" />
+          </button>
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content
+            side="top"
+            align="center"
+            sideOffset={6}
+            collisionPadding={16}
+            className="z-[100] max-w-[280px] rounded-xl border border-border/50 bg-popover px-4 py-3 text-[13px] leading-relaxed text-popover-foreground shadow-xl shadow-black/[0.08] backdrop-blur-sm select-none data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95 data-[state=delayed-open]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:slide-out-to-bottom-2 duration-200"
+          >
+            {content}
+            <Tooltip.Arrow className="fill-popover drop-shadow-sm" width={12} height={6} />
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
   );
 }
