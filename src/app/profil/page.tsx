@@ -492,6 +492,7 @@ const ProfilPage = () => {
         <div className="bg-card p-6 rounded-lg shadow-md">
           <h3 className="text-xl font-semibold mb-4">Actions Rapides</h3>
           <ul className="space-y-2">
+            <li><Link href="/mon-espace" className="flex items-center text-primary hover:underline font-medium"><FontAwesomeIcon icon={faRoute} className="w-5 mr-2 text-center" /> Mon Espace Services</Link></li>
             <li><Link href="/itineraire-personnalise-pour-les-philippines" className="flex items-center text-primary hover:underline"><FontAwesomeIcon icon={faMapSigns} className="w-5 mr-2 text-center" /> Créer un itinéraire</Link></li>
             <li><Link href="/forum-sur-les-philippines/nouveau-sujet" className="flex items-center text-primary hover:underline"><FontAwesomeIcon icon={faPencilAlt} className="w-5 mr-2 text-center" /> Poser une question</Link></li>
             <li><Link href="/meilleurs-plans" className="flex items-center text-primary hover:underline"><FontAwesomeIcon icon={faTags} className="w-5 mr-2 text-center" /> Voir les bons plans</Link></li>

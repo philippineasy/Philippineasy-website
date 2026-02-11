@@ -176,7 +176,7 @@ export default function ServicesPage() {
                 price={79}
                 icon="faUsers"
                 ctaText="Choisir"
-                ctaHref="#contact"
+                ctaHref="/checkout/services?type=buddy_short"
               />
               <ServiceCard
                 name="Buddy Standard"
@@ -192,7 +192,7 @@ export default function ServicesPage() {
                 badge="Populaire"
                 highlighted
                 ctaText="Choisir"
-                ctaHref="#contact"
+                ctaHref="/checkout/services?type=buddy_medium"
               />
               <ServiceCard
                 name="Buddy Long Séjour"
@@ -207,7 +207,7 @@ export default function ServicesPage() {
                 price={149}
                 icon="faUsers"
                 ctaText="Choisir"
-                ctaHref="#contact"
+                ctaHref="/checkout/services?type=buddy_long"
               />
             </div>
           </div>
@@ -235,7 +235,7 @@ export default function ServicesPage() {
                 price={99}
                 icon="faShieldAlt"
                 ctaText="Choisir"
-                ctaHref="#contact"
+                ctaHref="/checkout/services?type=voyage_serein_short"
               />
               <ServiceCard
                 name="Serein Standard"
@@ -252,7 +252,7 @@ export default function ServicesPage() {
                 badge="Populaire"
                 highlighted
                 ctaText="Choisir"
-                ctaHref="#contact"
+                ctaHref="/checkout/services?type=voyage_serein_medium"
               />
               <ServiceCard
                 name="Serein Long"
@@ -267,7 +267,7 @@ export default function ServicesPage() {
                 price={199}
                 icon="faShieldAlt"
                 ctaText="Choisir"
-                ctaHref="#contact"
+                ctaHref="/checkout/services?type=voyage_serein_long"
               />
             </div>
           </div>
@@ -315,7 +315,7 @@ export default function ServicesPage() {
                 </li>
               </ul>
               <Link
-                href="#contact"
+                href="/checkout/services?type=pack_ultime_medium"
                 className="block w-full py-3 bg-muted text-foreground rounded-lg text-center font-semibold hover:bg-muted/80"
               >
                 Choisir
@@ -361,7 +361,7 @@ export default function ServicesPage() {
                 </li>
               </ul>
               <Link
-                href="#contact"
+                href="/checkout/services?type=pack_ultime_long"
                 className="block w-full py-3 bg-primary text-primary-foreground rounded-lg text-center font-semibold hover:bg-primary/90"
               >
                 Choisir
@@ -404,7 +404,7 @@ export default function ServicesPage() {
                 </li>
               </ul>
               <Link
-                href="#contact"
+                href="/checkout/services?type=pack_ultime_expat"
                 className="block w-full py-3 bg-muted text-foreground rounded-lg text-center font-semibold hover:bg-muted/80"
               >
                 Choisir

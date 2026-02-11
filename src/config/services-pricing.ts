@@ -4,13 +4,14 @@
 export type ServiceDuration = 'short' | 'medium' | 'long' | 'expat';
 export type ServiceType = 'buddy' | 'voyage-serein' | 'pack-ultime' | 'guide-pdf' | 'easy-plus';
 
-// IDs des produits Stripe (à créer dans Stripe Dashboard)
+// IDs des produits Stripe (LIVE)
 export const SERVICE_STRIPE_PRODUCTS = {
-  buddy: 'prod_PLACEHOLDER_BUDDY',
-  'voyage-serein': 'prod_PLACEHOLDER_VOYAGE_SEREIN',
-  'pack-ultime': 'prod_PLACEHOLDER_PACK_ULTIME',
-  'guide-pdf': 'prod_PLACEHOLDER_GUIDE_PDF',
-  'easy-plus': 'prod_PLACEHOLDER_EASY_PLUS',
+  buddy: 'prod_Txa0L11YbtTR6h',
+  'voyage-serein': 'prod_Txa0JtYZblfrwU',
+  'pack-ultime': 'prod_Txa0ovVRckD7Ly',
+  'guide-pdf': 'prod_Txa0pvN9ymE2g0',
+  'easy-plus': 'prod_Txa0tR4pRAxGax',
+  'rencontre-premium': 'prod_Txa04zZwioxjnv',
 } as const;
 
 // Grille tarifaire Buddy System
@@ -20,9 +21,9 @@ export const BUDDY_PRICING: Record<ServiceDuration, {
   calls: number;
   whatsappDuration: string;
 } | null> = {
-  short: { price: 79, priceId: '', calls: 2, whatsappDuration: '1 semaine' },
-  medium: { price: 119, priceId: '', calls: 3, whatsappDuration: '2 semaines' },
-  long: { price: 149, priceId: '', calls: 4, whatsappDuration: '1 mois' },
+  short: { price: 79, priceId: 'price_1SzetjRxqcfmHXQYj5sZWwCi', calls: 2, whatsappDuration: '1 semaine' },
+  medium: { price: 119, priceId: 'price_1SzetkRxqcfmHXQYOBni4V3O', calls: 3, whatsappDuration: '2 semaines' },
+  long: { price: 149, priceId: 'price_1SzetlRxqcfmHXQYtGE2S226', calls: 4, whatsappDuration: '1 mois' },
   expat: null, // Utilise 'long'
 };
 
@@ -32,9 +33,9 @@ export const VOYAGE_SEREIN_PRICING: Record<ServiceDuration, {
   priceId: string;
   whatsappDuration: string;
 } | null> = {
-  short: { price: 99, priceId: '', whatsappDuration: '1 semaine' },
-  medium: { price: 149, priceId: '', whatsappDuration: '2 semaines' },
-  long: { price: 199, priceId: '', whatsappDuration: '3 semaines' },
+  short: { price: 99, priceId: 'price_1SzetlRxqcfmHXQY0k2bC7C3', whatsappDuration: '1 semaine' },
+  medium: { price: 149, priceId: 'price_1SzetmRxqcfmHXQYO5BQyB88', whatsappDuration: '2 semaines' },
+  long: { price: 199, priceId: 'price_1SzetnRxqcfmHXQYwngSwuMs', whatsappDuration: '3 semaines' },
   expat: null, // Utilise 'long'
 };
 
@@ -44,24 +45,24 @@ export const PACK_ULTIME_PRICING: Record<ServiceDuration, {
   priceId: string;
 } | null> = {
   short: null, // Non disponible pour séjours courts
-  medium: { price: 369, priceId: '' },
-  long: { price: 449, priceId: '' },
-  expat: { price: 549, priceId: '' },
+  medium: { price: 369, priceId: 'price_1SzetoRxqcfmHXQYtB1zMCRt' },
+  long: { price: 449, priceId: 'price_1SzetoRxqcfmHXQYmuKu9a1k' },
+  expat: { price: 549, priceId: 'price_1SzetpRxqcfmHXQY7dzoDhLl' },
 };
 
 // Guides PDF
 export const GUIDE_PDF_PRICING = {
-  visa: { price: 14.99, priceId: '', name: 'Guide Visa Philippines 2026' },
-  'cout-vie': { price: 14.99, priceId: '', name: 'Guide Coût de la Vie' },
-  destinations: { price: 19.99, priceId: '', name: 'Guide Destinations Secrètes' },
-  pack: { price: 24.99, priceId: '', name: 'Pack 3 Guides', originalPrice: 49.97 },
+  visa: { price: 14.99, priceId: 'price_1SzetqRxqcfmHXQYGv7pWnv4', name: 'Guide Visa Philippines 2026' },
+  'cout-vie': { price: 14.99, priceId: 'price_1SzetqRxqcfmHXQYe9aotRWZ', name: 'Guide Coût de la Vie' },
+  destinations: { price: 19.99, priceId: 'price_1SzetrRxqcfmHXQYSwEQp4Qk', name: 'Guide Destinations Secrètes' },
+  pack: { price: 24.99, priceId: 'price_1SzetsRxqcfmHXQY88EewSEf', name: 'Pack 3 Guides', originalPrice: 49.97 },
 } as const;
 
 // Easy+ Pricing
 export const EASY_PLUS_PRICING = {
-  monthly: { price: 29.99, priceId: '', period: 'mois', minEngagement: 3 },
-  yearly: { price: 249, priceId: '', period: 'an', savings: '31%' },
-  lifetime: { price: 499, priceId: '', period: 'à vie' },
+  monthly: { price: 29.99, priceId: 'price_1SzettRxqcfmHXQYgVv8XvW8', period: 'mois', minEngagement: 3 },
+  yearly: { price: 249, priceId: 'price_1SzettRxqcfmHXQYCCnr7Vpg', period: 'an', savings: '31%' },
+  lifetime: { price: 499, priceId: 'price_1SzetuRxqcfmHXQYMQoa10Us', period: 'à vie' },
 } as const;
 
 // Labels pour l'affichage
@@ -168,3 +169,43 @@ export function getServicePrice(
 export function formatServicePrice(price: number): string {
   return price % 1 === 0 ? `${price}€` : `${price.toFixed(2).replace('.', ',')}€`;
 }
+
+// =====================================================
+// Server-side checkout mapping: ServiceType → Stripe priceId + amount
+// Used by the checkout API route to validate and create Stripe sessions.
+// Replace empty priceId strings with real Stripe price IDs when products are created.
+// =====================================================
+import type { ServiceType as CRMServiceType } from '@/types/services';
+
+export interface CheckoutConfig {
+  priceId: string;
+  amount: number;
+  name: string;
+  mode: 'payment' | 'subscription';
+}
+
+export const SERVICE_CHECKOUT_MAP: Record<CRMServiceType, CheckoutConfig> = {
+  // Buddy System
+  buddy_short: { priceId: 'price_1SzetjRxqcfmHXQYj5sZWwCi', amount: 7900, name: 'Buddy System - Court Séjour', mode: 'payment' },
+  buddy_medium: { priceId: 'price_1SzetkRxqcfmHXQYOBni4V3O', amount: 11900, name: 'Buddy System - Standard', mode: 'payment' },
+  buddy_long: { priceId: 'price_1SzetlRxqcfmHXQYtGE2S226', amount: 14900, name: 'Buddy System - Long Séjour', mode: 'payment' },
+  // Pack Voyage Serein
+  voyage_serein_short: { priceId: 'price_1SzetlRxqcfmHXQY0k2bC7C3', amount: 9900, name: 'Pack Voyage Serein - Court', mode: 'payment' },
+  voyage_serein_medium: { priceId: 'price_1SzetmRxqcfmHXQYO5BQyB88', amount: 14900, name: 'Pack Voyage Serein - Standard', mode: 'payment' },
+  voyage_serein_long: { priceId: 'price_1SzetnRxqcfmHXQYwngSwuMs', amount: 19900, name: 'Pack Voyage Serein - Long', mode: 'payment' },
+  // Pack Ultime
+  pack_ultime_medium: { priceId: 'price_1SzetoRxqcfmHXQYtB1zMCRt', amount: 36900, name: 'Pack Ultime - 2 semaines', mode: 'payment' },
+  pack_ultime_long: { priceId: 'price_1SzetoRxqcfmHXQYmuKu9a1k', amount: 44900, name: 'Pack Ultime - 3+ semaines', mode: 'payment' },
+  pack_ultime_expat: { priceId: 'price_1SzetpRxqcfmHXQY7dzoDhLl', amount: 54900, name: 'Pack Ultime - Expatriation', mode: 'payment' },
+  // Guides PDF
+  guide_pdf_visa: { priceId: 'price_1SzetqRxqcfmHXQYGv7pWnv4', amount: 1499, name: 'Guide Visa Philippines 2026', mode: 'payment' },
+  guide_pdf_cout_vie: { priceId: 'price_1SzetqRxqcfmHXQYe9aotRWZ', amount: 1499, name: 'Guide Coût de la Vie', mode: 'payment' },
+  guide_pdf_destinations: { priceId: 'price_1SzetrRxqcfmHXQYSwEQp4Qk', amount: 1999, name: 'Guide Destinations Secrètes', mode: 'payment' },
+  guide_pdf_pack: { priceId: 'price_1SzetsRxqcfmHXQY88EewSEf', amount: 2499, name: 'Pack 3 Guides', mode: 'payment' },
+  // Easy+
+  easy_plus_monthly: { priceId: 'price_1SzettRxqcfmHXQYgVv8XvW8', amount: 2999, name: 'Easy+ Mensuel', mode: 'subscription' },
+  easy_plus_yearly: { priceId: 'price_1SzettRxqcfmHXQYCCnr7Vpg', amount: 24900, name: 'Easy+ Annuel', mode: 'subscription' },
+  easy_plus_lifetime: { priceId: 'price_1SzetuRxqcfmHXQYMQoa10Us', amount: 49900, name: 'Easy+ À Vie', mode: 'payment' },
+  // Rencontre Premium
+  rencontre_premium: { priceId: 'price_1SzetvRxqcfmHXQYHVh9NIMU', amount: 1999, name: 'Rencontre Premium', mode: 'subscription' },
+};

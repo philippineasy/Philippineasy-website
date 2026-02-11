@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTachometerAlt, faNewspaper, faUsers, faComments, faStore, faTags, faImage, faChartLine, faHeart } from '@fortawesome/free-solid-svg-icons';
+import { faTachometerAlt, faNewspaper, faUsers, faComments, faStore, faTags, faImage, faChartLine, faHeart, faUserTie, faPhone, faMoneyBillWave } from '@fortawesome/free-solid-svg-icons';
 import { createClient } from '@/utils/supabase/server';
 import type { Metadata } from 'next';
 
@@ -33,6 +33,10 @@ export default async function AdminLayout({
             <li><Link href="/admin/users" className="block px-6 py-3 hover:bg-gray-700"><FontAwesomeIcon icon={faUsers} className="mr-2" />Utilisateurs</Link></li>
             <li><Link href="/admin/forum" className="block px-6 py-3 hover:bg-gray-700"><FontAwesomeIcon icon={faComments} className="mr-2" />Forum</Link></li>
             <li><Link href="/admin/dating" className="block px-6 py-3 hover:bg-gray-700"><FontAwesomeIcon icon={faHeart} className="mr-2" />Rencontre</Link></li>
+            <li className="px-6 pt-4 pb-2 text-xs uppercase text-gray-400">Services</li>
+            <li><Link href="/admin/customers" className="block px-6 py-3 hover:bg-gray-700"><FontAwesomeIcon icon={faUserTie} className="mr-2" />Clients</Link></li>
+            <li><Link href="/admin/calls" className="block px-6 py-3 hover:bg-gray-700"><FontAwesomeIcon icon={faPhone} className="mr-2" />Appels</Link></li>
+            <li><Link href="/admin/revenue" className="block px-6 py-3 hover:bg-gray-700"><FontAwesomeIcon icon={faMoneyBillWave} className="mr-2" />Revenue</Link></li>
             <li className="px-6 pt-4 pb-2 text-xs uppercase text-gray-400">Marketplace</li>
             <li><Link href="/admin/vendors" className="block px-6 py-3 hover:bg-gray-700"><FontAwesomeIcon icon={faStore} className="mr-2" />Vendeurs</Link></li>
             <li><Link href="/admin/marketplace/categories" className="block px-6 py-3 hover:bg-gray-700"><FontAwesomeIcon icon={faTags} className="mr-2" />Catégories</Link></li>

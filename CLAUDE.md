@@ -135,3 +135,32 @@ Pour un workflow qui utilise Supabase/GitHub/Vercel :
 - `src/components/` - Composants React
 - `src/services/` - Services métier
 - `src/utils/supabase/` - Configuration Supabase
+
+## UI/UX
+
+Utiliser le plugin /frontend-design et l'agent ui-ux-designer pour tout composant visible. Pas de UI generique.
+
+### Regles
+- JAMAIS de UI generique "AI slop" (boutons bleus basiques, cards sans ame)
+- Toujours definir une direction esthetique avant de coder
+- S'inspirer de : Vercel, Linear, Raycast, Stripe pour le niveau de polish
+- Utiliser /ui-fix pour ameliorer un composant existant
+- Utiliser /new-component pour creer un nouveau composant
+
+## Composants
+
+- Base : shadcn/ui + Radix UI, customiser systematiquement
+- Variants : class-variance-authority (cva)
+- Animations : Framer Motion pour transitions et micro-interactions
+- Responsive : Mobile-first obligatoire
+- Dark mode : Prevu dans l'architecture des tokens
+- Accessibilite : Contraste AA, focus states, aria labels
+
+## Performance
+
+- Images : Toujours utiliser next/image, definir width/height, lazy load
+- Fonts : Utiliser next/font, pas d'import externe
+- Server Components par defaut, minimiser 'use client'
+- Dynamic imports pour les composants lourds
+- Eviter les re-renders inutiles (React.memo, useMemo, useCallback)
+- Utiliser /perf-check pour auditer regulierement
