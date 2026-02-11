@@ -13,6 +13,7 @@ import { supabase } from '@/utils/supabase/client';
 import StatusBadge from '@/components/crm/StatusBadge';
 import EntitlementGrid from '@/components/crm/EntitlementGrid';
 import PackProgressCard from '@/components/crm/PackProgressCard';
+import PackChecklist from '@/components/crm/PackChecklist';
 import CRMChat from './CRMChat';
 import AdminNotes from './AdminNotes';
 import type { ServicePurchase, EntitlementSummary } from '@/types/services';
@@ -52,6 +53,7 @@ export default function CustomerDetailTabs({ customer, adminId }: Props) {
   const [entitlements, setEntitlements] = useState<EntitlementSummary[]>([]);
   const [calls, setCalls] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPurchaseId, setSelectedPurchaseId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -79,8 +81,15 @@ export default function CustomerDetailTabs({ customer, adminId }: Props) {
         .order('scheduled_at', { ascending: true, nullsFirst: false }),
     ]);
 
-    setPurchases(purchasesRes.data || []);
+    const fetchedPurchases = purchasesRes.data || [];
+    setPurchases(fetchedPurchases);
     setCalls(callsRes.data || []);
+
+    // Auto-select first active purchase for sidebar if none selected
+    if (!selectedPurchaseId) {
+      const firstActive = fetchedPurchases.find(p => p.status === 'active');
+      if (firstActive) setSelectedPurchaseId(firstActive.id);
+    }
 
     // Map entitlements to summary format
     const summaries: EntitlementSummary[] = (entitlementsRes.data || []).map((e: any) => ({
@@ -104,6 +113,138 @@ export default function CustomerDetailTabs({ customer, adminId }: Props) {
     await consumeEntitlement(supabase, entitlementId, adminId);
     fetchData();
   };
+
+  const activePurchases = purchases.filter(p => p.status === 'active');
+  const sidebarPurchase = activePurchases.find(p => p.id === selectedPurchaseId) || null;
+  const sidebarEntitlements = sidebarPurchase
+    ? entitlements.filter(e => e.purchase_id === sidebarPurchase.id)
+    : [];
+  const hasSidebar = !!sidebarPurchase;
+
+  const tabContent = (
+    <>
+      {activeTab === 'overview' && (
+        <div className="space-y-6">
+          <h2 className="text-lg font-semibold">Services actifs</h2>
+          {activePurchases.length > 0 ? (
+            <div className="grid gap-4 md:grid-cols-2">
+              {activePurchases.map((purchase) => (
+                <PackProgressCard
+                  key={purchase.id}
+                  purchase={purchase}
+                  entitlements={entitlements.filter(e => e.purchase_id === purchase.id)}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-sm">Aucun service actif</p>
+          )}
+
+          <h2 className="text-lg font-semibold mt-8">Droits & Quotas</h2>
+          <EntitlementGrid
+            entitlements={entitlements.filter(e => e.status === 'available' || e.status === 'in_use')}
+            showValidateButton
+            onValidate={handleValidateEntitlement}
+          />
+        </div>
+      )}
+
+      {activeTab === 'purchases' && (
+        <div className="space-y-4">
+          {purchases.length === 0 ? (
+            <p className="text-muted-foreground text-sm py-8 text-center">Aucun achat</p>
+          ) : (
+            purchases.map((purchase) => (
+              <div key={purchase.id} className="bg-card border border-border rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium text-sm">{purchase.service_type}</span>
+                  <StatusBadge status={purchase.status} />
+                </div>
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span>{purchase.amount_paid}€</span>
+                  <span>{new Date(purchase.created_at).toLocaleDateString('fr-FR')}</span>
+                  {purchase.stripe_checkout_session_id && (
+                    <span className="font-mono truncate max-w-[200px]">{purchase.stripe_checkout_session_id}</span>
+                  )}
+                </div>
+                <div className="mt-3">
+                  <EntitlementGrid
+                    entitlements={entitlements.filter(e => e.purchase_id === purchase.id)}
+                    compact
+                    showValidateButton
+                    onValidate={handleValidateEntitlement}
+                  />
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {activeTab === 'calls' && (
+        <div className="space-y-4">
+          {calls.length === 0 ? (
+            <p className="text-muted-foreground text-sm py-8 text-center">Aucun appel</p>
+          ) : (
+            calls.map((call: any) => (
+              <div key={call.id} className="bg-card border border-border rounded-lg p-4 flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-sm">
+                      Call {call.call_number}/{call.total_calls}
+                    </span>
+                    <StatusBadge status={call.status} />
+                  </div>
+                  {call.scheduled_at && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {new Date(call.scheduled_at).toLocaleDateString('fr-FR', {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'long',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </p>
+                  )}
+                  {call.admin_notes && (
+                    <p className="text-xs text-muted-foreground mt-1 italic">{call.admin_notes}</p>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  {call.status === 'confirmed' && (
+                    <button
+                      onClick={async () => {
+                        const { updateCallStatus } = await import('@/services/callService');
+                        await updateCallStatus(supabase, call.id, 'completed');
+                        const callEntitlement = entitlements.find(
+                          e => e.feature_type === 'call_30min' && e.status === 'available' && e.purchase_id === call.purchase_id
+                        );
+                        if (callEntitlement) {
+                          await handleValidateEntitlement(callEntitlement.entitlement_id);
+                        }
+                        fetchData();
+                      }}
+                      className="px-3 py-1.5 text-xs font-medium bg-emerald-500/10 text-emerald-600 rounded-lg hover:bg-emerald-500/20"
+                    >
+                      Marquer terminé
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {activeTab === 'messages' && (
+        <CRMChat customerId={customer.id} adminId={adminId} />
+      )}
+
+      {activeTab === 'notes' && (
+        <AdminNotes customerId={customer.id} adminId={adminId} />
+      )}
+    </>
+  );
 
   return (
     <div>
@@ -169,128 +310,35 @@ export default function CustomerDetailTabs({ customer, adminId }: Props) {
         </nav>
       </div>
 
-      {/* Tab Content */}
-      {activeTab === 'overview' && (
-        <div className="space-y-6">
-          <h2 className="text-lg font-semibold">Services actifs</h2>
-          {purchases.filter(p => p.status === 'active').length > 0 ? (
-            <div className="grid gap-4 md:grid-cols-2">
-              {purchases.filter(p => p.status === 'active').map((purchase) => (
-                <PackProgressCard
-                  key={purchase.id}
-                  purchase={purchase}
-                  entitlements={entitlements.filter(e => e.purchase_id === purchase.id)}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-sm">Aucun service actif</p>
-          )}
-
-          <h2 className="text-lg font-semibold mt-8">Droits & Quotas</h2>
-          <EntitlementGrid
-            entitlements={entitlements.filter(e => e.status === 'available' || e.status === 'in_use')}
-            showValidateButton
-            onValidate={handleValidateEntitlement}
-          />
+      {/* 2-column layout when sidebar is active */}
+      {hasSidebar ? (
+        <div className="flex gap-6 items-start">
+          <div className="flex-1 min-w-0">
+            {tabContent}
+          </div>
+          <div className="w-[320px] flex-shrink-0 hidden lg:block">
+            {activePurchases.length > 1 && (
+              <select
+                value={selectedPurchaseId || ''}
+                onChange={(e) => setSelectedPurchaseId(e.target.value)}
+                className="w-full mb-3 px-3 py-2 text-sm bg-card border border-border rounded-lg text-foreground"
+              >
+                {activePurchases.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.service_type} — {p.amount_paid}€
+                  </option>
+                ))}
+              </select>
+            )}
+            <PackChecklist
+              purchase={sidebarPurchase}
+              entitlements={sidebarEntitlements}
+              onValidate={handleValidateEntitlement}
+            />
+          </div>
         </div>
-      )}
-
-      {activeTab === 'purchases' && (
-        <div className="space-y-4">
-          {purchases.length === 0 ? (
-            <p className="text-muted-foreground text-sm py-8 text-center">Aucun achat</p>
-          ) : (
-            purchases.map((purchase) => (
-              <div key={purchase.id} className="bg-card border border-border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium text-sm">{purchase.service_type}</span>
-                  <StatusBadge status={purchase.status} />
-                </div>
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span>{purchase.amount_paid}€</span>
-                  <span>{new Date(purchase.created_at).toLocaleDateString('fr-FR')}</span>
-                  {purchase.stripe_checkout_session_id && (
-                    <span className="font-mono truncate max-w-[200px]">{purchase.stripe_checkout_session_id}</span>
-                  )}
-                </div>
-                {/* Entitlements for this purchase */}
-                <div className="mt-3">
-                  <EntitlementGrid
-                    entitlements={entitlements.filter(e => e.purchase_id === purchase.id)}
-                    compact
-                    showValidateButton
-                    onValidate={handleValidateEntitlement}
-                  />
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      )}
-
-      {activeTab === 'calls' && (
-        <div className="space-y-4">
-          {calls.length === 0 ? (
-            <p className="text-muted-foreground text-sm py-8 text-center">Aucun appel</p>
-          ) : (
-            calls.map((call: any) => (
-              <div key={call.id} className="bg-card border border-border rounded-lg p-4 flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm">
-                      Call {call.call_number}/{call.total_calls}
-                    </span>
-                    <StatusBadge status={call.status} />
-                  </div>
-                  {call.scheduled_at && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {new Date(call.scheduled_at).toLocaleDateString('fr-FR', {
-                        weekday: 'long',
-                        day: 'numeric',
-                        month: 'long',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </p>
-                  )}
-                  {call.admin_notes && (
-                    <p className="text-xs text-muted-foreground mt-1 italic">{call.admin_notes}</p>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  {call.status === 'confirmed' && (
-                    <button
-                      onClick={async () => {
-                        const { updateCallStatus } = await import('@/services/callService');
-                        await updateCallStatus(supabase, call.id, 'completed');
-                        // Also consume the call entitlement
-                        const callEntitlement = entitlements.find(
-                          e => e.feature_type === 'call_30min' && e.status === 'available' && e.purchase_id === call.purchase_id
-                        );
-                        if (callEntitlement) {
-                          await handleValidateEntitlement(callEntitlement.entitlement_id);
-                        }
-                        fetchData();
-                      }}
-                      className="px-3 py-1.5 text-xs font-medium bg-emerald-500/10 text-emerald-600 rounded-lg hover:bg-emerald-500/20"
-                    >
-                      Marquer terminé
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      )}
-
-      {activeTab === 'messages' && (
-        <CRMChat customerId={customer.id} adminId={adminId} />
-      )}
-
-      {activeTab === 'notes' && (
-        <AdminNotes customerId={customer.id} adminId={adminId} />
+      ) : (
+        tabContent
       )}
     </div>
   );

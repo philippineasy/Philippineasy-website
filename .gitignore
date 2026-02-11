@@ -45,3 +45,6 @@ n8n-workflows/
 scripts/
 supabase/migrations/
 supabase/.temp/
+
+# TypeScript
+tsconfig.tsbuildinfo
