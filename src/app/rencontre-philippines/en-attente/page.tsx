@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Clock, CheckCircle, Mail } from 'lucide-react';
 
 const PendingValidationPage = () => {
   const router = useRouter();
@@ -11,30 +12,56 @@ const PendingValidationPage = () => {
   }, []);
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center">
-      <video autoPlay loop muted className="absolute z-0 w-full h-full object-cover">
-        <source src="/videos/Beach%20Philippines.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-      <div className="relative z-10 min-h-screen bg-black/30 flex items-center justify-center">
-        <div className="container mx-auto px-4 py-16 sm:py-24">
-          <div className="max-w-2xl mx-auto bg-white/80 backdrop-blur-lg p-8 rounded-2xl shadow-2xl border border-white/20 text-center">
-            <h1 className="text-4xl font-bold text-gray-800">Merci pour votre inscription !</h1>
-            <p className="text-gray-600 mt-4 text-lg">
-              Votre profil est en cours de validation par notre équipe de modération. Cette étape est nécessaire pour garantir la sécurité et l'authenticité de notre communauté.
-            </p>
-            <p className="text-gray-600 mt-2">
-              Vous recevrez une notification par e-mail dès que votre profil sera approuvé. Cela prend généralement moins de 24 heures.
-            </p>
-            <button
-              onClick={() => router.push('/')}
-              className="mt-8 bg-primary text-white font-bold py-3 px-8 rounded-full hover:bg-primary/90 transition-transform transform hover:scale-105"
-            >
-              Retour à l'accueil
-            </button>
+    <div className="min-h-screen bg-muted">
+      <section className="bg-card border-b border-border py-12 px-4">
+        <div className="container mx-auto max-w-2xl text-center">
+          <span className="inline-block bg-primary/10 text-primary text-sm font-medium px-4 py-1.5 rounded-full mb-4">
+            Rencontre Philippines
+          </span>
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground">Merci pour votre inscription !</h1>
+        </div>
+      </section>
+
+      <section className="py-10 px-4">
+        <div className="container mx-auto max-w-2xl">
+          <div className="bg-card rounded-2xl shadow-lg border border-border p-6 sm:p-8">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-6">
+                <Clock className="w-8 h-8" />
+              </div>
+
+              <div className="space-y-4 mb-8">
+                <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/50 border border-border text-left">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground">Profil en cours de validation</h3>
+                    <p className="text-sm text-muted-foreground mt-0.5">Notre équipe de modération vérifie votre profil pour garantir la sécurité et l&apos;authenticité de notre communauté.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 p-4 rounded-xl bg-muted/50 border border-border text-left">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground">Notification par e-mail</h3>
+                    <p className="text-sm text-muted-foreground mt-0.5">Vous recevrez un e-mail dès que votre profil sera approuvé. Cela prend généralement moins de 24 heures.</p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => router.push('/')}
+                className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-semibold py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                Retour à l&apos;accueil
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 };
