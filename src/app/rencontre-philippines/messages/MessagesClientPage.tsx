@@ -27,7 +27,7 @@ const TimeDisplay = ({ date }: { date: string | null | undefined }) => {
     }
   }, [date]);
 
-  return <p className="text-xs text-gray-400">{timeString}</p>;
+  return <p className="text-xs text-muted-foreground/60">{timeString}</p>;
 };
 
 const MessagesClientPage = ({ initialMatches, currentUserId }: { initialMatches: MatchWithLastMessage[], currentUserId: string }) => {
@@ -68,7 +68,7 @@ const MessagesClientPage = ({ initialMatches, currentUserId }: { initialMatches:
       <h1 className="text-3xl font-bold mb-4 flex-shrink-0">Mes Conversations</h1>
       <div className="flex-grow md:flex md:flex-row gap-8 min-h-0">
         {/* Conversation List */}
-        <div className="w-full md:w-1/4 bg-white rounded-lg shadow-md flex flex-col">
+        <div className="w-full md:w-1/4 bg-card rounded-lg shadow-md flex flex-col">
           {matches.length > 0 ? (
             <ul className="overflow-y-auto">
               {matches.map(match => {
@@ -78,7 +78,7 @@ const MessagesClientPage = ({ initialMatches, currentUserId }: { initialMatches:
                   <li key={match.id} className="border-b last:border-b-0">
                     <button
                       onClick={() => handleSelectMatch(match)}
-                      className={`flex items-center p-4 w-full text-left hover:bg-gray-50 border-l-4 ${selectedMatch?.id === match.id ? 'border-accent bg-accent/5' : 'border-transparent'}`}
+                      className={`flex items-center p-4 w-full text-left hover:bg-muted border-l-4 ${selectedMatch?.id === match.id ? 'border-accent bg-accent/5' : 'border-transparent'}`}
                     >
                       <div className="relative w-12 h-12 rounded-full mr-4 flex-shrink-0">
                         <Image
@@ -96,7 +96,7 @@ const MessagesClientPage = ({ initialMatches, currentUserId }: { initialMatches:
                           <h3 className="font-semibold truncate pr-2">{otherUser.username}</h3>
                           <TimeDisplay date={match.last_message?.created_at} />
                         </div>
-                        <p className={`text-sm truncate ${isUnread ? 'text-gray-700 font-medium' : 'text-gray-500'}`}>
+                        <p className={`text-sm truncate ${isUnread ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
                           {match.last_message ? match.last_message.content : "Commencez la conversation !"}
                         </p>
                       </div>
@@ -107,31 +107,31 @@ const MessagesClientPage = ({ initialMatches, currentUserId }: { initialMatches:
             </ul>
           ) : (
             <div className="flex items-center justify-center h-full">
-              <p className="p-8 text-center text-gray-500">Vous n'avez pas encore de match. Continuez à swiper !</p>
+              <p className="p-8 text-center text-muted-foreground">Vous n'avez pas encore de match. Continuez à swiper !</p>
             </div>
           )}
         </div>
         {/* Conversation Panel */}
-        <div className={`w-full md:w-2/4 bg-white rounded-lg shadow-md flex-col ${selectedMatch ? 'flex' : 'hidden md:flex'}`}>
+        <div className={`w-full md:w-2/4 bg-card rounded-lg shadow-md flex-col ${selectedMatch ? 'flex' : 'hidden md:flex'}`}>
           {selectedMatch ? (
             <ConversationPanel
               otherUser={selectedMatch.user_id_1 === currentUserId ? selectedMatch.user2 : selectedMatch.user1}
             />
           ) : (
             <div className="flex items-center justify-center h-full">
-              <p className="text-gray-500">Sélectionnez une conversation pour voir les messages.</p>
+              <p className="text-muted-foreground">Sélectionnez une conversation pour voir les messages.</p>
             </div>
           )}
         </div>
         {/* Profile Panel */}
-        <div className="hidden lg:flex lg:w-1/4 bg-white rounded-lg shadow-md flex-col">
+        <div className="hidden lg:flex lg:w-1/4 bg-card rounded-lg shadow-md flex-col">
           {selectedMatch ? (
             <ProfilePanel
               userId={selectedMatch.user_id_1 === currentUserId ? selectedMatch.user_id_2 : selectedMatch.user_id_1}
             />
           ) : (
             <div className="flex items-center justify-center h-full">
-              <p className="text-gray-500">Sélectionnez une conversation pour voir le profil.</p>
+              <p className="text-muted-foreground">Sélectionnez une conversation pour voir le profil.</p>
             </div>
           )}
         </div>

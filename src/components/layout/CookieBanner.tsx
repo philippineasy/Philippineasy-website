@@ -123,7 +123,7 @@ const CookieBanner = () => {
                         <span className="font-medium">Cookies statistiques</span>
                         <input
                             type="checkbox"
-                            className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
+                            className="h-5 w-5 rounded border-border text-primary focus:ring-primary"
                             checked={analyticsConsent}
                             onChange={(e) => setAnalyticsConsent(e.target.checked)}
                         />
@@ -132,7 +132,7 @@ const CookieBanner = () => {
                         <span className="font-medium">Cookies publicitaires</span>
                         <input
                             type="checkbox"
-                            className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
+                            className="h-5 w-5 rounded border-border text-primary focus:ring-primary"
                             checked={adsConsent}
                             onChange={(e) => setAdsConsent(e.target.checked)}
                         />

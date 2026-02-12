@@ -109,7 +109,7 @@ const ProfileClientPage = () => {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-muted min-h-screen">
       <ProfileHeader profile={profile} />
       
       <div className="container mx-auto p-4 md:p-8">
@@ -118,7 +118,7 @@ const ProfileClientPage = () => {
           {/* Left Column */}
           <div className="lg:col-span-1 space-y-8">
             {!isOwnProfile && (
-              <div className="bg-white rounded-lg shadow-lg p-6 text-center">
+              <div className="bg-card rounded-lg shadow-lg p-6 text-center">
                 <h3 className="text-2xl font-bold text-primary">{compatibility}%</h3>
                 <p className="text-muted-foreground">de compatibilité</p>
               </div>
@@ -132,8 +132,8 @@ const ProfileClientPage = () => {
 
             {isOwnProfile && (
               <>
-                <div className="bg-white rounded-lg shadow-lg p-6">
-                  <h2 className="text-xl font-bold text-gray-800 mb-4">Mon Tableau de Bord</h2>
+                <div className="bg-card rounded-lg shadow-lg p-6">
+                  <h2 className="text-xl font-bold text-foreground mb-4">Mon Tableau de Bord</h2>
                   <ul className="space-y-3">
                     <li><Link href="/rencontre-philippines/messages" className="flex items-center text-primary hover:underline"><FontAwesomeIcon icon={faComments} className="w-5 mr-3" /> Mes Conversations</Link></li>
                     <li><Link href="/rencontre-philippines/likes" className="flex items-center text-primary hover:underline"><FontAwesomeIcon icon={faHeart} className="w-5 mr-3" /> Qui m'a liké ?</Link></li>

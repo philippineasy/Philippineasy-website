@@ -59,7 +59,7 @@ const LikesClientPage = () => {
 
     return (
       <Wrapper key={profile.user_id} {...wrapperProps}>
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden group transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
+        <div className="bg-card rounded-xl shadow-lg overflow-hidden group transform hover:-translate-y-2 transition-transform duration-300 cursor-pointer">
           <div className="relative w-full h-64">
             <Image
               src={profile.profile_picture_url || '/default-avatar.webp'}
@@ -75,10 +75,10 @@ const LikesClientPage = () => {
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
             <div className="absolute bottom-4 left-4 text-white">
-              <h3 className={`text-2xl font-bold ${!canViewProfile ? 'text-transparent bg-gray-400/50 rounded-md' : ''}`}>
+              <h3 className={`text-2xl font-bold ${!canViewProfile ? 'text-transparent bg-muted-foreground/50 rounded-md' : ''}`}>
                 {canViewProfile ? `${profile.username}, ${profile.age}` : 'Utilisateur mystère'}
               </h3>
-              <p className={`text-gray-200 ${!canViewProfile ? 'text-transparent bg-gray-400/50 rounded-md mt-1' : ''}`}>
+              <p className={`text-gray-200 ${!canViewProfile ? 'text-transparent bg-muted-foreground/50 rounded-md mt-1' : ''}`}>
                 {canViewProfile ? profile.city : 'Ville secrète'}
               </p>
             </div>
@@ -90,20 +90,20 @@ const LikesClientPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-16">
-      <h1 className="text-4xl font-extrabold text-center text-gray-900 mb-12">Ils ont aimé votre profil</h1>
+      <h1 className="text-4xl font-extrabold text-center text-foreground mb-12">Ils ont aimé votre profil</h1>
       {likers.length === 0 ? (
-        <p className="text-center text-gray-600 text-lg">Personne n'a encore liké votre profil. Continuez à explorer !</p>
+        <p className="text-center text-muted-foreground text-lg">Personne n'a encore liké votre profil. Continuez à explorer !</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {likers.map(profile => renderProfileCard(profile))}
         </div>
       )}
       {!isPremium && likers.length > 0 && (
-        <div className="mt-12 text-center bg-white p-8 rounded-lg shadow-xl">
-          <Lock className="mx-auto h-12 w-12 text-gray-400" />
-          <h2 className="mt-6 text-2xl font-extrabold text-gray-900">Dévoilez ces profils !</h2>
-          <p className="mt-2 text-lg text-gray-600">Passez Premium pour voir qui s'intéresse à vous et discuter sans limites.</p>
-          <Link href="/rencontre-philippines/premium" className="mt-8 inline-block bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 transition-transform transform hover:scale-105 text-lg shadow-lg">
+        <div className="mt-12 text-center bg-card p-8 rounded-lg shadow-xl">
+          <Lock className="mx-auto h-12 w-12 text-muted-foreground/60" />
+          <h2 className="mt-6 text-2xl font-extrabold text-foreground">Dévoilez ces profils !</h2>
+          <p className="mt-2 text-lg text-muted-foreground">Passez Premium pour voir qui s'intéresse à vous et discuter sans limites.</p>
+          <Link href="/rencontre-philippines/premium" className="mt-8 inline-block bg-primary text-primary-foreground font-bold py-3 px-8 rounded-full hover:bg-primary/90 transition-transform transform hover:scale-105 text-lg shadow-lg">
             Passer Premium
           </Link>
         </div>

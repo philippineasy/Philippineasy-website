@@ -477,7 +477,7 @@ const ProfilPage = () => {
           </div>
 
           <div className="lg:col-span-1 space-y-8">
-            <div className="bg-gradient-to-br from-primary/10 to-secondary p-6 rounded-lg shadow-md border border-border">
+            <div className="bg-muted p-6 rounded-lg shadow-md border border-border">
           <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
             <FontAwesomeIcon icon={faStar} className="text-accent/90 mr-2" /> Statut Philippin'Easy+
           </h3>
@@ -485,7 +485,7 @@ const ProfilPage = () => {
             <p className="text-foreground mb-1">Statut actuel: <span className="font-bold text-foreground">Membre Standard</span></p>
             <p className="text-sm text-muted-foreground mb-4">Passez Premium pour des avantages exclusifs !</p>
           </div>
-          <Link href="/meilleurs-plans#premium" className="inline-block w-full text-center px-4 py-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-card-foreground rounded-lg shadow hover:from-yellow-500 hover:to-yellow-600 transition duration-300 font-semibold">
+          <Link href="/meilleurs-plans#premium" className="inline-block w-full text-center px-4 py-2 bg-accent text-accent-foreground rounded-lg shadow hover:bg-accent/90 transition duration-300 font-semibold">
             Découvrir Easy+
           </Link>
         </div>

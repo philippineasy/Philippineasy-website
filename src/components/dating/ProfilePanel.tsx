@@ -36,20 +36,20 @@ const ProfilePanel = ({ userId }: ProfilePanelProps) => {
   if (loading) {
     return (
       <div className="p-6 space-y-4">
-        <div className="h-48 bg-gray-200 rounded-lg animate-pulse"></div>
-        <div className="h-6 w-1/2 bg-gray-200 rounded-lg animate-pulse"></div>
-        <div className="h-4 w-1/3 bg-gray-200 rounded-lg animate-pulse"></div>
+        <div className="h-48 bg-muted rounded-lg animate-pulse"></div>
+        <div className="h-6 w-1/2 bg-muted rounded-lg animate-pulse"></div>
+        <div className="h-4 w-1/3 bg-muted rounded-lg animate-pulse"></div>
         <div className="space-y-2 pt-4">
-          <div className="h-4 w-full bg-gray-200 rounded-lg animate-pulse"></div>
-          <div className="h-4 w-full bg-gray-200 rounded-lg animate-pulse"></div>
-          <div className="h-4 w-3/4 bg-gray-200 rounded-lg animate-pulse"></div>
+          <div className="h-4 w-full bg-muted rounded-lg animate-pulse"></div>
+          <div className="h-4 w-full bg-muted rounded-lg animate-pulse"></div>
+          <div className="h-4 w-3/4 bg-muted rounded-lg animate-pulse"></div>
         </div>
       </div>
     );
   }
 
   if (!profile) {
-    return <div className="p-6 text-center text-gray-500">Impossible de charger le profil.</div>;
+    return <div className="p-6 text-center text-muted-foreground">Impossible de charger le profil.</div>;
   }
 
   const calculateAge = (birthDate: string) => {
@@ -68,7 +68,7 @@ const ProfilePanel = ({ userId }: ProfilePanelProps) => {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3 }}
-      className="p-6 overflow-y-auto h-full bg-gray-50"
+      className="p-6 overflow-y-auto h-full bg-muted"
     >
       <div className="relative w-full h-64 rounded-xl overflow-hidden mb-4 shadow-lg">
         <Image
@@ -86,14 +86,14 @@ const ProfilePanel = ({ userId }: ProfilePanelProps) => {
       
       {profile.description && (
         <div className="mt-6">
-          <h4 className="font-semibold text-gray-500 text-sm uppercase tracking-wider mb-2">À propos</h4>
-          <p className="text-md text-gray-800">{profile.description}</p>
+          <h4 className="font-semibold text-muted-foreground text-sm uppercase tracking-wider mb-2">À propos</h4>
+          <p className="text-md text-foreground">{profile.description}</p>
         </div>
       )}
 
       {profile.interests && profile.interests.length > 0 && (
         <div className="mt-6">
-          <h4 className="font-semibold text-gray-500 text-sm uppercase tracking-wider mb-3">Centres d'intérêt</h4>
+          <h4 className="font-semibold text-muted-foreground text-sm uppercase tracking-wider mb-3">Centres d'intérêt</h4>
           <div className="flex flex-wrap gap-2">
             {profile.interests.map((interest: Interest) => (
               <div key={interest.id} className="bg-accent/10 text-accent-dark text-sm font-semibold px-3 py-1 rounded-full">
@@ -106,7 +106,7 @@ const ProfilePanel = ({ userId }: ProfilePanelProps) => {
 
       {profile.photos && profile.photos.length > 0 && (
          <div className="mt-6">
-          <h4 className="font-semibold text-gray-500 text-sm uppercase tracking-wider mb-3">Photos</h4>
+          <h4 className="font-semibold text-muted-foreground text-sm uppercase tracking-wider mb-3">Photos</h4>
           <div className="grid grid-cols-3 gap-2">
             {profile.photos.slice(0,3).map((photo: DatingPhoto) => (
               <div key={photo.id} className="relative w-full h-24 rounded-lg overflow-hidden shadow-sm">
@@ -117,7 +117,7 @@ const ProfilePanel = ({ userId }: ProfilePanelProps) => {
         </div>
       )}
       
-      <Link href={`/rencontre-philippines/profil/${userId}`} className="mt-8 inline-block w-full text-center px-4 py-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition duration-300 font-bold shadow-lg">
+      <Link href={`/rencontre-philippines/profil/${userId}`} className="mt-8 inline-block w-full text-center px-4 py-3 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition duration-300 font-bold shadow-lg">
         Voir le profil complet
       </Link>
     </motion.div>

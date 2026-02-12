@@ -67,7 +67,7 @@ export default function ServicesPage() {
       <FAQSchema faqs={serviceFAQs} />
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary/10 via-background to-accent/10 py-20 px-4">
+      <section className="relative bg-muted py-20 px-4">
         <div className="container mx-auto text-center max-w-4xl">
           <span className="inline-block bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
             Services Exclusifs
@@ -275,7 +275,7 @@ export default function ServicesPage() {
       </section>
 
       {/* Section 3: Pack Ultime */}
-      <section className="py-16 px-4 bg-gradient-to-br from-primary/5 via-accent/5 to-primary/5">
+      <section className="py-16 px-4 bg-muted">
         <div className="container mx-auto max-w-5xl">
           <div className="text-center mb-12">
             <FontAwesomeIcon icon={faCrown} className="text-5xl text-accent mb-4" />
@@ -418,7 +418,7 @@ export default function ServicesPage() {
       <section className="py-16 px-4 bg-card">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
-            <FontAwesomeIcon icon={faHeart} className="text-4xl text-pink-500 mb-4" />
+            <FontAwesomeIcon icon={faHeart} className="text-4xl text-primary mb-4" />
             <h2 className="text-3xl font-bold text-foreground mb-4">Communauté & Abonnements</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Rejoignez notre communauté francophone aux Philippines
@@ -427,9 +427,9 @@ export default function ServicesPage() {
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Rencontre Premium */}
-            <div className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/20 dark:to-pink-800/20 rounded-2xl p-8">
+            <div className="bg-card border border-border hover:border-primary/50 transition-colors rounded-2xl p-8">
               <div className="flex items-center gap-3 mb-4">
-                <FontAwesomeIcon icon={faHeart} className="text-2xl text-pink-500" />
+                <FontAwesomeIcon icon={faHeart} className="text-2xl text-primary" />
                 <h3 className="text-xl font-bold">Rencontre Premium</h3>
               </div>
               <p className="text-muted-foreground mb-6">
@@ -451,18 +451,18 @@ export default function ServicesPage() {
               </div>
               <Link
                 href="/rencontre-philippines/premium"
-                className="block w-full py-3 bg-pink-500 text-white rounded-lg text-center font-semibold hover:bg-pink-600"
+                className="block w-full py-3 bg-primary text-primary-foreground rounded-lg text-center font-semibold hover:bg-primary/90"
               >
                 Découvrir
               </Link>
             </div>
 
             {/* Easy+ */}
-            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/20 dark:to-yellow-800/20 rounded-2xl p-8">
+            <div className="bg-card border-2 border-accent rounded-2xl p-8 relative">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground text-xs px-3 py-1 rounded-full font-semibold">VIP</span>
               <div className="flex items-center gap-3 mb-4">
-                <FontAwesomeIcon icon={faStar} className="text-2xl text-yellow-500" />
+                <FontAwesomeIcon icon={faStar} className="text-2xl text-accent" />
                 <h3 className="text-xl font-bold">Easy+</h3>
-                <span className="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">VIP</span>
               </div>
               <p className="text-muted-foreground mb-6">
                 Abonnement privilège avec -20% partenaires, support prioritaire, guides premium
@@ -479,7 +479,7 @@ export default function ServicesPage() {
               </div>
               <Link
                 href="/meilleurs-plans-aux-philippines"
-                className="block w-full py-3 bg-yellow-500 text-white rounded-lg text-center font-semibold hover:bg-yellow-600"
+                className="block w-full py-3 bg-accent text-accent-foreground rounded-lg text-center font-semibold hover:bg-accent/90"
               >
                 En savoir plus
               </Link>
@@ -507,7 +507,7 @@ export default function ServicesPage() {
             </a>
             <Link
               href="/itineraire-personnalise-pour-les-philippines"
-              className="inline-flex items-center justify-center gap-2 bg-white text-primary px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+              className="inline-flex items-center justify-center gap-2 bg-card text-primary px-8 py-4 rounded-lg font-semibold hover:bg-muted transition-colors"
             >
               Créer mon itinéraire
             </Link>

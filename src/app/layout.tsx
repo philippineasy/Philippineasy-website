@@ -195,7 +195,7 @@ export default async function RootLayout({
 
   return (
     <html lang="fr">
-      <body className={`${poppins.className} bg-gray-100`}>
+      <body className={`${poppins.className} bg-muted`}>
         <GoogleAnalytics />
         <AuthProvider>
           <CartProvider>

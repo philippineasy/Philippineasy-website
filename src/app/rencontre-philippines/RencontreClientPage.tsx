@@ -93,7 +93,7 @@ const RencontreClientPage = () => {
   };
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-muted">
       <HeroThematic
         titlePart1="Nos"
         titlePart2="Rencontres"
@@ -102,8 +102,8 @@ const RencontreClientPage = () => {
       />
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900">Bienvenue dans l'Espace Rencontre</h2>
-          <p className="text-xl text-gray-600 mt-4 max-w-3xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground">Bienvenue dans l'Espace Rencontre</h2>
+          <p className="text-xl text-muted-foreground mt-4 max-w-3xl mx-auto">
             Un lieu conçu pour des interactions authentiques et des connexions significatives.
           </p>
           <div className="mt-8">
@@ -113,27 +113,27 @@ const RencontreClientPage = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 my-16">
-          <h3 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">Passez Premium pour une expérience complète</h3>
+        <div className="bg-card rounded-2xl shadow-xl p-8 md:p-12 my-16">
+          <h3 className="text-3xl md:text-4xl font-bold text-center text-foreground mb-12">Passez Premium pour une expérience complète</h3>
           <div className="grid md:grid-cols-3 gap-10 text-center">
-            <div className="p-6 bg-gray-50 rounded-xl">
+            <div className="p-6 bg-muted rounded-xl">
               <FontAwesomeIcon icon={faComments} className="text-5xl text-primary mb-4" />
               <h4 className="text-2xl font-semibold mb-2">Messages Illimités</h4>
-              <p className="text-gray-600">Discutez sans limites avec toutes les personnes qui vous intéressent.</p>
+              <p className="text-muted-foreground">Discutez sans limites avec toutes les personnes qui vous intéressent.</p>
             </div>
-            <div className="p-6 bg-gray-50 rounded-xl">
+            <div className="p-6 bg-muted rounded-xl">
               <FontAwesomeIcon icon={faSearch} className="text-5xl text-primary mb-4" />
               <h4 className="text-2xl font-semibold mb-2">Visibilité Accrue</h4>
-              <p className="text-gray-600">Votre profil est mis en avant pour être vu par plus de membres.</p>
+              <p className="text-muted-foreground">Votre profil est mis en avant pour être vu par plus de membres.</p>
             </div>
-            <div className="p-6 bg-gray-50 rounded-xl">
+            <div className="p-6 bg-muted rounded-xl">
               <FontAwesomeIcon icon={faStar} className="text-5xl text-primary mb-4" />
               <h4 className="text-2xl font-semibold mb-2">Accès Exclusif</h4>
-              <p className="text-gray-600">Débloquez des fonctionnalités exclusives sur tout le site.</p>
+              <p className="text-muted-foreground">Débloquez des fonctionnalités exclusives sur tout le site.</p>
             </div>
           </div>
           <div className="text-center mt-12">
-            <Link href="/rencontre-philippines/premium" className="inline-block bg-accent text-white font-bold py-4 px-10 rounded-full hover:bg-accent/90 transition-transform transform hover:scale-105 text-lg shadow-lg">
+            <Link href="/rencontre-philippines/premium" className="inline-block bg-accent text-accent-foreground font-bold py-4 px-10 rounded-full hover:bg-accent/90 transition-transform transform hover:scale-105 text-lg shadow-lg">
               Découvrir nos offres Premium
             </Link>
           </div>
@@ -148,7 +148,7 @@ const RencontreClientPage = () => {
         </div>
 
         <div className="flex justify-between items-center mb-8">
-          <h3 className="text-3xl md:text-4xl font-bold text-gray-800">Nos derniers membres inscrits</h3>
+          <h3 className="text-3xl md:text-4xl font-bold text-foreground">Nos derniers membres inscrits</h3>
           {profileStatus.hasProfile && (
             <Link href="/rencontre-philippines/swipe" className="bg-primary text-white font-bold py-2 px-4 rounded-full hover:bg-primary/90 transition-transform transform hover:scale-105 text-lg shadow-lg">
               <FontAwesomeIcon icon={faClone} className="mr-2" />
@@ -165,7 +165,7 @@ const RencontreClientPage = () => {
 
               return (
                 <Wrapper key={profile.user_id} {...wrapperProps}>
-                  <div className="bg-white rounded-xl shadow-lg overflow-hidden group transform hover:-translate-y-2 transition-transform duration-300">
+                  <div className="bg-card rounded-xl shadow-lg overflow-hidden group transform hover:-translate-y-2 transition-transform duration-300">
                     <div className="relative w-full h-64">
                       <Image
                         src={profile.profile_picture_url || '/default-avatar.webp'}
@@ -184,10 +184,10 @@ const RencontreClientPage = () => {
                         <span className="absolute top-4 right-4 bg-accent text-white text-xs font-bold px-2 py-1 rounded-full">NOUVEAU</span>
                       )}
                       <div className="absolute bottom-4 left-4 text-white">
-                        <h3 className={`text-2xl font-bold ${!canView ? 'text-transparent bg-gray-400/50 rounded-md' : ''}`}>
+                        <h3 className={`text-2xl font-bold ${!canView ? 'text-transparent bg-muted-foreground/50 rounded-md' : ''}`}>
                           {canView ? `${profile.username}, ${profile.age}`: 'Utilisateur'}
                         </h3>
-                        <p className={`text-gray-200 ${!canView ? 'text-transparent bg-gray-400/50 rounded-md mt-1' : ''}`}>
+                        <p className={`text-gray-200 ${!canView ? 'text-transparent bg-muted-foreground/50 rounded-md mt-1' : ''}`}>
                           {canView ? profile.city : 'Ville secrète'}
                         </p>
                       </div>
@@ -195,7 +195,7 @@ const RencontreClientPage = () => {
                     <div className="p-4">
                       <div className="flex flex-wrap gap-2 mt-2">
                         {(profile.interests ?? []).slice(0, 3).map((interest) => (
-                          <div key={interest.id} className="bg-gray-200 rounded-full px-3 py-1 text-xs">
+                          <div key={interest.id} className="bg-muted rounded-full px-3 py-1 text-xs">
                             {interest.name}
                           </div>
                         ))}
@@ -213,7 +213,7 @@ const RencontreClientPage = () => {
         {error && <p className="text-center text-red-500 mt-8">{error}</p>}
         {!loadingProfiles && hasMore && (
           <div className="text-center mt-12">
-            <button onClick={loadMoreProfiles} className="bg-secondary text-white px-8 py-3 rounded-full font-semibold hover:bg-secondary/90 transition-colors">
+            <button onClick={loadMoreProfiles} className="bg-secondary text-secondary-foreground px-8 py-3 rounded-full font-semibold hover:bg-secondary/90 transition-colors">
               Voir plus de profils
             </button>
           </div>

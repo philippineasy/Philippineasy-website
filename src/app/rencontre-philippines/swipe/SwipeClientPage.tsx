@@ -146,7 +146,7 @@ const SwipeClientPage = ({ initialProfiles, hasMoreInitial }: SwipeClientPagePro
             {/* Tinder Card Container */}
             <div className="relative w-[320px] h-[480px] sm:w-[350px] sm:h-[525px]">
               {loading ? (
-                <div className="flex items-center justify-center w-full h-full bg-gray-200 rounded-xl shadow-lg">
+                <div className="flex items-center justify-center w-full h-full bg-muted rounded-xl shadow-lg">
                   <p>Chargement des profils...</p>
                 </div>
               ) : canSwipe ? (
@@ -206,10 +206,10 @@ const SwipeClientPage = ({ initialProfiles, hasMoreInitial }: SwipeClientPagePro
                   </TinderCard>
                 ))
               ) : (
-                <div className="flex flex-col items-center justify-center w-full h-full bg-gray-100 rounded-xl shadow-lg p-8">
-                  <svg className="w-24 h-24 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  <h3 className="text-xl font-semibold text-gray-700">Plus de profils pour le moment</h3>
-                  <p className="text-center text-gray-500 mt-2">
+                <div className="flex flex-col items-center justify-center w-full h-full bg-muted rounded-xl shadow-lg p-8">
+                  <svg className="w-24 h-24 text-muted-foreground/40 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <h3 className="text-xl font-semibold text-foreground">Plus de profils pour le moment</h3>
+                  <p className="text-center text-muted-foreground mt-2">
                     Revenez plus tard ou essayez d'ajuster vos filtres pour découvrir plus de personnes !
                   </p>
                 </div>
@@ -218,20 +218,20 @@ const SwipeClientPage = ({ initialProfiles, hasMoreInitial }: SwipeClientPagePro
 
             {/* Action Buttons */}
             <div className="flex items-center justify-around w-full max-w-xs p-4 mt-2">
-              <button onClick={() => swipe('left')} className="bg-white rounded-full w-16 h-16 flex items-center justify-center shadow-xl hover:bg-red-100 transition-colors text-red-500 text-3xl disabled:opacity-50 disabled:cursor-not-allowed" disabled={!canSwipe || loading}>
+              <button onClick={() => swipe('left')} className="bg-card rounded-full w-16 h-16 flex items-center justify-center shadow-xl hover:bg-destructive/10 transition-colors text-destructive text-3xl disabled:opacity-50 disabled:cursor-not-allowed" disabled={!canSwipe || loading}>
                 <FontAwesomeIcon icon={faTimes} />
               </button>
-              <button onClick={() => swipe('up')} className="bg-white rounded-full w-20 h-20 flex items-center justify-center shadow-xl hover:bg-blue-100 transition-colors text-blue-500 text-4xl disabled:opacity-50 disabled:cursor-not-allowed" disabled={!canSwipe || loading}>
+              <button onClick={() => swipe('up')} className="bg-card rounded-full w-20 h-20 flex items-center justify-center shadow-xl hover:bg-primary/10 transition-colors text-primary text-4xl disabled:opacity-50 disabled:cursor-not-allowed" disabled={!canSwipe || loading}>
                 <FontAwesomeIcon icon={faStar} />
               </button>
-              <button onClick={() => swipe('right')} className="bg-white rounded-full w-16 h-16 flex items-center justify-center shadow-xl hover:bg-green-100 transition-colors text-green-500 text-3xl disabled:opacity-50 disabled:cursor-not-allowed" disabled={!canSwipe || loading}>
+              <button onClick={() => swipe('right')} className="bg-card rounded-full w-16 h-16 flex items-center justify-center shadow-xl hover:bg-green-100 transition-colors text-green-500 text-3xl disabled:opacity-50 disabled:cursor-not-allowed" disabled={!canSwipe || loading}>
                 <FontAwesomeIcon icon={faHeart} />
               </button>
             </div>
           </div>
 
           {/* Filters Panel - Conditional rendering for mobile, permanent for desktop */}
-          <div className={`lg:order-2 order-1 lg:w-80 lg:h-auto lg:sticky lg:top-24 flex-shrink-0 bg-white p-4 rounded-lg shadow-lg lg:block ${showFilters ? 'block w-full mb-4' : 'hidden'}`}>
+          <div className={`lg:order-2 order-1 lg:w-80 lg:h-auto lg:sticky lg:top-24 flex-shrink-0 bg-card p-4 rounded-lg shadow-lg lg:block ${showFilters ? 'block w-full mb-4' : 'hidden'}`}>
             <SwipeFilters onApplyFilters={handleApplyFilters} availableInterests={availableInterests} />
           </div>
         </div>

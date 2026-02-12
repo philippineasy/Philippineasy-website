@@ -169,7 +169,7 @@ const ConversationPanel = ({ otherUser }: ConversationPanelProps) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-card">
       <div className="p-4 border-b flex items-center flex-shrink-0">
         <Image
           src={otherUser.avatar_url || '/default-avatar.webp'}
@@ -186,21 +186,21 @@ const ConversationPanel = ({ otherUser }: ConversationPanelProps) => {
           return (
             <div key={message.id} className={`group flex items-center gap-2 mb-4 ${isMyMessage ? 'justify-end' : 'justify-start'}`}>
               <div className={`relative flex items-center ${isMyMessage ? 'flex-row-reverse' : 'flex-row'}`}>
-                <div className={`relative rounded-lg px-3 py-2 max-w-xs lg:max-w-md ${isMyMessage ? 'bg-primary text-primary-foreground' : 'bg-gray-200 text-gray-800'}`}>
+                <div className={`relative rounded-lg px-3 py-2 max-w-xs lg:max-w-md ${isMyMessage ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'}`}>
                   <p>{message.content}</p>
                   {message.reactions && message.reactions.length > 0 && (
-                    <div className="absolute -bottom-3.5 bg-white px-1.5 py-0.5 rounded-full shadow flex items-center space-x-1">
+                    <div className="absolute -bottom-3.5 bg-card px-1.5 py-0.5 rounded-full shadow flex items-center space-x-1">
                       {message.reactions.slice(0, 3).map(r => <span key={r.user_id} className="text-xs">{r.emoji}</span>)}
                       {message.reactions.length > 3 && <span className="text-xs">...</span>}
                     </div>
                   )}
                 </div>
                 <div className="relative">
-                  <button onClick={() => setShowEmojiPicker(showEmojiPicker === message.id ? null : message.id)} className="p-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => setShowEmojiPicker(showEmojiPicker === message.id ? null : message.id)} className="p-1 text-muted-foreground/60 hover:text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
                     <FontAwesomeIcon icon={faSmile} />
                   </button>
                   {showEmojiPicker === message.id && (
-                    <div className={`absolute bottom-full mb-1 bg-white shadow-lg rounded-full px-2 py-1 flex space-x-2 z-20 ${isMyMessage ? 'right-0' : 'left-0'}`}>
+                    <div className={`absolute bottom-full mb-1 bg-card shadow-lg rounded-full px-2 py-1 flex space-x-2 z-20 ${isMyMessage ? 'right-0' : 'left-0'}`}>
                       {['👍', '❤️', '😂', '😮', '😢', '🙏'].map(emoji => (
                         <button key={emoji} onClick={() => handleReaction(message.id, emoji)} className="text-lg hover:scale-125 transition-transform">
                           {emoji}
@@ -216,7 +216,7 @@ const ConversationPanel = ({ otherUser }: ConversationPanelProps) => {
         <div ref={messagesEndRef} />
         {isTyping && (
           <div className="flex justify-start mb-4">
-            <div className="rounded-lg px-4 py-2 bg-gray-200 text-gray-800">
+            <div className="rounded-lg px-4 py-2 bg-muted text-foreground">
               <p className="italic text-sm">est en train d'écrire...</p>
             </div>
           </div>

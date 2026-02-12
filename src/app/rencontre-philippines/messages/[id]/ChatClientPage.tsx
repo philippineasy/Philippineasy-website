@@ -88,8 +88,8 @@ const ChatClientPage = ({ currentUser, otherUser }: ChatClientPageProps) => {
   };
 
   return (
-    <div className="flex flex-col h-[60vh] border rounded-lg shadow-lg bg-white">
-      <header className="bg-white shadow-md p-4 flex items-center sticky top-0 z-10 rounded-t-lg">
+    <div className="flex flex-col h-[60vh] border rounded-lg shadow-lg bg-card">
+      <header className="bg-card shadow-md p-4 flex items-center sticky top-0 z-10 rounded-t-lg">
         <Image
           src={otherUser.avatar_url || '/default-avatar.webp'}
           alt={otherUser.username}
@@ -110,8 +110,8 @@ const ChatClientPage = ({ currentUser, otherUser }: ChatClientPageProps) => {
               <div
                 className={`max-w-xs lg:max-w-md p-3 rounded-lg ${
                   message.from_user_id === currentUser.id
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white text-gray-800'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-foreground'
                 }`}
               >
                 <p>{message.content}</p>
@@ -125,18 +125,18 @@ const ChatClientPage = ({ currentUser, otherUser }: ChatClientPageProps) => {
         </div>
       </main>
 
-      <footer className="p-4 sticky bottom-0 border-t border-gray-200 rounded-b-lg">
+      <footer className="p-4 sticky bottom-0 border-t border-border rounded-b-lg">
         <form onSubmit={handleSendMessage} className="flex items-center">
           <input
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Écrivez votre message..."
-            className="flex-1 p-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 p-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-primary"
           />
           <button
             type="submit"
-            className="ml-4 bg-blue-500 text-white p-3 rounded-full hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="ml-4 bg-primary text-primary-foreground p-3 rounded-full hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <Send className="h-6 w-6" />
           </button>

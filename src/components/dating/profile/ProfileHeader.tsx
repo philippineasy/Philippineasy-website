@@ -24,7 +24,7 @@ const ProfileHeader = ({ profile }: ProfileHeaderProps) => {
         <p className="text-lg md:text-xl mt-1 text-gray-300">{profile.city}</p>
         <div className="mt-3 flex items-center space-x-4">
           {profile.plan === 'premium' && (
-            <span className="bg-yellow-400 text-white px-3 py-1 text-xs md:text-sm rounded-full font-semibold">
+            <span className="bg-accent text-accent-foreground px-3 py-1 text-xs md:text-sm rounded-full font-semibold">
               Premium
             </span>
           )}

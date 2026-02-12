@@ -16,7 +16,7 @@ const Modal: FC<ModalProps> = ({ isOpen, onClose, title, children, titleCentered
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
       <div className="bg-card p-8 rounded-lg shadow-xl w-full max-w-md mx-auto">
         <div className={`flex justify-between items-center mb-6 ${titleCentered ? 'text-center' : ''}`}>
           <h3 className={`text-2xl font-semibold text-foreground ${titleCentered ? 'w-full' : ''}`}>{title}</h3>

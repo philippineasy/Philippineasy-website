@@ -206,7 +206,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
                   <FontAwesomeIcon icon={faSearch} className="text-xl" />
                 </button>
                 {loading ? (
-                  <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+                  <div className="w-8 h-8 bg-muted rounded-full animate-pulse"></div>
                 ) : user ? (
                   <>
                     <div className="relative" ref={notificationRef}>

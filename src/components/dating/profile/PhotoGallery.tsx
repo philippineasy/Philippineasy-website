@@ -64,13 +64,13 @@ const PhotoGallery = ({ profile, isOwnProfile }: PhotoGalleryProps) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className="bg-card rounded-lg shadow-lg p-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-800">Photos</h2>
+        <h2 className="text-2xl font-bold text-foreground">Photos</h2>
         {isOwnProfile && (
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors text-sm font-semibold flex items-center"
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors text-sm font-semibold flex items-center"
             disabled={isUploading}
           >
             {isUploading ? (
@@ -101,7 +101,7 @@ const PhotoGallery = ({ profile, isOwnProfile }: PhotoGalleryProps) => {
             {isOwnProfile && (
               <>
                 {photo.status === 'pending' && (
-                  <div className="absolute top-2 left-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                  <div className="absolute top-2 left-2 bg-accent text-accent-foreground text-xs font-bold px-2 py-1 rounded-full">
                     En attente
                   </div>
                 )}

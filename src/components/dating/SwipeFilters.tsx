@@ -57,7 +57,7 @@ const AccordionItem = ({ title, children }: { title: string, children: React.Rea
           leaveFrom="transform scale-100 opacity-100"
           leaveTo="transform scale-95 opacity-0"
         >
-          <Disclosure.Panel className="px-4 pb-4 pt-2 text-sm text-gray-500">
+          <Disclosure.Panel className="px-4 pb-4 pt-2 text-sm text-muted-foreground">
             {children}
           </Disclosure.Panel>
         </Transition>

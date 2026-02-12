@@ -50,13 +50,13 @@ const AbonnementPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-lg">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Gérer mon Abonnement</h1>
+      <div className="max-w-2xl mx-auto bg-card p-8 rounded-xl shadow-lg">
+        <h1 className="text-3xl font-bold text-foreground mb-6">Gérer mon Abonnement</h1>
         {subscription ? (
           <div className="space-y-4">
             <div>
               <h2 className="text-lg font-semibold">Plan Actuel</h2>
-              <p className="text-gray-600 capitalize">{subscription.items.data[0].plan.nickname}</p>
+              <p className="text-muted-foreground capitalize">{subscription.items.data[0].plan.nickname}</p>
             </div>
             <div>
               <h2 className="text-lg font-semibold">Statut</h2>
@@ -66,7 +66,7 @@ const AbonnementPage = () => {
             </div>
             <div>
               <h2 className="text-lg font-semibold">Prochain renouvellement</h2>
-              <p className="text-gray-600">{new Date(subscription.current_period_end * 1000).toLocaleDateString('fr-FR')}</p>
+              <p className="text-muted-foreground">{new Date(subscription.current_period_end * 1000).toLocaleDateString('fr-FR')}</p>
             </div>
             {subscription.cancel_at_period_end ? (
               <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-r-lg">
@@ -77,14 +77,14 @@ const AbonnementPage = () => {
               <button 
                 onClick={handleCancel}
                 disabled={isCancelling}
-                className="w-full bg-red-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-red-700 transition-colors disabled:bg-gray-400"
+                className="w-full bg-destructive text-destructive-foreground font-bold py-3 px-6 rounded-lg hover:bg-destructive/90 transition-colors disabled:bg-muted"
               >
                 {isCancelling ? 'Résiliation...' : 'Résilier l\'abonnement'}
               </button>
             )}
           </div>
         ) : isPremium ? (
-          <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-r-lg">
+          <div className="bg-primary/10 border-l-4 border-primary text-primary p-4 rounded-r-lg">
             <p className="font-bold">Vous bénéficiez d'un accès Premium.</p>
             <p>Cet accès a été accordé manuellement et ne nécessite pas de gestion.</p>
           </div>

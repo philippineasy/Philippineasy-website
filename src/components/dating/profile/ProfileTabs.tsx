@@ -24,10 +24,10 @@ const ProfileTabs = ({ profile }: ProfileTabsProps) => {
   const renderContent = () => {
     switch (activeTab) {
       case 'about':
-        return <p className="text-gray-700 leading-relaxed break-words">{profile.description}</p>;
+        return <p className="text-foreground leading-relaxed break-words">{profile.description}</p>;
       case 'details':
         return (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-gray-700">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-foreground">
             {profile.height && <p><strong className="font-semibold text-primary">Taille:</strong> {profile.height} cm</p>}
             {profile.orientation && <p><strong className="font-semibold text-primary">Orientation:</strong> {profile.orientation}</p>}
             {profile.religion && <p><strong className="font-semibold text-primary">Religion:</strong> {detailTranslations.religion[profile.religion] || profile.religion}</p>}
@@ -55,7 +55,7 @@ const ProfileTabs = ({ profile }: ProfileTabsProps) => {
               return (
                 <li key={`${answer.question_key}-${index}`}>
                   <p className="font-semibold text-accent">{questionMap[answer.question_key] || answer.question_key}</p>
-                  <p className="text-gray-700 italic mt-2 pl-4 border-l-2 border-gray-200">"{translatedAnswer}"</p>
+                  <p className="text-foreground italic mt-2 pl-4 border-l-2 border-border">"{translatedAnswer}"</p>
                 </li>
               );
             })}
@@ -67,8 +67,8 @@ const ProfileTabs = ({ profile }: ProfileTabsProps) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg">
-      <div className="border-b border-gray-200">
+    <div className="bg-card rounded-lg shadow-lg">
+      <div className="border-b border-border">
         <nav className="-mb-px flex space-x-1 sm:space-x-4 px-4 sm:px-6" aria-label="Tabs">
           {tabs.map(tab => (
             !tab.disabled && (
@@ -78,7 +78,7 @@ const ProfileTabs = ({ profile }: ProfileTabsProps) => {
                 className={`
                   ${activeTab === tab.id
                     ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground'
                   }
                   whitespace-nowrap py-4 px-1 sm:px-2 border-b-2 font-medium text-sm sm:text-base transition-colors flex items-center
                 `}

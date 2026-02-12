@@ -162,7 +162,7 @@ export default async function HomePage() {
     <FeaturedNewsSection initialFeaturedItems={featuredItems} />
 
     {/* CTA Itinéraire PROÉMINENT */}
-    <section className="py-20 bg-gradient-to-r from-blue-50 to-yellow-50">
+    <section className="py-20 bg-card">
         <div className="container mx-auto px-4 text-center">
              <div className="max-w-3xl mx-auto">
                  <FontAwesomeIcon icon={faMagic} className="text-5xl text-primary mb-6" />

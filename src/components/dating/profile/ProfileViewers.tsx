@@ -37,14 +37,14 @@ const ProfileViewers = () => {
   }, [user]);
 
   if (loading || premiumLoading) {
-    return <div className="bg-white rounded-lg shadow-lg p-6 text-center">Chargement des visiteurs...</div>;
+    return <div className="bg-card rounded-lg shadow-lg p-6 text-center">Chargement des visiteurs...</div>;
   }
 
   if (viewers.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-          <FontAwesomeIcon icon={faEye} className="mr-3 text-gray-400" />
+      <div className="bg-card rounded-lg shadow-lg p-6">
+        <h2 className="text-xl font-bold text-foreground mb-4 flex items-center">
+          <FontAwesomeIcon icon={faEye} className="mr-3 text-muted-foreground/60" />
           Qui a vu mon profil ?
         </h2>
         <p className="text-muted-foreground text-center py-4">Personne n'a encore visité votre profil.</p>
@@ -53,9 +53,9 @@ const ProfileViewers = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
-        <FontAwesomeIcon icon={faEye} className="mr-3 text-gray-400" />
+    <div className="bg-card rounded-lg shadow-lg p-6">
+      <h2 className="text-xl font-bold text-foreground mb-4 flex items-center">
+        <FontAwesomeIcon icon={faEye} className="mr-3 text-muted-foreground/60" />
         Qui a vu mon profil ?
       </h2>
       <div className="space-y-3">
@@ -63,7 +63,7 @@ const ProfileViewers = () => {
           <Link 
             key={viewer.id} 
             href={isPremium ? `/rencontre/profil/${viewer.id}` : '/rencontre/premium'}
-            className="flex items-center space-x-4 p-2 rounded-lg hover:bg-gray-50"
+            className="flex items-center space-x-4 p-2 rounded-lg hover:bg-muted"
           >
             <div className="relative">
               <img 
@@ -78,7 +78,7 @@ const ProfileViewers = () => {
               )}
             </div>
             <div className="flex-grow">
-              <p className={`font-bold ${!isPremium ? 'text-transparent bg-gray-300 rounded-md' : 'text-gray-800'}`}>
+              <p className={`font-bold ${!isPremium ? 'text-transparent bg-muted rounded-md' : 'text-foreground'}`}>
                 {isPremium ? `${viewer.username}, ${viewer.age}` : 'Utilisateur Premium'}
               </p>
               <p className="text-sm text-muted-foreground">A vu votre profil</p>
@@ -87,9 +87,9 @@ const ProfileViewers = () => {
         ))}
       </div>
       {!isPremium && (
-        <div className="mt-4 pt-4 border-t border-gray-200 text-center">
+        <div className="mt-4 pt-4 border-t border-border text-center">
            <p className="text-sm text-muted-foreground mb-3">Passez Premium pour voir qui s'intéresse à vous !</p>
-          <Link href="/rencontre/premium" className="w-full inline-block bg-gradient-to-r from-accent to-yellow-400 text-white font-bold py-3 px-6 rounded-lg hover:opacity-90 transition-opacity shadow-md">
+          <Link href="/rencontre/premium" className="w-full inline-block bg-accent text-accent-foreground font-bold py-3 px-6 rounded-lg hover:bg-accent/90 transition-colors shadow-md">
             <FontAwesomeIcon icon={faCrown} className="mr-2" />
             Découvrir qui vous a vu
           </Link>
