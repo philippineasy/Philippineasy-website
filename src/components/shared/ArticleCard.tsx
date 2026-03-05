@@ -11,14 +11,7 @@ interface ArticleCardProps {
   priority?: boolean;
 }
 
-const stripHtml = (html: string) => {
-  if (typeof window === 'undefined') {
-    // Simple regex for server-side stripping
-    return html.replace(/<[^>]*>?/gm, '');
-  }
-  const doc = new DOMParser().parseFromString(html, 'text/html');
-  return doc.body.textContent || "";
-};
+const stripHtml = (html: string) => html.replace(/<[^>]*>?/gm, '');
 
 const ArticleCard = ({ article, basePath, priority = false }: ArticleCardProps) => {
   const href = `/${basePath}/${article.category.slug}/${article.slug}`;

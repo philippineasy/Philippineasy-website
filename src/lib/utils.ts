@@ -22,19 +22,30 @@ export const generateSlug = (text: string) => {
     .substring(0, 75); // Truncate to 75 chars
 };
 
-const getMainCategoryPath = (mainCategorySlug: string | null | undefined) => {
-    if (!mainCategorySlug) return 'actualites-sur-les-philippines'; // Fallback
+export const getMainCategoryPath = (mainCategorySlug: string | null | undefined): string => {
+    if (!mainCategorySlug) return 'actualites-sur-les-philippines';
+
+    const longFormats = [
+      'actualites-sur-les-philippines',
+      'meilleurs-plans-aux-philippines',
+      'vivre-aux-philippines',
+      'voyager-aux-philippines'
+    ];
+    if (longFormats.includes(mainCategorySlug)) {
+      return mainCategorySlug;
+    }
+
     switch (mainCategorySlug) {
-      case 'actualites-sur-les-philippines':
+      case 'actualites':
         return 'actualites-sur-les-philippines';
-      case 'meilleurs-plans-aux-philippines':
+      case 'meilleurs-plans':
         return 'meilleurs-plans-aux-philippines';
-      case 'vivre-aux-philippines':
+      case 'vivre':
         return 'vivre-aux-philippines';
-      case 'voyager-aux-philippines':
+      case 'voyager':
         return 'voyager-aux-philippines';
       default:
-        return 'actualites-sur-les-philippines'; // Fallback for any other case
+        return 'actualites-sur-les-philippines';
     }
 };
 

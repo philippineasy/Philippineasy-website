@@ -67,7 +67,6 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
       url: siteUrl,
     },
     description: description.substring(0, 200),
-    articleBody: description,
     wordCount: wordCount,
     timeRequired: `PT${readingTime}M`,
     inLanguage: 'fr-FR',

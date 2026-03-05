@@ -48,6 +48,7 @@
     "leaflet": "^1.9.4",
     "lucide-react": "^0.525.0",
     "next": "15.3.8",
+    "pdfkit": "^0.17.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.60.0",
@@ -55,6 +56,7 @@
     "react-leaflet": "^5.0.0",
     "react-select": "^5.10.1",
     "react-tinder-card": "^1.6.4",
+    "sanitize-html": "^2.17.1",
     "slugify": "^1.6.6",
     "stripe": "^18.3.0",
     "tailwind-merge": "^3.3.1",
@@ -75,6 +77,14 @@
       "last 1 safari version"
     ]
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp",
+      "@sentry/cli",
+      "supabase",
+      "unrs-resolver"
+    ]
+  },
   "devDependencies": {
     "@babel/preset-env": "^7.28.0",
     "@babel/preset-react": "^7.27.1",
@@ -89,6 +99,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sanitize-html": "^2.16.0",
     "autoprefixer": "^10.4.21",
     "babel-jest": "^30.0.5",
     "eslint": "^9",

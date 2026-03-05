@@ -8,96 +8,12 @@
 
 import { NextResponse } from 'next/server';
 import { createBuildClient } from '@/utils/supabase/build-client';
+import { getMainCategoryPath } from '@/lib/utils';
+import { escapeXml, toSeoImage } from '@/lib/sitemap-helpers';
 
 const BASE_URL = 'https://philippineasy.com';
-const HOURS_LIMIT = 48; // Articles des 48 dernières heures pour Google News (recommandé)
-const FALLBACK_DAYS = 7; // Si aucun article dans les 48h, on étend à 7 jours pour éviter sitemap vide
-
-/* ---------- Helpers (réutilisés depuis sitemap.ts) ---------- */
-
-// Helper: mappe les slugs de catégories principales à leurs chemins
-// Accepte à la fois le format court ('actualites') et long ('actualites-sur-les-philippines')
-const getMainCategoryPath = (mainCategorySlug: string | null) => {
-  if (!mainCategorySlug) return 'actualites-sur-les-philippines';
-
-  // Normaliser : si déjà au format long, le retourner tel quel
-  const longFormats = [
-    'actualites-sur-les-philippines',
-    'meilleurs-plans-aux-philippines',
-    'vivre-aux-philippines',
-    'voyager-aux-philippines'
-  ];
-  if (longFormats.includes(mainCategorySlug)) {
-    return mainCategorySlug;
-  }
-
-  // Sinon, mapper depuis le format court
-  switch (mainCategorySlug) {
-    case 'actualites':
-      return 'actualites-sur-les-philippines';
-    case 'meilleurs-plans':
-      return 'meilleurs-plans-aux-philippines';
-    case 'vivre':
-      return 'vivre-aux-philippines';
-    case 'voyager':
-      return 'voyager-aux-philippines';
-    default:
-      return 'actualites-sur-les-philippines';
-  }
-};
-
-// Echappement XML
-const escapeXml = (str: string) =>
-  str.replace(/[&<>"']/g, (c) => {
-    switch (c) {
-      case '&':
-        return '&amp;';
-      case '<':
-        return '&lt;';
-      case '>':
-        return '&gt;';
-      case '"':
-        return '&quot;';
-      case "'":
-        return '&apos;';
-      default:
-        return c;
-    }
-  });
-
-// Récupère le nom de fichier d'une URL
-const getRawFileName = (url: string) => {
-  try {
-    const u = new URL(url);
-    const pathname = u.pathname || '';
-    return decodeURIComponent(pathname.split('/').pop() || '');
-  } catch {
-    const noQuery = url.split('?')[0];
-    return decodeURIComponent(noQuery.split('/').pop() || '');
-  }
-};
-
-// Nettoie le nom de fichier pour le SEO
-const cleanFileName = (name: string) => {
-  const lower = name.toLowerCase();
-  const withoutPrefix = lower
-    .replace(/^thumbnail_\d+_/, '')
-    .replace(/^\d+[-_]/, '');
-  const parts = withoutPrefix.split('.');
-  const ext = parts.length > 1 ? '.' + parts.pop() : '';
-  const base = parts.join('.');
-  const slug = base
-    .replace(/[^a-z0-9-_]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-+|-+$/g, '');
-  return (slug || 'image') + (ext || '.webp');
-};
-
-// Construit une URL image canonique sur le domaine
-const toSeoImage = (sourceUrl: string, folder: 'articles' | 'products' | 'pages' | 'hero' | 'uploads' = 'uploads') => {
-  const fileName = cleanFileName(getRawFileName(sourceUrl));
-  return `${BASE_URL}/images/${folder}/${fileName}`;
-};
+const HOURS_LIMIT = 48;
+const FALLBACK_DAYS = 7;
 
 export async function GET() {
   try {

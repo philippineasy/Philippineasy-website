@@ -20,6 +20,26 @@ const nextConfig: NextConfig = {
         destination:
           "https://byxjlsbmhixdehbisvjp.supabase.co/storage/v1/object/public/articles/:path*",
       },
+      {
+        source: "/images/products/:path*",
+        destination:
+          "https://byxjlsbmhixdehbisvjp.supabase.co/storage/v1/object/public/products/:path*",
+      },
+      {
+        source: "/images/pages/:path*",
+        destination:
+          "https://byxjlsbmhixdehbisvjp.supabase.co/storage/v1/object/public/pages/:path*",
+      },
+      {
+        source: "/images/hero/:path*",
+        destination:
+          "https://byxjlsbmhixdehbisvjp.supabase.co/storage/v1/object/public/hero/:path*",
+      },
+      {
+        source: "/images/uploads/:path*",
+        destination:
+          "https://byxjlsbmhixdehbisvjp.supabase.co/storage/v1/object/public/uploads/:path*",
+      },
     ];
   },
   async redirects() {
@@ -117,6 +137,28 @@ const nextConfig: NextConfig = {
       },
       // NOTE: /article/:slug* est géré dynamiquement par middleware.ts
       // car nous devons interroger la DB pour trouver la bonne catégorie
+
+      // Redirections pour les articles recategorises (anciennement dans Actualites)
+      {
+        source: '/actualites-sur-les-philippines/actualites/guide-ultime-visita-iglesia-manille-eglises-historiques',
+        destination: '/voyager-aux-philippines/conseils-voyage/guide-ultime-visita-iglesia-manille-eglises-historiques',
+        permanent: true,
+      },
+      {
+        source: '/actualites-sur-les-philippines/actualites/guide-ultime-explorer-siquijor-philippines-logement',
+        destination: '/voyager-aux-philippines/cebu-visayas/guide-ultime-explorer-siquijor-philippines-logement',
+        permanent: true,
+      },
+      {
+        source: '/actualites-sur-les-philippines/actualites/guide-ultime-decouvrir-samal-island-philippines',
+        destination: '/voyager-aux-philippines/conseils-voyage/guide-ultime-decouvrir-samal-island-philippines',
+        permanent: true,
+      },
+      {
+        source: '/actualites-sur-les-philippines/actualites/guide-ultime-voyager-el-nido-coron-2026',
+        destination: '/voyager-aux-philippines/palawan/guide-ultime-voyager-el-nido-coron-2026',
+        permanent: true,
+      },
     ];
   },
   async headers() {
@@ -174,6 +216,15 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        source: '/images/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
     ];
   },
   experimental: {
@@ -186,23 +237,21 @@ const nextConfig: NextConfig = {
   images: {
     dangerouslyAllowSVG: true,
     formats: ['image/avif', 'image/webp'], // Modern image formats for better compression
-    minimumCacheTTL: 60, // Cache optimized images for 60 seconds
+    minimumCacheTTL: 86400, // Cache optimized images for 24 hours
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840], // Responsive breakpoints
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384], // Icon/thumbnail sizes
     // Lower default quality for better compression (Google PageSpeed recommendation)
     // Individual images can override with quality prop
     unoptimized: false,
-    domains: [
-      'byxjlsbmhixdehbisvjp.supabase.co',
-      'images.unsplash.com',
-      'via.placeholder.com',
-      'randomuser.me',
-      'storage.googleapis.com',
-      'ui-avatars.com',
-      'lh3.googleusercontent.com',
+    remotePatterns: [
+      { protocol: 'https', hostname: 'byxjlsbmhixdehbisvjp.supabase.co', pathname: '/storage/**' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'via.placeholder.com' },
+      { protocol: 'https', hostname: 'randomuser.me' },
+      { protocol: 'https', hostname: 'storage.googleapis.com' },
+      { protocol: 'https', hostname: 'ui-avatars.com' },
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
     ],
-    // Configure loader options for better compression
-    loaderFile: undefined,
   },
 };
 

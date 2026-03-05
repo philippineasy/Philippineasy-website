@@ -1,24 +1,19 @@
-'use client';
-
-import React, { useMemo } from 'react';
+import React from 'react';
 import Image from 'next/image';
+import sanitizeHtml from 'sanitize-html';
+import { generateSlug } from '@/lib/utils';
 
-const generateSlug = (text: string) => {
-  if (!text) return '';
-  const a = 'àáâäæãåāăąçćčđďèéêëēėęěğǵḧîïíīįìłḿñńǹňôöòóœøōõőṕŕřßśšşșťțûüùúūǘůűųẃẍÿýžźż·/_,:;'
-  const b = 'aaaaaaaaaacccddeeeeeeeegghiiiiiilmnnnnoooooooooprrsssssttuuuuuuuuuwxyyzzz------'
-  const p = new RegExp(a.split('').join('|'), 'g')
-
-  return text.toString().toLowerCase()
-    .replace(/\s+/g, '-') // Replace spaces with -
-    .replace(p, c => b.charAt(a.indexOf(c))) // Replace special characters
-    .replace(/&/g, '-and-') // Replace & with 'and'
-    .replace(/[^\w\-]+/g, '') // Remove all non-word chars
-    .replace(/\-\-+/g, '-') // Replace multiple - with single -
-    .replace(/^-+/, '') // Trim - from start of text
-    .replace(/-+$/, '') // Trim - from end of text
-    .substring(0, 75); // Truncate to 75 chars
-};
+const sanitize = (html: string) => sanitizeHtml(html, {
+  allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'figure', 'figcaption', 'iframe', 'mark', 'del', 'ins', 'sup', 'sub']),
+  allowedAttributes: {
+    ...sanitizeHtml.defaults.allowedAttributes,
+    '*': ['class', 'id', 'style'],
+    a: ['href', 'target', 'rel', 'title'],
+    img: ['src', 'alt', 'width', 'height', 'loading'],
+    iframe: ['src', 'frameborder', 'allow', 'allowfullscreen', 'title'],
+  },
+  allowedSchemes: ['http', 'https', 'mailto'],
+});
 
 const generateAltTextFromUrl = (url: string, caption?: string): string => {
   if (caption) {
@@ -28,12 +23,12 @@ const generateAltTextFromUrl = (url: string, caption?: string): string => {
     if (!url) return "Image de l'article";
     const fileNameWithTimestamp = url.split('/').pop();
     if (!fileNameWithTimestamp) return "Image de l'article";
-    
+
     const decodedFileName = decodeURIComponent(fileNameWithTimestamp);
     const fileName = decodedFileName.substring(decodedFileName.indexOf('_') + 1);
     const nameWithoutExtension = fileName.split('.').slice(0, -1).join('.');
     const altText = nameWithoutExtension.replace(/[-_]/g, ' ');
-    
+
     if (!altText) return "Image de l'article";
     return altText.charAt(0).toUpperCase() + altText.slice(1);
   } catch (e) {
@@ -53,19 +48,18 @@ const renderEditorJsData = (data: { blocks: Block[] }) => {
   return data.blocks.map((block: Block, index: number) => {
     switch (block.type) {
       case 'header':
-        const slug = generateSlug(block.data.text);
+        const slug = generateSlug(block.data.text.replace(/<[^>]*>?/gm, ''));
         const HeaderTag = `h${block.data.level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
-        return <HeaderTag key={index} id={slug} dangerouslySetInnerHTML={{ __html: block.data.text }} />;
+        return <HeaderTag key={index} id={slug} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
       case 'paragraph':
-        return <p key={index} dangerouslySetInnerHTML={{ __html: block.data.text }} />;
+        return <p key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
       case 'list':
         const ListTag = block.data.style === 'ordered' ? 'ol' : 'ul';
         return (
           <ListTag key={index} className={block.data.style === 'ordered' ? 'list-decimal list-inside' : 'list-disc list-inside'}>
             {block.data.items.map((item: any, i: number) => {
-              // Handle both string and object list items
               const content = typeof item === 'object' && item.content ? item.content : item;
-              return <li key={i} dangerouslySetInnerHTML={{ __html: content }} />;
+              return <li key={i} dangerouslySetInnerHTML={{ __html: sanitize(content) }} />;
             })}
           </ListTag>
         );
@@ -73,16 +67,16 @@ const renderEditorJsData = (data: { blocks: Block[] }) => {
         return (
           <blockquote key={index}>
             {block.data.caption && <p className="font-bold text-orange-700">{block.data.caption}</p>}
-            <div dangerouslySetInnerHTML={{ __html: block.data.text }} />
+            <div dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />
           </blockquote>
         );
       case 'image':
         return (
           <figure key={index} className="my-8 max-w-3xl mx-auto">
-            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}> {/* 16:9 Aspect Ratio */}
-              <Image 
-                src={block.data.file.url} 
-                alt={generateAltTextFromUrl(block.data.file.url, block.data.caption)} 
+            <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+              <Image
+                src={block.data.file.url}
+                alt={generateAltTextFromUrl(block.data.file.url, block.data.caption)}
                 fill
                 className="rounded-lg shadow-md object-cover"
                 sizes="(max-width: 768px) 100vw, 700px"
@@ -98,7 +92,7 @@ const renderEditorJsData = (data: { blocks: Block[] }) => {
               {block.data.content.map((row: string[], i: number) => (
                 <tr key={i} className="border-b border-border">
                   {row.map((cell: string, j: number) => (
-                    <td key={j} className="p-2 border border-border" dangerouslySetInnerHTML={{ __html: cell }} />
+                    <td key={j} className="p-2 border border-border" dangerouslySetInnerHTML={{ __html: sanitize(cell) }} />
                   ))}
                 </tr>
               ))}
@@ -117,7 +111,7 @@ const renderEditorJsData = (data: { blocks: Block[] }) => {
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
-                title={block.data.caption || 'Vidéo intégrée'}
+                title={block.data.caption || 'Video integree'}
               />
             </div>
             {block.data.caption && (
@@ -133,54 +127,63 @@ const renderEditorJsData = (data: { blocks: Block[] }) => {
   });
 };
 
-interface ArticleContentRendererProps {
-    content: string | { blocks: Block[] };
-}
-
 const parseHtmlToBlocks = (html: string): Block[] => {
-  if (typeof window === 'undefined') {
-    return [{ type: 'paragraph', data: { text: html } }];
-  }
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
   const blocks: Block[] = [];
-  doc.body.childNodes.forEach(node => {
-    if (node.nodeName.startsWith('H')) {
-      const level = parseInt(node.nodeName.substring(1), 10);
-      blocks.push({ type: 'header', data: { text: (node as HTMLElement).innerHTML, level } });
-    } else {
-      blocks.push({ type: 'paragraph', data: { text: (node as HTMLElement).outerHTML || node.textContent } });
+  // Match HTML tags for headers and paragraphs using regex (server-compatible)
+  const tagRegex = /<(h[1-6])[^>]*>([\s\S]*?)<\/\1>|<p[^>]*>([\s\S]*?)<\/p>|([^<]+)/gi;
+  let match;
+
+  while ((match = tagRegex.exec(html)) !== null) {
+    if (match[1]) {
+      // Header tag
+      const level = parseInt(match[1].substring(1), 10);
+      blocks.push({ type: 'header', data: { text: match[2], level } });
+    } else if (match[3]) {
+      // Paragraph tag
+      blocks.push({ type: 'paragraph', data: { text: match[3] } });
+    } else if (match[4] && match[4].trim()) {
+      // Raw text
+      blocks.push({ type: 'paragraph', data: { text: match[4].trim() } });
     }
-  });
+  }
+
+  if (blocks.length === 0) {
+    blocks.push({ type: 'paragraph', data: { text: html } });
+  }
+
   return blocks;
 };
 
+interface ArticleContentRendererProps {
+  content: string | { blocks: Block[] };
+}
+
 const ArticleContentRenderer = ({ content }: ArticleContentRendererProps) => {
-    const parsedContent = useMemo(() => {
-        if (!content) return null;
+  if (!content) return null;
 
-        if (typeof content === 'object' && content !== null && Array.isArray(content.blocks)) {
-            return content;
+  let parsedContent: { blocks: Block[] } | null = null;
+
+  if (typeof content === 'object' && content !== null && Array.isArray(content.blocks)) {
+    parsedContent = content;
+  } else if (typeof content === 'string') {
+    try {
+      if (content.trim().startsWith('{')) {
+        const parsed = JSON.parse(content);
+        if (parsed && Array.isArray(parsed.blocks)) {
+          parsedContent = parsed;
         }
+      }
+      if (!parsedContent) {
+        parsedContent = { blocks: parseHtmlToBlocks(content) };
+      }
+    } catch {
+      parsedContent = { blocks: parseHtmlToBlocks(content) };
+    }
+  }
 
-        if (typeof content === 'string') {
-            try {
-                if (content.trim().startsWith('{')) {
-                    const parsed = JSON.parse(content);
-                    if (parsed && Array.isArray(parsed.blocks)) {
-                        return parsed;
-                    }
-                }
-                return { blocks: parseHtmlToBlocks(content) };
-            } catch (e) {
-                console.error("Impossible de parser le contenu de l'article, traitement en texte brut:", e);
-                return { blocks: parseHtmlToBlocks(content) };
-            }
-        }
-        return null;
-    }, [content]);
+  if (!parsedContent) return null;
 
-    return <>{renderEditorJsData(parsedContent as { blocks: Block[] })}</>;
+  return <>{renderEditorJsData(parsedContent)}</>;
 };
 
 export default ArticleContentRenderer;

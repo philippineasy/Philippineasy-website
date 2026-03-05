@@ -1,62 +1,9 @@
 import { MetadataRoute } from 'next';
 import { createBuildClient } from '@/utils/supabase/build-client';
+import { getMainCategoryPath } from '@/lib/utils';
+import { escapeXml, toSeoImage } from '@/lib/sitemap-helpers';
 
 const BASE_URL = 'https://philippineasy.com';
-
-/* ---------- Helpers ---------- */
-
-// Echappement XML (évite le "EntityRef: expecting ';'")
-const escapeXml = (str: string) =>
-  str.replace(/[&<>"']/g, (c) => {
-    switch (c) {
-      case '&':
-        return '&amp;';
-      case '<':
-        return '&lt;';
-      case '>':
-        return '&gt;';
-      case '"':
-        return '&quot;';
-      case "'":
-        return '&apos;';
-      default:
-        return c;
-    }
-  });
-
-// Retire querystring + récupère le nom de fichier
-const getRawFileName = (url: string) => {
-  try {
-    const u = new URL(url);
-    const pathname = u.pathname || '';
-    return decodeURIComponent(pathname.split('/').pop() || '');
-  } catch {
-    const noQuery = url.split('?')[0];
-    return decodeURIComponent(noQuery.split('/').pop() || '');
-  }
-};
-
-// Nettoie le nom de fichier pour le SEO
-const cleanFileName = (name: string) => {
-  const lower = name.toLowerCase();
-  const withoutPrefix = lower
-    .replace(/^thumbnail_\d+_/, '')     // supprime "thumbnail_1755_"
-    .replace(/^\d+[-_]/, '');           // supprime "1755-" ou "1755_"
-  const parts = withoutPrefix.split('.');
-  const ext = parts.length > 1 ? '.' + parts.pop() : '';
-  const base = parts.join('.');
-  const slug = base
-    .replace(/[^a-z0-9-_]+/g, '-')      // caractères propres
-    .replace(/-+/g, '-')                // compresse les "-"
-    .replace(/^-+|-+$/g, '');           // trim "-"
-  return (slug || 'image') + (ext || '.webp');
-};
-
-// Construit une URL image canonique sur ton domaine
-const toSeoImage = (sourceUrl: string, folder: 'articles' | 'products' | 'pages' | 'hero' | 'uploads' = 'uploads') => {
-  const fileName = cleanFileName(getRawFileName(sourceUrl));
-  return `${BASE_URL}/images/${folder}/${fileName}`;
-};
 
 /* ---------- Types ---------- */
 
@@ -121,45 +68,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/itineraire-personnalise-pour-les-philippines`, lastModified: currentDate, changeFrequency: 'monthly', priority: 0.7 },
   ];
 
-  // Helper: mappe les slugs de catégories principales à leurs chemins
-  // Accepte à la fois le format court ('actualites') et long ('actualites-sur-les-philippines')
-  const getMainCategoryPath = (mainCategorySlug: string | null) => {
-    if (!mainCategorySlug) return 'actualites-sur-les-philippines';
-
-    // Normaliser : si déjà au format long, le retourner tel quel
-    const longFormats = [
-      'actualites-sur-les-philippines',
-      'meilleurs-plans-aux-philippines',
-      'vivre-aux-philippines',
-      'voyager-aux-philippines'
-    ];
-    if (longFormats.includes(mainCategorySlug)) {
-      return mainCategorySlug;
-    }
-
-    // Sinon, mapper depuis le format court
-    switch (mainCategorySlug) {
-      case 'actualites':
-        return 'actualites-sur-les-philippines';
-      case 'meilleurs-plans':
-        return 'meilleurs-plans-aux-philippines';
-      case 'vivre':
-        return 'vivre-aux-philippines';
-      case 'voyager':
-        return 'voyager-aux-philippines';
-      default:
-        return 'actualites-sur-les-philippines';
-    }
-  };
-
   /* ---------- Dynamic: Articles ---------- */
   const { data: articles } = await supabase
     .from('articles')
-    .select('slug, published_at, category:categories(slug, main_category), image')
+    .select('slug, published_at, updated_at, category:categories(slug, main_category), image')
     .eq('status', 'published');
 
   const articlePages: SitemapEntry[] =
-    (articles?.map(({ slug, published_at, category, image }) => {
+    (articles?.map(({ slug, published_at, updated_at, category, image }) => {
       const categoryObject = Array.isArray(category) ? category[0] : category;
       if (!categoryObject || !categoryObject.slug || !categoryObject.main_category) return null;
 
@@ -168,10 +84,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
       return {
         url,
-        lastModified: new Date(published_at).toISOString(),
+        lastModified: new Date(updated_at || published_at).toISOString(),
         changeFrequency: 'weekly' as const,
         priority: 0.7,
-        images: image ? [toSeoImage(image, 'articles')] : undefined, // réécrit vers ton domaine
+        images: image ? [toSeoImage(image, 'articles')] : undefined,
       };
     }) || [])
       .filter(Boolean) as SitemapEntry[];
