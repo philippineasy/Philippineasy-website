@@ -64,9 +64,25 @@ export const FeaturedProductsCarousel = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-20 text-center">
-        <p>Chargement des produits...</p>
-      </div>
+      <section className="py-20 bg-card">
+        <div className="container mx-auto px-4">
+          <div className="h-8 w-64 bg-muted rounded mx-auto mb-12 animate-pulse" />
+          <div className="flex gap-4 overflow-hidden">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex-shrink-0 w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-4">
+                <div className="bg-card rounded-lg shadow border border-border overflow-hidden">
+                  <div className="h-48 bg-muted animate-pulse" />
+                  <div className="p-4 space-y-3">
+                    <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
+                    <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
+                    <div className="h-5 bg-muted rounded animate-pulse w-1/3" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     );
   }
 

@@ -2,10 +2,6 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClientForRouteHandler } from '@/utils/supabase/server';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-08-27.basil',
-});
-
 type CartItem = {
   product: {
     id: number;
@@ -17,6 +13,10 @@ type CartItem = {
 
 export async function POST(request: Request) {
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: '2025-08-27.basil',
+    });
+
     const { cart } = await request.json();
 
     if (!cart || !Array.isArray(cart) || cart.length === 0) {

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faPassport, faMapMarkedAlt, faUniversity, faPlaneDeparture, faUmbrellaBeach, faShip, faWater, faMagic, faWandMagicSparkles, faStar, faMobileAlt, faUsers, faNewspaper } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faPassport, faMapMarkedAlt, faUniversity, faPlaneDeparture, faUmbrellaBeach, faShip, faWater, faMagic, faWandMagicSparkles, faStar } from '@fortawesome/free-solid-svg-icons';
 import { createClient } from '@/utils/supabase/server';
 import { getHomepageArticles } from '@/services/articleService';
 import dynamic from 'next/dynamic';
@@ -34,6 +34,7 @@ const homepageFAQs = [
 const BestDealsSection = dynamic(() => import('@/components/homepage/BestDealsSection').then(mod => mod.BestDealsSection));
 const FeaturedNewsSection = dynamic(() => import('@/components/homepage/FeaturedNewsSection').then(mod => mod.FeaturedNewsSection));
 const FeaturedProductsCarousel = dynamic(() => import('@/components/homepage/FeaturedProductsCarousel').then(mod => mod.FeaturedProductsCarousel));
+const LeadMagnetSection = dynamic(() => import('@/components/homepage/LeadMagnetSection').then(mod => mod.LeadMagnetSection));
 
 // Enable ISR (Incremental Static Regeneration) for better performance
 export const revalidate = 300; // Revalidate every 5 minutes (300 seconds)
@@ -72,16 +73,18 @@ export default async function HomePage() {
               <span className="text-accent">★</span> +10 000 voyageurs accompagnés depuis 2020
             </span>
           </p>
-          <div className="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4">
-            <Link href="/vivre-aux-philippines" className="px-8 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition duration-300 text-lg font-semibold">
-              S'installer aux Philippines
+          <div className="flex flex-col items-center space-y-4">
+            <Link href="/itineraire-personnalise-pour-les-philippines" className="px-10 py-4 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition duration-300 text-xl font-bold shadow-lg pulse-animation">
+              <FontAwesomeIcon icon={faWandMagicSparkles} className="mr-2" /> Créer mon Itinéraire IA
             </Link>
-            <Link href="/voyager-aux-philippines" className="px-8 py-3 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition duration-300 text-lg font-semibold">
-              Explorer l'archipel
-            </Link>
-            <Link href="/itineraire-personnalise-pour-les-philippines" className="px-8 py-3 bg-card text-primary rounded-lg hover:bg-muted transition duration-300 text-lg font-semibold pulse-animation">
-              Créer mon Itinéraire <span className="text-xs text-yellow-600">(IA)</span>
-            </Link>
+            <div className="flex flex-col md:flex-row justify-center space-y-2 md:space-y-0 md:space-x-6">
+              <Link href="/vivre-aux-philippines" className="text-white/90 hover:text-white underline underline-offset-4 transition duration-300 text-base font-medium">
+                S'installer aux Philippines
+              </Link>
+              <Link href="/voyager-aux-philippines" className="text-white/90 hover:text-white underline underline-offset-4 transition duration-300 text-base font-medium">
+                Explorer l'archipel
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -158,8 +161,8 @@ export default async function HomePage() {
         </div>
     </section>
 
-    {/* Section "À la Une" - Now Dynamic */}
-    <FeaturedNewsSection initialFeaturedItems={featuredItems} />
+    {/* Lead Magnet Section — Guides Gratuits */}
+    <LeadMagnetSection />
 
     {/* CTA Itinéraire PROÉMINENT */}
     <section className="py-20 bg-card">
@@ -178,65 +181,39 @@ export default async function HomePage() {
         </div>
     </section>
 
-    <FeaturedProductsCarousel />
-
-    {/* Aperçu Meilleurs Plans - Now Dynamic */}
-    <BestDealsSection initialDeals={bestDeals} />
-
-    {/* Feature Highlights (Réduit) */}
-    <section className="py-20 bg-card">
-        <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">Nos Autres Outils Essentiels</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-                 {/* Mobile App Card */}
-                 <div className="feature-card bg-card rounded-lg shadow-lg p-6 text-center border border-border">
-                    <div className="text-accent text-5xl mb-4"><FontAwesomeIcon icon={faMobileAlt} /></div>
-                    <h3 className="text-xl font-bold mb-3">Application Mobile</h3>
-                    <p className="text-muted-foreground mb-4 text-sm">Votre guide de poche : cartes offline, traducteur, itinéraires...</p>
-                    <Link href="/application-mobile" className="text-primary hover:text-primary/90 font-semibold">Découvrir l'App →</Link>
-                </div>
-                 {/* Forums Card */}
-                 <div className="feature-card bg-card rounded-lg shadow-lg p-6 text-center border border-border">
-                    <div className="text-primary text-5xl mb-4"><FontAwesomeIcon icon={faUsers} /></div>
-                    <h3 className="text-xl font-bold mb-3">Forums Communautaires</h3>
-                    <p className="text-muted-foreground mb-4 text-sm">Échangez avec des voyageurs et expatriés. Partagez vos expériences.</p>
-                    <Link href="/forum-sur-les-philippines" className="text-primary hover:text-primary/90 font-semibold">Rejoindre la discussion →</Link>
-                </div>
-                 {/* News Card */}
-                 <div className="feature-card bg-card rounded-lg shadow-lg p-6 text-center border border-border">
-                    <div className="text-accent text-5xl mb-4"><FontAwesomeIcon icon={faNewspaper} /></div>
-                    <h3 className="text-xl font-bold mb-3">Actualités Locales</h3>
-                    <p className="text-muted-foreground mb-4 text-sm">Restez informé des dernières nouvelles importantes pour votre séjour.</p>
-                    <Link href="/actualites-sur-les-philippines" className="text-primary hover:text-primary/90 font-semibold">Lire les actus →</Link>
-                </div>
-            </div>
-        </div>
-    </section>
-
     {/* Testimonials Section */}
      <section className="py-20 bg-muted">
            <div className="container mx-auto px-4">
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">Ils ont choisi les <span className="text-primary">Philippines</span></h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               <div className="bg-card p-6 rounded-lg shadow-lg text-center">
-                <div className="relative w-20 h-20 rounded-full mx-auto mb-4 border-4 border-primary/20">
-                    <Image src="https://randomuser.me/api/portraits/men/32.jpg" alt="Photo de Pierre D., entrepreneur digital à Cebu" fill className="rounded-full object-cover" sizes="80px" />
+                <div className="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-primary/20 bg-primary/20 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-primary">PD</span>
+                </div>
+                <div className="flex justify-center mb-3">
+                    {[...Array(5)].map((_, i) => <FontAwesomeIcon key={i} icon={faStar} className="text-accent text-sm mx-0.5" />)}
                 </div>
                 <p className="text-muted-foreground italic mb-4 text-sm">"M'installer à Cebu a été la meilleure décision. Le coût de la vie, le climat, la gentillesse des gens... mon entreprise en ligne me permet d'en profiter pleinement."</p>
                 <h3 className="font-bold">Pierre D., 42 ans</h3>
                 <p className="text-xs text-muted-foreground">Entrepreneur digital à Cebu</p>
               </div>
               <div className="bg-card p-6 rounded-lg shadow-lg text-center">
-                <div className="relative w-20 h-20 rounded-full mx-auto mb-4 border-4 border-accent/20">
-                    <Image src="https://randomuser.me/api/portraits/women/68.jpg" alt="Photo de Sophie L., voyageuse en couple aux Philippines" fill className="rounded-full object-cover" sizes="80px" />
+                <div className="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-accent/20 bg-accent/20 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-accent">SL</span>
+                </div>
+                <div className="flex justify-center mb-3">
+                    {[...Array(5)].map((_, i) => <FontAwesomeIcon key={i} icon={faStar} className="text-accent text-sm mx-0.5" />)}
                 </div>
                 <p className="text-muted-foreground italic mb-4 text-sm">"Notre voyage de 3 semaines était incroyable ! L'outil itinéraire de Philippin'Easy nous a vraiment aidés à organiser notre séjour à Palawan et Bohol."</p>
                 <h3 className="font-bold">Sophie L., 29 ans</h3>
                 <p className="text-xs text-muted-foreground">Voyageuse en couple</p>
               </div>
               <div className="bg-card p-6 rounded-lg shadow-lg text-center">
-                <div className="relative w-20 h-20 rounded-full mx-auto mb-4 border-4 border-primary/20">
-                    <Image src="https://randomuser.me/api/portraits/men/45.jpg" alt="Photo de Marc T., futur retraité aux Philippines" fill className="rounded-full object-cover" sizes="80px" />
+                <div className="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-primary/20 bg-primary/20 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-primary">MT</span>
+                </div>
+                <div className="flex justify-center mb-3">
+                    {[...Array(5)].map((_, i) => <FontAwesomeIcon key={i} icon={faStar} className={`text-sm mx-0.5 ${i < 4 ? 'text-accent' : 'text-muted-foreground/30'}`} />)}
                 </div>
                 <p className="text-muted-foreground italic mb-4 text-sm">"Le forum est une mine d'or ! J'ai trouvé toutes les réponses à mes questions sur le visa SRRV et des contacts utiles avant mon départ à la retraite."</p>
                 <h3 className="font-bold">Marc T., 63 ans</h3>
@@ -245,6 +222,12 @@ export default async function HomePage() {
             </div>
           </div>
      </section>
+
+    {/* Aperçu Meilleurs Plans */}
+    <BestDealsSection initialDeals={bestDeals} />
+
+    {/* Section "À la Une" */}
+    <FeaturedNewsSection initialFeaturedItems={featuredItems} />
 
     {/* Final Call to Action */}
     <section className="section-bg-1 py-24 text-white">
@@ -257,7 +240,7 @@ export default async function HomePage() {
             ) : (
               <Link href="/connexion" className="px-8 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition duration-300 text-lg font-semibold">Créer un compte</Link>
             )}
-            <button id="open-chatbot" className="px-8 py-3 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition duration-300 text-lg font-semibold">Discuter avec notre IA</button>
+            <button id="open-chatbot" className="px-8 py-3 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition duration-300 text-lg font-semibold">Discuter avec notre équipe</button>
           </div>
         </div>
     </section>

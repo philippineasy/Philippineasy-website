@@ -1,13 +1,43 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope, faLifeRing, faMapMarkerAlt, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import { faEnvelope, faLifeRing, faMapMarkerAlt, faPaperPlane, faCheck, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { faFacebookF, faTwitter, faInstagram, faYoutube, faTelegram, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 
 const Footer = () => {
   const { profile } = useAuth();
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [newsletterMessage, setNewsletterMessage] = useState('');
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim()) return;
+
+    setNewsletterStatus('loading');
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newsletterEmail.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setNewsletterStatus('success');
+        setNewsletterMessage(data.message);
+        setNewsletterEmail('');
+      } else {
+        setNewsletterStatus('error');
+        setNewsletterMessage(data.error || 'Une erreur est survenue.');
+      }
+    } catch {
+      setNewsletterStatus('error');
+      setNewsletterMessage('Erreur de connexion.');
+    }
+  };
 
   return (
     <footer className="bg-gray-900 text-white py-16">
@@ -56,17 +86,37 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold mb-6">Newsletter</h4>
             <p className="text-gray-400 mb-4">Conseils exclusifs et actus livrés dans votre boîte mail.</p>
-            <form className="mb-4">
+            <form className="mb-4" onSubmit={handleNewsletterSubmit}>
               <div className="flex">
-                <input type="email" className="px-4 py-2 w-full bg-gray-800 text-white rounded-l-lg focus:outline-none placeholder-gray-500" placeholder="Votre email" />
-                <button type="submit" aria-label="Subscribe to newsletter" className="px-4 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition duration-300"><FontAwesomeIcon icon={faPaperPlane} /></button>
+                <input
+                  type="email"
+                  value={newsletterEmail}
+                  onChange={(e) => { setNewsletterEmail(e.target.value); if (newsletterStatus !== 'idle') setNewsletterStatus('idle'); }}
+                  className="px-4 py-2 w-full bg-gray-800 text-white rounded-l-lg focus:outline-none placeholder-gray-500"
+                  placeholder="Votre email"
+                  required
+                  disabled={newsletterStatus === 'loading'}
+                />
+                <button
+                  type="submit"
+                  aria-label="Subscribe to newsletter"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition duration-300 disabled:opacity-50"
+                  disabled={newsletterStatus === 'loading'}
+                >
+                  <FontAwesomeIcon icon={newsletterStatus === 'loading' ? faSpinner : newsletterStatus === 'success' ? faCheck : faPaperPlane} spin={newsletterStatus === 'loading'} />
+                </button>
               </div>
             </form>
+            {newsletterMessage && (
+              <p className={`text-sm mb-2 ${newsletterStatus === 'success' ? 'text-green-400' : 'text-red-400'}`}>
+                {newsletterMessage}
+              </p>
+            )}
             <p className="text-gray-500 text-sm">En vous inscrivant, vous acceptez notre politique de confidentialité.</p>
           </div>
         </div>
         <div className="border-t border-gray-800 pt-8 text-center text-gray-500">
-          <p>© 2025 Philippin'Easy. Tous droits réservés.</p>
+          <p>© 2026 Philippin'Easy. Tous droits réservés.</p>
           <div className="flex justify-center space-x-6 mt-4 flex-wrap">
             <Link href="/mentions-legales" className="hover:text-white transition duration-300">Mentions légales</Link>
             <Link href="/confidentialite" className="hover:text-white transition duration-300">Confidentialité</Link>

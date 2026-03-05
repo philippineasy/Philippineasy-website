@@ -15,6 +15,8 @@ import { EditModeProvider } from '@/contexts/EditModeContext';
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
+import MetaPixel from '@/components/analytics/MetaPixel';
+import { ExitIntentPopup } from '@/components/homepage/ExitIntentPopup';
 config.autoAddCss = false;
 
 const poppins = Poppins({ 
@@ -197,6 +199,7 @@ export default async function RootLayout({
     <html lang="fr">
       <body className={`${poppins.className} bg-muted`}>
         <GoogleAnalytics />
+        <MetaPixel />
         <AuthProvider>
           <CartProvider>
             <EditModeProvider>
@@ -210,6 +213,7 @@ export default async function RootLayout({
             <CookieBanner />
             <Footer />
             <TawkToChat />
+            <ExitIntentPopup />
             <Toaster position="bottom-right" />
             </EditModeProvider>
           </CartProvider>

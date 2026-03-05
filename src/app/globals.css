@@ -88,6 +88,14 @@ body {
 .pulse-animation {
     animation: pulse 2s infinite;
 }
+@media (prefers-reduced-motion: reduce) {
+    .pulse-animation {
+        animation: none;
+    }
+    .forum-card:hover, .news-card:hover, .plan-card:hover, .feature-card:hover, .destination-card:hover {
+        transform: none;
+    }
+}
 
 #toc-sidebar ul { 
     list-style: none; 

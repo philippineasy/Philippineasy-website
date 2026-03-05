@@ -275,7 +275,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
             <div className="md:hidden absolute top-full right-0 mt-2 w-auto max-w-xs rounded-lg shadow-lg bg-secondary z-20 border border-border">
               <div className="flex flex-col space-y-2 p-4">
                 {navLinks.map((link) => !link.special && <MobileNavLink key={link.href} {...link} />)}
-                <MobileNavLink href="/itineraire" label="Créer Itinéraire" />
+                <MobileNavLink href="/itineraire-personnalise-pour-les-philippines" label="Créer Itinéraire" />
                 <button onClick={() => { setIsSearchModalOpen(true); setIsMenuOpen(false); }} className="px-3 py-2 rounded-md text-foreground hover:text-primary hover:bg-primary/10 transition duration-300 flex items-center">
                     <FontAwesomeIcon icon={faSearch} className="mr-2" /> Rechercher
                 </button>

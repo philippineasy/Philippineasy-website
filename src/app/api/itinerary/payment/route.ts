@@ -15,12 +15,12 @@ interface RateLimitResult {
   reset_at: string | null;
 }
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-08-27.basil',
-});
-
 export async function POST(request: Request) {
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: '2025-08-27.basil',
+    });
+
     const body = await request.json();
     const { generation_id, selected_variant, offer_type, duration, price_id } = body;
 
