@@ -30,6 +30,12 @@ const AdminDatingPage = async () => {
         <StatCard title="Profils en attente" value={pendingProfiles || 0} icon={faUserTimes} />
       </div>
 
+      <div className="mb-6">
+        <Link href="/admin/dating/profiles/add" className="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm">
+          + Ajouter un profil manuellement
+        </Link>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Link href="/admin/dating/profiles" className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
           <h2 className="text-xl font-bold flex items-center"><FontAwesomeIcon icon={faUserCheck} className="mr-3 text-primary" />Gestion des profils</h2>
