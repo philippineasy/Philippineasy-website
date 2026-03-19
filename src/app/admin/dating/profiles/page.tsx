@@ -1,4 +1,3 @@
-import { createClient } from '@/utils/supabase/server';
 import Link from 'next/link';
 import { ProfilesClient } from './ProfilesClient';
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
@@ -33,27 +32,30 @@ export default async function AdminDatingProfilesPage({
     return <p className="text-red-500">Erreur lors du chargement des profils: {error.message}</p>;
   }
 
-  const userIds = profiles.map(p => p.user_id);
-  const { data: users, error: usersError } = await supabase.auth.admin.listUsers({
-    page: 1,
-    perPage: 1000,
+  // Fetch emails individually per user (more robust than listUsers)
+  const emailMap = new Map<string, string>();
+  const userResults = await Promise.allSettled(
+    profiles.map(p => supabase.auth.admin.getUserById(p.user_id))
+  );
+  userResults.forEach((result, index) => {
+    if (result.status === 'fulfilled' && result.value.data?.user?.email) {
+      emailMap.set(profiles[index].user_id, result.value.data.user.email);
+    }
   });
 
-  if (usersError) {
-    return <p className="text-red-500">Erreur lors du chargement des utilisateurs: {usersError.message}</p>;
-  }
-
-  const profilesWithEmail = profiles.map(profile => {
-    const user = users.users.find(u => u.id === profile.user_id);
-    return {
-      ...profile,
-      email: user?.email,
-    };
-  });
+  const profilesWithEmail = profiles.map(profile => ({
+    ...profile,
+    email: emailMap.get(profile.user_id),
+  }));
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-8">Gestion des Profils Rencontre</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold">Gestion des Profils Rencontre</h1>
+        <Link href="/admin/dating/profiles/add" className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm">
+          + Ajouter un profil
+        </Link>
+      </div>
 
       <div className="bg-white p-4 rounded-lg shadow-md mb-8">
         <form className="grid md:grid-cols-4 gap-4">
