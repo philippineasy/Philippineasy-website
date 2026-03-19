@@ -48,7 +48,7 @@ export async function createManualProfile(formData: FormData) {
     const photo = validPhotos[i];
     const photoPath = `${userId}/${Date.now()}_${i}_${photo.name}`;
     const { error: uploadError } = await supabase.storage
-      .from('dating-photos')
+      .from('dating_profile_pictures')
       .upload(photoPath, photo);
 
     if (uploadError) {
@@ -57,7 +57,7 @@ export async function createManualProfile(formData: FormData) {
     }
 
     const { data: { publicUrl } } = supabase.storage
-      .from('dating-photos')
+      .from('dating_profile_pictures')
       .getPublicUrl(photoPath);
 
     uploadedPhotos.push({ url: publicUrl, sortOrder: i });
