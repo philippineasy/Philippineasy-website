@@ -313,8 +313,13 @@ export default function ItineraryPage({ params }: PageProps) {
         )}
 
         {/* Day-by-day program */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-foreground">Votre programme jour par jour</h2>
+        <div>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+              <FontAwesomeIcon icon={faSun} className="w-4 h-4" />
+            </div>
+            <h2 className="text-xl font-bold text-foreground">Votre programme jour par jour</h2>
+          </div>
 
           {selected_variant?.days && selected_variant.days.length > 0 ? (
             <Accordion type="multiple" defaultValue={['day-1']}>
@@ -322,250 +327,220 @@ export default function ItineraryPage({ params }: PageProps) {
                 <AccordionItem
                   key={day.day}
                   value={`day-${day.day}`}
-                  className="border border-border/50 rounded-2xl mb-4 overflow-hidden bg-card shadow-[0_1px_3px_rgba(0,0,0,0.04)] data-[state=open]:shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-shadow"
+                  className="bg-card rounded-2xl mb-5 overflow-hidden shadow-lg border border-border data-[state=open]:shadow-xl transition-shadow"
                 >
-                  <AccordionTrigger className="px-4 py-4 bg-primary/5 hover:bg-primary/8 hover:no-underline border-l-4 border-primary [&>svg]:text-primary">
+                  <AccordionTrigger className="px-5 py-5 hover:no-underline hover:bg-muted/30 [&>svg]:text-muted-foreground [&>svg]:w-5 [&>svg]:h-5">
                     <div className="flex items-center gap-3">
-                      <span className="bg-primary text-white text-sm font-bold px-3 py-1 rounded-full">
-                        Jour {day.day}
+                      <span className="bg-primary text-primary-foreground text-sm font-bold w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
+                        J{day.day}
                       </span>
-                      {day.location && (
-                        <span className="font-semibold text-foreground">{day.location}</span>
-                      )}
-                      {day.title && day.title !== 'description' && day.title !== 'jours' && (
-                        <span className="text-muted-foreground text-sm hidden sm:inline">{day.title}</span>
-                      )}
+                      <div className="text-left">
+                        <p className="font-bold text-foreground text-base">
+                          {day.location || `Jour ${day.day}`}
+                        </p>
+                        {day.title && day.title !== 'description' && day.title !== 'jours' && (
+                          <p className="text-sm text-muted-foreground">{day.title}</p>
+                        )}
+                      </div>
                     </div>
                   </AccordionTrigger>
 
-                  <AccordionContent className="px-4 pt-4 pb-2">
-                    <div className="space-y-4">
-                      {/* Transport */}
-                      {day.transport?.method && (
-                        <div
-                          id={`day-${day.day}-transport`}
-                          className="p-4 rounded-xl bg-primary/5 border-l-2 border-primary/30"
-                        >
-                          <div className="flex items-center gap-2 mb-2">
-                            <FontAwesomeIcon icon={faBus} className="text-primary w-4 h-4" />
-                            <span className="font-semibold text-foreground">Transport</span>
+                  <AccordionContent className="px-5 pt-2 pb-5">
+                    {/* Transport */}
+                    {day.transport?.method && (
+                      <div
+                        id={`day-${day.day}-transport`}
+                        className="mb-6 p-4 rounded-xl bg-primary/5 border border-primary/15"
+                      >
+                        <div className="flex items-center gap-2.5 mb-2">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                            <FontAwesomeIcon icon={faBus} className="text-primary w-3.5 h-3.5" />
                           </div>
-                          <p className="text-foreground">{day.transport.method}</p>
-                          {day.transport.from && day.transport.to && (
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {day.transport.from} → {day.transport.to}
-                            </p>
-                          )}
-                          <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
-                            {day.transport.duration && <span>⏱ {day.transport.duration}</span>}
-                            {day.transport.cost && <span>💰 {day.transport.cost}</span>}
-                            {day.transport.times && <span>🕐 Departs: {day.transport.times}</span>}
-                          </div>
-                          {day.transport.coordinates && (
-                            <a
-                              href={`https://maps.google.com/?q=${day.transport.coordinates.lat},${day.transport.coordinates.lng}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 mt-2 text-xs text-primary hover:underline"
-                            >
-                              <FontAwesomeIcon icon={faMapMarkerAlt} className="w-3 h-3" />
-                              Voir sur Google Maps
-                            </a>
-                          )}
+                          <span className="font-semibold text-foreground">Transport</span>
                         </div>
-                      )}
+                        <p className="text-foreground font-medium">{day.transport.method}</p>
+                        {day.transport.from && day.transport.to && (
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {day.transport.from} → {day.transport.to}
+                          </p>
+                        )}
+                        <div className="flex flex-wrap gap-3 mt-2 text-sm text-muted-foreground">
+                          {day.transport.duration && <span className="bg-card px-2 py-0.5 rounded-md text-xs">⏱ {day.transport.duration}</span>}
+                          {day.transport.cost && <span className="bg-card px-2 py-0.5 rounded-md text-xs">💰 {day.transport.cost}</span>}
+                          {day.transport.times && <span className="bg-card px-2 py-0.5 rounded-md text-xs">🕐 {day.transport.times}</span>}
+                        </div>
+                        {day.transport.coordinates && (
+                          <a href={`https://maps.google.com/?q=${day.transport.coordinates.lat},${day.transport.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-2 text-xs text-primary hover:underline">
+                            <FontAwesomeIcon icon={faMapMarkerAlt} className="w-3 h-3" /> Google Maps
+                          </a>
+                        )}
+                      </div>
+                    )}
 
-                      {/* Activities */}
-                      {day.activities && day.activities.length > 0 && (
-                        <div className="space-y-3">
-                          <h4 className="font-semibold text-foreground flex items-center gap-2">
-                            <FontAwesomeIcon icon={faSun} className="w-4 h-4 text-yellow-500" />
-                            Programme du jour
-                          </h4>
-                          {day.activities.map((activity, actIndex) => (
+                    {/* Activities — Timeline */}
+                    {day.activities && day.activities.length > 0 && (
+                      <div className="mb-6">
+                        <div className="flex items-center gap-2.5 mb-4">
+                          <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
+                            <FontAwesomeIcon icon={faSun} className="text-amber-600 w-3.5 h-3.5" />
+                          </div>
+                          <span className="font-bold text-foreground">Programme du jour</span>
+                        </div>
+
+                        {/* Timeline */}
+                        <div className="relative ml-4 pl-6 border-l-2 border-primary/15 space-y-0">
+                          {day.activities.map((activity, actIndex) => {
+                            const isLast = actIndex === (day.activities?.length ?? 0) - 1;
+                            return (
+                              <div
+                                key={actIndex}
+                                id={`day-${day.day}-act-${actIndex}`}
+                                className={`relative pb-5 ${isLast ? 'pb-0' : ''}`}
+                              >
+                                {/* Timeline dot */}
+                                <div className={`absolute -left-[31px] top-0 w-4 h-4 rounded-full border-2 border-card ${
+                                  selectedPointId === `day-${day.day}-act-${actIndex}` ? 'bg-primary' : 'bg-primary/60'
+                                }`} />
+
+                                {/* Time badge */}
+                                {activity.time && (
+                                  <span className="inline-block text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full mb-2">
+                                    {activity.time}
+                                  </span>
+                                )}
+
+                                <div className={`bg-card rounded-xl border shadow-sm p-4 transition-all ${
+                                  selectedPointId === `day-${day.day}-act-${actIndex}`
+                                    ? 'border-primary ring-4 ring-primary/20 shadow-lg'
+                                    : 'border-border hover:shadow-md hover:border-primary/30'
+                                }`}>
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="flex-1">
+                                      <h5 className="font-semibold text-foreground">{activity.name}</h5>
+                                      {activity.description && activity.description !== activity.name && (
+                                        <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{activity.description}</p>
+                                      )}
+                                      {activity.coordinates && (
+                                        <a href={`https://maps.google.com/?q=${activity.coordinates.lat},${activity.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 mt-2 text-xs text-primary font-medium hover:underline">
+                                          <FontAwesomeIcon icon={faMapMarkerAlt} className="w-3 h-3" /> Voir sur Google Maps
+                                        </a>
+                                      )}
+                                    </div>
+                                    {canModify ? (
+                                      <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors text-xs font-medium flex-shrink-0"
+                                        onClick={() => alert('Fonctionnalite de modification a venir')}
+                                      >
+                                        <FontAwesomeIcon icon={faPencil} className="w-3 h-3" />
+                                        <span className="hidden sm:inline">Modifier</span>
+                                      </motion.button>
+                                    ) : (
+                                      <div className="relative group">
+                                        <button disabled className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted text-muted-foreground/50 cursor-not-allowed text-xs">
+                                          <FontAwesomeIcon icon={faLock} className="w-3 h-3" />
+                                        </button>
+                                        <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-foreground text-background text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                          Passez en Premium pour modifier
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Meals */}
+                    {(day.meals?.breakfast || day.meals?.lunch || day.meals?.dinner) && (
+                      <div className="mb-6">
+                        <div className="flex items-center gap-2.5 mb-4">
+                          <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+                            <FontAwesomeIcon icon={faUtensils} className="text-orange-500 w-3.5 h-3.5" />
+                          </div>
+                          <span className="font-bold text-foreground">Ou manger</span>
+                        </div>
+                        <div className="grid gap-3 sm:grid-cols-3">
+                          {[
+                            { key: 'breakfast', data: day.meals?.breakfast, label: 'Petit-dejeuner', emoji: '☀️' },
+                            { key: 'lunch', data: day.meals?.lunch, label: 'Dejeuner', emoji: '🌤' },
+                            { key: 'dinner', data: day.meals?.dinner, label: 'Diner', emoji: '🌙' },
+                          ].map(({ key, data, label, emoji }) => data?.restaurant && (
                             <div
-                              key={actIndex}
-                              id={`day-${day.day}-act-${actIndex}`}
-                              className={`p-4 rounded-xl border-l-2 border-yellow-300 transition-all duration-200 ${
-                                selectedPointId === `day-${day.day}-act-${actIndex}`
-                                  ? 'bg-primary/10 ring-2 ring-primary'
-                                  : 'bg-muted/50 hover:bg-muted hover:shadow-[0_1px_3px_rgba(0,0,0,0.06)]'
+                              key={key}
+                              id={`day-${day.day}-${key}`}
+                              className={`bg-card rounded-xl border p-4 transition-all ${
+                                selectedPointId === `day-${day.day}-${key}`
+                                  ? 'border-accent ring-4 ring-accent/20 shadow-lg'
+                                  : 'border-border hover:shadow-md hover:border-accent/30'
                               }`}
                             >
-                              <div className="flex items-start justify-between gap-4">
-                                <div className="flex-1">
-                                  {activity.time && (
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <FontAwesomeIcon icon={faClock} className="text-accent w-3 h-3" />
-                                      <span className="text-sm text-muted-foreground">{activity.time}</span>
-                                    </div>
-                                  )}
-                                  <h5 className="font-semibold text-foreground">{activity.name}</h5>
-                                  {activity.description && activity.description !== activity.name && (
-                                    <p className="text-sm text-muted-foreground mt-1">{activity.description}</p>
-                                  )}
-                                  {activity.coordinates && (
-                                    <a
-                                      href={`https://maps.google.com/?q=${activity.coordinates.lat},${activity.coordinates.lng}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="inline-flex items-center gap-1 mt-2 text-xs text-primary hover:underline"
-                                    >
-                                      <FontAwesomeIcon icon={faMapMarkerAlt} className="w-3 h-3" />
-                                      Voir sur Google Maps
-                                    </a>
-                                  )}
-                                </div>
-                                {canModify ? (
-                                  <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-accent/15 text-primary hover:bg-accent/25 transition-colors text-sm font-medium"
-                                    onClick={() => alert('Fonctionnalite de modification a venir')}
-                                  >
-                                    <FontAwesomeIcon icon={faPencil} className="w-3 h-3" />
-                                    <span className="hidden sm:inline">Modifier</span>
-                                  </motion.button>
-                                ) : (
-                                  <div className="relative group">
-                                    <button disabled className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted text-muted-foreground cursor-not-allowed text-sm">
-                                      <FontAwesomeIcon icon={faLock} className="w-3 h-3" />
-                                    </button>
-                                    <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-foreground text-background text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                      Passez en Premium pour modifier
-                                    </div>
-                                  </div>
+                              <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
+                                <span>{emoji}</span> {label}
+                              </p>
+                              <p className="font-semibold text-foreground text-sm">{data.restaurant}</p>
+                              {data.dish && (
+                                <p className="text-sm text-muted-foreground mt-0.5">{data.dish}</p>
+                              )}
+                              <div className="flex items-center justify-between mt-2">
+                                {data.cost && (
+                                  <span className="text-xs font-semibold text-primary">{data.cost}</span>
+                                )}
+                                {data.coordinates && (
+                                  <a href={`https://maps.google.com/?q=${data.coordinates.lat},${data.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
+                                    <FontAwesomeIcon icon={faMapMarkerAlt} className="w-2.5 h-2.5" /> Maps
+                                  </a>
                                 )}
                               </div>
                             </div>
                           ))}
                         </div>
-                      )}
+                      </div>
+                    )}
 
-                      {/* Meals */}
-                      {(day.meals?.breakfast || day.meals?.lunch || day.meals?.dinner) && (
-                        <div className="space-y-3">
-                          <h4 className="font-semibold text-foreground flex items-center gap-2">
-                            <FontAwesomeIcon icon={faUtensils} className="w-4 h-4 text-orange-400" />
-                            Ou manger
-                          </h4>
-                          <div className="grid gap-3 sm:grid-cols-3">
-                            {day.meals?.breakfast?.restaurant && (
-                              <div
-                                id={`day-${day.day}-breakfast`}
-                                className={`p-3 rounded-xl border-l-2 border-orange-300 ${
-                                  selectedPointId === `day-${day.day}-breakfast`
-                                    ? 'bg-accent/20 ring-2 ring-accent'
-                                    : 'bg-accent/5 hover:bg-accent/10'
-                                } transition-all`}
-                              >
-                                <p className="text-xs text-muted-foreground mb-1">☀️ Petit-dejeuner</p>
-                                <p className="font-medium text-foreground">{day.meals.breakfast.restaurant}</p>
-                                {day.meals.breakfast.dish && (
-                                  <p className="text-sm text-muted-foreground">{day.meals.breakfast.dish}</p>
-                                )}
-                                {day.meals.breakfast.cost && (
-                                  <p className="text-xs text-accent mt-1">{day.meals.breakfast.cost}</p>
-                                )}
-                                {day.meals.breakfast.coordinates && (
-                                  <a href={`https://maps.google.com/?q=${day.meals.breakfast.coordinates.lat},${day.meals.breakfast.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-1 text-xs text-primary hover:underline">
-                                    <FontAwesomeIcon icon={faMapMarkerAlt} className="w-2 h-2" /> Maps
-                                  </a>
-                                )}
-                              </div>
-                            )}
-                            {day.meals?.lunch?.restaurant && (
-                              <div
-                                id={`day-${day.day}-lunch`}
-                                className={`p-3 rounded-xl border-l-2 border-orange-300 ${
-                                  selectedPointId === `day-${day.day}-lunch`
-                                    ? 'bg-accent/20 ring-2 ring-accent'
-                                    : 'bg-accent/5 hover:bg-accent/10'
-                                } transition-all`}
-                              >
-                                <p className="text-xs text-muted-foreground mb-1">🌤 Dejeuner</p>
-                                <p className="font-medium text-foreground">{day.meals.lunch.restaurant}</p>
-                                {day.meals.lunch.dish && (
-                                  <p className="text-sm text-muted-foreground">{day.meals.lunch.dish}</p>
-                                )}
-                                {day.meals.lunch.cost && (
-                                  <p className="text-xs text-accent mt-1">{day.meals.lunch.cost}</p>
-                                )}
-                                {day.meals.lunch.coordinates && (
-                                  <a href={`https://maps.google.com/?q=${day.meals.lunch.coordinates.lat},${day.meals.lunch.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-1 text-xs text-primary hover:underline">
-                                    <FontAwesomeIcon icon={faMapMarkerAlt} className="w-2 h-2" /> Maps
-                                  </a>
-                                )}
-                              </div>
-                            )}
-                            {day.meals?.dinner?.restaurant && (
-                              <div
-                                id={`day-${day.day}-dinner`}
-                                className={`p-3 rounded-xl border-l-2 border-orange-300 ${
-                                  selectedPointId === `day-${day.day}-dinner`
-                                    ? 'bg-accent/20 ring-2 ring-accent'
-                                    : 'bg-accent/5 hover:bg-accent/10'
-                                } transition-all`}
-                              >
-                                <p className="text-xs text-muted-foreground mb-1">🌙 Diner</p>
-                                <p className="font-medium text-foreground">{day.meals.dinner.restaurant}</p>
-                                {day.meals.dinner.dish && (
-                                  <p className="text-sm text-muted-foreground">{day.meals.dinner.dish}</p>
-                                )}
-                                {day.meals.dinner.cost && (
-                                  <p className="text-xs text-accent mt-1">{day.meals.dinner.cost}</p>
-                                )}
-                                {day.meals.dinner.coordinates && (
-                                  <a href={`https://maps.google.com/?q=${day.meals.dinner.coordinates.lat},${day.meals.dinner.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-1 text-xs text-primary hover:underline">
-                                    <FontAwesomeIcon icon={faMapMarkerAlt} className="w-2 h-2" /> Maps
-                                  </a>
-                                )}
-                              </div>
-                            )}
+                    {/* Accommodation */}
+                    {day.accommodation?.name && (
+                      <div
+                        id={`day-${day.day}-accommodation`}
+                        className={`bg-card rounded-xl border p-4 transition-all ${
+                          selectedPointId === `day-${day.day}-accommodation`
+                            ? 'border-emerald-400 ring-4 ring-emerald-400/20 shadow-lg'
+                            : 'border-border hover:shadow-md hover:border-emerald-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 mb-3">
+                          <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                            <FontAwesomeIcon icon={faBed} className="text-emerald-600 w-3.5 h-3.5" />
                           </div>
+                          <span className="font-bold text-foreground">Hebergement</span>
                         </div>
-                      )}
-
-                      {/* Accommodation */}
-                      {day.accommodation?.name && (
-                        <div
-                          id={`day-${day.day}-accommodation`}
-                          className={`p-4 rounded-xl border-l-2 border-green-300 ${
-                            selectedPointId === `day-${day.day}-accommodation`
-                              ? 'bg-green-100/50 ring-2 ring-green-400'
-                              : 'bg-green-50/50 hover:bg-green-100/30'
-                          } transition-all`}
-                        >
-                          <div className="flex items-center gap-2 mb-2">
-                            <FontAwesomeIcon icon={faBed} className="text-green-600 w-4 h-4" />
-                            <span className="font-semibold text-foreground">Hebergement</span>
-                          </div>
-                          <p className="font-medium text-foreground">{day.accommodation.name}</p>
-                          <div className="flex gap-4 mt-1 text-sm text-muted-foreground">
-                            {day.accommodation.type && <span>{day.accommodation.type}</span>}
-                            {day.accommodation.cost && <span>💰 {day.accommodation.cost}/nuit</span>}
-                          </div>
-                          {day.accommodation.coordinates && (
-                            <a
-                              href={`https://maps.google.com/?q=${day.accommodation.coordinates.lat},${day.accommodation.coordinates.lng}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 mt-2 text-xs text-primary hover:underline"
-                            >
-                              <FontAwesomeIcon icon={faMapMarkerAlt} className="w-3 h-3" />
-                              Voir sur Google Maps
-                            </a>
+                        <p className="font-semibold text-foreground">{day.accommodation.name}</p>
+                        <div className="flex flex-wrap gap-3 mt-2">
+                          {day.accommodation.type && (
+                            <span className="text-xs bg-muted px-2.5 py-1 rounded-md text-muted-foreground">{day.accommodation.type}</span>
+                          )}
+                          {day.accommodation.cost && (
+                            <span className="text-xs bg-emerald-50 px-2.5 py-1 rounded-md text-emerald-700 font-medium">{day.accommodation.cost}/nuit</span>
                           )}
                         </div>
-                      )}
+                        {day.accommodation.coordinates && (
+                          <a href={`https://maps.google.com/?q=${day.accommodation.coordinates.lat},${day.accommodation.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 mt-3 text-xs text-primary font-medium hover:underline">
+                            <FontAwesomeIcon icon={faMapMarkerAlt} className="w-3 h-3" /> Voir sur Google Maps
+                          </a>
+                        )}
+                      </div>
+                    )}
 
-                      {/* Empty day */}
-                      {!day.activities?.length && !day.meals?.breakfast && !day.meals?.lunch && !day.meals?.dinner && !day.accommodation?.name && !day.transport?.method && (
-                        <p className="text-muted-foreground italic text-center py-4">
-                          Aucune activite prevue pour ce jour
-                        </p>
-                      )}
-                    </div>
+                    {/* Empty day */}
+                    {!day.activities?.length && !day.meals?.breakfast && !day.meals?.lunch && !day.meals?.dinner && !day.accommodation?.name && !day.transport?.method && (
+                      <p className="text-muted-foreground italic text-center py-4">
+                        Aucune activite prevue pour ce jour
+                      </p>
+                    )}
                   </AccordionContent>
                 </AccordionItem>
               ))}
