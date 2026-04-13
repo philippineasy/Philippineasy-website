@@ -132,6 +132,20 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
+const DAY_THEMES = [
+  { gradient: 'from-amber-50 to-orange-50/50', badge: 'bg-gradient-to-br from-amber-400 to-orange-500', accent: 'text-amber-600' },
+  { gradient: 'from-cyan-50 to-blue-50/50', badge: 'bg-gradient-to-br from-cyan-400 to-blue-500', accent: 'text-cyan-600' },
+  { gradient: 'from-emerald-50 to-teal-50/50', badge: 'bg-gradient-to-br from-emerald-400 to-teal-500', accent: 'text-emerald-600' },
+  { gradient: 'from-rose-50 to-pink-50/50', badge: 'bg-gradient-to-br from-rose-400 to-pink-500', accent: 'text-rose-600' },
+  { gradient: 'from-violet-50 to-purple-50/50', badge: 'bg-gradient-to-br from-violet-400 to-purple-500', accent: 'text-violet-600' },
+  { gradient: 'from-yellow-50 to-amber-50/50', badge: 'bg-gradient-to-br from-yellow-400 to-amber-500', accent: 'text-yellow-600' },
+  { gradient: 'from-sky-50 to-indigo-50/50', badge: 'bg-gradient-to-br from-sky-400 to-indigo-500', accent: 'text-sky-600' },
+];
+
+function getDayTheme(dayNumber: number) {
+  return DAY_THEMES[(dayNumber - 1) % DAY_THEMES.length];
+}
+
 export default function ItineraryPage({ params }: PageProps) {
   const resolvedParams = use(params);
   const router = useRouter();
@@ -249,36 +263,34 @@ export default function ItineraryPage({ params }: PageProps) {
   const { selected_variant } = itinerary;
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--warm-bg))]">
+    <div className="min-h-screen bg-gradient-to-b from-[hsl(36,33%,97%)] via-[hsl(30,20%,98%)] to-[hsl(24,80%,94%)]">
       {/* Sticky header */}
-      <div className="backdrop-blur-sm bg-card/95 border-b border-border/50 sticky top-32 z-20">
-        <div className="container mx-auto px-4 py-4">
+      <div className="backdrop-blur-md bg-card/80 border-b border-accent/10 sticky top-32 z-20 shadow-sm">
+        <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <Link
                 href="/profil"
-                className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
+                className="flex items-center justify-center w-9 h-9 rounded-xl bg-muted hover:bg-accent/10 text-muted-foreground hover:text-accent transition-all"
               >
-                <FontAwesomeIcon icon={faArrowLeft} />
-                <span className="hidden sm:inline">Retour au profil</span>
+                <FontAwesomeIcon icon={faArrowLeft} className="w-3.5 h-3.5" />
               </Link>
-              <div className="h-6 w-px bg-border" />
-              <h1 className="font-bold text-lg text-foreground truncate max-w-[200px] sm:max-w-none">
+              <div className="h-5 w-px bg-border/50" />
+              <h1 className="font-bold text-base text-foreground truncate max-w-[200px] sm:max-w-none">
                 {selected_variant?.title || 'Mon Itineraire'}
               </h1>
             </div>
 
-            <Badge variant="recommended" className="px-3 py-1.5 flex items-center gap-2">
-              <FontAwesomeIcon icon={faEdit} className="w-3 h-3" />
-              <span className="text-xs">
-                Modifications :{' '}
+            <div className="px-3 py-1.5 flex items-center gap-2 bg-accent/10 border border-accent/20 rounded-full">
+              <FontAwesomeIcon icon={faEdit} className="w-3 h-3 text-accent" />
+              <span className="text-xs text-foreground/70">
                 {isUnlimited ? (
-                  <FontAwesomeIcon icon={faInfinity} className="w-3 h-3" />
+                  <><FontAwesomeIcon icon={faInfinity} className="w-3 h-3 text-accent" /> Illimite</>
                 ) : (
-                  <span className="font-bold">{itinerary.modifications_remaining}</span>
+                  <><span className="font-bold text-accent">{itinerary.modifications_remaining}</span> modif.</>
                 )}
               </span>
-            </Badge>
+            </div>
           </div>
         </div>
       </div>
@@ -289,57 +301,64 @@ export default function ItineraryPage({ params }: PageProps) {
         {selected_variant?.description && (
           <motion.div
             {...fadeInUp}
-            className="mb-6 p-4 bg-primary/5 border-l-4 border-primary rounded-xl"
+            className="mb-6 p-5 bg-gradient-to-r from-accent/10 via-accent/5 to-transparent border-l-4 border-accent rounded-xl"
           >
-            <p className="text-primary">{selected_variant.description}</p>
+            <p className="text-foreground/80 leading-relaxed">{selected_variant.description}</p>
           </motion.div>
         )}
 
         {/* Map */}
         {mapPoints.length > 0 && (
           <motion.div {...fadeInUp} className="mb-8">
-            <h2 className="text-xl font-bold text-foreground mb-4">Carte de votre itineraire</h2>
-            <div className="rounded-2xl overflow-hidden border border-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-foreground">Votre parcours</h2>
+              <span className="text-xs text-muted-foreground bg-muted px-3 py-1 rounded-full">{mapPoints.length} etapes</span>
+            </div>
+            <div className="relative rounded-2xl overflow-hidden border border-accent/20 shadow-lg">
               <ItineraryMap
                 points={mapPoints}
                 selectedPointId={selectedPointId}
                 onPointClick={handlePointClick}
               />
+              <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[hsl(36,33%,97%)]/60 to-transparent pointer-events-none" />
             </div>
-            <p className="text-sm text-muted-foreground mt-2 text-center">
-              Cliquez sur un marqueur pour voir les details
-            </p>
           </motion.div>
         )}
 
         {/* Day-by-day program */}
         <div>
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-              <FontAwesomeIcon icon={faSun} className="w-4 h-4" />
+          <div className="flex items-center gap-4 mb-8 mt-2">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent to-amber-500 text-white flex items-center justify-center shadow-lg">
+              <FontAwesomeIcon icon={faSun} className="w-5 h-5" />
             </div>
-            <h2 className="text-xl font-bold text-foreground">Votre programme jour par jour</h2>
+            <div>
+              <h2 className="text-xl font-bold text-foreground">Votre programme jour par jour</h2>
+              <p className="text-sm text-muted-foreground mt-0.5">{selected_variant?.days?.length || 0} jours d&apos;aventure aux Philippines</p>
+            </div>
           </div>
 
           {selected_variant?.days && selected_variant.days.length > 0 ? (
             <Accordion type="multiple" defaultValue={['day-1']}>
-              {selected_variant.days.map((day) => (
+              {selected_variant.days.map((day) => {
+                const theme = getDayTheme(day.day);
+                return (
                 <AccordionItem
                   key={day.day}
                   value={`day-${day.day}`}
-                  className="bg-card rounded-2xl mb-5 overflow-hidden shadow-lg border border-border data-[state=open]:shadow-xl transition-shadow"
+                  className="bg-card rounded-2xl mb-5 overflow-hidden border border-border/50 data-[state=open]:shadow-xl data-[state=open]:border-accent/20 transition-all duration-300"
                 >
-                  <AccordionTrigger className="px-5 py-5 hover:no-underline hover:bg-muted/30 [&>svg]:text-muted-foreground [&>svg]:w-5 [&>svg]:h-5">
-                    <div className="flex items-center gap-3">
-                      <span className="bg-primary text-primary-foreground text-sm font-bold w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
-                        J{day.day}
-                      </span>
+                  <AccordionTrigger className={`px-5 py-5 hover:no-underline bg-gradient-to-r ${theme.gradient} [&>svg]:text-muted-foreground [&>svg]:w-5 [&>svg]:h-5 transition-all`}>
+                    <div className="flex items-center gap-4">
+                      <div className={`${theme.badge} text-white text-sm font-bold w-12 h-12 rounded-2xl flex flex-col items-center justify-center flex-shrink-0 shadow-lg`}>
+                        <span className="text-[10px] font-medium uppercase leading-none opacity-80">Jour</span>
+                        <span className="text-lg font-extrabold leading-none">{day.day}</span>
+                      </div>
                       <div className="text-left">
-                        <p className="font-bold text-foreground text-base">
+                        <p className="font-bold text-foreground text-base leading-tight">
                           {day.location || `Jour ${day.day}`}
                         </p>
                         {day.title && day.title !== 'description' && day.title !== 'jours' && (
-                          <p className="text-sm text-muted-foreground">{day.title}</p>
+                          <p className={`text-sm ${theme.accent} font-medium mt-0.5`}>{day.title}</p>
                         )}
                       </div>
                     </div>
@@ -350,7 +369,7 @@ export default function ItineraryPage({ params }: PageProps) {
                     {day.transport?.method && (
                       <div
                         id={`day-${day.day}-transport`}
-                        className="mb-6 p-4 rounded-xl bg-primary/5 border border-primary/15"
+                        className={`mb-6 p-4 rounded-xl bg-gradient-to-r ${theme.gradient} border border-black/5`}
                       >
                         <div className="flex items-center gap-2.5 mb-2">
                           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -381,38 +400,48 @@ export default function ItineraryPage({ params }: PageProps) {
                     {day.activities && day.activities.length > 0 && (
                       <div className="mb-6">
                         <div className="flex items-center gap-2.5 mb-4">
-                          <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
-                            <FontAwesomeIcon icon={faSun} className="text-amber-600 w-3.5 h-3.5" />
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-100 to-orange-100 flex items-center justify-center">
+                            <FontAwesomeIcon icon={faSun} className="text-amber-500 w-3.5 h-3.5" />
                           </div>
                           <span className="font-bold text-foreground">Programme du jour</span>
+                          <span className="text-xs text-muted-foreground ml-auto">{day.activities.length} activite{day.activities.length > 1 ? 's' : ''}</span>
                         </div>
 
                         {/* Timeline */}
-                        <div className="relative ml-4 pl-6 border-l-2 border-primary/15 space-y-0">
+                        <div className="relative ml-4 pl-8 space-y-0">
+                          <div className="absolute left-0 top-2 bottom-2 w-0.5 bg-gradient-to-b from-amber-300 via-accent/40 to-primary/20 rounded-full" />
                           {day.activities.map((activity, actIndex) => {
                             const isLast = actIndex === (day.activities?.length ?? 0) - 1;
                             return (
-                              <div
+                              <motion.div
                                 key={actIndex}
                                 id={`day-${day.day}-act-${actIndex}`}
-                                className={`relative pb-5 ${isLast ? 'pb-0' : ''}`}
+                                className={`relative ${isLast ? 'pb-0' : 'pb-6'}`}
+                                initial={{ opacity: 0, x: -12 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true, margin: '-50px' }}
+                                transition={{ delay: actIndex * 0.08, duration: 0.4, ease: 'easeOut' }}
                               >
                                 {/* Timeline dot */}
-                                <div className={`absolute -left-[31px] top-0 w-4 h-4 rounded-full border-2 border-card ${
-                                  selectedPointId === `day-${day.day}-act-${actIndex}` ? 'bg-primary' : 'bg-primary/60'
-                                }`} />
+                                <div className="absolute -left-[35px] top-1.5">
+                                  <div className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                                    selectedPointId === `day-${day.day}-act-${actIndex}`
+                                      ? 'bg-accent scale-125 shadow-[0_0_0_4px_rgba(234,179,8,0.2)]'
+                                      : 'bg-accent/50 hover:bg-accent/80'
+                                  }`} />
+                                </div>
 
                                 {/* Time badge */}
                                 {activity.time && (
-                                  <span className="inline-block text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full mb-2">
+                                  <span className="inline-block text-xs font-bold text-accent bg-accent/10 px-3 py-1 rounded-full mb-2 tracking-wide">
                                     {activity.time}
                                   </span>
                                 )}
 
-                                <div className={`bg-card rounded-xl border shadow-sm p-4 transition-all ${
+                                <div className={`bg-card rounded-xl border p-4 transition-all duration-300 ${
                                   selectedPointId === `day-${day.day}-act-${actIndex}`
-                                    ? 'border-primary ring-4 ring-primary/20 shadow-lg'
-                                    : 'border-border hover:shadow-md hover:border-primary/30'
+                                    ? 'border-accent ring-2 ring-accent/20 shadow-lg -translate-x-0.5'
+                                    : 'border-border/60 hover:shadow-md hover:border-accent/30 hover:-translate-y-0.5'
                                 }`}>
                                   <div className="flex items-start justify-between gap-3">
                                     <div className="flex-1">
@@ -448,10 +477,19 @@ export default function ItineraryPage({ params }: PageProps) {
                                     )}
                                   </div>
                                 </div>
-                              </div>
+                              </motion.div>
                             );
                           })}
                         </div>
+                      </div>
+                    )}
+
+                    {/* Section separator */}
+                    {day.activities && day.activities.length > 0 && (day.meals?.breakfast || day.meals?.lunch || day.meals?.dinner) && (
+                      <div className="flex items-center gap-3 my-6">
+                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-accent/20 to-transparent" />
+                        <span className="text-accent/40 text-xs">~</span>
+                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-accent/20 to-transparent" />
                       </div>
                     )}
 
@@ -459,80 +497,95 @@ export default function ItineraryPage({ params }: PageProps) {
                     {(day.meals?.breakfast || day.meals?.lunch || day.meals?.dinner) && (
                       <div className="mb-6">
                         <div className="flex items-center gap-2.5 mb-4">
-                          <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center">
                             <FontAwesomeIcon icon={faUtensils} className="text-orange-500 w-3.5 h-3.5" />
                           </div>
                           <span className="font-bold text-foreground">Ou manger</span>
                         </div>
                         <div className="grid gap-3 sm:grid-cols-3">
                           {[
-                            { key: 'breakfast', data: day.meals?.breakfast, label: 'Petit-dejeuner', emoji: '☀️' },
-                            { key: 'lunch', data: day.meals?.lunch, label: 'Dejeuner', emoji: '🌤' },
-                            { key: 'dinner', data: day.meals?.dinner, label: 'Diner', emoji: '🌙' },
-                          ].map(({ key, data, label, emoji }) => data?.restaurant && (
-                            <div
+                            { key: 'breakfast', data: day.meals?.breakfast, label: 'Petit-dejeuner', emoji: '☀️', gradient: 'from-amber-50 to-yellow-50', borderAccent: 'border-amber-200', costColor: 'text-amber-700 bg-amber-50' },
+                            { key: 'lunch', data: day.meals?.lunch, label: 'Dejeuner', emoji: '🌴', gradient: 'from-orange-50 to-amber-50', borderAccent: 'border-orange-200', costColor: 'text-orange-700 bg-orange-50' },
+                            { key: 'dinner', data: day.meals?.dinner, label: 'Diner', emoji: '🌅', gradient: 'from-rose-50 to-orange-50', borderAccent: 'border-rose-200', costColor: 'text-rose-700 bg-rose-50' },
+                          ].map(({ key, data, label, emoji, gradient, borderAccent, costColor }) => data?.restaurant && (
+                            <motion.div
                               key={key}
                               id={`day-${day.day}-${key}`}
-                              className={`bg-card rounded-xl border p-4 transition-all ${
+                              whileHover={{ y: -2 }}
+                              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                              className={`rounded-xl border p-4 transition-all bg-gradient-to-br ${gradient} ${
                                 selectedPointId === `day-${day.day}-${key}`
-                                  ? 'border-accent ring-4 ring-accent/20 shadow-lg'
-                                  : 'border-border hover:shadow-md hover:border-accent/30'
+                                  ? `${borderAccent} ring-2 ring-accent/20 shadow-lg`
+                                  : `${borderAccent}/50 hover:shadow-md`
                               }`}
                             >
-                              <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
-                                <span>{emoji}</span> {label}
-                              </p>
+                              <div className="flex items-center gap-2 mb-2.5">
+                                <span className="text-lg">{emoji}</span>
+                                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{label}</span>
+                              </div>
                               <p className="font-semibold text-foreground text-sm">{data.restaurant}</p>
                               {data.dish && (
-                                <p className="text-sm text-muted-foreground mt-0.5">{data.dish}</p>
+                                <p className="text-sm text-muted-foreground mt-1 italic">&quot;{data.dish}&quot;</p>
                               )}
-                              <div className="flex items-center justify-between mt-2">
+                              <div className="flex items-center justify-between mt-3 pt-2 border-t border-black/5">
                                 {data.cost && (
-                                  <span className="text-xs font-semibold text-primary">{data.cost}</span>
+                                  <span className={`text-xs font-bold px-2 py-0.5 rounded-md ${costColor}`}>{data.cost}</span>
                                 )}
                                 {data.coordinates && (
-                                  <a href={`https://maps.google.com/?q=${data.coordinates.lat},${data.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
+                                  <a href={`https://maps.google.com/?q=${data.coordinates.lat},${data.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="text-xs text-accent font-medium hover:underline flex items-center gap-1">
                                     <FontAwesomeIcon icon={faMapMarkerAlt} className="w-2.5 h-2.5" /> Maps
                                   </a>
                                 )}
                               </div>
-                            </div>
+                            </motion.div>
                           ))}
                         </div>
                       </div>
                     )}
 
+                    {/* Section separator */}
+                    {(day.meals?.breakfast || day.meals?.lunch || day.meals?.dinner) && day.accommodation?.name && (
+                      <div className="flex items-center gap-3 my-6">
+                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-accent/20 to-transparent" />
+                        <span className="text-accent/40 text-xs">~</span>
+                        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-accent/20 to-transparent" />
+                      </div>
+                    )}
+
                     {/* Accommodation */}
                     {day.accommodation?.name && (
-                      <div
+                      <motion.div
                         id={`day-${day.day}-accommodation`}
-                        className={`bg-card rounded-xl border p-4 transition-all ${
+                        whileHover={{ y: -1 }}
+                        className={`rounded-xl border p-5 transition-all duration-300 bg-gradient-to-br from-emerald-50/80 via-card to-teal-50/30 ${
                           selectedPointId === `day-${day.day}-accommodation`
-                            ? 'border-emerald-400 ring-4 ring-emerald-400/20 shadow-lg'
-                            : 'border-border hover:shadow-md hover:border-emerald-300'
+                            ? 'border-emerald-300 ring-2 ring-emerald-300/20 shadow-lg'
+                            : 'border-emerald-200/60 hover:shadow-md hover:border-emerald-200'
                         }`}
                       >
-                        <div className="flex items-center gap-2.5 mb-3">
-                          <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                            <FontAwesomeIcon icon={faBed} className="text-emerald-600 w-3.5 h-3.5" />
+                        <div className="flex items-start gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center flex-shrink-0 shadow-md">
+                            <FontAwesomeIcon icon={faBed} className="text-white w-4 h-4" />
                           </div>
-                          <span className="font-bold text-foreground">Hebergement</span>
+                          <div className="flex-1">
+                            <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 mb-1 block">Hebergement</span>
+                            <p className="font-bold text-foreground text-base">{day.accommodation.name}</p>
+                            <div className="flex flex-wrap gap-2 mt-3">
+                              {day.accommodation.type && (
+                                <span className="text-xs bg-emerald-100 px-2.5 py-1 rounded-lg text-emerald-700 font-medium">{day.accommodation.type}</span>
+                              )}
+                              {day.accommodation.cost && (
+                                <span className="text-xs bg-emerald-500/10 px-2.5 py-1 rounded-lg text-emerald-700 font-bold">{day.accommodation.cost}/nuit</span>
+                              )}
+                            </div>
+                            {day.accommodation.coordinates && (
+                              <a href={`https://maps.google.com/?q=${day.accommodation.coordinates.lat},${day.accommodation.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 mt-3 text-xs text-emerald-600 font-medium hover:text-emerald-700 hover:underline">
+                                <FontAwesomeIcon icon={faMapMarkerAlt} className="w-3 h-3" /> Voir sur Google Maps
+                              </a>
+                            )}
+                          </div>
                         </div>
-                        <p className="font-semibold text-foreground">{day.accommodation.name}</p>
-                        <div className="flex flex-wrap gap-3 mt-2">
-                          {day.accommodation.type && (
-                            <span className="text-xs bg-muted px-2.5 py-1 rounded-md text-muted-foreground">{day.accommodation.type}</span>
-                          )}
-                          {day.accommodation.cost && (
-                            <span className="text-xs bg-emerald-50 px-2.5 py-1 rounded-md text-emerald-700 font-medium">{day.accommodation.cost}/nuit</span>
-                          )}
-                        </div>
-                        {day.accommodation.coordinates && (
-                          <a href={`https://maps.google.com/?q=${day.accommodation.coordinates.lat},${day.accommodation.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 mt-3 text-xs text-primary font-medium hover:underline">
-                            <FontAwesomeIcon icon={faMapMarkerAlt} className="w-3 h-3" /> Voir sur Google Maps
-                          </a>
-                        )}
-                      </div>
+                      </motion.div>
                     )}
 
                     {/* Empty day */}
@@ -543,7 +596,8 @@ export default function ItineraryPage({ params }: PageProps) {
                     )}
                   </AccordionContent>
                 </AccordionItem>
-              ))}
+                );
+              })}
             </Accordion>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
@@ -554,15 +608,18 @@ export default function ItineraryPage({ params }: PageProps) {
 
         {/* Tips */}
         {selected_variant?.tips && selected_variant.tips.length > 0 && (
-          <motion.div {...fadeInUp} className="mt-8 p-6 bg-accent/5 border border-accent/20 rounded-2xl">
-            <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-              <FontAwesomeIcon icon={faLightbulb} className="text-accent" />
-              Conseils pour votre voyage
+          <motion.div {...fadeInUp} className="mt-10 p-6 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50/50 border border-amber-200/50 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-accent/10 to-transparent rounded-bl-full" />
+            <h3 className="font-bold text-foreground mb-4 flex items-center gap-2.5 relative z-10">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-sm">
+                <FontAwesomeIcon icon={faLightbulb} className="text-white w-3.5 h-3.5" />
+              </div>
+              Nos conseils de voyage
             </h3>
-            <ul className="space-y-2">
+            <ul className="space-y-2 relative z-10">
               {selected_variant.tips.map((tip, i) => (
                 <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                  <span className="text-accent">•</span>
+                  <FontAwesomeIcon icon={faLightbulb} className="text-accent w-3 h-3 mt-0.5 flex-shrink-0" />
                   {tip}
                 </li>
               ))}
@@ -572,7 +629,7 @@ export default function ItineraryPage({ params }: PageProps) {
 
         {/* Upgrade CTA for Express */}
         {!canModify && itinerary.offer_type === 'express' && (
-          <motion.div {...fadeInUp} className="mt-8 p-6 bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/20 rounded-2xl text-center">
+          <motion.div {...fadeInUp} className="mt-8 p-6 bg-gradient-to-br from-accent/10 via-primary/5 to-accent/10 border border-accent/20 rounded-2xl text-center relative overflow-hidden">
             <h3 className="font-semibold text-foreground mb-2">
               Envie de personnaliser votre itineraire ?
             </h3>
