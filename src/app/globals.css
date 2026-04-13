@@ -44,6 +44,7 @@
     --radius: 0.5rem;
     --success: 145 63% 42%; /* green-600 */
     --success-foreground: 210 40% 98%;
+    --warm-bg: 30 20% 98%;
   }
 
   * {

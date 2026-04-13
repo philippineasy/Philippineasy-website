@@ -186,7 +186,7 @@ function MapContent({ points, selectedPointId, onPointClick, className }: Itiner
   return (
     <div
       id="itinerary-map"
-      className={`w-full h-[400px] rounded-xl overflow-hidden border-2 border-primary/20 relative z-0 ${className || ''}`}
+      className={`w-full h-[300px] md:h-[400px] rounded-2xl overflow-hidden border border-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.08)] relative z-0 ${className || ''}`}
     />
   );
 }
@@ -207,7 +207,7 @@ function getPeriodLabel(period: string): string {
 const ItineraryMap = dynamic(() => Promise.resolve(MapContent), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[400px] rounded-xl bg-gray-100 flex items-center justify-center border-2 border-primary/20">
+    <div className="w-full h-[300px] md:h-[400px] rounded-2xl bg-muted flex items-center justify-center border border-border/50">
       <div className="text-muted-foreground">Chargement de la carte...</div>
     </div>
   ),

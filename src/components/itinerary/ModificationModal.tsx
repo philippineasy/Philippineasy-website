@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTimes,
@@ -8,6 +9,10 @@ import {
   faSpinner,
   faCheckCircle,
 } from '@fortawesome/free-solid-svg-icons';
+import { Button } from '@/components/ui/Button';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { modalOverlay, modalContent, scaleIn } from './animations';
 
 interface ModificationModalProps {
   isOpen: boolean;
@@ -21,7 +26,6 @@ interface ModificationModalProps {
   onSuccess: (newRemaining: number) => void;
 }
 
-// Suggestions predefinies selon le type d'element
 const SUGGESTIONS: Record<string, string[]> = {
   morning: [
     'Plus proche de mon hotel',
@@ -102,7 +106,6 @@ export default function ModificationModal({
       setIsSuccess(true);
       onSuccess(data.modifications_remaining);
 
-      // Fermer apres 2 secondes
       setTimeout(() => {
         setIsSuccess(false);
         setRequestText('');
@@ -116,133 +119,148 @@ export default function ModificationModal({
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    setRequestText((prev) => {
-      if (prev) {
-        return `${prev}\n${suggestion}`;
-      }
-      return suggestion;
-    });
+    setRequestText((prev) => prev ? `${prev}\n${suggestion}` : suggestion);
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-      />
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Overlay */}
+          <motion.div
+            variants={modalOverlay}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={onClose}
+          />
 
-      {/* Modal */}
-      <div className="relative bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="p-6 border-b">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-primary">Demander une modification</h2>
-              <p className="text-sm text-muted-foreground mt-1">{elementName}</p>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <FontAwesomeIcon icon={faTimes} className="w-5 h-5 text-gray-500" />
-            </button>
-          </div>
-        </div>
-
-        {/* Succes */}
-        {isSuccess ? (
-          <div className="p-8 text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FontAwesomeIcon icon={faCheckCircle} className="text-green-500 text-3xl" />
-            </div>
-            <h3 className="text-lg font-semibold text-green-600">Demande envoyee !</h3>
-            <p className="text-sm text-muted-foreground mt-2">
-              Nous traitons votre modification et vous contacterons bientot.
-            </p>
-          </div>
-        ) : (
-          <>
-            {/* Body */}
-            <div className="p-6 space-y-4">
-              {/* Quota restant */}
-              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                <span className="text-sm text-blue-800">Modifications restantes</span>
-                <span className="font-bold text-blue-600">
-                  {isUnlimited ? 'Illimite' : modificationsRemaining}
-                </span>
+          {/* Modal */}
+          <motion.div
+            variants={modalContent}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            role="dialog"
+            aria-modal="true"
+            className="relative bg-card rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-border/50"
+          >
+            {/* Header */}
+            <div className="p-6 border-b border-border">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-foreground">Demander une modification</h2>
+                  <p className="text-sm text-muted-foreground mt-1">{elementName}</p>
+                </div>
+                <button
+                  onClick={onClose}
+                  className="p-2 hover:bg-muted rounded-xl transition-colors"
+                >
+                  <FontAwesomeIcon icon={faTimes} className="w-5 h-5 text-muted-foreground" />
+                </button>
               </div>
+            </div>
 
-              {/* Suggestions */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Suggestions rapides
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {suggestions.map((suggestion, i) => (
-                    <button
-                      key={i}
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      className="px-3 py-1.5 bg-gray-100 hover:bg-primary/10 text-sm rounded-full transition-colors"
+            {/* Success */}
+            {isSuccess ? (
+              <div className="p-8 text-center">
+                <motion.div
+                  variants={scaleIn}
+                  initial="initial"
+                  animate="animate"
+                  className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"
+                >
+                  <FontAwesomeIcon icon={faCheckCircle} className="text-green-500 text-3xl" />
+                </motion.div>
+                <h3 className="text-lg font-semibold text-green-600">Demande envoyee !</h3>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Nous traitons votre modification et vous contacterons bientot.
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Body */}
+                <div className="p-6 space-y-4">
+                  {/* Quota */}
+                  <div className="flex items-center justify-between p-3 bg-primary/5 rounded-xl border border-primary/10">
+                    <span className="text-sm text-foreground">Modifications restantes</span>
+                    <Badge variant={isUnlimited ? 'success' : 'default'}>
+                      {isUnlimited ? 'Illimite' : modificationsRemaining}
+                    </Badge>
+                  </div>
+
+                  {/* Suggestions */}
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Suggestions rapides
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {suggestions.map((suggestion, i) => (
+                        <button
+                          key={i}
+                          onClick={() => handleSuggestionClick(suggestion)}
+                          className="px-3 py-1.5 bg-muted hover:bg-primary/10 text-sm rounded-full transition-colors text-muted-foreground hover:text-foreground"
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Textarea */}
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Decrivez votre demande
+                    </label>
+                    <Textarea
+                      value={requestText}
+                      onChange={(e) => setRequestText(e.target.value)}
+                      placeholder="Ex: Je souhaite un restaurant plus economique avec cuisine locale..."
+                      className="h-32 resize-none bg-muted/50 hover:border-primary/50 focus:bg-card"
+                    />
+                  </div>
+
+                  {/* Error */}
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-3 bg-destructive/10 border border-destructive/30 rounded-xl text-destructive text-sm"
                     >
-                      {suggestion}
-                    </button>
-                  ))}
+                      {error}
+                    </motion.div>
+                  )}
                 </div>
-              </div>
 
-              {/* Textarea */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Decrivez votre demande
-                </label>
-                <textarea
-                  value={requestText}
-                  onChange={(e) => setRequestText(e.target.value)}
-                  placeholder="Ex: Je souhaite un restaurant plus economique avec cuisine locale..."
-                  className="w-full h-32 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-                />
-              </div>
-
-              {/* Erreur */}
-              {error && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-                  {error}
+                {/* Footer */}
+                <div className="p-6 border-t border-border flex gap-3 justify-end">
+                  <Button variant="ghost" onClick={onClose}>
+                    Annuler
+                  </Button>
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    className="bg-accent text-accent-foreground hover:bg-accent/90"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <FontAwesomeIcon icon={faSpinner} className="animate-spin mr-2" />
+                        Envoi...
+                      </>
+                    ) : (
+                      <>
+                        <FontAwesomeIcon icon={faPaperPlane} className="mr-2" />
+                        Envoyer
+                      </>
+                    )}
+                  </Button>
                 </div>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="p-6 border-t flex gap-3 justify-end">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="px-6 py-2 bg-accent text-primary font-semibold rounded-lg hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {isSubmitting ? (
-                  <>
-                    <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
-                    Envoi...
-                  </>
-                ) : (
-                  <>
-                    <FontAwesomeIcon icon={faPaperPlane} />
-                    Envoyer
-                  </>
-                )}
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
+              </>
+            )}
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }

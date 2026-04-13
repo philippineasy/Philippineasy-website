@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, use } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowLeft,
@@ -10,8 +11,6 @@ import {
   faEdit,
   faInfinity,
   faClock,
-  faChevronDown,
-  faChevronUp,
   faMapMarkerAlt,
   faPencil,
   faLock,
@@ -21,16 +20,25 @@ import {
   faBus,
   faSun,
   faMoon,
+  faArrowRight,
 } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/Button';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { fadeInUp } from '@/components/itinerary/animations';
 import dynamic from 'next/dynamic';
 
-// Import dynamique de la carte pour éviter les erreurs SSR
 const ItineraryMap = dynamic(() => import('@/components/itinerary/ItineraryMap'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[400px] rounded-xl bg-muted flex items-center justify-center border-2 border-primary/20">
+    <div className="w-full h-[300px] md:h-[400px] rounded-2xl bg-muted flex items-center justify-center border border-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
       <div className="text-muted-foreground">Chargement de la carte...</div>
     </div>
   ),
@@ -132,10 +140,8 @@ export default function ItineraryPage({ params }: PageProps) {
   const [itinerary, setItinerary] = useState<Itinerary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set([1]));
   const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
 
-  // Charger l'itinéraire
   useEffect(() => {
     const fetchItinerary = async () => {
       if (!user) return;
@@ -148,7 +154,6 @@ export default function ItineraryPage({ params }: PageProps) {
           throw new Error(data.error || 'Erreur lors du chargement');
         }
 
-        console.log('API Response itinerary:', JSON.stringify(data.itinerary?.selected_variant?.days?.[0], null, 2));
         setItinerary(data.itinerary);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Une erreur est survenue');
@@ -166,11 +171,9 @@ export default function ItineraryPage({ params }: PageProps) {
     }
   }, [user, authLoading, resolvedParams.id, router]);
 
-  // Convertir les données en points pour la carte
   const mapPoints: MapPoint[] = itinerary?.selected_variant?.days?.flatMap((day) => {
     const points: MapPoint[] = [];
 
-    // Activités
     day.activities?.forEach((activity, actIndex) => {
       if (activity.coordinates) {
         points.push({
@@ -179,72 +182,28 @@ export default function ItineraryPage({ params }: PageProps) {
           type: 'activity',
           coordinates: activity.coordinates,
           day: day.day,
-          period: activity.time || `Activité ${actIndex + 1}`,
+          period: activity.time || `Activite ${actIndex + 1}`,
         });
       }
     });
 
-    // Repas
     if (day.meals?.breakfast?.coordinates) {
-      points.push({
-        id: `day-${day.day}-breakfast`,
-        name: day.meals.breakfast.restaurant || 'Petit-déjeuner',
-        type: 'restaurant',
-        coordinates: day.meals.breakfast.coordinates,
-        day: day.day,
-        period: 'Petit-déjeuner',
-      });
+      points.push({ id: `day-${day.day}-breakfast`, name: day.meals.breakfast.restaurant || 'Petit-dejeuner', type: 'restaurant', coordinates: day.meals.breakfast.coordinates, day: day.day, period: 'Petit-dejeuner' });
     }
     if (day.meals?.lunch?.coordinates) {
-      points.push({
-        id: `day-${day.day}-lunch`,
-        name: day.meals.lunch.restaurant || 'Déjeuner',
-        type: 'restaurant',
-        coordinates: day.meals.lunch.coordinates,
-        day: day.day,
-        period: 'Déjeuner',
-      });
+      points.push({ id: `day-${day.day}-lunch`, name: day.meals.lunch.restaurant || 'Dejeuner', type: 'restaurant', coordinates: day.meals.lunch.coordinates, day: day.day, period: 'Dejeuner' });
     }
     if (day.meals?.dinner?.coordinates) {
-      points.push({
-        id: `day-${day.day}-dinner`,
-        name: day.meals.dinner.restaurant || 'Dîner',
-        type: 'restaurant',
-        coordinates: day.meals.dinner.coordinates,
-        day: day.day,
-        period: 'Dîner',
-      });
+      points.push({ id: `day-${day.day}-dinner`, name: day.meals.dinner.restaurant || 'Diner', type: 'restaurant', coordinates: day.meals.dinner.coordinates, day: day.day, period: 'Diner' });
     }
 
-    // Hébergement
     if (day.accommodation?.coordinates) {
-      points.push({
-        id: `day-${day.day}-accommodation`,
-        name: day.accommodation.name || 'Hébergement',
-        type: 'accommodation',
-        coordinates: day.accommodation.coordinates,
-        day: day.day,
-        period: 'Hébergement',
-      });
+      points.push({ id: `day-${day.day}-accommodation`, name: day.accommodation.name || 'Hebergement', type: 'accommodation', coordinates: day.accommodation.coordinates, day: day.day, period: 'Hebergement' });
     }
 
     return points;
   }) || [];
 
-  // Toggle jour
-  const toggleDay = useCallback((dayNum: number) => {
-    setExpandedDays((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(dayNum)) {
-        newSet.delete(dayNum);
-      } else {
-        newSet.add(dayNum);
-      }
-      return newSet;
-    });
-  }, []);
-
-  // Gestion du clic sur un point
   const handlePointClick = useCallback((pointId: string) => {
     setSelectedPointId(pointId);
     const element = document.getElementById(pointId);
@@ -253,52 +212,46 @@ export default function ItineraryPage({ params }: PageProps) {
     }
   }, []);
 
-  // Calcul des modifications
   const isUnlimited = itinerary?.offer_type === 'conciergerie' && itinerary?.modifications_remaining === -1;
   const canModify = isUnlimited || (itinerary?.modifications_remaining ?? 0) > 0;
 
-  // Loading
   if (authLoading || loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] pt-32">
         <FontAwesomeIcon icon={faSpinner} className="animate-spin text-4xl text-primary mb-4" />
-        <p className="text-muted-foreground">Chargement de l&apos;itinéraire...</p>
+        <p className="text-muted-foreground">Chargement de l&apos;itineraire...</p>
       </div>
     );
   }
 
-  // Error
   if (error) {
     return (
       <div className="container mx-auto px-4 py-16 pt-32 max-w-2xl">
-        <div className="bg-card p-8 rounded-xl border-2 border-destructive/30 text-center">
+        <div className="bg-card p-8 rounded-2xl border border-destructive/20 shadow-[0_2px_12px_rgba(0,0,0,0.06)] text-center">
           <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <FontAwesomeIcon icon={faExclamationTriangle} className="text-destructive text-2xl" />
           </div>
           <h1 className="text-xl font-bold text-destructive mb-2">Erreur</h1>
           <p className="text-muted-foreground mb-6">{error}</p>
-          <Link
-            href="/profil"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90"
-          >
-            <FontAwesomeIcon icon={faArrowLeft} />
-            Retour au profil
-          </Link>
+          <Button asChild>
+            <Link href="/profil">
+              <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
+              Retour au profil
+            </Link>
+          </Button>
         </div>
       </div>
     );
   }
 
-  if (!itinerary) {
-    return null;
-  }
+  if (!itinerary) return null;
 
   const { selected_variant } = itinerary;
 
   return (
-    <div className="min-h-screen bg-muted">
-      {/* Header sticky sous la navbar principale */}
-      <div className="bg-card border-b sticky top-32 z-20">
+    <div className="min-h-screen bg-[hsl(var(--warm-bg))]">
+      {/* Sticky header */}
+      <div className="backdrop-blur-sm bg-card/95 border-b border-border/50 sticky top-32 z-20">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -310,23 +263,22 @@ export default function ItineraryPage({ params }: PageProps) {
                 <span className="hidden sm:inline">Retour au profil</span>
               </Link>
               <div className="h-6 w-px bg-border" />
-              <h1 className="font-bold text-lg text-primary truncate max-w-[200px] sm:max-w-none">
-                {selected_variant?.title || 'Mon Itinéraire'}
+              <h1 className="font-bold text-lg text-foreground truncate max-w-[200px] sm:max-w-none">
+                {selected_variant?.title || 'Mon Itineraire'}
               </h1>
             </div>
 
-            {/* Badge modifications */}
-            <div className="flex items-center gap-2 px-4 py-2 bg-accent/20 rounded-lg border border-accent/40">
-              <FontAwesomeIcon icon={faEdit} className="text-accent w-4 h-4" />
-              <span className="text-sm text-foreground">
+            <Badge variant="recommended" className="px-3 py-1.5 flex items-center gap-2">
+              <FontAwesomeIcon icon={faEdit} className="w-3 h-3" />
+              <span className="text-xs">
                 Modifications :{' '}
                 {isUnlimited ? (
-                  <FontAwesomeIcon icon={faInfinity} className="w-4 h-4" />
+                  <FontAwesomeIcon icon={faInfinity} className="w-3 h-3" />
                 ) : (
                   <span className="font-bold">{itinerary.modifications_remaining}</span>
                 )}
               </span>
-            </div>
+            </Badge>
           </div>
         </div>
       </div>
@@ -335,313 +287,299 @@ export default function ItineraryPage({ params }: PageProps) {
       <div className="container mx-auto px-4 py-8">
         {/* Description */}
         {selected_variant?.description && (
-          <div className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-xl">
+          <motion.div
+            {...fadeInUp}
+            className="mb-6 p-4 bg-primary/5 border-l-4 border-primary rounded-xl"
+          >
             <p className="text-primary">{selected_variant.description}</p>
-          </div>
+          </motion.div>
         )}
 
-        {/* Carte */}
+        {/* Map */}
         {mapPoints.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-primary mb-4">Carte de votre itinéraire</h2>
-            <ItineraryMap
-              points={mapPoints}
-              selectedPointId={selectedPointId}
-              onPointClick={handlePointClick}
-            />
+          <motion.div {...fadeInUp} className="mb-8">
+            <h2 className="text-xl font-bold text-foreground mb-4">Carte de votre itineraire</h2>
+            <div className="rounded-2xl overflow-hidden border border-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+              <ItineraryMap
+                points={mapPoints}
+                selectedPointId={selectedPointId}
+                onPointClick={handlePointClick}
+              />
+            </div>
             <p className="text-sm text-muted-foreground mt-2 text-center">
-              Cliquez sur un marqueur pour voir les détails
+              Cliquez sur un marqueur pour voir les details
             </p>
-          </div>
+          </motion.div>
         )}
 
-        {/* Liste des jours */}
+        {/* Day-by-day program */}
         <div className="space-y-4">
-          <h2 className="text-xl font-bold text-primary">Votre programme jour par jour</h2>
+          <h2 className="text-xl font-bold text-foreground">Votre programme jour par jour</h2>
 
           {selected_variant?.days && selected_variant.days.length > 0 ? (
-            selected_variant.days.map((day) => (
-              <div key={day.day} className="border-2 border-primary/20 rounded-xl overflow-hidden">
-                {/* Header du jour */}
-                <button
-                  onClick={() => toggleDay(day.day)}
-                  className="w-full p-4 bg-primary/5 border-l-4 border-primary flex items-center justify-between hover:bg-primary/10 transition-colors"
+            <Accordion type="multiple" defaultValue={['day-1']}>
+              {selected_variant.days.map((day) => (
+                <AccordionItem
+                  key={day.day}
+                  value={`day-${day.day}`}
+                  className="border border-border/50 rounded-2xl mb-4 overflow-hidden bg-card shadow-[0_1px_3px_rgba(0,0,0,0.04)] data-[state=open]:shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-shadow"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="bg-primary text-white text-sm font-bold px-3 py-1 rounded-full">
-                      Jour {day.day}
-                    </span>
-                    {day.location && (
-                      <span className="font-semibold text-primary">{day.location}</span>
-                    )}
-                    {day.title && day.title !== 'description' && day.title !== 'jours' && (
-                      <span className="text-muted-foreground text-sm">{day.title}</span>
-                    )}
-                  </div>
-                  <FontAwesomeIcon
-                    icon={expandedDays.has(day.day) ? faChevronUp : faChevronDown}
-                    className="text-primary w-4 h-4"
-                  />
-                </button>
+                  <AccordionTrigger className="px-4 py-4 bg-primary/5 hover:bg-primary/8 hover:no-underline border-l-4 border-primary [&>svg]:text-primary">
+                    <div className="flex items-center gap-3">
+                      <span className="bg-primary text-white text-sm font-bold px-3 py-1 rounded-full">
+                        Jour {day.day}
+                      </span>
+                      {day.location && (
+                        <span className="font-semibold text-foreground">{day.location}</span>
+                      )}
+                      {day.title && day.title !== 'description' && day.title !== 'jours' && (
+                        <span className="text-muted-foreground text-sm hidden sm:inline">{day.title}</span>
+                      )}
+                    </div>
+                  </AccordionTrigger>
 
-                {/* Contenu du jour */}
-                {expandedDays.has(day.day) && (
-                  <div className="p-4 space-y-4">
-                    {/* Transport */}
-                    {day.transport?.method && (
-                      <div
-                        id={`day-${day.day}-transport`}
-                        className="p-4 rounded-lg bg-primary/10 border border-primary/30"
-                      >
-                        <div className="flex items-center gap-2 mb-2">
-                          <FontAwesomeIcon icon={faBus} className="text-primary w-4 h-4" />
-                          <span className="font-semibold text-primary">Transport</span>
+                  <AccordionContent className="px-4 pt-4 pb-2">
+                    <div className="space-y-4">
+                      {/* Transport */}
+                      {day.transport?.method && (
+                        <div
+                          id={`day-${day.day}-transport`}
+                          className="p-4 rounded-xl bg-primary/5 border-l-2 border-primary/30"
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <FontAwesomeIcon icon={faBus} className="text-primary w-4 h-4" />
+                            <span className="font-semibold text-foreground">Transport</span>
+                          </div>
+                          <p className="text-foreground">{day.transport.method}</p>
+                          {day.transport.from && day.transport.to && (
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {day.transport.from} → {day.transport.to}
+                            </p>
+                          )}
+                          <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
+                            {day.transport.duration && <span>⏱ {day.transport.duration}</span>}
+                            {day.transport.cost && <span>💰 {day.transport.cost}</span>}
+                            {day.transport.times && <span>🕐 Departs: {day.transport.times}</span>}
+                          </div>
+                          {day.transport.coordinates && (
+                            <a
+                              href={`https://maps.google.com/?q=${day.transport.coordinates.lat},${day.transport.coordinates.lng}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 mt-2 text-xs text-primary hover:underline"
+                            >
+                              <FontAwesomeIcon icon={faMapMarkerAlt} className="w-3 h-3" />
+                              Voir sur Google Maps
+                            </a>
+                          )}
                         </div>
-                        <p className="text-foreground">{day.transport.method}</p>
-                        {day.transport.from && day.transport.to && (
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {day.transport.from} → {day.transport.to}
-                          </p>
-                        )}
-                        <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
-                          {day.transport.duration && <span>⏱ {day.transport.duration}</span>}
-                          {day.transport.cost && <span>💰 {day.transport.cost}</span>}
-                          {day.transport.times && <span>🕐 Départs: {day.transport.times}</span>}
-                        </div>
-                        {day.transport.coordinates && (
-                          <a
-                            href={`https://maps.google.com/?q=${day.transport.coordinates.lat},${day.transport.coordinates.lng}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 mt-2 text-xs text-primary hover:underline"
-                          >
-                            <FontAwesomeIcon icon={faMapMarkerAlt} className="w-3 h-3" />
-                            Voir sur Google Maps
-                          </a>
-                        )}
-                      </div>
-                    )}
+                      )}
 
-                    {/* Activités */}
-                    {day.activities && day.activities.length > 0 && (
-                      <div className="space-y-3">
-                        <h4 className="font-semibold text-primary flex items-center gap-2">
-                          <FontAwesomeIcon icon={faSun} className="w-4 h-4" />
-                          Programme du jour
-                        </h4>
-                        {day.activities.map((activity, actIndex) => (
-                          <div
-                            key={actIndex}
-                            id={`day-${day.day}-act-${actIndex}`}
-                            className={`p-4 rounded-lg transition-all duration-200 ${
-                              selectedPointId === `day-${day.day}-act-${actIndex}`
-                                ? 'bg-primary/10 ring-2 ring-primary'
-                                : 'bg-muted hover:bg-muted/80'
-                            }`}
-                          >
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="flex-1">
-                                {activity.time && (
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <FontAwesomeIcon icon={faClock} className="text-accent w-3 h-3" />
-                                    <span className="text-sm text-muted-foreground">{activity.time}</span>
+                      {/* Activities */}
+                      {day.activities && day.activities.length > 0 && (
+                        <div className="space-y-3">
+                          <h4 className="font-semibold text-foreground flex items-center gap-2">
+                            <FontAwesomeIcon icon={faSun} className="w-4 h-4 text-yellow-500" />
+                            Programme du jour
+                          </h4>
+                          {day.activities.map((activity, actIndex) => (
+                            <div
+                              key={actIndex}
+                              id={`day-${day.day}-act-${actIndex}`}
+                              className={`p-4 rounded-xl border-l-2 border-yellow-300 transition-all duration-200 ${
+                                selectedPointId === `day-${day.day}-act-${actIndex}`
+                                  ? 'bg-primary/10 ring-2 ring-primary'
+                                  : 'bg-muted/50 hover:bg-muted hover:shadow-[0_1px_3px_rgba(0,0,0,0.06)]'
+                              }`}
+                            >
+                              <div className="flex items-start justify-between gap-4">
+                                <div className="flex-1">
+                                  {activity.time && (
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <FontAwesomeIcon icon={faClock} className="text-accent w-3 h-3" />
+                                      <span className="text-sm text-muted-foreground">{activity.time}</span>
+                                    </div>
+                                  )}
+                                  <h5 className="font-semibold text-foreground">{activity.name}</h5>
+                                  {activity.description && activity.description !== activity.name && (
+                                    <p className="text-sm text-muted-foreground mt-1">{activity.description}</p>
+                                  )}
+                                  {activity.coordinates && (
+                                    <a
+                                      href={`https://maps.google.com/?q=${activity.coordinates.lat},${activity.coordinates.lng}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1 mt-2 text-xs text-primary hover:underline"
+                                    >
+                                      <FontAwesomeIcon icon={faMapMarkerAlt} className="w-3 h-3" />
+                                      Voir sur Google Maps
+                                    </a>
+                                  )}
+                                </div>
+                                {canModify ? (
+                                  <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-accent/15 text-primary hover:bg-accent/25 transition-colors text-sm font-medium"
+                                    onClick={() => alert('Fonctionnalite de modification a venir')}
+                                  >
+                                    <FontAwesomeIcon icon={faPencil} className="w-3 h-3" />
+                                    <span className="hidden sm:inline">Modifier</span>
+                                  </motion.button>
+                                ) : (
+                                  <div className="relative group">
+                                    <button disabled className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted text-muted-foreground cursor-not-allowed text-sm">
+                                      <FontAwesomeIcon icon={faLock} className="w-3 h-3" />
+                                    </button>
+                                    <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-foreground text-background text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                      Passez en Premium pour modifier
+                                    </div>
                                   </div>
                                 )}
-                                <h5 className="font-semibold text-foreground">{activity.name}</h5>
-                                {activity.description && activity.description !== activity.name && (
-                                  <p className="text-sm text-muted-foreground mt-1">{activity.description}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Meals */}
+                      {(day.meals?.breakfast || day.meals?.lunch || day.meals?.dinner) && (
+                        <div className="space-y-3">
+                          <h4 className="font-semibold text-foreground flex items-center gap-2">
+                            <FontAwesomeIcon icon={faUtensils} className="w-4 h-4 text-orange-400" />
+                            Ou manger
+                          </h4>
+                          <div className="grid gap-3 sm:grid-cols-3">
+                            {day.meals?.breakfast?.restaurant && (
+                              <div
+                                id={`day-${day.day}-breakfast`}
+                                className={`p-3 rounded-xl border-l-2 border-orange-300 ${
+                                  selectedPointId === `day-${day.day}-breakfast`
+                                    ? 'bg-accent/20 ring-2 ring-accent'
+                                    : 'bg-accent/5 hover:bg-accent/10'
+                                } transition-all`}
+                              >
+                                <p className="text-xs text-muted-foreground mb-1">☀️ Petit-dejeuner</p>
+                                <p className="font-medium text-foreground">{day.meals.breakfast.restaurant}</p>
+                                {day.meals.breakfast.dish && (
+                                  <p className="text-sm text-muted-foreground">{day.meals.breakfast.dish}</p>
                                 )}
-                                {activity.coordinates && (
-                                  <a
-                                    href={`https://maps.google.com/?q=${activity.coordinates.lat},${activity.coordinates.lng}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 mt-2 text-xs text-primary hover:underline"
-                                  >
-                                    <FontAwesomeIcon icon={faMapMarkerAlt} className="w-3 h-3" />
-                                    Voir sur Google Maps
+                                {day.meals.breakfast.cost && (
+                                  <p className="text-xs text-accent mt-1">{day.meals.breakfast.cost}</p>
+                                )}
+                                {day.meals.breakfast.coordinates && (
+                                  <a href={`https://maps.google.com/?q=${day.meals.breakfast.coordinates.lat},${day.meals.breakfast.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-1 text-xs text-primary hover:underline">
+                                    <FontAwesomeIcon icon={faMapMarkerAlt} className="w-2 h-2" /> Maps
                                   </a>
                                 )}
                               </div>
-                              {canModify ? (
-                                <button
-                                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-accent/20 text-primary hover:bg-accent transition-colors text-sm font-medium"
-                                  onClick={() => alert('Fonctionnalité de modification à venir')}
-                                >
-                                  <FontAwesomeIcon icon={faPencil} className="w-3 h-3" />
-                                  <span className="hidden sm:inline">Modifier</span>
-                                </button>
-                              ) : (
-                                <div className="relative group">
-                                  <button disabled className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted text-muted-foreground cursor-not-allowed text-sm">
-                                    <FontAwesomeIcon icon={faLock} className="w-3 h-3" />
-                                  </button>
-                                  <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-foreground text-background text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                    Passez en Premium pour modifier
-                                  </div>
-                                </div>
-                              )}
-                            </div>
+                            )}
+                            {day.meals?.lunch?.restaurant && (
+                              <div
+                                id={`day-${day.day}-lunch`}
+                                className={`p-3 rounded-xl border-l-2 border-orange-300 ${
+                                  selectedPointId === `day-${day.day}-lunch`
+                                    ? 'bg-accent/20 ring-2 ring-accent'
+                                    : 'bg-accent/5 hover:bg-accent/10'
+                                } transition-all`}
+                              >
+                                <p className="text-xs text-muted-foreground mb-1">🌤 Dejeuner</p>
+                                <p className="font-medium text-foreground">{day.meals.lunch.restaurant}</p>
+                                {day.meals.lunch.dish && (
+                                  <p className="text-sm text-muted-foreground">{day.meals.lunch.dish}</p>
+                                )}
+                                {day.meals.lunch.cost && (
+                                  <p className="text-xs text-accent mt-1">{day.meals.lunch.cost}</p>
+                                )}
+                                {day.meals.lunch.coordinates && (
+                                  <a href={`https://maps.google.com/?q=${day.meals.lunch.coordinates.lat},${day.meals.lunch.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-1 text-xs text-primary hover:underline">
+                                    <FontAwesomeIcon icon={faMapMarkerAlt} className="w-2 h-2" /> Maps
+                                  </a>
+                                )}
+                              </div>
+                            )}
+                            {day.meals?.dinner?.restaurant && (
+                              <div
+                                id={`day-${day.day}-dinner`}
+                                className={`p-3 rounded-xl border-l-2 border-orange-300 ${
+                                  selectedPointId === `day-${day.day}-dinner`
+                                    ? 'bg-accent/20 ring-2 ring-accent'
+                                    : 'bg-accent/5 hover:bg-accent/10'
+                                } transition-all`}
+                              >
+                                <p className="text-xs text-muted-foreground mb-1">🌙 Diner</p>
+                                <p className="font-medium text-foreground">{day.meals.dinner.restaurant}</p>
+                                {day.meals.dinner.dish && (
+                                  <p className="text-sm text-muted-foreground">{day.meals.dinner.dish}</p>
+                                )}
+                                {day.meals.dinner.cost && (
+                                  <p className="text-xs text-accent mt-1">{day.meals.dinner.cost}</p>
+                                )}
+                                {day.meals.dinner.coordinates && (
+                                  <a href={`https://maps.google.com/?q=${day.meals.dinner.coordinates.lat},${day.meals.dinner.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-1 text-xs text-primary hover:underline">
+                                    <FontAwesomeIcon icon={faMapMarkerAlt} className="w-2 h-2" /> Maps
+                                  </a>
+                                )}
+                              </div>
+                            )}
                           </div>
-                        ))}
-                      </div>
-                    )}
+                        </div>
+                      )}
 
-                    {/* Repas */}
-                    {(day.meals?.breakfast || day.meals?.lunch || day.meals?.dinner) && (
-                      <div className="space-y-3">
-                        <h4 className="font-semibold text-accent flex items-center gap-2">
-                          <FontAwesomeIcon icon={faUtensils} className="w-4 h-4" />
-                          Où manger
-                        </h4>
-                        <div className="grid gap-3 sm:grid-cols-3">
-                          {day.meals?.breakfast?.restaurant && (
-                            <div
-                              id={`day-${day.day}-breakfast`}
-                              className={`p-3 rounded-lg ${
-                                selectedPointId === `day-${day.day}-breakfast`
-                                  ? 'bg-accent/30 ring-2 ring-accent'
-                                  : 'bg-accent/10'
-                              }`}
+                      {/* Accommodation */}
+                      {day.accommodation?.name && (
+                        <div
+                          id={`day-${day.day}-accommodation`}
+                          className={`p-4 rounded-xl border-l-2 border-green-300 ${
+                            selectedPointId === `day-${day.day}-accommodation`
+                              ? 'bg-green-100/50 ring-2 ring-green-400'
+                              : 'bg-green-50/50 hover:bg-green-100/30'
+                          } transition-all`}
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <FontAwesomeIcon icon={faBed} className="text-green-600 w-4 h-4" />
+                            <span className="font-semibold text-foreground">Hebergement</span>
+                          </div>
+                          <p className="font-medium text-foreground">{day.accommodation.name}</p>
+                          <div className="flex gap-4 mt-1 text-sm text-muted-foreground">
+                            {day.accommodation.type && <span>{day.accommodation.type}</span>}
+                            {day.accommodation.cost && <span>💰 {day.accommodation.cost}/nuit</span>}
+                          </div>
+                          {day.accommodation.coordinates && (
+                            <a
+                              href={`https://maps.google.com/?q=${day.accommodation.coordinates.lat},${day.accommodation.coordinates.lng}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 mt-2 text-xs text-primary hover:underline"
                             >
-                              <p className="text-xs text-accent mb-1">☀️ Petit-déjeuner</p>
-                              <p className="font-medium text-foreground">{day.meals.breakfast.restaurant}</p>
-                              {day.meals.breakfast.dish && (
-                                <p className="text-sm text-muted-foreground">{day.meals.breakfast.dish}</p>
-                              )}
-                              {day.meals.breakfast.cost && (
-                                <p className="text-xs text-accent mt-1">{day.meals.breakfast.cost}</p>
-                              )}
-                              {day.meals.breakfast.coordinates && (
-                                <a
-                                  href={`https://maps.google.com/?q=${day.meals.breakfast.coordinates.lat},${day.meals.breakfast.coordinates.lng}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 mt-1 text-xs text-accent hover:underline"
-                                >
-                                  <FontAwesomeIcon icon={faMapMarkerAlt} className="w-2 h-2" />
-                                  Maps
-                                </a>
-                              )}
-                            </div>
-                          )}
-                          {day.meals?.lunch?.restaurant && (
-                            <div
-                              id={`day-${day.day}-lunch`}
-                              className={`p-3 rounded-lg ${
-                                selectedPointId === `day-${day.day}-lunch`
-                                  ? 'bg-accent/30 ring-2 ring-accent'
-                                  : 'bg-accent/10'
-                              }`}
-                            >
-                              <p className="text-xs text-accent mb-1">🌤 Déjeuner</p>
-                              <p className="font-medium text-foreground">{day.meals.lunch.restaurant}</p>
-                              {day.meals.lunch.dish && (
-                                <p className="text-sm text-muted-foreground">{day.meals.lunch.dish}</p>
-                              )}
-                              {day.meals.lunch.cost && (
-                                <p className="text-xs text-accent mt-1">{day.meals.lunch.cost}</p>
-                              )}
-                              {day.meals.lunch.coordinates && (
-                                <a
-                                  href={`https://maps.google.com/?q=${day.meals.lunch.coordinates.lat},${day.meals.lunch.coordinates.lng}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 mt-1 text-xs text-accent hover:underline"
-                                >
-                                  <FontAwesomeIcon icon={faMapMarkerAlt} className="w-2 h-2" />
-                                  Maps
-                                </a>
-                              )}
-                            </div>
-                          )}
-                          {day.meals?.dinner?.restaurant && (
-                            <div
-                              id={`day-${day.day}-dinner`}
-                              className={`p-3 rounded-lg ${
-                                selectedPointId === `day-${day.day}-dinner`
-                                  ? 'bg-accent/30 ring-2 ring-accent'
-                                  : 'bg-accent/10'
-                              }`}
-                            >
-                              <p className="text-xs text-accent mb-1">🌙 Dîner</p>
-                              <p className="font-medium text-foreground">{day.meals.dinner.restaurant}</p>
-                              {day.meals.dinner.dish && (
-                                <p className="text-sm text-muted-foreground">{day.meals.dinner.dish}</p>
-                              )}
-                              {day.meals.dinner.cost && (
-                                <p className="text-xs text-accent mt-1">{day.meals.dinner.cost}</p>
-                              )}
-                              {day.meals.dinner.coordinates && (
-                                <a
-                                  href={`https://maps.google.com/?q=${day.meals.dinner.coordinates.lat},${day.meals.dinner.coordinates.lng}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1 mt-1 text-xs text-accent hover:underline"
-                                >
-                                  <FontAwesomeIcon icon={faMapMarkerAlt} className="w-2 h-2" />
-                                  Maps
-                                </a>
-                              )}
-                            </div>
+                              <FontAwesomeIcon icon={faMapMarkerAlt} className="w-3 h-3" />
+                              Voir sur Google Maps
+                            </a>
                           )}
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* Hébergement */}
-                    {day.accommodation?.name && (
-                      <div
-                        id={`day-${day.day}-accommodation`}
-                        className={`p-4 rounded-lg ${
-                          selectedPointId === `day-${day.day}-accommodation`
-                            ? 'bg-secondary/30 ring-2 ring-secondary'
-                            : 'bg-secondary/10'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-2">
-                          <FontAwesomeIcon icon={faBed} className="text-secondary w-4 h-4" />
-                          <span className="font-semibold text-foreground">Hébergement</span>
-                        </div>
-                        <p className="font-medium text-foreground">{day.accommodation.name}</p>
-                        <div className="flex gap-4 mt-1 text-sm text-muted-foreground">
-                          {day.accommodation.type && <span>{day.accommodation.type}</span>}
-                          {day.accommodation.cost && <span>💰 {day.accommodation.cost}/nuit</span>}
-                        </div>
-                        {day.accommodation.coordinates && (
-                          <a
-                            href={`https://maps.google.com/?q=${day.accommodation.coordinates.lat},${day.accommodation.coordinates.lng}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 mt-2 text-xs text-secondary hover:underline"
-                          >
-                            <FontAwesomeIcon icon={faMapMarkerAlt} className="w-3 h-3" />
-                            Voir sur Google Maps
-                          </a>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Message si rien */}
-                    {!day.activities?.length && !day.meals?.breakfast && !day.meals?.lunch && !day.meals?.dinner && !day.accommodation?.name && !day.transport?.method && (
-                      <p className="text-muted-foreground italic text-center py-4">
-                        Aucune activité prévue pour ce jour
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))
+                      {/* Empty day */}
+                      {!day.activities?.length && !day.meals?.breakfast && !day.meals?.lunch && !day.meals?.dinner && !day.accommodation?.name && !day.transport?.method && (
+                        <p className="text-muted-foreground italic text-center py-4">
+                          Aucune activite prevue pour ce jour
+                        </p>
+                      )}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
-              <p>Aucun jour planifié dans cet itinéraire.</p>
+              <p>Aucun jour planifie dans cet itineraire.</p>
             </div>
           )}
         </div>
 
         {/* Tips */}
         {selected_variant?.tips && selected_variant.tips.length > 0 && (
-          <div className="mt-8 p-6 bg-accent/10 border border-accent/30 rounded-xl">
+          <motion.div {...fadeInUp} className="mt-8 p-6 bg-accent/5 border border-accent/20 rounded-2xl">
             <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
               <FontAwesomeIcon icon={faLightbulb} className="text-accent" />
               Conseils pour votre voyage
@@ -654,26 +592,26 @@ export default function ItineraryPage({ params }: PageProps) {
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
         )}
 
-        {/* Info modifications Express */}
+        {/* Upgrade CTA for Express */}
         {!canModify && itinerary.offer_type === 'express' && (
-          <div className="mt-8 p-6 bg-primary/10 border border-primary/30 rounded-xl text-center">
+          <motion.div {...fadeInUp} className="mt-8 p-6 bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/20 rounded-2xl text-center">
             <h3 className="font-semibold text-foreground mb-2">
-              Envie de personnaliser votre itinéraire ?
+              Envie de personnaliser votre itineraire ?
             </h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Avec l&apos;offre Express, vous ne pouvez pas modifier votre itinéraire.
-              Passez en Premium ou Conciergerie pour bénéficier de modifications.
+              Avec l&apos;offre Express, vous ne pouvez pas modifier votre itineraire.
+              Passez en Premium ou Conciergerie pour beneficier de modifications.
             </p>
-            <Link
-              href="/itineraire-personnalise-pour-les-philippines"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90"
-            >
-              Voir les offres
-            </Link>
-          </div>
+            <Button asChild size="lg">
+              <Link href="/itineraire-personnalise-pour-les-philippines">
+                Voir les offres
+                <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
+              </Link>
+            </Button>
+          </motion.div>
         )}
       </div>
     </div>
