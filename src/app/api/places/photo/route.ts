@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
+const PLACES_API_BASE = 'https://places.googleapis.com/v1';
 
-// Cache photos in memory to avoid repeated API calls (resets on deploy)
-const photoCache = new Map<string, { url: string; expiry: number }>();
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24h
+// Cache photos in memory (resets on deploy)
+const photoCache = new Map<string, { url: string | null; expiry: number }>();
+const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (!GOOGLE_PLACES_API_KEY) {
-    return NextResponse.json({ error: 'Google Places API key not configured' }, { status: 500 });
+    return NextResponse.json({ photoUrl: null });
   }
 
   const cacheKey = `${lat},${lng},${name || ''}`;
@@ -27,46 +28,83 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Find nearby place using coordinates + optional name
-    const query = name ? encodeURIComponent(name) : '';
-    const findUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=500&keyword=${query}&key=${GOOGLE_PLACES_API_KEY}`;
+    // Step 1: Find nearby place using Places API (New) - Nearby Search
+    const searchBody = {
+      locationRestriction: {
+        circle: {
+          center: { latitude: parseFloat(lat), longitude: parseFloat(lng) },
+          radius: 1000.0,
+        },
+      },
+      maxResultCount: 5,
+    };
 
-    const findRes = await fetch(findUrl);
-    const findData = await findRes.json();
+    const searchRes = await fetch(`${PLACES_API_BASE}/places:searchNearby`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY,
+        'X-Goog-FieldMask': 'places.displayName,places.photos',
+      },
+      body: JSON.stringify(searchBody),
+    });
 
-    if (!findData.results?.length) {
-      // Fallback: try text search with name
-      if (name) {
-        const textUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(name + ' Philippines')}&location=${lat},${lng}&radius=5000&key=${GOOGLE_PLACES_API_KEY}`;
-        const textRes = await fetch(textUrl);
-        const textData = await textRes.json();
+    const searchData = await searchRes.json();
 
-        if (!textData.results?.length || !textData.results[0].photos?.length) {
-          return NextResponse.json({ photoUrl: null });
+    // Find first place with photos
+    let photoName: string | null = null;
+
+    if (searchData.places?.length) {
+      for (const place of searchData.places) {
+        if (place.photos?.length) {
+          photoName = place.photos[0].name;
+          break;
         }
-
-        const photoRef = textData.results[0].photos[0].photo_reference;
-        const photoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${photoRef}&key=${GOOGLE_PLACES_API_KEY}`;
-
-        photoCache.set(cacheKey, { url: photoUrl, expiry: Date.now() + CACHE_TTL });
-        return NextResponse.json({ photoUrl });
       }
+    }
+
+    // Step 1b: Fallback — text search with name if no nearby results
+    if (!photoName && name) {
+      const textBody = { textQuery: `${name} Philippines` };
+      const textRes = await fetch(`${PLACES_API_BASE}/places:searchText`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY,
+          'X-Goog-FieldMask': 'places.displayName,places.photos',
+        },
+        body: JSON.stringify(textBody),
+      });
+      const textData = await textRes.json();
+
+      if (textData.places?.length) {
+        for (const place of textData.places) {
+          if (place.photos?.length) {
+            photoName = place.photos[0].name;
+            break;
+          }
+        }
+      }
+    }
+
+    if (!photoName) {
+      photoCache.set(cacheKey, { url: null, expiry: Date.now() + CACHE_TTL });
       return NextResponse.json({ photoUrl: null });
     }
 
-    // Get photo from first result that has photos
-    const placeWithPhoto = findData.results.find((r: { photos?: { photo_reference: string }[] }) => r.photos?.length);
-    if (!placeWithPhoto) {
-      return NextResponse.json({ photoUrl: null });
-    }
+    // Step 2: Get photo URL via media endpoint
+    const mediaRes = await fetch(
+      `${PLACES_API_BASE}/${photoName}/media?maxWidthPx=800&skipHttpRedirect=true&key=${GOOGLE_PLACES_API_KEY}`
+    );
+    const mediaData = await mediaRes.json();
 
-    const photoRef = placeWithPhoto.photos[0].photo_reference;
-    const photoUrl = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${photoRef}&key=${GOOGLE_PLACES_API_KEY}`;
-
+    const photoUrl = mediaData.photoUri || null;
     photoCache.set(cacheKey, { url: photoUrl, expiry: Date.now() + CACHE_TTL });
+
     return NextResponse.json({ photoUrl });
   } catch (error) {
     console.error('Google Places API error:', error);
+    photoCache.set(cacheKey, { url: null, expiry: Date.now() + 60000 }); // cache errors 1min
     return NextResponse.json({ photoUrl: null });
   }
 }
