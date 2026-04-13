@@ -2,9 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRocket, faStar, faCrown, faCheck, faArrowRight, faLock, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
-import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/badge';
+import { faRocket, faStar, faCrown, faArrowRight, faLock } from '@fortawesome/free-solid-svg-icons';
+import { Check, AlertTriangle, Infinity, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { fadeInUp, staggerContainer } from './animations';
 import {
@@ -24,23 +23,26 @@ interface OfferSelectionProps {
   onPayment: (offer: OfferType) => void;
 }
 
-const OFFER_ICONS = {
-  express: { icon: faRocket, color: 'text-blue-500' },
-  premium: { icon: faStar, color: 'text-yellow-500' },
-  conciergerie: { icon: faCrown, color: 'text-purple-500' },
+const OFFER_CONFIG = {
+  express: { icon: faRocket, color: 'text-blue-500', accentBg: 'bg-blue-50', accentText: 'text-blue-700' },
+  premium: { icon: faStar, color: 'text-yellow-500', accentBg: 'bg-yellow-50', accentText: 'text-yellow-700' },
+  conciergerie: { icon: faCrown, color: 'text-purple-500', accentBg: 'bg-purple-50', accentText: 'text-purple-700' },
 } as const;
 
 const OFFER_ORDER: OfferType[] = ['express', 'premium', 'conciergerie'];
 
 export function OfferSelection({ selectedOffer, onSelectOffer, currentPricing, duration, onPayment }: OfferSelectionProps) {
   return (
-    <div className="mt-8">
-      <h3 className="text-xl font-semibold mb-6 text-center">
-        Choisissez votre formule pour <span className="text-primary">{DURATION_LABELS[duration]}</span>
+    <div className="mt-10">
+      <h3 className="text-xl font-bold text-foreground mb-2 text-center">
+        Choisissez votre formule
       </h3>
+      <p className="text-muted-foreground text-center mb-8">
+        Pour un sejour de <span className="font-semibold text-primary">{DURATION_LABELS[duration]}</span>
+      </p>
 
       <motion.div
-        className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-4 md:grid md:grid-cols-3 md:gap-8 md:overflow-visible md:snap-none md:pb-0 mt-6"
+        className="grid grid-cols-1 md:grid-cols-3 gap-6"
         variants={staggerContainer}
         initial="initial"
         animate="animate"
@@ -48,7 +50,7 @@ export function OfferSelection({ selectedOffer, onSelectOffer, currentPricing, d
         {OFFER_ORDER.map((offerKey) => {
           const offer = OFFER_LABELS[offerKey];
           const pricing = currentPricing[offerKey];
-          const iconConfig = OFFER_ICONS[offerKey];
+          const config = OFFER_CONFIG[offerKey];
           const isSelected = selectedOffer === offerKey;
           const isPremium = offerKey === 'premium';
 
@@ -56,93 +58,88 @@ export function OfferSelection({ selectedOffer, onSelectOffer, currentPricing, d
             <motion.div
               key={offerKey}
               variants={fadeInUp}
-              whileHover={{ y: -4 }}
-              transition={{ duration: 0.2 }}
-              className="min-w-[280px] snap-center md:min-w-0"
+              onClick={() => onSelectOffer(offerKey)}
+              className={`
+                bg-card rounded-2xl cursor-pointer transition-all duration-200 relative flex flex-col
+                shadow-lg border
+                ${isSelected
+                  ? 'border-primary ring-4 ring-primary/20'
+                  : 'border-border hover:border-primary/40 hover:shadow-xl'
+                }
+              `}
             >
-              <Card
-                onClick={() => onSelectOffer(offerKey)}
-                className={`
-                  cursor-pointer transition-all duration-300 h-full relative overflow-hidden
-                  ${isSelected
-                    ? 'ring-2 ring-primary/40 border-primary shadow-[0_4px_16px_rgba(74,127,214,0.15)]'
-                    : 'border-border/50 hover:border-primary/30 shadow-[0_1px_3px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)]'
-                  }
-                  ${isPremium ? 'md:scale-[1.02]' : ''}
-                `}
-              >
-                {/* Gradient bar for premium */}
-                {isPremium && (
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-accent" />
-                )}
+              {/* Recommended banner for Premium */}
+              {isPremium && (
+                <div className="bg-primary text-primary-foreground text-xs font-semibold px-4 py-2 rounded-t-2xl flex items-center justify-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Recommande
+                </div>
+              )}
 
-                {isPremium && (
-                  <div className="absolute -top-0 left-1/2 transform -translate-x-1/2 translate-y-3 z-10">
-                    <Badge variant="recommended" className="px-4 py-1 shadow-sm">
-                      Recommande
-                    </Badge>
-                  </div>
-                )}
-
-                <CardHeader className={`pb-2 ${isPremium ? 'pt-8' : 'pt-6'}`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <FontAwesomeIcon icon={iconConfig.icon} className={iconConfig.color} />
-                      <span className="font-bold text-lg">{offer.name}</span>
+              <div className={`p-6 flex flex-col flex-1 ${isPremium ? '' : 'pt-6'}`}>
+                {/* Header: icon + name + badge */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className={`w-9 h-9 rounded-full ${config.accentBg} flex items-center justify-center`}>
+                      <FontAwesomeIcon icon={config.icon} className={`${config.color} text-sm`} />
                     </div>
-                    <Badge variant={offerKey === 'express' ? 'express' : offerKey === 'premium' ? 'premium' : 'conciergerie'}>
-                      {offer.badge}
-                    </Badge>
+                    <span className="font-bold text-lg text-foreground">{offer.name}</span>
                   </div>
-                </CardHeader>
+                  <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${config.accentBg} ${config.accentText}`}>
+                    {offer.badge}
+                  </span>
+                </div>
 
-                <CardContent className="space-y-4">
-                  <div>
-                    <p className="text-2xl font-bold text-primary">
-                      {pricing.price > 0 ? formatPrice(pricing.price) : 'Sur devis'}
-                    </p>
-                    <p className="text-sm text-muted-foreground">{offer.description}</p>
-                  </div>
+                {/* Price */}
+                <p className="text-3xl font-bold text-primary mb-1">
+                  {pricing.price > 0 ? formatPrice(pricing.price) : 'Sur devis'}
+                </p>
+                <p className="text-sm text-muted-foreground mb-5">{offer.description}</p>
 
-                  <ul className="space-y-2">
-                    {offer.features.map((feature, idx) => (
-                      <li key={idx} className="text-sm flex items-start gap-2">
-                        <span className="w-4 h-4 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <FontAwesomeIcon icon={faCheck} className="text-green-600 text-[8px]" />
-                        </span>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
+                {/* Features */}
+                <ul className="space-y-2.5 mb-6 flex-1">
+                  {offer.features.map((feature, idx) => (
+                    <li key={idx} className="text-sm text-foreground flex items-start gap-2.5">
+                      <span className="w-4 h-4 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Check className="w-2.5 h-2.5" />
+                      </span>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
 
-                <CardFooter className="pt-0">
+                {/* Modifications info */}
+                <div className="border-t border-border pt-4">
                   {pricing.modifications === 0 ? (
-                    <p className="text-xs text-destructive/80 flex items-center gap-1">
-                      <FontAwesomeIcon icon={faTriangleExclamation} className="text-[10px]" />
+                    <p className="text-sm text-muted-foreground flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-destructive/60" />
                       Aucune modification incluse
                     </p>
                   ) : pricing.modifications === -1 ? (
-                    <Badge variant="success">Modifications illimitees</Badge>
+                    <p className="text-sm text-primary font-medium flex items-center gap-2">
+                      <Infinity className="w-4 h-4" />
+                      Modifications illimitees
+                    </p>
                   ) : (
-                    <Badge variant="success">
+                    <p className="text-sm text-primary font-medium flex items-center gap-2">
+                      <Check className="w-4 h-4" />
                       {pricing.modifications} modification{pricing.modifications > 1 ? 's' : ''} incluse{pricing.modifications > 1 ? 's' : ''}
-                    </Badge>
+                    </p>
                   )}
-                </CardFooter>
-              </Card>
+                </div>
+              </div>
             </motion.div>
           );
         })}
       </motion.div>
 
       {/* Modifications supplementaires */}
-      <div className="mt-6 p-4 bg-muted/50 rounded-xl border border-border/50">
+      <div className="mt-6 p-4 bg-card rounded-xl border border-border">
         <p className="text-sm text-muted-foreground text-center">
-          <strong>Besoin de plus de modifications ?</strong> Ajoutez-en a tout moment :
+          <strong className="text-foreground">Besoin de plus de modifications ?</strong> Ajoutez-en a tout moment :
           {Object.entries(MODIFICATION_PRICES).map(([key, value], idx) => (
             <span key={key}>
-              {idx > 0 && ' |'} {value.description} <strong>{formatPrice(value.price)}</strong>
+              {idx > 0 && ' |'} {value.description} <strong className="text-foreground">{formatPrice(value.price)}</strong>
             </span>
           ))}
         </p>
@@ -163,7 +160,7 @@ export function OfferSelection({ selectedOffer, onSelectOffer, currentPricing, d
             }
           </Button>
         </motion.div>
-        <p className="text-xs text-muted-foreground mt-3 flex items-center justify-center gap-1">
+        <p className="text-xs text-muted-foreground mt-3 flex items-center justify-center gap-1.5">
           <FontAwesomeIcon icon={faLock} className="text-[10px]" />
           Paiement securise par Stripe • Livraison instantanee par email
         </p>
