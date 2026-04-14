@@ -23,11 +23,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Added** : 10 sous-pages vivre-aux-philippines dans le sitemap (logement, visas, banque-assurance, creer-entreprise, emploi-salarie, universites, ecoles-internationales, immobilier, bourse-et-entreprises, famille)
 - **Added** : Schema `VideoObject` automatique — toute video YouTube embedee dans un article genere les donnees structurees pour l'indexation video Google (thumbnail, embedUrl, contentUrl)
 
-### Contact
+### Contact & Email
 - **Added** : Page `/contact` avec formulaire (nom, email, sujet, message) — design Airbnb-style coherent avec le systeme de design existant
 - **Added** : API route `POST /api/contact` — validation des inputs, envoi email via Resend (`noreply@philippineasy.com` → `contact@philippineasy.com`)
 - **Added** : Rate limiting in-memory — max 3 emails par heure par IP
-- **Added** : Alerte Telegram admin apres chaque soumission (bot Philippineasy, non-bloquant)
+- **Added** : Alerte Telegram admin apres chaque soumission (non-bloquant)
+- **Fixed** : Token Telegram supprime du code source (etait expose sur le repo public GitHub) — migre vers variables d'environnement (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`)
+- **Added** : Reception email activee sur Resend — record MX configure sur Vercel DNS (`inbound-smtp.us-east-1.amazonaws.com`)
+- **Added** : Webhook Resend `email.received` + API route `/api/webhooks/resend-inbound` — tout email recu sur `contact@philippineasy.com` est automatiquement forwarde vers Gmail + notification Telegram
 
 ### Itineraire — UX chargement
 - **Added** : Panneau de feedback pendant la generation d'itineraire — 3 messages texte, barre de progression animee, dots animes
