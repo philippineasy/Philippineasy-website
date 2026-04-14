@@ -6,6 +6,39 @@ interface JsonLdProps {
   basePath: string; // e.g., 'voyager-aux-philippines'
 }
 
+/** Extract YouTube video ID from various URL formats */
+const extractYouTubeId = (url: string): string | null => {
+  const patterns = [
+    /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/,
+    /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
+};
+
+/** Extract all YouTube embeds from EditorJS content */
+const extractVideos = (content: string | EditorJSContent) => {
+  if (typeof content === 'string') return [];
+  const videos: { id: string; embedUrl: string; caption?: string }[] = [];
+  for (const block of content?.blocks || []) {
+    if (block.type === 'embed' && block.data?.embed) {
+      const videoId = extractYouTubeId(block.data.embed);
+      if (videoId) {
+        videos.push({
+          id: videoId,
+          embedUrl: block.data.embed,
+          caption: block.data.caption || undefined,
+        });
+      }
+    }
+  }
+  return videos;
+};
+
 const JsonLd = ({ article, basePath }: JsonLdProps) => {
   const extractText = (content: string | EditorJSContent): string => {
     if (typeof content === 'string') {
@@ -22,6 +55,7 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
 
   const description = extractText(article.content);
   const siteUrl = 'https://philippineasy.com';
+  const articleUrl = `${siteUrl}/${basePath}/${article.category?.slug}/${article.slug}`;
 
   // Breadcrumb items pour le JSON-LD
   const breadcrumbItems = [
@@ -40,9 +74,12 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
   ];
 
   const wordCount = description.split(' ').length;
-  const readingTime = Math.ceil(wordCount / 200); // Average reading speed
+  const readingTime = Math.ceil(wordCount / 200);
 
-  const newsArticle = {
+  // Detect YouTube videos in article content
+  const videos = extractVideos(article.content);
+
+  const newsArticle: Record<string, unknown> = {
     '@type': 'NewsArticle',
     headline: article.title,
     image: [article.image],
@@ -72,11 +109,24 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
     inLanguage: 'fr-FR',
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `${siteUrl}/${basePath}/${article.category?.slug}/${article.slug}`,
+      '@id': articleUrl,
     },
     articleSection: article.category?.name,
     keywords: ['Philippines', article.category?.name, article.title].filter(Boolean).join(', '),
   };
+
+  // Add video reference to article if videos are present
+  if (videos.length > 0) {
+    newsArticle.video = videos.map((v) => ({
+      '@type': 'VideoObject',
+      name: v.caption || article.title,
+      description: v.caption || description.substring(0, 200),
+      thumbnailUrl: `https://img.youtube.com/vi/${v.id}/hqdefault.jpg`,
+      uploadDate: article.published_at,
+      embedUrl: v.embedUrl,
+      contentUrl: `https://www.youtube.com/watch?v=${v.id}`,
+    }));
+  }
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -90,6 +140,35 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      {videos.map((v) => (
+        <script
+          key={v.id}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'VideoObject',
+              name: v.caption || article.title,
+              description: v.caption || description.substring(0, 200),
+              thumbnailUrl: [
+                `https://img.youtube.com/vi/${v.id}/maxresdefault.jpg`,
+                `https://img.youtube.com/vi/${v.id}/hqdefault.jpg`,
+              ],
+              uploadDate: article.published_at,
+              embedUrl: v.embedUrl,
+              contentUrl: `https://www.youtube.com/watch?v=${v.id}`,
+              publisher: {
+                '@type': 'Organization',
+                name: "Philippin'Easy",
+                logo: {
+                  '@type': 'ImageObject',
+                  url: `${siteUrl}/logo-philippineasy.png`,
+                },
+              },
+            }),
+          }}
+        />
+      ))}
     </>
   );
 };

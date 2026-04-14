@@ -21,6 +21,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Fixed** : `lastModified` — `currentDate` conservé pour les pages de listing (homepage, actualités, forum, marketplace), dates fixes pour les pages vraiment statiques (CGU, mentions légales, contact, etc.)
 - **Added** : `export const revalidate = 3600` — régénération du sitemap toutes les heures
 - **Added** : 10 sous-pages vivre-aux-philippines dans le sitemap (logement, visas, banque-assurance, creer-entreprise, emploi-salarie, universites, ecoles-internationales, immobilier, bourse-et-entreprises, famille)
+- **Added** : Schema `VideoObject` automatique — toute video YouTube embedee dans un article genere les donnees structurees pour l'indexation video Google (thumbnail, embedUrl, contentUrl)
 
 ### Contact
 - **Added** : Page `/contact` avec formulaire (nom, email, sujet, message) — design Airbnb-style coherent avec le systeme de design existant
