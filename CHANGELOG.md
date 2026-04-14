@@ -5,6 +5,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### SEO — Sitemap (CRITIQUE)
+- **Fixed** : Sitemap cassé — toutes les requêtes dynamiques Supabase échouaient silencieusement (colonnes `updated_at` inexistantes sur 7/8 tables). Google ne voyait que 15 URLs au lieu de ~96, causant une désindexation progressive (34 → 16 pages indexées)
+- **Fixed** : `articles` → `published_at` au lieu de `updated_at`
+- **Fixed** : `categories` → suppression de `updated_at` (pas de timestamp)
+- **Fixed** : `forum_topics` → `last_activity_at` au lieu de `updated_at`
+- **Fixed** : `forum_categories`, `product_categories`, `vendors` → `created_at` au lieu de `updated_at`
+- **Fixed** : `dating_profiles` → `user_id` au lieu de `id` (PK = `user_id`)
+- **Fixed** : `pages` → `created_at` + URL corrigée avec préfixe `section` (avant: `/budget` 404, après: `/voyager-aux-philippines/budget`)
+- **Added** : `/services` et `/contact` dans les pages statiques du sitemap
+- **Removed** : `/connexion` du sitemap (Disallow dans robots.txt)
+- **Added** : Logging `console.error` sur chaque requête Supabase du sitemap
+- **Fixed** : Page 404 — canonical `/404` remplacé par `robots: { index: false }` (une page 404 ne doit pas être indexée)
+
 ### Contact
 - **Added** : Page `/contact` avec formulaire (nom, email, sujet, message) — design Airbnb-style coherent avec le systeme de design existant
 - **Added** : API route `POST /api/contact` — validation des inputs, envoi email via Resend (`noreply@philippineasy.com` → `contact@philippineasy.com`)
