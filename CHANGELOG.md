@@ -17,6 +17,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Removed** : `/connexion` du sitemap (Disallow dans robots.txt)
 - **Added** : Logging `console.error` sur chaque requête Supabase du sitemap
 - **Fixed** : Page 404 — canonical `/404` remplacé par `robots: { index: false }` (une page 404 ne doit pas être indexée)
+- **Fixed** : Suppression du pré-échappement XML (`escapeXml`) sur les URLs — Next.js le fait déjà, risque de double-encodage
+- **Fixed** : `lastModified` des pages statiques — dates réalistes au lieu de `new Date()` à chaque requête
+- **Added** : `export const revalidate = 3600` — régénération du sitemap toutes les heures
+- **Added** : 10 sous-pages vivre-aux-philippines dans le sitemap (logement, visas, banque-assurance, creer-entreprise, emploi-salarie, universites, ecoles-internationales, immobilier, bourse-et-entreprises, famille)
 
 ### Contact
 - **Added** : Page `/contact` avec formulaire (nom, email, sujet, message) — design Airbnb-style coherent avec le systeme de design existant

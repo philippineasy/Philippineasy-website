@@ -1,13 +1,13 @@
 import { MetadataRoute } from 'next';
 import { createBuildClient } from '@/utils/supabase/build-client';
 import { getMainCategoryPath } from '@/lib/utils';
-import { escapeXml, toSeoImage } from '@/lib/sitemap-helpers';
+import { toSeoImage } from '@/lib/sitemap-helpers';
 
 const BASE_URL = 'https://philippineasy.com';
 
 /* ---------- Types ---------- */
 
-// On étend localement pour conserver <image:image> dans l’XML
+// On étend localement pour conserver <image:image> dans l'XML
 type SitemapEntry = {
   url: string;
   lastModified: string;
@@ -16,18 +16,21 @@ type SitemapEntry = {
   images?: string[];
 };
 
+/* ---------- Revalidation ---------- */
+
+export const revalidate = 3600; // Régénérer le sitemap toutes les heures
+
 /* ---------- Route ---------- */
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createBuildClient();
   if (!supabase) return [];
-  const currentDate = new Date().toISOString();
 
-  // Pages statiques
+  // Pages statiques — lastModified ne change que quand le contenu change réellement
   const staticPages: SitemapEntry[] = [
     {
       url: `${BASE_URL}/`,
-      lastModified: currentDate,
+      lastModified: '2026-04-15',
       changeFrequency: 'weekly',
       priority: 1,
       images: [
@@ -35,38 +38,57 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         toSeoImage(`${BASE_URL}/imagesHero/comment-voyager-aux-philippines.webp`, 'hero'),
       ],
     },
-    { url: `${BASE_URL}/actualites-sur-les-philippines`, lastModified: currentDate, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${BASE_URL}/meilleurs-plans-aux-philippines`,   lastModified: currentDate, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${BASE_URL}/actualites-sur-les-philippines`, lastModified: '2026-02-13', changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${BASE_URL}/meilleurs-plans-aux-philippines`,   lastModified: '2026-02-01', changeFrequency: 'weekly', priority: 0.8 },
     {
       url: `${BASE_URL}/vivre-aux-philippines`,
-      lastModified: currentDate,
+      lastModified: '2026-02-10',
       changeFrequency: 'monthly',
       priority: 0.8,
       images: [toSeoImage(`${BASE_URL}/imagesHero/nouveau-depart-aux-philippines.webp`, 'hero')],
     },
     {
       url: `${BASE_URL}/voyager-aux-philippines`,
-      lastModified: currentDate,
+      lastModified: '2026-02-13',
       changeFrequency: 'monthly',
       priority: 0.8,
       images: [toSeoImage(`${BASE_URL}/imagesHero/comment-voyager-aux-philippines.webp`, 'hero')],
     },
-    { url: `${BASE_URL}/forum-sur-les-philippines`,      lastModified: currentDate, changeFrequency: 'daily',  priority: 0.9 },
-    { url: `${BASE_URL}/marketplace-aux-philippines`,     lastModified: currentDate, changeFrequency: 'daily',  priority: 0.9 },
+    { url: `${BASE_URL}/forum-sur-les-philippines`,      lastModified: '2026-04-15', changeFrequency: 'daily',  priority: 0.9 },
+    { url: `${BASE_URL}/marketplace-aux-philippines`,     lastModified: '2026-02-01', changeFrequency: 'daily',  priority: 0.9 },
     {
       url: `${BASE_URL}/rencontre-philippines`,
-      lastModified: currentDate,
+      lastModified: '2026-02-01',
       changeFrequency: 'daily',
       priority: 0.9,
       images: [toSeoImage(`${BASE_URL}/imagesHero/couple-rencontre-aux-philippines.webp`, 'hero')],
     },
-    { url: `${BASE_URL}/services`,                        lastModified: currentDate, changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${BASE_URL}/contact`,                         lastModified: currentDate, changeFrequency: 'yearly',  priority: 0.5 },
-    { url: `${BASE_URL}/application-mobile`,              lastModified: currentDate, changeFrequency: 'yearly', priority: 0.5 },
-    { url: `${BASE_URL}/cgu`,                             lastModified: currentDate, changeFrequency: 'yearly', priority: 0.3 },
-    { url: `${BASE_URL}/confidentialite`,                 lastModified: currentDate, changeFrequency: 'yearly', priority: 0.3 },
-    { url: `${BASE_URL}/mentions-legales`,                lastModified: currentDate, changeFrequency: 'yearly', priority: 0.3 },
-    { url: `${BASE_URL}/itineraire-personnalise-pour-les-philippines`, lastModified: currentDate, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/services`,                        lastModified: '2026-04-15', changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${BASE_URL}/contact`,                         lastModified: '2026-04-15', changeFrequency: 'yearly',  priority: 0.5 },
+    { url: `${BASE_URL}/application-mobile`,              lastModified: '2026-02-01', changeFrequency: 'yearly', priority: 0.5 },
+    { url: `${BASE_URL}/cgu`,                             lastModified: '2026-01-01', changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${BASE_URL}/confidentialite`,                 lastModified: '2026-01-01', changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${BASE_URL}/mentions-legales`,                lastModified: '2026-01-01', changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${BASE_URL}/itineraire-personnalise-pour-les-philippines`, lastModified: '2026-04-15', changeFrequency: 'monthly', priority: 0.7 },
+  ];
+
+  /* ---------- Static: Sous-pages (non couvertes par la table `pages`) ---------- */
+  const subPages: SitemapEntry[] = [
+    // Vivre — S'installer (depth 3)
+    { url: `${BASE_URL}/vivre-aux-philippines/s-installer/logement`,          lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/vivre-aux-philippines/s-installer/visas`,             lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/vivre-aux-philippines/s-installer/banque-assurance`,  lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
+    // Vivre — Travailler (depth 3)
+    { url: `${BASE_URL}/vivre-aux-philippines/travailler/creer-entreprise`,   lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/vivre-aux-philippines/travailler/emploi-salarie`,     lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
+    // Vivre — Étudier (depth 3)
+    { url: `${BASE_URL}/vivre-aux-philippines/etudier/universites`,             lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/vivre-aux-philippines/etudier/ecoles-internationales`,  lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
+    // Vivre — Investir (depth 3)
+    { url: `${BASE_URL}/vivre-aux-philippines/investir/immobilier`,             lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/vivre-aux-philippines/investir/bourse-et-entreprises`,  lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
+    // Vivre — Famille
+    { url: `${BASE_URL}/vivre-aux-philippines/famille`,  lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
   ];
 
   /* ---------- Dynamic: Articles ---------- */
@@ -129,7 +151,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const mainCategoryPath = getMainCategoryPath(main_category);
       return {
         url: `${BASE_URL}/${mainCategoryPath}/${slug}`,
-        lastModified: currentDate,
+        lastModified: '2026-04-15',
         changeFrequency: 'weekly' as const,
         priority: 0.6,
       };
@@ -223,9 +245,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     })) || []);
 
-  /* ---------- Merge + escape ---------- */
-  const allPages = [
+  /* ---------- Merge ---------- */
+  return [
     ...staticPages,
+    ...subPages,
     ...articlePages,
     ...pageImages,
     ...categoryPages,
@@ -235,16 +258,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...productCategoryPages,
     ...vendorPages,
     ...profilePages,
-  ];
-
-  const escapedPages = allPages
-    .filter(Boolean)
-    .map((page) => ({
-      ...page,
-      url: escapeXml(page.url),
-      images: page.images?.map(escapeXml),
-    })) as SitemapEntry[];
-
-  // Next acceptera le champ "images" et générera les balises <image:image>
-  return escapedPages as MetadataRoute.Sitemap;
+  ] as MetadataRoute.Sitemap;
 }
