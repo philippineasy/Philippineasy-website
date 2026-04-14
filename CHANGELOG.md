@@ -5,6 +5,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Contact
+- **Added** : Page `/contact` avec formulaire (nom, email, sujet, message) — design Airbnb-style coherent avec le systeme de design existant
+- **Added** : API route `POST /api/contact` — validation des inputs, envoi email via Resend (`noreply@philippineasy.com` → `contact@philippineasy.com`)
+- **Added** : Rate limiting in-memory — max 3 emails par heure par IP
+- **Added** : Alerte Telegram admin apres chaque soumission (bot Philippineasy, non-bloquant)
+
+### Itineraire — UX chargement
+- **Added** : Panneau de feedback pendant la generation d'itineraire — 3 messages texte, barre de progression animee, dots animes
+- **Changed** : Le bouton "Generer" ne scale plus au hover quand le chargement est actif
+
 ### Itineraire — Validation n8n (boucle Google Places)
 - **Added** : Boucle Split/HTTP/Validate dans le workflow n8n Generator V3
 - **Added** : Chaque lieu valide via Google Places API (coordonnees, rating, Google Maps URL) DANS le workflow n8n

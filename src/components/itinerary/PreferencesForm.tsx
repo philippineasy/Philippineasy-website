@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagic, faLock, faSpinner, faUser, faCompass } from '@fortawesome/free-solid-svg-icons';
 import { CustomSelect, SelectOption } from '@/components/shared/CustomSelect';
@@ -194,7 +194,7 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
             </div>
           ) : (
             <>
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <motion.div whileHover={{ scale: isLoading ? 1 : 1.02 }} whileTap={{ scale: isLoading ? 1 : 0.98 }}>
                 <Button
                   type="button"
                   onClick={handleSubmit}
@@ -209,6 +209,63 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
                   )}
                 </Button>
               </motion.div>
+
+              {/* Loading feedback panel — visible only during generation */}
+              <AnimatePresence>
+                {isLoading && (
+                  <motion.div
+                    key="loading-feedback"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.3 }}
+                    className="mt-6 bg-primary/5 border border-primary/20 rounded-2xl p-6 text-center space-y-3"
+                  >
+                    <p className="text-foreground font-semibold text-base">
+                      Votre itineraire est en cours de creation...
+                    </p>
+                    <p className="text-muted-foreground text-sm leading-relaxed max-w-md mx-auto">
+                      Nos experts IA analysent vos preferences et selectionnent les meilleurs lieux aux Philippines.
+                    </p>
+
+                    {/* Animated progress dots */}
+                    <div className="flex items-center justify-center gap-1.5 py-1">
+                      {[0, 1, 2, 3, 4].map((i) => (
+                        <motion.span
+                          key={i}
+                          className="block w-1.5 h-1.5 rounded-full bg-primary"
+                          animate={{ opacity: [0.25, 1, 0.25] }}
+                          transition={{
+                            duration: 1.4,
+                            repeat: Infinity,
+                            delay: i * 0.18,
+                            ease: 'easeInOut',
+                          }}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Progress bar */}
+                    <div className="w-full bg-primary/10 rounded-full h-1.5 overflow-hidden max-w-xs mx-auto">
+                      <motion.div
+                        className="h-full bg-primary rounded-full"
+                        initial={{ x: '-100%' }}
+                        animate={{ x: '100%' }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: 'easeInOut',
+                        }}
+                      />
+                    </div>
+
+                    <p className="text-muted-foreground text-xs font-medium pt-1">
+                      Veuillez ne pas fermer cette page. Cela peut prendre jusqu&apos;a 1 minute.
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <p className="text-sm text-muted-foreground mt-4">
                 <FontAwesomeIcon icon={faLock} className="mr-1" /> Vos donnees sont utilisees uniquement pour creer votre itineraire.
               </p>
