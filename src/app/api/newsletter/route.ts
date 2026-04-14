@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { sendNewsletterWelcome } from '@/emails/senders/newsletter';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,6 +36,11 @@ export async function POST(request: NextRequest) {
     if (error) {
       throw error;
     }
+
+    // Send welcome email (non-blocking)
+    sendNewsletterWelcome(email.toLowerCase().trim()).catch((err) => {
+      console.error('Newsletter welcome email error:', err);
+    });
 
     return NextResponse.json({ message: 'Inscription réussie !' }, { status: 201 });
   } catch (err) {

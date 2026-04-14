@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
+import { sendItineraryPaymentConfirmation, sendPaymentFailedEmail, sendSubscriptionCancelledEmail } from '@/emails/senders/payment';
+import { getUserEmail } from '@/emails/send';
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -101,16 +103,28 @@ export async function POST(req: NextRequest) {
     }
 
     // Reset dating plan (legacy)
-    const { error } = await supabaseAdmin
+    const { data: cancelledProfile, error } = await supabaseAdmin
       .from('profiles')
       .update({
         plan: 'free',
         stripe_subscription_id: null,
       })
-      .eq('stripe_subscription_id', subscription.id);
+      .eq('stripe_subscription_id', subscription.id)
+      .select('id')
+      .single();
 
     if (error) {
       console.error(`Failed to update plan on subscription deletion for ${subscription.id}:`, error);
+    }
+
+    // Send cancellation email
+    if (cancelledProfile) {
+      const user = await getUserEmail(cancelledProfile.id);
+      if (user) {
+        sendSubscriptionCancelledEmail(user.email, user.name, 'Abonnement Premium').catch((err) =>
+          console.error('Subscription cancelled email error:', err)
+        );
+      }
     }
   }
 
@@ -120,6 +134,24 @@ export async function POST(req: NextRequest) {
   if (event.type === 'invoice.payment_failed') {
     const invoice = event.data.object as Stripe.Invoice;
     console.error(`Payment failed for invoice ${invoice.id}, customer ${invoice.customer}`);
+
+    // Send payment failure email
+    if (invoice.customer) {
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('id, username')
+        .eq('stripe_customer_id', invoice.customer as string)
+        .single();
+
+      if (profile) {
+        const user = await getUserEmail(profile.id);
+        if (user) {
+          sendPaymentFailedEmail(user.email, user.name).catch((err) =>
+            console.error('Payment failed email error:', err)
+          );
+        }
+      }
+    }
   }
 
   return NextResponse.json({ received: true });
@@ -200,6 +232,26 @@ async function handleItineraryPayment(
     }
 
     console.log(`Generation ${generation_id} marked as delivered (auto-profile delivery)`);
+
+    // Send payment confirmation email
+    const { data: generation } = await supabaseAdmin
+      .from('itinerary_generations')
+      .select('user_id, destination, duration_days')
+      .eq('id', generation_id)
+      .single();
+
+    if (generation?.user_id) {
+      const user = await getUserEmail(generation.user_id);
+      if (user) {
+        sendItineraryPaymentConfirmation(
+          user.email,
+          user.name,
+          generation.destination || 'Philippines',
+          generation.duration_days || 7,
+          `${(paymentIntent.amount / 100).toFixed(2)} EUR`,
+        ).catch((err) => console.error('Itinerary payment email error:', err));
+      }
+    }
   } catch (error) {
     console.error('Error processing itinerary payment:', error);
   }

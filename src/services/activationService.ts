@@ -2,6 +2,8 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ServiceType } from '@/types/services';
 import { PACK_ENTITLEMENTS } from '@/types/services';
 import { createEntitlements } from './entitlementService';
+import { sendServicePurchaseConfirmation } from '@/emails/senders/payment';
+import { getUserEmail } from '@/emails/send';
 
 /**
  * Main activation function called after successful payment.
@@ -71,6 +73,27 @@ export async function activateService(supabase: SupabaseClient, purchaseId: stri
 
     // Update customer stats
     await updateCustomerStats(supabase, userId, purchase.amount_paid);
+
+    // Send purchase confirmation email
+    const user = await getUserEmail(userId);
+    if (user) {
+      const entitlementLabels = packConfig
+        ? packConfig.map((e) => {
+            const label = e.feature_type.replace(/_/g, ' ');
+            const qty = e.total_quantity ? `x${e.total_quantity}` : 'illimite';
+            const duration = e.duration_days ? `${e.duration_days}j` : 'permanent';
+            return `${label} (${qty}, ${duration})`;
+          })
+        : [serviceType.replace(/_/g, ' ')];
+
+      sendServicePurchaseConfirmation(
+        user.email,
+        user.name,
+        serviceType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+        `${purchase.amount_paid || 0} EUR`,
+        entitlementLabels,
+      ).catch((err) => console.error('Service purchase email error:', err));
+    }
 
     console.log(`Service activated: ${serviceType} for user ${userId}`);
     return { error: null };

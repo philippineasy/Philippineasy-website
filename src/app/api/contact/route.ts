@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { sendContactAutoReply } from '@/emails/senders/contact';
 
 // ---------------------------------------------------------------------------
 // Lazy-init Resend
@@ -265,6 +266,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         { status: 500 }
       );
     }
+
+    // Send auto-reply to the visitor (non-blocking)
+    sendContactAutoReply(safeEmail, safeName, subject, safeMessage).catch((err: unknown) => {
+      console.error('Contact auto-reply error:', err instanceof Error ? err.message : err);
+    });
 
     // Send Telegram alert (non-blocking — failure does not affect the response)
     sendTelegramAlert(safeName, safeEmail, subject, safeMessage).catch((err: unknown) => {

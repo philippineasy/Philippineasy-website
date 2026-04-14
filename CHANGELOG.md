@@ -5,6 +5,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Systeme d'emails automatiques — Phase 1
+- **Added** : Infrastructure email complete (`src/emails/`) — config, types, templates branded, send unifie, gestion desinscription
+- **Added** : Template HTML brande Philippin'Easy — header bleu #4A7FD6 avec logo, barre accent orange #F5A623, footer avec desinscription
+- **Added** : 8 adresses email separees par fonction (bienvenue@, commandes@, communaute@, newsletter@, equipe@, itineraire@, contact@, noreply@)
+- **Added** : Table `email_preferences` avec gestion opt-out par categorie + token desinscription
+- **Added** : Endpoint `/api/email/unsubscribe` — page branded de confirmation desinscription
+- **Added** : Email #1 — Bienvenue apres inscription (regles du site + features disponibles)
+- **Added** : Email #2 — Confirmation achat service (Buddy, Pack Ultime, etc.) avec details entitlements
+- **Added** : Email #3 — Confirmation paiement itineraire
+- **Added** : Email #4 — Itineraire pret (refactored avec nouveau template)
+- **Added** : Email #5 — Echec de paiement (Stripe invoice.payment_failed)
+- **Added** : Email #6 — Annulation abonnement (Stripe subscription.deleted)
+- **Added** : Email #7 — Auto-reply formulaire contact (confirmation au visiteur)
+- **Added** : Email #8 — Bienvenue newsletter (confirmation inscription)
+- **Changed** : `emailService.ts` refactored — delegue au nouveau systeme `src/emails/`
+
 ### SEO — Sitemap (CRITIQUE)
 - **Fixed** : Sitemap cassé — toutes les requêtes dynamiques Supabase échouaient silencieusement (colonnes `updated_at` inexistantes sur 7/8 tables). Google ne voyait que 15 URLs au lieu de ~96, causant une désindexation progressive (34 → 16 pages indexées)
 - **Fixed** : `articles` → `published_at` au lieu de `updated_at`
