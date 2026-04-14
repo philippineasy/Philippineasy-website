@@ -1,9 +1,12 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new Error('RESEND_API_KEY not configured');
+  return new Resend(key);
+}
 
-// Use resend.dev domain until philippineasy.com DNS is verified
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'Philippineasy <itineraire@philippineasy.com>';
+const FROM_EMAIL = 'Philippineasy <itineraire@philippineasy.com>';
 
 interface ItineraryEmailData {
   to: string;
@@ -21,7 +24,7 @@ export async function sendItineraryEmail(data: ItineraryEmailData) {
   const itineraryUrl = `${siteUrl}/itineraire/${data.generationId}`;
   const pdfUrl = `${siteUrl}/api/itinerary/pdf/${data.generationId}`;
 
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: FROM_EMAIL,
     to: data.to,
     subject: `Votre itineraire ${data.destination} - ${data.days} jours`,
