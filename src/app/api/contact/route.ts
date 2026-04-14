@@ -13,9 +13,8 @@ function getResend() {
 // ---------------------------------------------------------------------------
 // Telegram alert
 // ---------------------------------------------------------------------------
-const TELEGRAM_TOKEN = '7309981895:AAEOllkI40cjRM199AkWUwbxjw9dXo5Fnto';
-const TELEGRAM_CHAT_ID = '6810508373';
-const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 async function sendTelegramAlert(
   name: string,
@@ -23,6 +22,11 @@ async function sendTelegramAlert(
   subject: string,
   message: string
 ): Promise<void> {
+  if (!TELEGRAM_TOKEN || !TELEGRAM_CHAT_ID) {
+    console.warn('Telegram credentials not configured, skipping alert');
+    return;
+  }
+
   const preview = message.length > 300 ? message.slice(0, 300) + '...' : message;
   const text =
     `📩 Nouveau message sur Philippineasy\n\n` +
@@ -31,7 +35,7 @@ async function sendTelegramAlert(
     `Message: ${preview}\n\n` +
     `→ Repondre: ${email}`;
 
-  const res = await fetch(TELEGRAM_API, {
+  const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
