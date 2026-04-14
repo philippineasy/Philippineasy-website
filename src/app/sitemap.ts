@@ -25,12 +25,14 @@ export const revalidate = 3600; // Régénérer le sitemap toutes les heures
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createBuildClient();
   if (!supabase) return [];
+  const currentDate = new Date().toISOString();
 
-  // Pages statiques — lastModified ne change que quand le contenu change réellement
+  // Pages de listing (contenu qui change régulièrement) → currentDate
+  // Pages statiques fixes (CGU, mentions légales, etc.) → date fixe
   const staticPages: SitemapEntry[] = [
     {
       url: `${BASE_URL}/`,
-      lastModified: '2026-04-15',
+      lastModified: currentDate,
       changeFrequency: 'weekly',
       priority: 1,
       images: [
@@ -38,27 +40,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         toSeoImage(`${BASE_URL}/imagesHero/comment-voyager-aux-philippines.webp`, 'hero'),
       ],
     },
-    { url: `${BASE_URL}/actualites-sur-les-philippines`, lastModified: '2026-02-13', changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${BASE_URL}/meilleurs-plans-aux-philippines`,   lastModified: '2026-02-01', changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${BASE_URL}/actualites-sur-les-philippines`, lastModified: currentDate,    changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${BASE_URL}/meilleurs-plans-aux-philippines`,lastModified: currentDate,    changeFrequency: 'weekly', priority: 0.8 },
     {
       url: `${BASE_URL}/vivre-aux-philippines`,
-      lastModified: '2026-02-10',
+      lastModified: currentDate,
       changeFrequency: 'monthly',
       priority: 0.8,
       images: [toSeoImage(`${BASE_URL}/imagesHero/nouveau-depart-aux-philippines.webp`, 'hero')],
     },
     {
       url: `${BASE_URL}/voyager-aux-philippines`,
-      lastModified: '2026-02-13',
+      lastModified: currentDate,
       changeFrequency: 'monthly',
       priority: 0.8,
       images: [toSeoImage(`${BASE_URL}/imagesHero/comment-voyager-aux-philippines.webp`, 'hero')],
     },
-    { url: `${BASE_URL}/forum-sur-les-philippines`,      lastModified: '2026-04-15', changeFrequency: 'daily',  priority: 0.9 },
-    { url: `${BASE_URL}/marketplace-aux-philippines`,     lastModified: '2026-02-01', changeFrequency: 'daily',  priority: 0.9 },
+    { url: `${BASE_URL}/forum-sur-les-philippines`,      lastModified: currentDate,    changeFrequency: 'daily',  priority: 0.9 },
+    { url: `${BASE_URL}/marketplace-aux-philippines`,     lastModified: currentDate,    changeFrequency: 'daily',  priority: 0.9 },
     {
       url: `${BASE_URL}/rencontre-philippines`,
-      lastModified: '2026-02-01',
+      lastModified: currentDate,
       changeFrequency: 'daily',
       priority: 0.9,
       images: [toSeoImage(`${BASE_URL}/imagesHero/couple-rencontre-aux-philippines.webp`, 'hero')],
