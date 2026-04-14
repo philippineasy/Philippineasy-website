@@ -31,6 +31,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Added** : Email #15 — Notification nouvelle commande marketplace (vendeur)
 - **Added** : Email #16 — Confirmation candidature vendeur marketplace
 
+### Systeme d'emails automatiques — Phase 3 (Lifecycle)
+- **Added** : Email #17 — Rappel appel 24h avant (cron daily 7h UTC)
+- **Added** : Email #18 — Expiration abonnement dans 7 jours (cron daily 8h UTC)
+- **Added** : Email #19 — Confirmation dating premium active
+- **Added** : Email #20 — Boutique vendeur approuvee
+- **Added** : Email #21 — Nouveau message CRM admin
+- **Added** : Cron jobs Vercel (`vercel.json`) pour rappels appels et expirations
+- **Added** : Colonne `reminder_sent_at` sur `call_bookings` pour eviter doublons
+- **Added** : Variable `CRON_SECRET` pour securiser les endpoints cron
+
 ### SEO — Sitemap (CRITIQUE)
 - **Fixed** : Sitemap cassé — toutes les requêtes dynamiques Supabase échouaient silencieusement (colonnes `updated_at` inexistantes sur 7/8 tables). Google ne voyait que 15 URLs au lieu de ~96, causant une désindexation progressive (34 → 16 pages indexées)
 - **Fixed** : `articles` → `published_at` au lieu de `updated_at`

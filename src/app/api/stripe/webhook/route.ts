@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { sendItineraryPaymentConfirmation, sendPaymentFailedEmail, sendSubscriptionCancelledEmail } from '@/emails/senders/payment';
 import { sendOrderConfirmation, sendVendorNewOrder } from '@/emails/senders/marketplace';
+import { sendDatingPremiumConfirmation } from '@/emails/senders/lifecycle';
 import { getUserEmail } from '@/emails/send';
 
 function getStripe() {
@@ -66,6 +67,14 @@ export async function POST(req: NextRequest) {
       if (error) {
         console.error(`Failed to update plan for user ${userId}:`, error);
         return NextResponse.json({ error: 'Database update failed' }, { status: 500 });
+      }
+
+      // Send dating premium confirmation email
+      const premiumUser = await getUserEmail(userId);
+      if (premiumUser) {
+        sendDatingPremiumConfirmation(premiumUser.email, premiumUser.name).catch((err) =>
+          console.error('Dating premium email error:', err)
+        );
       }
     }
   }
