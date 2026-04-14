@@ -71,8 +71,8 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold mb-6">Contact & Support</h4>
             <ul className="space-y-3">
-              <li className="flex items-start"><FontAwesomeIcon icon={faEnvelope} className="text-yellow-500 mt-1 mr-2" /><span className="text-gray-400">philippineasy@gmail.com</span></li>
-              <li className="flex items-start"><FontAwesomeIcon icon={faLifeRing} className="text-yellow-500 mt-1 mr-2" /><span className="text-gray-400">Support Membres</span></li>
+              <li className="flex items-start"><FontAwesomeIcon icon={faEnvelope} className="text-yellow-500 mt-1 mr-2" /><a href="mailto:contact@philippineasy.com" className="text-gray-400 hover:text-white transition duration-300">contact@philippineasy.com</a></li>
+              <li className="flex items-start"><FontAwesomeIcon icon={faLifeRing} className="text-yellow-500 mt-1 mr-2" /><Link href="/contact" className="text-gray-400 hover:text-white transition duration-300">Nous contacter</Link></li>
               <li className="flex items-start"><FontAwesomeIcon icon={faMapMarkerAlt} className="text-yellow-500 mt-1 mr-2" /><span className="text-gray-400">Tandag, Philippines (Bureau Virtuel)</span></li>
             </ul>
             <div className="mt-6">
