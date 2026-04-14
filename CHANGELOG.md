@@ -5,6 +5,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Itineraire — PDF
+- **Fixed** : Emojis casses dans le PDF (remplaces par labels texte + icones colorees)
+- **Fixed** : Duree brute "10-days" → traduite en "10 jours" sur la cover
+- **Fixed** : "N/A" dans l'annuaire et l'hebergement — filtre les entries invalides
+- **Fixed** : Header jour — location ne se superpose plus au titre
+- **Added** : Photos Google Places dans le PDF — jusqu'a 15 photos par itineraire
+- **Changed** : Section headers avec pastilles colorees (T/P/R/H) au lieu d'emojis
+
 ---
 
 ## [2.4.0] - 2026-04-14

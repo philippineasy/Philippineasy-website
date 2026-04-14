@@ -10,6 +10,7 @@ interface Activity {
   coordinates?: { lat: number; lng: number };
   google_maps_url?: string;
   google_rating?: number;
+  photoUrl?: string;
 }
 
 interface Meal {
@@ -19,6 +20,7 @@ interface Meal {
   coordinates?: { lat: number; lng: number };
   google_maps_url?: string;
   google_rating?: number;
+  photoUrl?: string;
 }
 
 interface Accommodation {
@@ -28,6 +30,7 @@ interface Accommodation {
   coordinates?: { lat: number; lng: number };
   google_maps_url?: string;
   google_rating?: number;
+  photoUrl?: string;
 }
 
 interface Day {
@@ -56,51 +59,66 @@ interface PDFProps {
   offerType: string;
 }
 
+const DURATION_MAP: Record<string, string> = {
+  '3-days': '3 jours', '1-week': '1 semaine', '10-days': '10 jours',
+  '2-weeks': '2 semaines', '3-weeks': '3 semaines', '1-month': '1 mois', 'more': '1 mois+',
+};
+
 function mapsUrl(coords?: { lat: number; lng: number }) {
   if (!coords?.lat) return null;
   return `https://www.google.com/maps/search/?api=1&query=${coords.lat},${coords.lng}`;
 }
 
-function Stars({ rating }: { rating?: number }) {
+function StarRating({ rating }: { rating?: number }) {
   if (!rating) return null;
-  const full = Math.floor(rating);
-  const stars = '★'.repeat(full) + '☆'.repeat(5 - full);
-  return <Text style={styles.placeRating}>{stars} {rating.toFixed(1)}</Text>;
+  return (
+    <Text style={{ fontSize: 8, color: COLORS.accent, fontFamily: 'Helvetica-Bold' }}>
+      {rating.toFixed(1)}/5
+    </Text>
+  );
 }
 
-function PlaceItem({ icon, name, description, time, cost, coordinates, googleMapsUrl, rating, links }: {
-  icon: string; name: string; description?: string; time?: string; cost?: string;
-  coordinates?: { lat: number; lng: number }; googleMapsUrl?: string; rating?: number;
-  links?: { label: string; url: string }[];
+function PlacePhoto({ url }: { url?: string }) {
+  if (!url) return null;
+  return (
+    <Image src={url} style={{ width: 60, height: 40, borderRadius: 4, objectFit: 'cover', marginRight: 8 }} />
+  );
+}
+
+function SectionLabel({ label, color }: { label: string; color: string }) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 14, marginBottom: 8, paddingBottom: 4, borderBottomWidth: 1, borderBottomColor: color }}>
+      <View style={{ width: 14, height: 14, borderRadius: 3, backgroundColor: color, marginRight: 6, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ fontSize: 7, color: '#fff', fontFamily: 'Helvetica-Bold' }}>
+          {label === 'Transport' ? 'T' : label === 'Programme' ? 'P' : label === 'Restaurants' ? 'R' : 'H'}
+        </Text>
+      </View>
+      <Text style={{ fontSize: 11, fontFamily: 'Helvetica-Bold', color: COLORS.foreground, textTransform: 'uppercase', letterSpacing: 0.5 }}>{label}</Text>
+    </View>
+  );
+}
+
+function PlaceItem({ label, name, description, time, cost, coordinates, googleMapsUrl, rating, photoUrl }: {
+  label?: string; name: string; description?: string; time?: string; cost?: string;
+  coordinates?: { lat: number; lng: number }; googleMapsUrl?: string; rating?: number; photoUrl?: string;
 }) {
   const mapLink = googleMapsUrl || mapsUrl(coordinates);
   return (
     <View style={styles.placeItem}>
-      <View style={styles.placeIcon}>
-        <Text style={styles.placeIconText}>{icon}</Text>
-      </View>
+      <PlacePhoto url={photoUrl} />
       <View style={styles.placeContent}>
+        {label && <Text style={{ fontSize: 7, color: COLORS.muted, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 1 }}>{label}</Text>}
         {time && <Text style={styles.placeTime}>{time}</Text>}
         <Text style={styles.placeName}>{name}</Text>
         {description && <Text style={styles.placeDescription}>{description}</Text>}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {cost && <Text style={styles.placeCost}>{cost}</Text>}
-          <Stars rating={rating} />
+          <StarRating rating={rating} />
         </View>
-        <View style={styles.placeLinks}>
-          {mapLink && <Link src={mapLink} style={styles.placeLink}>Voir sur Google Maps</Link>}
-          {links?.map((l, i) => <Link key={i} src={l.url} style={styles.placeLink}>{l.label}</Link>)}
-        </View>
+        {mapLink && (
+          <Link src={mapLink} style={styles.placeLink}>Voir sur Google Maps</Link>
+        )}
       </View>
-    </View>
-  );
-}
-
-function SectionHeader({ icon, title }: { icon: string; title: string }) {
-  return (
-    <View style={styles.sectionHeader}>
-      <Text style={styles.sectionIcon}>{icon}</Text>
-      <Text style={styles.sectionTitle}>{title}</Text>
     </View>
   );
 }
@@ -115,37 +133,43 @@ function PageFooter() {
 }
 
 function CoverPage({ itinerary, userName, duration, offerType }: PDFProps) {
+  const durationLabel = DURATION_MAP[duration] || `${itinerary.days.length} jours`;
+  const destinations = [...new Set(itinerary.days.map(d => d.location).filter(Boolean))].join(', ');
+
   return (
     <Page size="A4" style={styles.page}>
       <View style={styles.coverPage}>
-        <Image src="/logo-philippineasy.png" style={styles.coverLogo} />
         <Text style={styles.coverTitle}>{itinerary.title}</Text>
         <Text style={styles.coverSubtitle}>{itinerary.description}</Text>
         <View style={styles.coverDivider} />
         <View style={styles.coverMeta}>
           <View style={styles.coverMetaItem}>
-            <Text style={styles.coverMetaText}>{itinerary.days.length} jours</Text>
+            <Text style={styles.coverMetaText}>{durationLabel}</Text>
           </View>
-          <View style={styles.coverMetaItem}>
-            <Text style={styles.coverMetaText}>{duration}</Text>
-          </View>
+          {destinations && (
+            <View style={styles.coverMetaItem}>
+              <Text style={styles.coverMetaText}>{destinations}</Text>
+            </View>
+          )}
           <View style={styles.coverMetaItem}>
             <Text style={styles.coverMetaText}>{offerType}</Text>
           </View>
         </View>
         {userName && <Text style={styles.coverName}>Prepare pour {userName}</Text>}
+        <Text style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', marginTop: 40 }}>philippineasy.com</Text>
       </View>
     </Page>
   );
 }
 
 function DayPage({ day }: { day: Day }) {
+  const isAccommodationValid = day.accommodation?.name && day.accommodation.name !== 'N/A' && day.accommodation.name !== 'n/a';
+
   return (
     <Page size="A4" style={styles.page}>
-      {/* Day header */}
       <View style={styles.dayHeader}>
         <Text style={styles.dayNumber}>J{day.day}</Text>
-        <View>
+        <View style={{ flex: 1 }}>
           <Text style={styles.dayTitle}>{day.title || `Jour ${day.day}`}</Text>
           {day.location && <Text style={styles.dayLocation}>{day.location}</Text>}
         </View>
@@ -155,9 +179,8 @@ function DayPage({ day }: { day: Day }) {
         {/* Transport */}
         {day.transport?.method && (
           <>
-            <SectionHeader icon="🚌" title="Transport" />
+            <SectionLabel label="Transport" color={COLORS.primary} />
             <PlaceItem
-              icon="🚌"
               name={day.transport.method}
               description={day.transport.from && day.transport.to ? `${day.transport.from} → ${day.transport.to}` : undefined}
               cost={day.transport.cost}
@@ -168,11 +191,10 @@ function DayPage({ day }: { day: Day }) {
         {/* Activities */}
         {day.activities && day.activities.length > 0 && (
           <>
-            <SectionHeader icon="🎯" title="Programme" />
+            <SectionLabel label="Programme" color={COLORS.accent} />
             {day.activities.map((act, i) => (
               <PlaceItem
                 key={i}
-                icon="📍"
                 name={act.name}
                 description={act.description}
                 time={act.time}
@@ -180,6 +202,7 @@ function DayPage({ day }: { day: Day }) {
                 coordinates={act.coordinates}
                 googleMapsUrl={act.google_maps_url}
                 rating={act.google_rating}
+                photoUrl={act.photoUrl}
               />
             ))}
           </>
@@ -188,55 +211,58 @@ function DayPage({ day }: { day: Day }) {
         {/* Meals */}
         {(day.meals?.breakfast || day.meals?.lunch || day.meals?.dinner) && (
           <>
-            <SectionHeader icon="🍽" title="Restaurants" />
+            <SectionLabel label="Restaurants" color="#E67E22" />
             {day.meals?.breakfast?.restaurant && (
               <PlaceItem
-                icon="☀"
+                label="Petit-dejeuner"
                 name={day.meals.breakfast.restaurant}
                 description={day.meals.breakfast.dish}
                 cost={day.meals.breakfast.cost}
                 coordinates={day.meals.breakfast.coordinates}
                 googleMapsUrl={day.meals.breakfast.google_maps_url}
                 rating={day.meals.breakfast.google_rating}
+                photoUrl={day.meals.breakfast.photoUrl}
               />
             )}
             {day.meals?.lunch?.restaurant && (
               <PlaceItem
-                icon="🌤"
+                label="Dejeuner"
                 name={day.meals.lunch.restaurant}
                 description={day.meals.lunch.dish}
                 cost={day.meals.lunch.cost}
                 coordinates={day.meals.lunch.coordinates}
                 googleMapsUrl={day.meals.lunch.google_maps_url}
                 rating={day.meals.lunch.google_rating}
+                photoUrl={day.meals.lunch.photoUrl}
               />
             )}
             {day.meals?.dinner?.restaurant && (
               <PlaceItem
-                icon="🌙"
+                label="Diner"
                 name={day.meals.dinner.restaurant}
                 description={day.meals.dinner.dish}
                 cost={day.meals.dinner.cost}
                 coordinates={day.meals.dinner.coordinates}
                 googleMapsUrl={day.meals.dinner.google_maps_url}
                 rating={day.meals.dinner.google_rating}
+                photoUrl={day.meals.dinner.photoUrl}
               />
             )}
           </>
         )}
 
         {/* Accommodation */}
-        {day.accommodation?.name && (
+        {isAccommodationValid && (
           <>
-            <SectionHeader icon="🏨" title="Hebergement" />
+            <SectionLabel label="Hebergement" color={COLORS.primaryDark} />
             <PlaceItem
-              icon="🏨"
-              name={day.accommodation.name}
-              description={day.accommodation.type}
-              cost={day.accommodation.cost}
-              coordinates={day.accommodation.coordinates}
-              googleMapsUrl={day.accommodation.google_maps_url}
-              rating={day.accommodation.google_rating}
+              name={day.accommodation!.name!}
+              description={day.accommodation!.type}
+              cost={day.accommodation!.cost}
+              coordinates={day.accommodation!.coordinates}
+              googleMapsUrl={day.accommodation!.google_maps_url}
+              rating={day.accommodation!.google_rating}
+              photoUrl={day.accommodation!.photoUrl}
             />
           </>
         )}
@@ -248,10 +274,9 @@ function DayPage({ day }: { day: Day }) {
 }
 
 function SummaryPage({ itinerary, userName }: { itinerary: ItineraryData; userName?: string }) {
-  // Collect all unique places for the directory
   const allPlaces: { name: string; type: string; url?: string }[] = [];
   for (const day of itinerary.days) {
-    if (day.accommodation?.name) {
+    if (day.accommodation?.name && day.accommodation.name !== 'N/A') {
       allPlaces.push({
         name: day.accommodation.name,
         type: 'Hebergement',
@@ -260,7 +285,7 @@ function SummaryPage({ itinerary, userName }: { itinerary: ItineraryData; userNa
     }
     for (const mt of ['breakfast', 'lunch', 'dinner'] as const) {
       const meal = day.meals?.[mt];
-      if (meal?.restaurant) {
+      if (meal?.restaurant && meal.restaurant !== 'N/A') {
         allPlaces.push({
           name: meal.restaurant,
           type: 'Restaurant',
@@ -269,8 +294,6 @@ function SummaryPage({ itinerary, userName }: { itinerary: ItineraryData; userNa
       }
     }
   }
-
-  // Deduplicate
   const uniquePlaces = allPlaces.filter((p, i) => allPlaces.findIndex(q => q.name === p.name) === i);
 
   return (
@@ -280,7 +303,6 @@ function SummaryPage({ itinerary, userName }: { itinerary: ItineraryData; userNa
       </View>
 
       <View style={styles.content}>
-        {/* Summary */}
         <View style={styles.summarySection}>
           <Text style={styles.summaryTitle}>Votre voyage en resume</Text>
           <View style={styles.summaryItem}>
@@ -301,7 +323,6 @@ function SummaryPage({ itinerary, userName }: { itinerary: ItineraryData; userNa
           )}
         </View>
 
-        {/* Tips */}
         {itinerary.tips.length > 0 && (
           <View style={styles.summarySection}>
             <Text style={styles.summaryTitle}>Conseils pratiques</Text>
@@ -314,7 +335,6 @@ function SummaryPage({ itinerary, userName }: { itinerary: ItineraryData; userNa
           </View>
         )}
 
-        {/* Places directory */}
         {uniquePlaces.length > 0 && (
           <View style={styles.summarySection}>
             <Text style={styles.summaryTitle}>Annuaire des etablissements</Text>
@@ -331,7 +351,6 @@ function SummaryPage({ itinerary, userName }: { itinerary: ItineraryData; userNa
           </View>
         )}
 
-        {/* Thank you */}
         <View style={{ marginTop: 30, padding: 20, backgroundColor: COLORS.mutedLight, borderRadius: 8, alignItems: 'center' }}>
           <Text style={{ fontSize: 14, fontFamily: 'Helvetica-Bold', color: COLORS.primary, marginBottom: 6 }}>
             Merci{userName ? ` ${userName}` : ''} !

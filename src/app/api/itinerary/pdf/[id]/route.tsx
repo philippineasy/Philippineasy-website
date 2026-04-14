@@ -4,6 +4,34 @@ import { renderToBuffer } from '@react-pdf/renderer';
 import { ItineraryPDF } from '@/components/pdf/ItineraryPDF';
 import React from 'react';
 
+const PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
+const PLACES_API_BASE = 'https://places.googleapis.com/v1';
+
+async function fetchPlacePhoto(name: string, location?: string): Promise<string | null> {
+  if (!PLACES_API_KEY || !name) return null;
+  try {
+    const query = `${name} ${location || ''} Philippines`;
+    const searchRes = await fetch(`${PLACES_API_BASE}/places:searchText`, {
+      method: 'POST',
+      headers: {
+        'X-Goog-Api-Key': PLACES_API_KEY,
+        'X-Goog-FieldMask': 'places.photos',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ textQuery: query, maxResultCount: 1 }),
+    });
+    const searchData = await searchRes.json();
+    const photoName = searchData.places?.[0]?.photos?.[0]?.name;
+    if (!photoName) return null;
+
+    const mediaRes = await fetch(
+      `${PLACES_API_BASE}/${photoName}/media?maxWidthPx=400&skipHttpRedirect=true&key=${PLACES_API_KEY}`
+    );
+    const mediaData = await mediaRes.json();
+    return mediaData.photoUri || null;
+  } catch { return null; }
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -103,6 +131,30 @@ export async function GET(
       })(),
       transport: d.transport || undefined,
     }));
+
+    // Enrich with Google Places photos (max 15 to keep generation fast)
+    let photoCount = 0;
+    const MAX_PHOTOS = 15;
+    for (const day of days) {
+      const location = day.location || '';
+      for (const act of (day.activities || [])) {
+        if (photoCount >= MAX_PHOTOS) break;
+        act.photoUrl = await fetchPlacePhoto(act.name, location);
+        if (act.photoUrl) photoCount++;
+      }
+      for (const mt of ['breakfast', 'lunch', 'dinner'] as const) {
+        if (photoCount >= MAX_PHOTOS) break;
+        const meal = day.meals?.[mt];
+        if (meal?.restaurant) {
+          meal.photoUrl = await fetchPlacePhoto(meal.restaurant, location);
+          if (meal.photoUrl) photoCount++;
+        }
+      }
+      if (photoCount < MAX_PHOTOS && day.accommodation?.name && day.accommodation.name !== 'N/A') {
+        day.accommodation.photoUrl = await fetchPlacePhoto(day.accommodation.name, location);
+        if (day.accommodation.photoUrl) photoCount++;
+      }
+    }
 
     const itineraryData = {
       title: variant.preview?.title || full.title || 'Votre itineraire Philippines',
