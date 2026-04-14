@@ -5,6 +5,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Itineraire — Validation n8n (boucle Google Places)
+- **Added** : Boucle Split/HTTP/Validate dans le workflow n8n Generator V3
+- **Added** : Chaque lieu valide via Google Places API (coordonnees, rating, Google Maps URL) DANS le workflow n8n
+- **Added** : Validation haversine avec rayon dynamique par destination (8km Boracay, 30km Davao, etc.)
+- **Added** : Lieux hors zone rejetes automatiquement (ex: Coral Garden Samal rejete pour un jour Talikud)
+- **Changed** : Plus besoin du fallback frontend pour l'enrichissement — tout se fait a la generation
+
 ### Auth
 - **Fixed** : Session auth bloquee en "loading" indefiniment — ajout fallback `getSession()` quand `onAuthStateChange` ne fire pas (race condition SSR/cookies)
 
