@@ -252,7 +252,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Send email via Resend
     const { error: resendError } = await getResend().emails.send({
       from: 'Philippineasy Contact <noreply@philippineasy.com>',
-      to: process.env.CONTACT_EMAIL || 'philippineasy@gmail.com',
+      to: 'contact@philippineasy.com',
       replyTo: safeEmail,
       subject: `[Contact] ${subject} — ${safeName}`,
       html: buildEmailHtml(safeName, safeEmail, subject, safeMessage),
