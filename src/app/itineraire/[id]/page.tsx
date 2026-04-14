@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, use } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -21,7 +21,7 @@ import {
   faSun,
   faArrowRight,
 } from '@fortawesome/free-solid-svg-icons';
-import { MapPin, Clock, ExternalLink, Utensils, Hotel, Bus, Pencil, Lock, Lightbulb } from 'lucide-react';
+import { MapPin, Clock, ExternalLink, Utensils, Hotel, Bus, Pencil, Lock, Lightbulb, Download } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
@@ -74,12 +74,23 @@ interface PageProps { params: Promise<{ id: string }>; }
 export default function ItineraryPage({ params }: PageProps) {
   const resolvedParams = use(params);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
 
   const [itinerary, setItinerary] = useState<Itinerary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  // Show welcome banner if coming from checkout
+  useEffect(() => {
+    if (searchParams.get('welcome') === 'true') {
+      setShowWelcome(true);
+      const timer = setTimeout(() => setShowWelcome(false), 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchItinerary = async () => {
@@ -163,21 +174,47 @@ export default function ItineraryPage({ params }: PageProps) {
                 {selected_variant?.title || 'Mon Itineraire'}
               </h1>
             </div>
-            <div className="px-3 py-1.5 flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full text-xs">
-              <Pencil className="w-3 h-3 text-primary" />
-              <span className="text-foreground/70">
-                {isUnlimited ? (
-                  <>Modif. illimitees</>
-                ) : (
-                  <><span className="font-bold text-primary">{itinerary.modifications_remaining}</span> modif.</>
-                )}
-              </span>
+            <div className="flex items-center gap-2">
+              <a
+                href={`/api/itinerary/pdf/${itinerary.id}`}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-muted hover:bg-muted/80 rounded-full text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Download className="w-3 h-3" />
+                <span className="hidden sm:inline">PDF</span>
+              </a>
+              <div className="px-3 py-1.5 flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full text-xs">
+                <Pencil className="w-3 h-3 text-primary" />
+                <span className="text-foreground/70">
+                  {isUnlimited ? (
+                    <>Modif. illimitees</>
+                  ) : (
+                    <><span className="font-bold text-primary">{itinerary.modifications_remaining}</span> modif.</>
+                  )}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Welcome banner after checkout */}
+        {showWelcome && (
+          <motion.div
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3"
+          >
+            <span className="text-2xl">🎉</span>
+            <div>
+              <p className="font-semibold text-green-800">Votre itineraire est pret !</p>
+              <p className="text-sm text-green-600">Bon voyage aux Philippines.</p>
+            </div>
+            <button onClick={() => setShowWelcome(false)} className="ml-auto text-green-400 hover:text-green-600 text-lg">&times;</button>
+          </motion.div>
+        )}
+
         {/* Description */}
         {selected_variant?.description && (
           <p className="text-lg text-muted-foreground leading-relaxed mb-8">{selected_variant.description}</p>

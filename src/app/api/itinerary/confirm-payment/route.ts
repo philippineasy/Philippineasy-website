@@ -58,7 +58,8 @@ export async function POST(request: Request) {
         .update({
           payment_status: 'completed',
           amount_paid: paymentIntent.amount / 100,
-          status: 'paid',
+          status: 'delivered',
+          delivered_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
         .eq('id', generation_id);
@@ -71,7 +72,7 @@ export async function POST(request: Request) {
         );
       }
 
-      return NextResponse.json({ success: true, payment_confirmed: true });
+      return NextResponse.json({ success: true, payment_confirmed: true, generation_id });
     }
 
     return NextResponse.json({

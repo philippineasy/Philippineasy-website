@@ -188,7 +188,8 @@ async function handleItineraryPayment(
       .update({
         payment_status: 'completed',
         amount_paid: paymentIntent.amount / 100,
-        status: 'paid',
+        status: 'delivered',
+        delivered_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
       .eq('id', generation_id);
@@ -198,7 +199,7 @@ async function handleItineraryPayment(
       throw updateError;
     }
 
-    console.log(`Generation ${generation_id} marked as paid, ready for delivery`);
+    console.log(`Generation ${generation_id} marked as delivered (auto-profile delivery)`);
   } catch (error) {
     console.error('Error processing itinerary payment:', error);
   }

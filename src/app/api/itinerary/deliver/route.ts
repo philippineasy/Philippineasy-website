@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClientForRouteHandler } from '@/utils/supabase/server';
+import { sendItineraryEmail } from '@/services/emailService';
 
 const N8N_DELIVER_URL = process.env.N8N_ITINERARY_DELIVER_URL || 'https://n8n.hugogotophilippines.com/webhook/itinerary-deliver';
 const N8N_API_KEY = process.env.N8N_API_KEY;
@@ -7,30 +8,23 @@ const N8N_API_KEY = process.env.N8N_API_KEY;
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { generation_id, delivery_method, email, telegram_chat_id } = body;
+    const { generation_id, delivery_email, delivery_telegram, email, telegram_chat_id } = body;
 
-    if (!generation_id || !delivery_method) {
-      return NextResponse.json(
-        { error: 'generation_id et delivery_method requis' },
-        { status: 400 }
-      );
+    const wantEmail = delivery_email ?? (body.delivery_method === 'email');
+    const wantTelegram = delivery_telegram ?? (body.delivery_method === 'telegram');
+
+    if (!generation_id) {
+      return NextResponse.json({ error: 'generation_id requis' }, { status: 400 });
     }
 
-    if (delivery_method === 'email' && !email) {
-      return NextResponse.json(
-        { error: 'Email requis pour la livraison par email' },
-        { status: 400 }
-      );
+    if (wantEmail && !email) {
+      return NextResponse.json({ error: 'Email requis' }, { status: 400 });
     }
 
-    if (delivery_method === 'telegram' && !telegram_chat_id) {
-      return NextResponse.json(
-        { error: 'Chat ID Telegram requis' },
-        { status: 400 }
-      );
+    if (wantTelegram && !telegram_chat_id) {
+      return NextResponse.json({ error: 'Chat ID Telegram requis' }, { status: 400 });
     }
 
-    // Vérifier que la génération existe et est payée
     const supabase = await createClientForRouteHandler();
     const { data: generation, error } = await supabase
       .from('itinerary_generations')
@@ -39,80 +33,96 @@ export async function POST(request: Request) {
       .single();
 
     if (error || !generation) {
-      return NextResponse.json(
-        { error: 'Génération non trouvée' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Generation non trouvee' }, { status: 404 });
     }
 
     if (generation.payment_status !== 'completed') {
-      return NextResponse.json(
-        { error: 'Paiement requis avant la livraison' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Paiement requis' }, { status: 403 });
     }
 
-    // Appeler le webhook n8n pour la livraison
-    const n8nPayload = {
-      generation_id,
-      selected_variant: generation.selected_variant,
-      delivery_method,
-      email: email || null,
-      telegram_chat_id: telegram_chat_id || null,
-    };
+    const itineraries = typeof generation.itineraries === 'string'
+      ? JSON.parse(generation.itineraries)
+      : generation.itineraries;
 
-    let n8nResult = null;
+    const selectedVariant = itineraries.find(
+      (it: { variant: string }) => it.variant === generation.selected_variant
+    ) || itineraries[0];
 
-    try {
-      const n8nResponse = await fetch(N8N_DELIVER_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-N8N-API-Key': N8N_API_KEY || '',
-        },
-        body: JSON.stringify(n8nPayload),
-      });
+    const errors: string[] = [];
 
-      if (n8nResponse.ok) {
-        const responseText = await n8nResponse.text();
-        if (responseText) {
-          try {
-            n8nResult = JSON.parse(responseText);
-          } catch {
-            console.log('n8n response is not JSON:', responseText);
-          }
-        }
-      } else {
-        console.error('n8n deliver error:', await n8nResponse.text());
+    // Email: send directly via Resend (not n8n)
+    if (wantEmail) {
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('first_name')
+          .eq('id', generation.user_id)
+          .single();
+
+        const days = selectedVariant?.full?.days || [];
+        const destinations = [...new Set(days.map((d: { location?: string }) => d.location).filter(Boolean))].join(', ') || 'Philippines';
+
+        await sendItineraryEmail({
+          to: email,
+          userName: profile?.first_name || undefined,
+          itineraryTitle: selectedVariant?.preview?.title || selectedVariant?.full?.title || 'Votre itineraire',
+          destination: destinations,
+          days: days.length,
+          variant: generation.selected_variant || 'balanced',
+          generationId: generation_id,
+        });
+      } catch (emailError) {
+        console.error('Email send error:', emailError);
+        errors.push('email: ' + (emailError instanceof Error ? emailError.message : 'failed'));
       }
-    } catch (n8nError) {
-      console.error('n8n request failed:', n8nError);
-      // Continue anyway - we'll still mark as delivered in Supabase
     }
 
-    // Mettre à jour le statut de livraison dans Supabase
+    // Telegram: send via n8n (Telegram node needs bot credentials)
+    if (wantTelegram) {
+      try {
+        const n8nResponse = await fetch(N8N_DELIVER_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-N8N-API-Key': N8N_API_KEY || '',
+          },
+          body: JSON.stringify({
+            generation_id,
+            selected_variant: generation.selected_variant,
+            itineraries: generation.itineraries,
+            delivery_email: false,
+            delivery_telegram: true,
+            telegram_chat_id,
+          }),
+        });
+
+        if (!n8nResponse.ok) {
+          const errText = await n8nResponse.text();
+          console.error('n8n telegram error:', errText);
+          errors.push('telegram: n8n error');
+        }
+      } catch (n8nError) {
+        console.error('n8n request failed:', n8nError);
+        errors.push('telegram: n8n unreachable');
+      }
+    }
+
+    // Update delivery preferences
     await supabase
-      .from('itinerary_generations')
+      .from('delivery_preferences')
       .update({
-        delivery_method,
-        delivery_email: email || null,
-        telegram_chat_id: telegram_chat_id || null,
-        delivered_at: new Date().toISOString(),
-        status: 'delivered',
+        delivery_status: errors.length === 0 ? 'sent' : 'failed',
+        delivered_at: errors.length === 0 ? new Date().toISOString() : null,
+        error_log: errors.length > 0 ? errors.join('; ') : null,
       })
-      .eq('id', generation_id);
+      .eq('generation_id', generation_id);
 
     return NextResponse.json({
-      success: true,
-      google_maps_url: n8nResult?.google_maps_url || null,
-      alarms_data: n8nResult?.alarms_data || null,
+      success: errors.length === 0,
+      errors: errors.length > 0 ? errors : undefined,
     });
-
   } catch (error) {
     console.error('Deliver error:', error);
-    return NextResponse.json(
-      { error: 'Erreur serveur' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
