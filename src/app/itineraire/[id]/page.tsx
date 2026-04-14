@@ -246,26 +246,24 @@ export default function ItineraryPage({ params }: PageProps) {
               >
                 <AccordionTrigger className="px-5 py-4 hover:no-underline hover:bg-muted/30 [&>svg]:text-muted-foreground [&>svg]:w-5 [&>svg]:h-5">
                   <div className="flex items-center gap-4">
-                    {/* Day photo or number */}
+                    {/* Day photo with number overlay */}
                     <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0">
-                      {day.activities?.[0]?.coordinates ? (
-                        <PlacePhoto
-                          coordinates={day.activities[0].coordinates}
-                          name={day.location || day.activities[0].name}
-                          className="w-14 h-14 rounded-xl"
-                          fallbackIcon={
-                            <div className="w-14 h-14 bg-primary text-primary-foreground rounded-xl flex flex-col items-center justify-center">
-                              <span className="text-[10px] uppercase font-medium opacity-70">Jour</span>
-                              <span className="text-xl font-bold leading-none">{day.day}</span>
-                            </div>
-                          }
-                        />
-                      ) : (
-                        <div className="w-14 h-14 bg-primary text-primary-foreground rounded-xl flex flex-col items-center justify-center">
-                          <span className="text-[10px] uppercase font-medium opacity-70">Jour</span>
-                          <span className="text-xl font-bold leading-none">{day.day}</span>
-                        </div>
-                      )}
+                      <PlacePhoto
+                        coordinates={day.activities?.[0]?.coordinates}
+                        name={day.location || day.activities?.[0]?.name}
+                        className="w-14 h-14 rounded-xl"
+                        fallbackIcon={
+                          <div className="w-14 h-14 bg-primary text-primary-foreground rounded-xl flex flex-col items-center justify-center">
+                            <span className="text-[10px] uppercase font-medium opacity-70">Jour</span>
+                            <span className="text-xl font-bold leading-none">{day.day}</span>
+                          </div>
+                        }
+                      />
+                      {/* Number overlay on photo */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-xl flex flex-col items-center justify-end pb-1">
+                        <span className="text-[8px] uppercase font-medium text-white/80 leading-none">Jour</span>
+                        <span className="text-sm font-bold text-white leading-none">{day.day}</span>
+                      </div>
                     </div>
                     <div className="text-left">
                       <p className="font-bold text-foreground text-base">{day.location || `Jour ${day.day}`}</p>
