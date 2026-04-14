@@ -50,15 +50,15 @@ export async function GET(request: NextRequest) {
   const lng = searchParams.get('lng');
   const name = searchParams.get('name');
 
-  if (!lat || !lng) {
-    return NextResponse.json({ error: 'lat and lng required' }, { status: 400 });
+  if (!lat && !lng && !name) {
+    return NextResponse.json({ error: 'lat/lng or name required' }, { status: 400 });
   }
 
   if (!GOOGLE_PLACES_API_KEY) {
     return NextResponse.json({ photoUrl: null });
   }
 
-  const cacheKey = `${lat},${lng},${name || ''}`;
+  const cacheKey = lat ? `${lat},${lng},${name || ''}` : `name:${name}`;
   const cached = photoCache.get(cacheKey);
   if (cached && cached.expiry > Date.now()) {
     return NextResponse.json({ photoUrl: cached.url });
@@ -69,16 +69,16 @@ export async function GET(request: NextRequest) {
 
     // Strategy 1: Text search with exact name + location bias (best for specific places)
     if (name) {
-      photoName = await getPhotoName(name, lat, lng);
+      photoName = await getPhotoName(name, lat || undefined, lng || undefined);
     }
 
-    // Strategy 2: If no name or no result, try coordinates-only nearby search
-    if (!photoName) {
+    // Strategy 2: If no name or no result, try coordinates-only nearby search (needs lat/lng)
+    if (!photoName && lat && lng) {
       const searchBody = {
         locationRestriction: {
           circle: {
             center: { latitude: parseFloat(lat), longitude: parseFloat(lng) },
-            radius: 200.0, // Tight radius to find the exact spot
+            radius: 200.0,
           },
         },
         maxResultCount: 1,

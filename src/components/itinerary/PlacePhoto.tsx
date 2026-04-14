@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 
 const photoCache = new Map<string, string | null>();
 
@@ -18,18 +17,23 @@ export function PlacePhoto({ coordinates, name, className = '', fallbackIcon }: 
   const [errored, setErrored] = useState(false);
 
   useEffect(() => {
-    if (!coordinates) return;
+    // Need at least coordinates OR name to search
+    if (!coordinates && !name) return;
 
-    const cacheKey = `${coordinates.lat},${coordinates.lng},${name || ''}`;
+    const cacheKey = coordinates
+      ? `${coordinates.lat},${coordinates.lng},${name || ''}`
+      : `name:${name}`;
+
     if (photoCache.has(cacheKey)) {
       setPhotoUrl(photoCache.get(cacheKey) || null);
       return;
     }
 
-    const params = new URLSearchParams({
-      lat: String(coordinates.lat),
-      lng: String(coordinates.lng),
-    });
+    const params = new URLSearchParams();
+    if (coordinates) {
+      params.set('lat', String(coordinates.lat));
+      params.set('lng', String(coordinates.lng));
+    }
     if (name) params.set('name', name);
 
     fetch(`/api/places/photo?${params}`)
@@ -47,7 +51,7 @@ export function PlacePhoto({ coordinates, name, className = '', fallbackIcon }: 
     if (fallbackIcon) {
       return <div className={`bg-muted flex items-center justify-center ${className}`}>{fallbackIcon}</div>;
     }
-    return <div className={`bg-muted animate-pulse ${className}`} />;
+    return null;
   }
 
   return (

@@ -8,6 +8,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Auth
 - **Fixed** : Session auth bloquee en "loading" indefiniment — ajout fallback `getSession()` quand `onAuthStateChange` ne fire pas (race condition SSR/cookies)
 
+### Itineraire — Photos
+- **Fixed** : Photos ne chargent pas quand il n'y a pas de coordonnees GPS — PlacePhoto cherche par nom seul via Google Places text search
+- **Fixed** : API `/api/places/photo` accepte maintenant les requetes sans lat/lng (recherche par nom)
+
 ### Itineraire — PDF
 - **Fixed** : Emojis casses dans le PDF (remplaces par labels texte + icones colorees)
 - **Fixed** : Duree brute "10-days" → traduite en "10 jours" sur la cover
