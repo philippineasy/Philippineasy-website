@@ -14,6 +14,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Added** : Liens Google Maps cliquables sur chaque card (activite, restaurant, hebergement)
 - **Added** : Donnees enrichies sauvegardees en base (`delivered_itinerary`) — enrichissement unique, pas a chaque visite
 - **Added** : Map interactive avec tous les marqueurs (maintenant que les coordonnees sont presentes)
+- **Added** : Validation coherence geographique — rejette les resultats Google Places a +80km du lieu du jour
+- **Added** : Location bias dans les recherches Google Places (biais vers la ville/ile du jour)
+- **Added** : Re-validation des coordonnees existantes si trop loin de la reference
+- **Changed** : Limite enrichissement augmentee de 25 a 50 lieux (couvre 10 jours complets)
+- **Changed** : Prompt GPT V3 — regles de coherence geographique ajoutees (petit-dej pres de l'hotel, activites dans un rayon 30km, transport prevu pour changement d'ile)
 - **Fixed** : Photos ne chargent pas sans coordonnees GPS — PlacePhoto cherche par nom seul
 - **Fixed** : API `/api/places/photo` accepte les requetes sans lat/lng
 - **Fixed** : Hebergement affiche "cost/nuit/nuit" → retire le doublon "/nuit"

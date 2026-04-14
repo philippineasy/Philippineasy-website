@@ -74,21 +74,59 @@ function normalizeDays(days: RawDay[]) {
 
 // ========== Google Places Enrichment ==========
 
-async function searchPlace(name: string, locationHint?: string): Promise<{
+// Reference coordinates for major Philippine destinations
+const LOCATION_COORDS: Record<string, Coordinates> = {
+  'davao': { lat: 7.1907, lng: 125.4553 }, 'davao city': { lat: 7.1907, lng: 125.4553 },
+  'samal': { lat: 7.1000, lng: 125.7200 }, 'samal island': { lat: 7.1000, lng: 125.7200 },
+  'talikud': { lat: 6.9500, lng: 125.7300 }, 'talikud island': { lat: 6.9500, lng: 125.7300 },
+  'el nido': { lat: 11.1784, lng: 119.3930 }, 'coron': { lat: 11.9986, lng: 120.2043 },
+  'cebu': { lat: 10.3157, lng: 123.8854 }, 'bohol': { lat: 9.8500, lng: 124.1435 },
+  'siargao': { lat: 9.8489, lng: 126.0458 }, 'boracay': { lat: 11.9674, lng: 121.9248 },
+  'manila': { lat: 14.5995, lng: 120.9842 }, 'palawan': { lat: 9.8349, lng: 118.7384 },
+  'panglao': { lat: 9.5742, lng: 123.7621 }, 'general luna': { lat: 9.7900, lng: 126.1170 },
+  'dumaguete': { lat: 9.3068, lng: 123.3054 }, 'moalboal': { lat: 9.9422, lng: 123.3952 },
+  'puerto princesa': { lat: 9.7392, lng: 118.7353 },
+};
+
+function haversine(c1: Coordinates, c2: Coordinates): number {
+  const R = 6371;
+  const dLat = (c2.lat - c1.lat) * Math.PI / 180;
+  const dLng = (c2.lng - c1.lng) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(c1.lat * Math.PI / 180) * Math.cos(c2.lat * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function getLocationRef(location: string): Coordinates | null {
+  const key = location.toLowerCase().trim();
+  return LOCATION_COORDS[key] || null;
+}
+
+async function searchPlace(name: string, locationHint?: string, locationRef?: Coordinates | null): Promise<{
   coordinates: Coordinates; rating: number | null; google_maps_url: string;
 } | null> {
   if (!PLACES_API_KEY || !name || name === 'N/A') return null;
 
   try {
-    const query = `${name} ${locationHint || ''} Philippines`;
+    const textBody: Record<string, unknown> = {
+      textQuery: `${name} ${locationHint || ''} Philippines`,
+      maxResultCount: 1,
+    };
+
+    // Bias toward the day's location if known
+    if (locationRef) {
+      textBody.locationBias = {
+        circle: { center: { latitude: locationRef.lat, longitude: locationRef.lng }, radius: 30000 },
+      };
+    }
+
     const res = await fetch(`${PLACES_API_BASE}/places:searchText`, {
       method: 'POST',
       headers: {
         'X-Goog-Api-Key': PLACES_API_KEY,
-        'X-Goog-FieldMask': 'places.location,places.rating,places.googleMapsUri',
+        'X-Goog-FieldMask': 'places.location,places.rating,places.googleMapsUri,places.formattedAddress',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ textQuery: query, maxResultCount: 1 }),
+      body: JSON.stringify(textBody),
     });
     const data = await res.json();
     const place = data.places?.[0];
@@ -96,7 +134,13 @@ async function searchPlace(name: string, locationHint?: string): Promise<{
 
     const lat = place.location.latitude;
     const lng = place.location.longitude;
-    if (lat < 4.5 || lat > 21.5 || lng < 116 || lng > 127) return null; // Not Philippines
+    if (lat < 4.5 || lat > 21.5 || lng < 116 || lng > 127) return null;
+
+    // Validate: if we have a location reference, reject results too far away (>80km)
+    if (locationRef) {
+      const dist = haversine({ lat, lng }, locationRef);
+      if (dist > 80) return null; // Too far from expected location
+    }
 
     return {
       coordinates: { lat, lng },
@@ -110,16 +154,25 @@ async function searchPlace(name: string, locationHint?: string): Promise<{
 
 async function enrichDays(days: ReturnType<typeof normalizeDays>): Promise<{ enriched: typeof days; count: number }> {
   let count = 0;
-  const MAX = 25; // Max API calls per enrichment
+  const MAX = 50; // Enough for 10 days × 5 places
 
   for (const day of days) {
     const loc = day.location || '';
+    const locRef = getLocationRef(loc);
 
     // Enrich activities
     for (const act of (day.activities || [])) {
       if (count >= MAX) break;
-      if (act.coordinates?.lat) continue; // Already has coords
-      const result = await searchPlace(act.name, loc);
+      if (act.coordinates?.lat) {
+        // Validate existing coords against location
+        if (locRef && haversine(act.coordinates, locRef) > 80) {
+          // Bad coords — re-search
+          const result = await searchPlace(act.name, loc, locRef);
+          if (result) { act.coordinates = result.coordinates; act.google_maps_url = result.google_maps_url; act.google_rating = result.rating ?? undefined; count++; }
+        }
+        continue;
+      }
+      const result = await searchPlace(act.name, loc, locRef);
       if (result) {
         act.coordinates = result.coordinates;
         act.google_maps_url = result.google_maps_url;
@@ -132,8 +185,15 @@ async function enrichDays(days: ReturnType<typeof normalizeDays>): Promise<{ enr
     for (const mt of ['breakfast', 'lunch', 'dinner'] as const) {
       if (count >= MAX) break;
       const meal = day.meals?.[mt];
-      if (!meal?.restaurant || meal.coordinates?.lat) continue;
-      const result = await searchPlace(meal.restaurant, loc);
+      if (!meal?.restaurant) continue;
+      if (meal.coordinates?.lat) {
+        if (locRef && haversine(meal.coordinates, locRef) > 80) {
+          const result = await searchPlace(meal.restaurant, loc, locRef);
+          if (result) { meal.coordinates = result.coordinates; meal.google_maps_url = result.google_maps_url; meal.google_rating = result.rating ?? undefined; count++; }
+        }
+        continue;
+      }
+      const result = await searchPlace(meal.restaurant, loc, locRef);
       if (result) {
         meal.coordinates = result.coordinates;
         meal.google_maps_url = result.google_maps_url;
@@ -143,13 +203,23 @@ async function enrichDays(days: ReturnType<typeof normalizeDays>): Promise<{ enr
     }
 
     // Enrich accommodation
-    if (count < MAX && day.accommodation?.name && !day.accommodation.coordinates?.lat) {
-      const result = await searchPlace(day.accommodation.name, loc);
-      if (result) {
-        day.accommodation.coordinates = result.coordinates;
-        day.accommodation.google_maps_url = result.google_maps_url;
-        day.accommodation.google_rating = result.rating ?? undefined;
-        count++;
+    if (count < MAX && day.accommodation?.name && day.accommodation.name !== 'N/A') {
+      if (!day.accommodation.coordinates?.lat) {
+        const result = await searchPlace(day.accommodation.name, loc, locRef);
+        if (result) {
+          day.accommodation.coordinates = result.coordinates;
+          day.accommodation.google_maps_url = result.google_maps_url;
+          day.accommodation.google_rating = result.rating ?? undefined;
+          count++;
+        }
+      } else if (locRef && haversine(day.accommodation.coordinates, locRef) > 80) {
+        const result = await searchPlace(day.accommodation.name, loc, locRef);
+        if (result) {
+          day.accommodation.coordinates = result.coordinates;
+          day.accommodation.google_maps_url = result.google_maps_url;
+          day.accommodation.google_rating = result.rating ?? undefined;
+          count++;
+        }
       }
     }
   }
