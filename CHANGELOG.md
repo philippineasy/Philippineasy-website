@@ -8,9 +8,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Auth
 - **Fixed** : Session auth bloquee en "loading" indefiniment — ajout fallback `getSession()` quand `onAuthStateChange` ne fire pas (race condition SSR/cookies)
 
-### Itineraire — Photos
-- **Fixed** : Photos ne chargent pas quand il n'y a pas de coordonnees GPS — PlacePhoto cherche par nom seul via Google Places text search
-- **Fixed** : API `/api/places/photo` accepte maintenant les requetes sans lat/lng (recherche par nom)
+### Itineraire — Enrichissement Google Places
+- **Added** : Enrichissement automatique au premier chargement — coordonnees GPS, ratings, liens Google Maps pour chaque lieu
+- **Added** : Ratings affiches sur les cards activites, restaurants et hebergements (ex: 4.3/5)
+- **Added** : Liens Google Maps cliquables sur chaque card (activite, restaurant, hebergement)
+- **Added** : Donnees enrichies sauvegardees en base (`delivered_itinerary`) — enrichissement unique, pas a chaque visite
+- **Added** : Map interactive avec tous les marqueurs (maintenant que les coordonnees sont presentes)
+- **Fixed** : Photos ne chargent pas sans coordonnees GPS — PlacePhoto cherche par nom seul
+- **Fixed** : API `/api/places/photo` accepte les requetes sans lat/lng
+- **Fixed** : Hebergement affiche "cost/nuit/nuit" → retire le doublon "/nuit"
 
 ### Itineraire — PDF
 - **Fixed** : Emojis casses dans le PDF (remplaces par labels texte + icones colorees)

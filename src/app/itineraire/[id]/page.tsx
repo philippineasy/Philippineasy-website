@@ -45,9 +45,9 @@ const ItineraryMap = dynamic(() => import('@/components/itinerary/ItineraryMap')
 
 // Types
 interface Coordinates { lat: number; lng: number; }
-interface Activity { time?: string; name: string; description?: string; coordinates?: Coordinates; }
-interface Meal { restaurant?: string; dish?: string; cost?: string; coordinates?: Coordinates; }
-interface Accommodation { name?: string; type?: string; cost?: string; coordinates?: Coordinates; }
+interface Activity { time?: string; name: string; description?: string; cost?: string; coordinates?: Coordinates; google_maps_url?: string; google_rating?: number; }
+interface Meal { restaurant?: string; dish?: string; cost?: string; coordinates?: Coordinates; google_maps_url?: string; google_rating?: number; }
+interface Accommodation { name?: string; type?: string; cost?: string; coordinates?: Coordinates; google_maps_url?: string; google_rating?: number; }
 interface Transport { method?: string; duration?: string; cost?: string; times?: string; from?: string; to?: string; coordinates?: Coordinates; }
 
 interface Day {
@@ -354,11 +354,16 @@ export default function ItineraryPage({ params }: PageProps) {
                                   </button>
                                 )}
                               </div>
-                              {activity.coordinates && (
-                                <a href={`https://maps.google.com/?q=${activity.coordinates.lat},${activity.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-2 text-xs text-primary font-medium hover:underline">
-                                  <ExternalLink className="w-3 h-3" /> Google Maps
-                                </a>
-                              )}
+                              <div className="flex items-center gap-3 mt-2">
+                                {activity.google_rating && (
+                                  <span className="text-xs text-accent font-semibold">{activity.google_rating.toFixed(1)}/5</span>
+                                )}
+                                {(activity.google_maps_url || activity.coordinates) && (
+                                  <a href={activity.google_maps_url || `https://maps.google.com/?q=${activity.coordinates!.lat},${activity.coordinates!.lng}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary font-medium hover:underline">
+                                    <ExternalLink className="w-3 h-3" /> Google Maps
+                                  </a>
+                                )}
+                              </div>
                             </div>
                           </motion.div>
                         ))}
@@ -400,9 +405,12 @@ export default function ItineraryPage({ params }: PageProps) {
                               <p className="font-semibold text-foreground text-sm">{data.restaurant}</p>
                               {data.dish && <p className="text-xs text-muted-foreground mt-0.5">{data.dish}</p>}
                               <div className="flex items-center justify-between mt-2">
-                                {data.cost && <span className="text-xs font-semibold text-primary">{data.cost}</span>}
-                                {data.coordinates && (
-                                  <a href={`https://maps.google.com/?q=${data.coordinates.lat},${data.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">Maps</a>
+                                <div className="flex items-center gap-2">
+                                  {data.cost && <span className="text-xs font-semibold text-primary">{data.cost}</span>}
+                                  {data.google_rating && <span className="text-xs text-accent font-semibold">{data.google_rating.toFixed(1)}/5</span>}
+                                </div>
+                                {(data.google_maps_url || data.coordinates) && (
+                                  <a href={data.google_maps_url || `https://maps.google.com/?q=${data.coordinates!.lat},${data.coordinates!.lng}`} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">Maps</a>
                                 )}
                               </div>
                             </div>
@@ -441,11 +449,14 @@ export default function ItineraryPage({ params }: PageProps) {
                               <span className="text-xs bg-muted px-2 py-0.5 rounded-md text-muted-foreground">{day.accommodation.type}</span>
                             )}
                             {day.accommodation.cost && (
-                              <span className="text-xs bg-primary/10 px-2 py-0.5 rounded-md text-primary font-medium">{day.accommodation.cost}/nuit</span>
+                              <span className="text-xs bg-primary/10 px-2 py-0.5 rounded-md text-primary font-medium">{day.accommodation.cost}</span>
+                            )}
+                            {day.accommodation.google_rating && (
+                              <span className="text-xs bg-accent/10 px-2 py-0.5 rounded-md text-accent font-semibold">{day.accommodation.google_rating.toFixed(1)}/5</span>
                             )}
                           </div>
-                          {day.accommodation.coordinates && (
-                            <a href={`https://maps.google.com/?q=${day.accommodation.coordinates.lat},${day.accommodation.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-3 text-xs text-primary font-medium hover:underline">
+                          {(day.accommodation.google_maps_url || day.accommodation.coordinates) && (
+                            <a href={day.accommodation.google_maps_url || `https://maps.google.com/?q=${day.accommodation.coordinates!.lat},${day.accommodation.coordinates!.lng}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-3 text-xs text-primary font-medium hover:underline">
                               <ExternalLink className="w-3 h-3" /> Google Maps
                             </a>
                           )}
