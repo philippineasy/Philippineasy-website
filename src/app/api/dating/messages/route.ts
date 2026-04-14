@@ -69,5 +69,12 @@ export async function POST(request: Request) {
       .eq('user_id', user.id);
   }
 
+  // Send message notification to recipient (non-blocking)
+  import('@/emails/senders/dating').then(({ sendMessageNotification }) => {
+    sendMessageNotification(to_user_id, user.id, content).catch((err) =>
+      console.error('Dating message notification error:', err)
+    );
+  });
+
   return NextResponse.json(message);
 }

@@ -87,5 +87,12 @@ export async function POST(request: Request) {
 
   const { data } = await supabase.from('dating_profiles').select().eq('user_id', user.id).single();
 
+  // Send dating welcome email (non-blocking)
+  import('@/emails/senders/dating').then(({ sendDatingWelcome }) => {
+    sendDatingWelcome(user!.id, user!.email!, user!.user_metadata?.username || 'voyageur').catch((err) =>
+      console.error('Dating welcome email error:', err)
+    );
+  });
+
   return NextResponse.json(data);
 }

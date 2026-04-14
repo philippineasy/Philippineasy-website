@@ -119,6 +119,13 @@ export const addForumPost = async (supabase: SupabaseClient, topicId: number, us
         return { data: null, error };
     }
 
+    // Send email notifications to topic participants (non-blocking)
+    import('@/emails/senders/forum').then(({ sendForumReplyNotifications }) => {
+      sendForumReplyNotifications(topicId, userId, content).catch((err) =>
+        console.error('Forum reply notification error:', err)
+      );
+    });
+
     return { data, error: null };
 };
 

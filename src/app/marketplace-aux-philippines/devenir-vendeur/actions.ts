@@ -69,6 +69,17 @@ export async function handleVendorApplication(formData: FormData) {
     return { success: false, message: vendorError.message };
   }
 
+  // Send vendor application confirmation (non-blocking)
+  const userEmail = user.email;
+  if (userEmail) {
+    import('@/emails/senders/marketplace').then(({ sendVendorApplicationConfirmation }) => {
+      const userName = user!.user_metadata?.username || userEmail!.split('@')[0];
+      sendVendorApplicationConfirmation(userEmail!, userName, vendorName).catch((err) =>
+        console.error('Vendor application email error:', err)
+      );
+    });
+  }
+
   revalidatePath('/marketplace-aux-philippines/devenir-vendeur');
   return { success: true };
 }

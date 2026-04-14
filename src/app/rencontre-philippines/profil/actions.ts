@@ -361,6 +361,13 @@ export async function likeUser(toUserId: string) {
     return { error: error.message };
   }
 
+  // Send like notification (non-blocking, dynamic import for server action)
+  import('@/emails/senders/dating').then(({ sendLikeNotification }) => {
+    sendLikeNotification(toUserId, user.id, false).catch((err) =>
+      console.error('Like notification error:', err)
+    );
+  });
+
   revalidatePath(`/rencontre-philippines/profil/${toUserId}`);
   return { success: true };
 }
@@ -394,6 +401,13 @@ export async function superLikeUser(toUserId: string) {
     console.error('Error super liking user:', error);
     return { error: error.message };
   }
+
+  // Send super like notification (non-blocking)
+  import('@/emails/senders/dating').then(({ sendLikeNotification }) => {
+    sendLikeNotification(toUserId, user.id, true).catch((err) =>
+      console.error('Super like notification error:', err)
+    );
+  });
 
   revalidatePath(`/rencontre-philippines/profil/${toUserId}`);
   return { success: true };

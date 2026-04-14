@@ -21,6 +21,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Added** : Email #8 — Bienvenue newsletter (confirmation inscription)
 - **Changed** : `emailService.ts` refactored — delegue au nouveau systeme `src/emails/`
 
+### Systeme d'emails automatiques — Phase 2 (Communaute)
+- **Added** : Email #9 — Notification reponse forum (tous les participants du sujet)
+- **Added** : Email #10 — Notification like dating
+- **Added** : Email #11 — Notification super like dating
+- **Added** : Email #12 — Notification nouveau message dating
+- **Added** : Email #13 — Bienvenue inscription dating (conseils profil)
+- **Added** : Email #14 — Confirmation commande marketplace (acheteur, detail produits + total)
+- **Added** : Email #15 — Notification nouvelle commande marketplace (vendeur)
+- **Added** : Email #16 — Confirmation candidature vendeur marketplace
+
 ### SEO — Sitemap (CRITIQUE)
 - **Fixed** : Sitemap cassé — toutes les requêtes dynamiques Supabase échouaient silencieusement (colonnes `updated_at` inexistantes sur 7/8 tables). Google ne voyait que 15 URLs au lieu de ~96, causant une désindexation progressive (34 → 16 pages indexées)
 - **Fixed** : `articles` → `published_at` au lieu de `updated_at`

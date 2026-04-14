@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { sendItineraryPaymentConfirmation, sendPaymentFailedEmail, sendSubscriptionCancelledEmail } from '@/emails/senders/payment';
+import { sendOrderConfirmation, sendVendorNewOrder } from '@/emails/senders/marketplace';
 import { getUserEmail } from '@/emails/send';
 
 function getStripe() {
@@ -305,6 +306,48 @@ async function handleMarketplacePayment(
     }
 
     console.log(`Successfully processed marketplace order ${order.id} for payment intent ${paymentIntent.id}`);
+
+    // Send order confirmation to buyer
+    const buyer = await getUserEmail(userId);
+    if (buyer) {
+      const itemDetails = parsedCartItems.map((item: any) => ({
+        name: item.name || item.title || `Produit #${item.id}`,
+        qty: item.qty || 1,
+        price: item.price || 0,
+      }));
+
+      sendOrderConfirmation(
+        buyer.email,
+        buyer.name,
+        String(order.id),
+        itemDetails,
+        paymentIntent.amount / 100,
+      ).catch((err) => console.error('Order confirmation email error:', err));
+
+      // Notify each vendor
+      const vendorIds = [...new Set(parsedCartItems.map((item: any) => item.vendor_id).filter(Boolean))];
+      for (const vendorId of vendorIds) {
+        const { data: vendor } = await supabaseAdmin
+          .from('vendors')
+          .select('user_id')
+          .eq('id', vendorId)
+          .single();
+
+        if (vendor?.user_id) {
+          const vendorItems = parsedCartItems
+            .filter((item: any) => item.vendor_id === vendorId)
+            .map((item: any) => ({
+              name: item.name || item.title || `Produit #${item.id}`,
+              qty: item.qty || 1,
+              price: item.price || 0,
+            }));
+
+          sendVendorNewOrder(vendor.user_id, String(order.id), vendorItems, buyer.name).catch((err) =>
+            console.error(`Vendor order notification error for vendor ${vendorId}:`, err)
+          );
+        }
+      }
+    }
   } catch (parseError) {
     console.error(`Failed to parse cart items for payment intent ${paymentIntent.id}:`, parseError);
   }
