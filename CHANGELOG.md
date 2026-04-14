@@ -5,6 +5,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Auth
+- **Fixed** : Session auth bloquee en "loading" indefiniment — ajout fallback `getSession()` quand `onAuthStateChange` ne fire pas (race condition SSR/cookies)
+
 ### Itineraire — PDF
 - **Fixed** : Emojis casses dans le PDF (remplaces par labels texte + icones colorees)
 - **Fixed** : Duree brute "10-days" → traduite en "10 jours" sur la cover

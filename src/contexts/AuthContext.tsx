@@ -67,9 +67,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    // Single source of truth: onAuthStateChange handles everything,
-    // including INITIAL_SESSION which fires when cookies are ready
+    let listenerFired = false;
+
+    // 1. Listen for auth state changes (handles sign in/out, token refresh)
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      listenerFired = true;
       const currentUser = session?.user ?? null;
 
       if (currentUser) {
@@ -80,6 +82,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       setLoading(false);
     });
+
+    // 2. Eagerly check session as well — if onAuthStateChange fires first,
+    // this becomes a no-op. Fixes the race condition where INITIAL_SESSION
+    // never fires (intermittent bug with @supabase/ssr + Next.js middleware).
+    const initSession = async () => {
+      // Small delay to let onAuthStateChange fire first if it's going to
+      await new Promise(r => setTimeout(r, 500));
+      if (listenerFired) return;
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (listenerFired) return; // Listener fired while we were fetching
+        const currentUser = session?.user ?? null;
+        if (currentUser) {
+          setUser(currentUser);
+          await fetchUserData(currentUser);
+        } else {
+          clearUserData();
+        }
+      } catch {
+        if (!listenerFired) clearUserData();
+      }
+      if (!listenerFired) setLoading(false);
+    };
+    initSession();
 
     return () => {
       authListener?.subscription.unsubscribe();
