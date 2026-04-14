@@ -6,8 +6,9 @@ import { faHome, faMap, faBook, faComments, faShoppingBag, faHeart } from '@fort
 export const metadata: Metadata = {
   title: 'Page non trouvée - 404 | Philippin\'Easy',
   description: 'La page que vous cherchez n\'existe pas ou a été déplacée. Découvrez nos guides sur les Philippines, le forum, la marketplace et plus.',
-  alternates: {
-    canonical: 'https://philippineasy.com/404',
+  robots: {
+    index: false,
+    follow: true,
   },
 };
 

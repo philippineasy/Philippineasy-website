@@ -28,7 +28,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     {
       url: `${BASE_URL}/`,
       lastModified: currentDate,
-      changeFrequency: 'yearly',
+      changeFrequency: 'weekly',
       priority: 1,
       images: [
         toSeoImage(`${BASE_URL}/logo-philippineasy.png`, 'hero'),
@@ -60,22 +60,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
       images: [toSeoImage(`${BASE_URL}/imagesHero/couple-rencontre-aux-philippines.webp`, 'hero')],
     },
+    { url: `${BASE_URL}/services`,                        lastModified: currentDate, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${BASE_URL}/contact`,                         lastModified: currentDate, changeFrequency: 'yearly',  priority: 0.5 },
     { url: `${BASE_URL}/application-mobile`,              lastModified: currentDate, changeFrequency: 'yearly', priority: 0.5 },
     { url: `${BASE_URL}/cgu`,                             lastModified: currentDate, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${BASE_URL}/confidentialite`,                 lastModified: currentDate, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${BASE_URL}/mentions-legales`,                lastModified: currentDate, changeFrequency: 'yearly', priority: 0.3 },
-    { url: `${BASE_URL}/connexion`,                       lastModified: currentDate, changeFrequency: 'yearly', priority: 0.5 },
     { url: `${BASE_URL}/itineraire-personnalise-pour-les-philippines`, lastModified: currentDate, changeFrequency: 'monthly', priority: 0.7 },
   ];
 
   /* ---------- Dynamic: Articles ---------- */
-  const { data: articles } = await supabase
+  const { data: articles, error: articlesError } = await supabase
     .from('articles')
-    .select('slug, published_at, updated_at, category:categories(slug, main_category), image')
+    .select('slug, published_at, category:categories(slug, main_category), image')
     .eq('status', 'published');
 
+  if (articlesError) console.error('Sitemap: articles query failed', articlesError.message);
+
   const articlePages: SitemapEntry[] =
-    (articles?.map(({ slug, published_at, updated_at, category, image }) => {
+    (articles?.map(({ slug, published_at, category, image }) => {
       const categoryObject = Array.isArray(category) ? category[0] : category;
       if (!categoryObject || !categoryObject.slug || !categoryObject.main_category) return null;
 
@@ -84,7 +87,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
       return {
         url,
-        lastModified: new Date(updated_at || published_at).toISOString(),
+        lastModified: new Date(published_at).toISOString(),
         changeFrequency: 'weekly' as const,
         priority: 0.7,
         images: image ? [toSeoImage(image, 'articles')] : undefined,
@@ -93,16 +96,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .filter(Boolean) as SitemapEntry[];
 
   /* ---------- Dynamic: Pages avec hero images ---------- */
-  const { data: pages } = await supabase
+  const { data: pages, error: pagesError } = await supabase
     .from('pages')
-    .select('slug, updated_at, hero_image_url');
+    .select('slug, created_at, hero_image_url, section');
+
+  if (pagesError) console.error('Sitemap: pages query failed', pagesError.message);
 
   const pageImages: SitemapEntry[] =
-    (pages?.map(({ slug, updated_at, hero_image_url }) => {
-      if (!hero_image_url) return null;
+    (pages?.map(({ slug, created_at, hero_image_url, section }) => {
+      if (!hero_image_url || !section) return null;
+      const sectionPath = getMainCategoryPath(section);
       return {
-        url: `${BASE_URL}/${slug}`,
-        lastModified: new Date(updated_at).toISOString(),
+        url: `${BASE_URL}/${sectionPath}/${slug}`,
+        lastModified: new Date(created_at).toISOString(),
         changeFrequency: 'monthly' as const,
         priority: 0.6,
         images: [toSeoImage(hero_image_url, 'pages')],
@@ -111,17 +117,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .filter(Boolean) as SitemapEntry[];
 
   /* ---------- Dynamic: Catégories ---------- */
-  const { data: allCategories } = await supabase
+  const { data: allCategories, error: categoriesError } = await supabase
     .from('categories')
-    .select('slug, updated_at, main_category');
+    .select('slug, main_category');
+
+  if (categoriesError) console.error('Sitemap: categories query failed', categoriesError.message);
 
   const categoryPages: SitemapEntry[] =
-    (allCategories?.map(({ slug, updated_at, main_category }) => {
+    (allCategories?.map(({ slug, main_category }) => {
       if (!main_category) return null;
       const mainCategoryPath = getMainCategoryPath(main_category);
       return {
         url: `${BASE_URL}/${mainCategoryPath}/${slug}`,
-        lastModified: new Date(updated_at).toISOString(),
+        lastModified: currentDate,
         changeFrequency: 'weekly' as const,
         priority: 0.6,
       };
@@ -129,26 +137,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .filter(Boolean) as SitemapEntry[];
 
   /* ---------- Dynamic: Forum ---------- */
-  const { data: forumTopics } = await supabase
+  const { data: forumTopics, error: forumTopicsError } = await supabase
     .from('forum_topics')
-    .select('slug, updated_at');
+    .select('slug, last_activity_at');
+
+  if (forumTopicsError) console.error('Sitemap: forum_topics query failed', forumTopicsError.message);
 
   const forumTopicPages: SitemapEntry[] =
-    (forumTopics?.map(({ slug, updated_at }) => ({
+    (forumTopics?.map(({ slug, last_activity_at }) => ({
       url: `${BASE_URL}/forum-sur-les-philippines/sujet/${slug}`,
-      lastModified: new Date(updated_at).toISOString(),
+      lastModified: new Date(last_activity_at).toISOString(),
       changeFrequency: 'daily' as const,
       priority: 0.8,
     })) || []);
 
-  const { data: forumCategories } = await supabase
+  const { data: forumCategories, error: forumCategoriesError } = await supabase
     .from('forum_categories')
-    .select('slug, updated_at');
+    .select('slug, created_at');
+
+  if (forumCategoriesError) console.error('Sitemap: forum_categories query failed', forumCategoriesError.message);
 
   const forumCategoryPages: SitemapEntry[] =
-    (forumCategories?.map(({ slug, updated_at }) => ({
+    (forumCategories?.map(({ slug, created_at }) => ({
       url: `${BASE_URL}/forum-sur-les-philippines/${slug}`,
-      lastModified: new Date(updated_at).toISOString(),
+      lastModified: new Date(created_at).toISOString(),
       changeFrequency: 'weekly' as const,
       priority: 0.7,
     })) || []);
@@ -167,39 +179,45 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       images: Array.isArray(image_urls) ? image_urls.map((u: string) => toSeoImage(u, 'products')) : undefined,
     })) || []);
 
-  const { data: productCategories } = await supabase
+  const { data: productCategories, error: productCategoriesError } = await supabase
     .from('product_categories')
-    .select('slug, updated_at');
+    .select('slug, created_at');
+
+  if (productCategoriesError) console.error('Sitemap: product_categories query failed', productCategoriesError.message);
 
   const productCategoryPages: SitemapEntry[] =
-    (productCategories?.map(({ slug, updated_at }) => ({
+    (productCategories?.map(({ slug, created_at }) => ({
       url: `${BASE_URL}/marketplace-aux-philippines/categorie/${slug}`,
-      lastModified: new Date(updated_at).toISOString(),
+      lastModified: new Date(created_at).toISOString(),
       changeFrequency: 'weekly' as const,
       priority: 0.7,
     })) || []);
 
   /* ---------- Dynamic: Vendeurs ---------- */
-  const { data: vendors } = await supabase
+  const { data: vendors, error: vendorsError } = await supabase
     .from('vendors')
-    .select('id, updated_at');
+    .select('id, created_at');
+
+  if (vendorsError) console.error('Sitemap: vendors query failed', vendorsError.message);
 
   const vendorPages: SitemapEntry[] =
-    (vendors?.map(({ id, updated_at }) => ({
+    (vendors?.map(({ id, created_at }) => ({
       url: `${BASE_URL}/marketplace-aux-philippines/vendeur/${id}`,
-      lastModified: new Date(updated_at).toISOString(),
+      lastModified: new Date(created_at).toISOString(),
       changeFrequency: 'monthly' as const,
       priority: 0.6,
     })) || []);
 
   /* ---------- Dynamic: Profils Rencontre ---------- */
-  const { data: profiles } = await supabase
+  const { data: profiles, error: profilesError } = await supabase
     .from('dating_profiles')
-    .select('id, updated_at');
+    .select('user_id, updated_at');
+
+  if (profilesError) console.error('Sitemap: dating_profiles query failed', profilesError.message);
 
   const profilePages: SitemapEntry[] =
-    (profiles?.map(({ id, updated_at }) => ({
-      url: `${BASE_URL}/rencontre-philippines/profil/${id}`,
+    (profiles?.map(({ user_id, updated_at }) => ({
+      url: `${BASE_URL}/rencontre-philippines/profil/${user_id}`,
       lastModified: new Date(updated_at).toISOString(),
       changeFrequency: 'daily' as const,
       priority: 0.7,
