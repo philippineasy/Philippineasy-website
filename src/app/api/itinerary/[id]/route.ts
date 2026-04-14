@@ -75,17 +75,33 @@ function normalizeDays(days: RawDay[]) {
 // ========== Google Places Enrichment ==========
 
 // Reference coordinates for major Philippine destinations
-const LOCATION_COORDS: Record<string, Coordinates> = {
-  'davao': { lat: 7.1907, lng: 125.4553 }, 'davao city': { lat: 7.1907, lng: 125.4553 },
-  'samal': { lat: 7.1000, lng: 125.7200 }, 'samal island': { lat: 7.1000, lng: 125.7200 },
-  'talikud': { lat: 6.9500, lng: 125.7300 }, 'talikud island': { lat: 6.9500, lng: 125.7300 },
-  'el nido': { lat: 11.1784, lng: 119.3930 }, 'coron': { lat: 11.9986, lng: 120.2043 },
-  'cebu': { lat: 10.3157, lng: 123.8854 }, 'bohol': { lat: 9.8500, lng: 124.1435 },
-  'siargao': { lat: 9.8489, lng: 126.0458 }, 'boracay': { lat: 11.9674, lng: 121.9248 },
-  'manila': { lat: 14.5995, lng: 120.9842 }, 'palawan': { lat: 9.8349, lng: 118.7384 },
-  'panglao': { lat: 9.5742, lng: 123.7621 }, 'general luna': { lat: 9.7900, lng: 126.1170 },
-  'dumaguete': { lat: 9.3068, lng: 123.3054 }, 'moalboal': { lat: 9.9422, lng: 123.3952 },
-  'puerto princesa': { lat: 9.7392, lng: 118.7353 },
+// coords + radius in km (small islands get small radius to avoid cross-island errors)
+const LOCATION_DB: Record<string, { lat: number; lng: number; radius: number }> = {
+  'davao': { lat: 7.1907, lng: 125.4553, radius: 30 },
+  'davao city': { lat: 7.1907, lng: 125.4553, radius: 30 },
+  'samal': { lat: 7.1000, lng: 125.7200, radius: 15 },
+  'samal island': { lat: 7.1000, lng: 125.7200, radius: 15 },
+  'talikud': { lat: 6.9500, lng: 125.7300, radius: 8 },
+  'talikud island': { lat: 6.9500, lng: 125.7300, radius: 8 },
+  'ligid': { lat: 6.9200, lng: 125.7500, radius: 5 },
+  'ligid island': { lat: 6.9200, lng: 125.7500, radius: 5 },
+  'el nido': { lat: 11.1784, lng: 119.3930, radius: 25 },
+  'coron': { lat: 11.9986, lng: 120.2043, radius: 25 },
+  'cebu': { lat: 10.3157, lng: 123.8854, radius: 40 },
+  'cebu city': { lat: 10.3157, lng: 123.8854, radius: 20 },
+  'bohol': { lat: 9.8500, lng: 124.1435, radius: 40 },
+  'siargao': { lat: 9.8489, lng: 126.0458, radius: 25 },
+  'boracay': { lat: 11.9674, lng: 121.9248, radius: 8 },
+  'manila': { lat: 14.5995, lng: 120.9842, radius: 30 },
+  'palawan': { lat: 9.8349, lng: 118.7384, radius: 80 },
+  'panglao': { lat: 9.5742, lng: 123.7621, radius: 10 },
+  'general luna': { lat: 9.7900, lng: 126.1170, radius: 15 },
+  'dumaguete': { lat: 9.3068, lng: 123.3054, radius: 20 },
+  'moalboal': { lat: 9.9422, lng: 123.3952, radius: 15 },
+  'puerto princesa': { lat: 9.7392, lng: 118.7353, radius: 30 },
+  'oslob': { lat: 9.4692, lng: 123.3803, radius: 15 },
+  'camiguin': { lat: 9.1733, lng: 124.7292, radius: 15 },
+  'batanes': { lat: 20.4487, lng: 121.9710, radius: 20 },
 };
 
 function haversine(c1: Coordinates, c2: Coordinates): number {
@@ -96,12 +112,12 @@ function haversine(c1: Coordinates, c2: Coordinates): number {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-function getLocationRef(location: string): Coordinates | null {
+function getLocationRef(location: string): { lat: number; lng: number; radius: number } | null {
   const key = location.toLowerCase().trim();
-  return LOCATION_COORDS[key] || null;
+  return LOCATION_DB[key] || null;
 }
 
-async function searchPlace(name: string, locationHint?: string, locationRef?: Coordinates | null): Promise<{
+async function searchPlace(name: string, locationHint?: string, locationRef?: { lat: number; lng: number; radius: number } | null): Promise<{
   coordinates: Coordinates; rating: number | null; google_maps_url: string;
 } | null> {
   if (!PLACES_API_KEY || !name || name === 'N/A') return null;
@@ -115,7 +131,7 @@ async function searchPlace(name: string, locationHint?: string, locationRef?: Co
     // Bias toward the day's location if known
     if (locationRef) {
       textBody.locationBias = {
-        circle: { center: { latitude: locationRef.lat, longitude: locationRef.lng }, radius: 30000 },
+        circle: { center: { latitude: locationRef.lat, longitude: locationRef.lng }, radius: locationRef.radius * 1000 },
       };
     }
 
@@ -136,10 +152,10 @@ async function searchPlace(name: string, locationHint?: string, locationRef?: Co
     const lng = place.location.longitude;
     if (lat < 4.5 || lat > 21.5 || lng < 116 || lng > 127) return null;
 
-    // Validate: if we have a location reference, reject results too far away (>80km)
+    // Validate: reject results outside the destination's radius
     if (locationRef) {
       const dist = haversine({ lat, lng }, locationRef);
-      if (dist > 80) return null; // Too far from expected location
+      if (dist > locationRef.radius) return null;
     }
 
     return {
@@ -165,7 +181,7 @@ async function enrichDays(days: ReturnType<typeof normalizeDays>): Promise<{ enr
       if (count >= MAX) break;
       if (act.coordinates?.lat) {
         // Validate existing coords against location
-        if (locRef && haversine(act.coordinates, locRef) > 80) {
+        if (locRef && haversine(act.coordinates, locRef) > locRef.radius) {
           // Bad coords — re-search
           const result = await searchPlace(act.name, loc, locRef);
           if (result) { act.coordinates = result.coordinates; act.google_maps_url = result.google_maps_url; act.google_rating = result.rating ?? undefined; count++; }
@@ -187,7 +203,7 @@ async function enrichDays(days: ReturnType<typeof normalizeDays>): Promise<{ enr
       const meal = day.meals?.[mt];
       if (!meal?.restaurant) continue;
       if (meal.coordinates?.lat) {
-        if (locRef && haversine(meal.coordinates, locRef) > 80) {
+        if (locRef && haversine(meal.coordinates, locRef) > locRef.radius) {
           const result = await searchPlace(meal.restaurant, loc, locRef);
           if (result) { meal.coordinates = result.coordinates; meal.google_maps_url = result.google_maps_url; meal.google_rating = result.rating ?? undefined; count++; }
         }
@@ -212,7 +228,7 @@ async function enrichDays(days: ReturnType<typeof normalizeDays>): Promise<{ enr
           day.accommodation.google_rating = result.rating ?? undefined;
           count++;
         }
-      } else if (locRef && haversine(day.accommodation.coordinates, locRef) > 80) {
+      } else if (locRef && haversine(day.accommodation.coordinates, locRef) > locRef.radius) {
         const result = await searchPlace(day.accommodation.name, loc, locRef);
         if (result) {
           day.accommodation.coordinates = result.coordinates;
