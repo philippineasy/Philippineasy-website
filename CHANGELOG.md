@@ -5,6 +5,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Images categories Voyager
+- **Added** : 4 hero images AI pour les categories voyager-aux-philippines (Palawan, Cebu & Visayas, Siargao, Conseils Voyage)
+- **Added** : Images compressees PNG ~9MB → WebP ~120-190KB, uploadees dans Supabase storage
+- **Fixed** : Lien parasite `#palawan-quand` sur la homepage → corrige vers `/voyager-aux-philippines/quand-partir`
+
 ### Systeme d'emails automatiques — Phase 1
 - **Added** : Infrastructure email complete (`src/emails/`) — config, types, templates branded, send unifie, gestion desinscription
 - **Added** : Template HTML brande Philippin'Easy — header bleu #4A7FD6 avec logo, barre accent orange #F5A623, footer avec desinscription
