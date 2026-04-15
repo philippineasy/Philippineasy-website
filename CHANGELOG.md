@@ -5,6 +5,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Articles republies
+- **Fixed** : 3 articles n8n republies apres correction des liens internes casses (`/blog/xxx/` → URLs correctes)
+- **Published** : "Saisies de contrefacons a Binondo" (actualites)
+- **Published** : "CHR condamne les remarques sexistes de Bong Suntay" (actualites)
+- **Published** : "Arrestation miniere illegale a Cagayan" (actualites)
+
 ### Images categories Voyager
 - **Added** : 4 hero images AI pour les categories voyager-aux-philippines (Palawan, Cebu & Visayas, Siargao, Conseils Voyage)
 - **Added** : Images compressees PNG ~9MB → WebP ~120-190KB, uploadees dans Supabase storage
