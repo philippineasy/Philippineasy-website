@@ -135,7 +135,7 @@ export default async function HomePage() {
                             <div>
                                 <h4 className="font-bold">Quand Visiter Palawan ?</h4>
                                 <p className="text-sm text-muted-foreground">Climat, affluence, événements... Choisissez la meilleure période pour El Nido et Coron.</p>
-                                <Link href="/voyager-aux-philippines#palawan-quand" className="text-sm text-primary hover:underline mt-1 inline-block">Meilleure saison →</Link>
+                                <Link href="/voyager-aux-philippines/quand-partir" className="text-sm text-primary hover:underline mt-1 inline-block">Meilleure saison →</Link>
                             </div>
                         </div>
                         <div className="feature-card bg-muted p-4 rounded-lg shadow flex items-start space-x-4">
