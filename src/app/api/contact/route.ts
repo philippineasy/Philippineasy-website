@@ -98,9 +98,12 @@ function isValidSubject(value: unknown): value is Subject {
 }
 
 // ---------------------------------------------------------------------------
-// Email HTML template
+// Admin notification email — uses branded template
 // ---------------------------------------------------------------------------
-function buildEmailHtml(
+import { buildEmailHtml } from '@/emails/templates/base';
+import { emailInfoBox } from '@/emails/templates/components';
+
+function buildAdminNotificationHtml(
   name: string,
   email: string,
   subject: string,
@@ -112,84 +115,27 @@ function buildEmailHtml(
     .replace(/>/g, '&gt;')
     .replace(/\n/g, '<br>');
 
-  return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:40px 20px;">
-    <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.07);">
+  const bodyHtml = `
+    ${emailInfoBox([
+      { label: 'Nom', value: name },
+      { label: 'Email', value: `<a href="mailto:${email}" style="color:#4A7FD6;text-decoration:none;">${email}</a>` },
+      { label: 'Sujet', value: subject },
+    ])}
 
-          <!-- Header -->
-          <tr>
-            <td style="background-color:#4A7FD6;padding:28px 40px;text-align:center;">
-              <h1 style="color:#ffffff;font-size:22px;margin:0;font-weight:700;">
-                Nouveau message de contact
-              </h1>
-            </td>
-          </tr>
+    <p style="margin:16px 0 8px;font-size:13px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Message</p>
+    <div style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px 20px;font-size:14px;color:#0f172a;line-height:1.7;">
+      ${escapedMessage}
+    </div>
+  `;
 
-          <!-- Content -->
-          <tr>
-            <td style="padding:32px 40px;">
-
-              <!-- Sender info -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
-                <tr>
-                  <td style="background-color:#f8fafc;padding:12px 16px;width:120px;font-size:13px;color:#64748b;font-weight:600;vertical-align:top;">Nom</td>
-                  <td style="padding:12px 16px;font-size:14px;color:#0f172a;">${name}</td>
-                </tr>
-                <tr>
-                  <td style="background-color:#f8fafc;padding:12px 16px;font-size:13px;color:#64748b;font-weight:600;border-top:1px solid #e2e8f0;vertical-align:top;">Email</td>
-                  <td style="padding:12px 16px;font-size:14px;color:#0f172a;border-top:1px solid #e2e8f0;">
-                    <a href="mailto:${email}" style="color:#4A7FD6;text-decoration:none;">${email}</a>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="background-color:#f8fafc;padding:12px 16px;font-size:13px;color:#64748b;font-weight:600;border-top:1px solid #e2e8f0;vertical-align:top;">Sujet</td>
-                  <td style="padding:12px 16px;font-size:14px;color:#0f172a;border-top:1px solid #e2e8f0;">${subject}</td>
-                </tr>
-              </table>
-
-              <!-- Message -->
-              <p style="margin:0 0 8px;font-size:13px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Message</p>
-              <div style="background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px 20px;font-size:14px;color:#0f172a;line-height:1.7;">
-                ${escapedMessage}
-              </div>
-
-              <!-- Reply CTA -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;">
-                <tr>
-                  <td align="center">
-                    <a href="mailto:${email}?subject=Re: ${encodeURIComponent(subject)}"
-                       style="display:inline-block;background-color:#4A7FD6;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:600;">
-                      Repondre a ${name}
-                    </a>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td style="background-color:#f8fafc;padding:16px 40px;text-align:center;border-top:1px solid #e2e8f0;">
-              <p style="color:#94a3b8;font-size:12px;margin:0;">
-                Philippineasy — Formulaire de contact
-              </p>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
+  return buildEmailHtml({
+    title: 'Nouveau message de contact',
+    preheader: `Message de ${name} — ${subject}`,
+    bodyHtml,
+    ctaText: `Repondre a ${name}`,
+    ctaUrl: `mailto:${email}?subject=Re: ${encodeURIComponent(subject)}`,
+    footerText: "Philippin'Easy — Formulaire de contact",
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -256,7 +202,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       to: 'contact@philippineasy.com',
       replyTo: safeEmail,
       subject: `[Contact] ${subject} — ${safeName}`,
-      html: buildEmailHtml(safeName, safeEmail, subject, safeMessage),
+      html: buildAdminNotificationHtml(safeName, safeEmail, subject, safeMessage),
     });
 
     if (resendError) {

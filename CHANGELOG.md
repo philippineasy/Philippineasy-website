@@ -45,6 +45,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Added** : Logging des emails inbound (recus sur contact@philippineasy.com) dans email_log
 - **Added** : Email vendeur approuve branche sur l'action admin d'approbation
 - **Added** : Email notification CRM branche sur `sendMessage()` quand un admin envoie un message
+- **Added** : Email #22 — Guide PDF pret (branche dans activationService pour `guide_pdf_*`)
+- **Added** : Email #23 — Feedback post-voyage (cron daily 9h UTC, 3j apres fin itineraire)
+- **Added** : Email #25 — Nouvel article publie → notification newsletter subscribers
+- **Added** : Email #26 — Anniversaire inscription (cron daily 10h UTC, 1 an apres signup)
+- **Added** : Rate-limiting emails communaute — max 1 email/30min par destinataire (evite le spam de likes)
+- **Added** : Page preferences email `/api/email/preferences` — toggles par categorie (communaute, newsletter, services) accessible via token sans login
+- **Changed** : Email admin contact refactored avec le nouveau template brande (header logo + barre orange)
 
 ### SEO — Sitemap (CRITIQUE)
 - **Fixed** : Sitemap cassé — toutes les requêtes dynamiques Supabase échouaient silencieusement (colonnes `updated_at` inexistantes sur 7/8 tables). Google ne voyait que 15 URLs au lieu de ~96, causant une désindexation progressive (34 → 16 pages indexées)

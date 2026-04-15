@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
-import { createArticleFromN8n } from '@/services/articleService'; // This function will be created next
+import { createArticleFromN8n } from '@/services/articleService';
+import { notifyNewArticle } from '@/emails/senders/article-notify';
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -51,6 +52,13 @@ export async function POST(request: Request) {
     if (error) {
       console.error('Error creating article from n8n:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // Notify newsletter subscribers if article is published
+    if (status === 'published' && newArticle) {
+      notifyNewArticle(supabase, title, slug, category_id, image_url).catch((err) =>
+        console.error('Article notification error:', err)
+      );
     }
 
     return NextResponse.json({ message: 'Article created successfully', article: newArticle }, { status: 201 });

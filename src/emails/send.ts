@@ -17,8 +17,36 @@ function getResend(): Resend {
   return resendInstance;
 }
 
+// In-memory rate limiter for community emails
+const rateLimitCache = new Map<string, number>();
+
+function isEmailRateLimited(to: string, category: string): boolean {
+  if (category !== 'community') return false;
+
+  const key = `${to}:${category}`;
+  const lastSent = rateLimitCache.get(key);
+  const now = Date.now();
+  const cooldownMs = 30 * 60 * 1000; // 30 minutes between community emails per recipient
+
+  if (lastSent && now - lastSent < cooldownMs) {
+    return true;
+  }
+
+  rateLimitCache.set(key, now);
+
+  // Clean old entries every 100 inserts
+  if (rateLimitCache.size > 500) {
+    const cutoff = now - cooldownMs;
+    for (const [k, v] of rateLimitCache) {
+      if (v < cutoff) rateLimitCache.delete(k);
+    }
+  }
+
+  return false;
+}
+
 /**
- * Send an email with preference checking.
+ * Send an email with preference checking and rate limiting.
  * Transactional emails are always sent. Other categories check user preferences.
  */
 export async function sendEmail(params: SendEmailParams): Promise<{ success: boolean; error?: string }> {
@@ -30,6 +58,11 @@ export async function sendEmail(params: SendEmailParams): Promise<{ success: boo
     if (!shouldSend) {
       return { success: true }; // Silently skip — user opted out
     }
+  }
+
+  // Rate limit community emails (max 1 per 30 min per recipient)
+  if (isEmailRateLimited(to, category)) {
+    return { success: true }; // Silently skip — rate limited
   }
 
   try {

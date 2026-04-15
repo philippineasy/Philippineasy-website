@@ -7,6 +7,14 @@
     {
       "path": "/api/cron/expiration-reminders",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/feedback-request",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/anniversary",
+      "schedule": "0 10 * * *"
     }
   ],
   "redirects": [

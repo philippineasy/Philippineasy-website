@@ -3,6 +3,7 @@ import type { ServiceType } from '@/types/services';
 import { PACK_ENTITLEMENTS } from '@/types/services';
 import { createEntitlements } from './entitlementService';
 import { sendServicePurchaseConfirmation } from '@/emails/senders/payment';
+import { sendGuidePdfReady } from '@/emails/senders/lifecycle';
 import { getUserEmail } from '@/emails/send';
 
 /**
@@ -55,7 +56,16 @@ export async function activateService(supabase: SupabaseClient, purchaseId: stri
     } else if (serviceType === 'rencontre_premium') {
       await activateRencontrePremium(supabase, userId);
     }
-    // guide_pdf_* only need entitlements — no extra activation
+    // guide_pdf_* — send download notification
+    if (serviceType.startsWith('guide_pdf_')) {
+      const guideUser = await getUserEmail(userId);
+      if (guideUser) {
+        const guideName = serviceType.replace('guide_pdf_', '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+        sendGuidePdfReady(guideUser.email, guideUser.name, guideName).catch((err) =>
+          console.error('Guide PDF email error:', err)
+        );
+      }
+    }
 
     // Mark as active
     const now = new Date().toISOString();

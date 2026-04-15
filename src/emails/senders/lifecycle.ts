@@ -207,3 +207,147 @@ export async function sendAdminMessageNotification(
     userId,
   });
 }
+
+/** Guide PDF ready — after guide entitlement activation */
+export async function sendGuidePdfReady(to: string, userName: string, guideName: string) {
+  const bodyHtml = `
+    <p style="font-size:14px;line-height:1.7;margin:0 0 16px;">
+      Votre guide <strong>"${guideName}"</strong> est pret a telecharger !
+    </p>
+
+    ${emailHighlightBox("Rendez-vous dans votre espace personnel pour telecharger votre guide au format PDF.", 'success')}
+
+    ${emailMutedText('Ce guide est accessible a tout moment depuis votre espace personnel.')}
+  `;
+
+  const html = buildEmailHtml({
+    title: 'Votre guide est pret !',
+    preheader: `${userName}, votre guide "${guideName}" est disponible en telechargement.`,
+    userName,
+    bodyHtml,
+    ctaText: 'Telecharger mon guide',
+    ctaUrl: `${BRAND.siteUrl}/mon-espace`,
+  });
+
+  return sendEmail({
+    to,
+    from: 'commandes',
+    subject: `Votre guide "${guideName}" est pret !`,
+    html,
+    category: 'transactional',
+  });
+}
+
+/** Feedback request 3 days after trip end */
+export async function sendFeedbackRequest(userId: string, to: string, userName: string, destination: string) {
+  const unsubscribeUrl = await getUnsubscribeUrl(userId, 'marketing');
+
+  const bodyHtml = `
+    <p style="font-size:14px;line-height:1.7;margin:0 0 16px;">
+      Nous esperons que votre voyage a <strong>${destination}</strong> s'est bien passe !
+    </p>
+
+    <p style="font-size:14px;line-height:1.7;margin:0 0 16px;">
+      Votre retour nous aide a ameliorer nos itineraires pour les futurs voyageurs. Ca ne prend que 2 minutes !
+    </p>
+
+    ${emailHighlightBox("Partagez votre experience sur le forum — vos conseils aideront d'autres francophones a preparer leur voyage.", 'info')}
+  `;
+
+  const html = buildEmailHtml({
+    title: 'Comment s\'est passe votre voyage ?',
+    preheader: `${userName}, racontez-nous votre voyage a ${destination} !`,
+    userName,
+    bodyHtml,
+    ctaText: 'Partager mon experience',
+    ctaUrl: `${BRAND.siteUrl}/forum-sur-les-philippines`,
+    unsubscribeUrl,
+  });
+
+  return sendEmail({
+    to,
+    from: 'bienvenue',
+    subject: `Comment s'est passe votre voyage a ${destination} ?`,
+    html,
+    category: 'marketing',
+    userId,
+  });
+}
+
+/** New article published — notify newsletter subscribers */
+export async function sendNewArticleNotification(
+  to: string,
+  articleTitle: string,
+  articleUrl: string,
+  articleImage: string | null,
+  unsubscribeUrl: string,
+) {
+  const imageBlock = articleImage
+    ? `<img src="${articleImage}" alt="${articleTitle}" style="width:100%;max-width:560px;border-radius:10px;margin:0 0 16px;" />`
+    : '';
+
+  const bodyHtml = `
+    <p style="font-size:14px;line-height:1.7;margin:0 0 16px;">
+      Un nouvel article vient d'etre publie sur Philippin'Easy :
+    </p>
+
+    ${imageBlock}
+
+    <h2 style="color:${BRAND.text};font-size:18px;margin:8px 0 16px;">
+      <a href="${articleUrl}" style="color:${BRAND.primaryBlue};text-decoration:none;">${articleTitle}</a>
+    </h2>
+  `;
+
+  const html = buildEmailHtml({
+    title: 'Nouvel article !',
+    preheader: `Nouvel article : ${articleTitle}`,
+    bodyHtml,
+    ctaText: 'Lire l\'article',
+    ctaUrl: articleUrl,
+    unsubscribeUrl,
+  });
+
+  return sendEmail({
+    to,
+    from: 'newsletter',
+    subject: `Nouvel article : ${articleTitle}`,
+    html,
+    category: 'marketing',
+  });
+}
+
+/** Anniversary email — 1 year after signup */
+export async function sendAnniversaryEmail(userId: string, to: string, userName: string) {
+  const unsubscribeUrl = await getUnsubscribeUrl(userId, 'marketing');
+
+  const bodyHtml = `
+    <p style="font-size:15px;line-height:1.7;margin:0 0 16px;">
+      Ca fait deja <strong>1 an</strong> que tu fais partie de la communaute Philippin'Easy !
+    </p>
+
+    ${emailHighlightBox("Merci pour ta fidelite. Tu fais partie des membres qui rendent cette communaute unique !", 'success')}
+
+    <p style="font-size:14px;line-height:1.7;margin:16px 0;">
+      Depuis ton inscription, la communaute n'a cesse de grandir. Continue a partager, a decouvrir et a inspirer !
+    </p>
+  `;
+
+  const html = buildEmailHtml({
+    title: 'Joyeux anniversaire !',
+    preheader: `${userName}, ca fait 1 an que tu es avec nous !`,
+    userName,
+    bodyHtml,
+    ctaText: 'Visiter le site',
+    ctaUrl: BRAND.siteUrl,
+    unsubscribeUrl,
+  });
+
+  return sendEmail({
+    to,
+    from: 'bienvenue',
+    subject: `${userName}, 1 an deja avec Philippin'Easy !`,
+    html,
+    category: 'marketing',
+    userId,
+  });
+}
