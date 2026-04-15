@@ -44,7 +44,28 @@ export async function handleVendorApproval(vendorId: number, userId: string, sta
     }
   }
 
-  // 3. Revalidate the path to refresh the data on the admin page
+  // 3. Send email notification
+  if (status === 'approved') {
+    const { data: vendor } = await supabase
+      .from('vendors')
+      .select('name')
+      .eq('id', vendorId)
+      .single();
+
+    import('@/emails/send').then(({ getUserEmail }) => {
+      getUserEmail(userId).then((user) => {
+        if (user) {
+          import('@/emails/senders/lifecycle').then(({ sendVendorApproved }) => {
+            sendVendorApproved(user.email, user.name, vendor?.name || 'Votre boutique').catch((err) =>
+              console.error('Vendor approved email error:', err)
+            );
+          });
+        }
+      });
+    });
+  }
+
+  // 4. Revalidate the path to refresh the data on the admin page
   revalidatePath('/admin/vendors');
 
   return { success: true };

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { createServiceRoleClient } from '@/utils/supabase/service-role';
 
 function getResend() {
   const key = process.env.RESEND_API_KEY;
@@ -51,6 +52,19 @@ export async function POST(request: NextRequest) {
       console.error('Failed to forward email:', error);
       return NextResponse.json({ error: 'Forward failed' }, { status: 500 });
     }
+
+    // Log inbound email
+    try {
+      const supabase = createServiceRoleClient();
+      await supabase.from('email_log').insert({
+        email_to: 'contact@philippineasy.com',
+        email_from: sender,
+        subject: subject || '(sans sujet)',
+        category: 'inbound',
+        status: 'forwarded',
+        direction: 'inbound',
+      });
+    } catch { /* silent */ }
 
     // Send Telegram alert
     const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;

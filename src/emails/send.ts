@@ -43,14 +43,44 @@ export async function sendEmail(params: SendEmailParams): Promise<{ success: boo
 
     if (error) {
       console.error(`Email send error [${from}→${to}]:`, error.message);
+      logEmail(userId, to, EMAIL_FROM[from], subject, category, 'failed').catch(() => {});
       return { success: false, error: error.message };
     }
+
+    // Log successful send
+    logEmail(userId, to, EMAIL_FROM[from], subject, category, 'sent').catch(() => {});
 
     return { success: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown email error';
     console.error(`Email send exception [${from}→${to}]:`, message);
+    logEmail(userId, to, EMAIL_FROM[from], subject, category, 'error').catch(() => {});
     return { success: false, error: message };
+  }
+}
+
+/** Log email to database for history tracking */
+async function logEmail(
+  userId: string | undefined,
+  to: string,
+  from: string,
+  subject: string,
+  category: string,
+  status: string,
+) {
+  try {
+    const supabase = createServiceRoleClient();
+    await supabase.from('email_log').insert({
+      user_id: userId || null,
+      email_to: to,
+      email_from: from,
+      subject,
+      category,
+      status,
+      direction: 'outbound',
+    });
+  } catch {
+    // Silent fail — logging should never block email delivery
   }
 }
 

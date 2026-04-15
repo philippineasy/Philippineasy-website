@@ -90,6 +90,21 @@ export const sendMessage = async (
     return { data: null, error };
   }
 
+  // Send email notification if admin sends a message to customer
+  if (isAdminMessage && toUserId) {
+    import('@/emails/send').then(({ getUserEmail }) => {
+      getUserEmail(toUserId!).then((user) => {
+        if (user) {
+          import('@/emails/senders/lifecycle').then(({ sendAdminMessageNotification }) => {
+            sendAdminMessageNotification(toUserId!, user.email, user.name, content).catch((err) =>
+              console.error('Admin CRM message notification error:', err)
+            );
+          });
+        }
+      });
+    });
+  }
+
   // Update conversation last_message_at and status
   const newStatus = isAdminMessage ? 'waiting_customer' : 'waiting_admin';
   await supabase

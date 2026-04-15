@@ -40,6 +40,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Added** : Cron jobs Vercel (`vercel.json`) pour rappels appels et expirations
 - **Added** : Colonne `reminder_sent_at` sur `call_bookings` pour eviter doublons
 - **Added** : Variable `CRON_SECRET` pour securiser les endpoints cron
+- **Added** : Table `email_log` — historique complet des emails envoyes et recus par utilisateur (direction, status, categorie)
+- **Added** : Logging automatique dans `sendEmail()` — chaque email envoye/echoue est trace en base
+- **Added** : Logging des emails inbound (recus sur contact@philippineasy.com) dans email_log
+- **Added** : Email vendeur approuve branche sur l'action admin d'approbation
+- **Added** : Email notification CRM branche sur `sendMessage()` quand un admin envoie un message
 
 ### SEO — Sitemap (CRITIQUE)
 - **Fixed** : Sitemap cassé — toutes les requêtes dynamiques Supabase échouaient silencieusement (colonnes `updated_at` inexistantes sur 7/8 tables). Google ne voyait que 15 URLs au lieu de ~96, causant une désindexation progressive (34 → 16 pages indexées)
