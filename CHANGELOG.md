@@ -5,6 +5,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Tracking & Analytics — RGPD Consent Mode + Event Tracking
+- **Added** : Consent mode v2 RGPD — GA4 et Meta Pixel demarrent avec consentement refuse par defaut, mis a jour dynamiquement quand l'utilisateur accepte/refuse via CookieBanner
+- **Fixed** : CookieBanner etait decoratif (console.log placeholder) — maintenant branche a GA4 (`gtag consent`) et Meta Pixel (`fbq consent`) via CustomEvent
+- **Added** : Module `src/lib/analytics.ts` — 12 fonctions de tracking GA4 (purchase, begin_checkout, generate_lead, sign_up, newsletter_signup, cta_clicked, exit_intent, dating, services)
+- **Added** : Module `src/lib/meta-pixel.ts` — 9 fonctions Meta Pixel (Purchase, InitiateCheckout, Lead, ViewContent, CompleteRegistration, custom events)
+- **Added** : Tracking integre dans checkout itineraire (begin_checkout + purchase), checkout marketplace (purchase), checkout services (purchase), formulaire contact (generate_lead), newsletter footer + lead magnets + exit intent (newsletter_signup + Lead)
+- **Fixed** : Reference fantome `news-sitemap.xml` retiree de `robots.txt` (fichier n'existait pas)
+- **Added** : `NEXT_PUBLIC_META_PIXEL_ID` configure sur Vercel (production, preview, development)
+
+### MCP & Outils Claude Code
+- **Added** : MCP Google Analytics (`uvx analytics-mcp`) — acces GA4 Data API pour rapports et metriques
+- **Added** : MCP Google Search Console (`uvx mcp-gsc`) — acces GSC pour requetes, impressions, clics, positions
+- **Added** : Service Account Google (`indexing-service@api-new-472306`) ajoute comme Editeur dans GA4
+- **Added** : APIs activees dans Google Cloud : Analytics Data API + Search Console API
+- **Added** : Fichier `.mcp.json` pour configuration projet Claude Code
+
 ### Articles republies
 - **Fixed** : 3 articles n8n republies apres correction des liens internes casses (`/blog/xxx/` → URLs correctes)
 - **Published** : "Saisies de contrefacons a Binondo" (actualites)
