@@ -5,6 +5,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Systeme d'affiliation — Page /partenaires + Recommandations contextuelles
+- **Added** : Composant `AffiliateLink` — liens `rel="sponsored"` avec tracking GA4 (cta_clicked)
+- **Added** : Composant `AffiliateRecommendation` — bloc recommandation reutilisable avec cards partenaires
+- **Added** : Page `/partenaires` — hub central avec 7 partenaires (Booking, Chapka, AVI, Wise, Airalo, NordVPN, Klook), badges "Recommande", disclaimer transparence
+- **Added** : Recommandations affiliees sur 8 pages : budget (Booking+Wise), communication (Airalo+NordVPN), sante-securite (Chapka+NordVPN), palawan (Booking+Klook), cebu-visayas (Booking+Klook), siargao (Booking+Klook), carte-sim (Airalo), banque-assurance (Wise+Chapka)
+- **Added** : Liens affilies Klook reels avec tracking (aid=118789) sur 4 pages
+
 ### Tracking & Analytics — RGPD Consent Mode + Event Tracking
 - **Added** : Consent mode v2 RGPD — GA4 et Meta Pixel demarrent avec consentement refuse par defaut, mis a jour dynamiquement quand l'utilisateur accepte/refuse via CookieBanner
 - **Fixed** : CookieBanner etait decoratif (console.log placeholder) — maintenant branche a GA4 (`gtag consent`) et Meta Pixel (`fbq consent`) via CustomEvent
