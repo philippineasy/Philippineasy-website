@@ -2,8 +2,9 @@ import { Metadata } from 'next';
 import { HeroThematic } from '@/components/ui/HeroThematic';
 import { AlternatingContent } from '@/components/ui/AlternatingContent';
 import { KeyStatCard } from '@/components/ui/KeyStatCard';
-import { faWallet, faBed, faUtensils } from '@fortawesome/free-solid-svg-icons';
+import { faWallet, faBed, faUtensils, faHotel, faMoneyBillTransfer } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
+import { AffiliateRecommendation } from '@/components/affiliate/AffiliateRecommendation';
 import { createClient } from '@/utils/supabase/server';
 import { getPageBySlug } from '@/services/pageService';
 import { notFound } from 'next/navigation';
@@ -114,6 +115,30 @@ const BudgetPage = async () => {
           <Link href="/voyager-aux-philippines/budget/hebergement" className="text-accent font-bold hover:underline mt-4 inline-block">Comment trouver les meilleurs hôtels →</Link>
         </AlternatingContent>
       </div>
+
+      <AffiliateRecommendation
+        title="Nos recommandations pour economiser"
+        icon={faHotel}
+        location="budget_page"
+        items={[
+          {
+            name: 'Booking.com',
+            description:
+              "Reservez a l'avance en haute saison (decembre-mai). Les meilleurs hotels partent vite, surtout a El Nido et Siargao. Annulation gratuite sur la plupart des reservations.",
+            advantage: 'Prix negocie + annulation gratuite',
+            url: 'https://www.booking.com/country/ph.fr.html',
+            recommended: true,
+          },
+          {
+            name: 'Wise',
+            description:
+              "Ne changez PAS a l'aeroport (taux horrible). Avec la carte Wise, vous payez au taux de change reel sans frais de conversion. Compte multi-devises EUR + PHP.",
+            advantage: 'Economisez 3-5% sur chaque transaction EUR → PHP',
+            url: 'https://wise.com/fr/send-money/send-money-to-philippines',
+            recommended: true,
+          },
+        ]}
+      />
 
     </div>
   );

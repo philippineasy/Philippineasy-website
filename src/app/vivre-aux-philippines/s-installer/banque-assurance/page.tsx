@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import { Landmark, Shield, CreditCard, Hospital, AlertTriangle, CheckCircle, ExternalLink, DollarSign, FileText, Heart, Building, ChevronRight, Smartphone, Users, Clock, Globe } from 'lucide-react';
 import { HeroThematic } from '@/components/ui/HeroThematic';
 import Link from 'next/link';
+import { faMoneyBillTransfer } from '@fortawesome/free-solid-svg-icons';
+import { AffiliateRecommendation } from '@/components/affiliate/AffiliateRecommendation';
 
 export const metadata: Metadata = {
   title: "Banque et Assurance aux Philippines 2026 : Guide Expatrié | Philippineasy",
@@ -531,6 +533,29 @@ const BanqueAssurancePage = () => {
             </div>
           </div>
         </section>
+
+        {/* Affiliate recommendations */}
+        <AffiliateRecommendation
+          title="Nos recommandations pour les expats"
+          icon={faMoneyBillTransfer}
+          location="banque_assurance_page"
+          items={[
+            {
+              name: 'Wise',
+              description: 'Compte multi-devises EUR + PHP + USD. Recevez votre salaire en euros, convertissez au taux reel, et payez en PHP avec la carte Wise. 16 millions d\'utilisateurs.',
+              advantage: 'Economisez 3-5% vs banques traditionnelles — 0 frais mensuels',
+              url: 'https://wise.com/fr/send-money/send-money-to-philippines',
+              recommended: true,
+            },
+            {
+              name: 'Chapka',
+              description: "Pour les expats: Cap Expatrie couvre les frais medicaux, hospitalisation et rapatriement aux Philippines. Alternative aux HMO locales pour une couverture complete.",
+              advantage: 'Couverture monde entier — rapatriement inclus',
+              url: 'https://www.chapkadirect.fr/assurance-voyage.html',
+              recommended: true,
+            },
+          ]}
+        />
 
         {/* Navigation */}
         <section className="border-t border-gray-200 pt-12">

@@ -2,11 +2,12 @@ import { Metadata } from 'next';
 import { HeroThematic } from '../../../components/ui/HeroThematic';
 import { AlternatingContent } from '../../../components/ui/AlternatingContent';
 import { KeyStatCard } from '../../../components/ui/KeyStatCard';
-import { faWater, faChurch, faHippo } from '@fortawesome/free-solid-svg-icons';
+import { faWater, faChurch, faHippo, faUmbrellaBeach } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
 import { createClient } from '../../../utils/supabase/server';
 import { getArticlesByCategorySlug } from '../../../services/articleService';
 import ArticleList from '../../../components/shared/ArticleList';
+import { AffiliateRecommendation } from '@/components/affiliate/AffiliateRecommendation';
 
 export const metadata: Metadata = {
   title: 'Cebu et les Visayas : Le Cœur des Philippines',
@@ -100,6 +101,28 @@ const CebuVisayasPage = async () => {
           <Link href="/voyager-aux-philippines/quand-partir" className="text-accent font-bold hover:underline mt-4 inline-block">Quelle est la meilleure saison ? →</Link>
         </AlternatingContent>
       </div>
+
+      <AffiliateRecommendation
+        title="Preparez votre sejour a Cebu"
+        icon={faUmbrellaBeach}
+        location="cebu_page"
+        items={[
+          {
+            name: 'Booking.com',
+            description: "Cebu City offre un large choix d'hotels, des auberges de Moalboal aux resorts de Mactan. Reservez a l'avance pour la haute saison.",
+            advantage: 'Prix negocie + annulation gratuite',
+            url: 'https://www.booking.com/searchresults.fr.html?ss=Cebu',
+            recommended: true,
+          },
+          {
+            name: 'Klook',
+            description: 'Reservez vos excursions: nage avec les requins baleines d\'Oslob, canyoneering a Kawasan Falls, island hopping a Moalboal.',
+            advantage: 'Jusqu\'a -30% vs prix sur place + annulation flexible',
+            url: 'https://affiliate.klook.com/redirect?aid=118789&aff_adid=1257881&k_site=https%3A%2F%2Fwww.klook.com%2Ffr%2Fsearch%2F%3Fquery%3DCebu',
+            recommended: true,
+          },
+        ]}
+      />
 
       <div className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-12">Nos Articles sur Cebu et les Visayas</h2>

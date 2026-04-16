@@ -2,8 +2,9 @@ import { Metadata } from 'next';
 import { HeroThematic } from '@/components/ui/HeroThematic';
 import { AlternatingContent } from '@/components/ui/AlternatingContent';
 import { KeyStatCard } from '@/components/ui/KeyStatCard';
-import { faSyringe, faFirstAid, faShieldAlt } from '@fortawesome/free-solid-svg-icons';
+import { faSyringe, faFirstAid, faShieldAlt, faShieldHalved } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
+import { AffiliateRecommendation } from '@/components/affiliate/AffiliateRecommendation';
 import { createClient } from '@/utils/supabase/server';
 import { getPageBySlug } from '@/services/pageService';
 import { notFound } from 'next/navigation';
@@ -104,6 +105,30 @@ const SanteSecuritePage = async () => {
           <Link href="/voyager-aux-philippines/sante-securite/conseils" className="text-accent font-bold hover:underline mt-4 inline-block">Nos conseils de sécurité →</Link>
         </AlternatingContent>
       </div>
+
+      <AffiliateRecommendation
+        title="Protegez-vous avant de partir"
+        icon={faShieldHalved}
+        location="sante_securite_page"
+        items={[
+          {
+            name: 'Chapka Assurances',
+            description:
+              "L'assurance voyage n'est pas obligatoire pour les Philippines (visa touriste 30 jours), mais elle est fortement recommandee. Les frais medicaux ne sont pas couverts par la Secu — une hospitalisation peut couter plusieurs milliers d'euros. Souscrivez AVANT de partir.",
+            advantage: 'A partir de 22 EUR/mois — rapatriement, frais medicaux, bagages inclus',
+            url: 'https://www.chapkadirect.fr/assurance-voyage.html',
+            recommended: true,
+          },
+          {
+            name: 'NordVPN',
+            description:
+              "Les Wi-Fi des hotels et cafes aux Philippines sont rarement securises. Un VPN chiffre votre connexion et protege vos donnees bancaires et mots de passe sur les reseaux publics.",
+            advantage: 'A partir de 3 EUR/mois — protegez vos donnees bancaires',
+            url: 'https://nordvpn.com/fr/',
+            recommended: false,
+          },
+        ]}
+      />
 
     </div>
   );

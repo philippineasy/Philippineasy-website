@@ -2,8 +2,9 @@ import { Metadata } from 'next';
 import { HeroThematic } from '@/components/ui/HeroThematic';
 import { AlternatingContent } from '@/components/ui/AlternatingContent';
 import { KeyStatCard } from '@/components/ui/KeyStatCard';
-import { faSimCard, faLanguage, faWifi } from '@fortawesome/free-solid-svg-icons';
+import { faSimCard, faLanguage, faWifi, faLock } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
+import { AffiliateRecommendation } from '@/components/affiliate/AffiliateRecommendation';
 import { createClient } from '@/utils/supabase/server';
 import { getPageBySlug } from '@/services/pageService';
 import { notFound } from 'next/navigation';
@@ -109,6 +110,30 @@ const CommunicationPage = async () => {
           <Link href="/voyager-aux-philippines/communication/expressions" className="text-accent font-bold hover:underline mt-4 inline-block">Apprendre les bases du Tagalog →</Link>
         </AlternatingContent>
       </div>
+
+      <AffiliateRecommendation
+        title="Rester connecte et en securite"
+        icon={faSimCard}
+        location="communication_page"
+        items={[
+          {
+            name: 'Airalo',
+            description:
+              "eSIM data pour les Philippines. Achetez et activez AVANT de partir — internet disponible des l'atterrissage. Plus besoin de chercher un shop SIM a l'aeroport.",
+            advantage: "A partir de 5 USD pour 1 GB — internet des l'atterrissage",
+            url: 'https://www.airalo.com/philippines-esim',
+            recommended: true,
+          },
+          {
+            name: 'NordVPN',
+            description:
+              "Securisez votre connexion sur les Wi-Fi d'hotels et cafes aux Philippines. Accedez aussi a Netflix France, Canal+ et la TV francaise depuis l'etranger.",
+            advantage: 'A partir de 3 EUR/mois — Netflix France depuis les Philippines',
+            url: 'https://nordvpn.com/fr/',
+            recommended: true,
+          },
+        ]}
+      />
 
     </div>
   );

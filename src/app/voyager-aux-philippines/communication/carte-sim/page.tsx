@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Wifi, Globe, Smartphone } from 'lucide-react';
 import { HeroThematic } from '@/components/ui/HeroThematic';
 import Link from 'next/link';
+import { faSimCard } from '@fortawesome/free-solid-svg-icons';
+import { AffiliateRecommendation } from '@/components/affiliate/AffiliateRecommendation';
 
 export const metadata: Metadata = {
   title: "Carte SIM aux Philippines | Guide pour les Touristes",
@@ -69,6 +71,21 @@ const CarteSimPage = () => {
           </Card>
         </div>
       </div>
+
+      <AffiliateRecommendation
+        title="Alternative : eSIM sans file d'attente"
+        icon={faSimCard}
+        location="carte_sim_page"
+        items={[
+          {
+            name: 'Airalo eSIM',
+            description: "Alternative aux SIM physiques : l'eSIM Airalo s'active AVANT votre depart. Plus besoin de faire la queue a l'aeroport. Votre numero francais reste actif en parallele.",
+            advantage: 'A partir de 5 USD pour 1 GB — activation en 2 minutes',
+            url: 'https://www.airalo.com/philippines-esim',
+            recommended: true,
+          },
+        ]}
+      />
     </div>
   );
 };
