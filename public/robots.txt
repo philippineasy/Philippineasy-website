@@ -22,4 +22,3 @@ Disallow: /api/
 
 # Sitemaps
 Sitemap: https://philippineasy.com/sitemap.xml
-Sitemap: https://philippineasy.com/news-sitemap.xml

@@ -14,7 +14,7 @@ const CookieBanner = () => {
     if (!consent) {
       setBannerVisible(true);
     } else {
-      loadScripts();
+      applyConsent();
     }
   }, []);
 
@@ -26,7 +26,7 @@ const CookieBanner = () => {
     };
     localStorage.setItem('cookieConsent', JSON.stringify(consent));
     closeBanner();
-    loadScripts();
+    applyConsent();
   };
 
   const rejectAllCookies = () => {
@@ -37,6 +37,7 @@ const CookieBanner = () => {
     };
     localStorage.setItem('cookieConsent', JSON.stringify(consent));
     closeBanner();
+    applyConsent();
   };
 
   const customizeCookies = () => {
@@ -52,7 +53,7 @@ const CookieBanner = () => {
     };
     localStorage.setItem('cookieConsent', JSON.stringify(consent));
     closeBanner();
-    loadScripts();
+    applyConsent();
   };
 
   const closeBanner = () => {
@@ -60,16 +61,13 @@ const CookieBanner = () => {
     setSettingsVisible(false);
   };
 
-  const loadScripts = () => {
+  const applyConsent = () => {
     const consent = JSON.parse(localStorage.getItem('cookieConsent') || '{}');
-    if (consent.analytics) {
-      // Placeholder for analytics scripts (e.g., Google Analytics)
-      console.log('Loading analytics scripts...');
-    }
-    if (consent.ads) {
-      // Placeholder for advertising scripts (e.g., Google AdSense)
-      console.log('Loading ads scripts...');
-    }
+    window.dispatchEvent(
+      new CustomEvent('cookie-consent-update', {
+        detail: { analytics: !!consent.analytics, ads: !!consent.ads },
+      })
+    );
   };
   
   // Function to be called from other parts of the app, e.g., the footer link

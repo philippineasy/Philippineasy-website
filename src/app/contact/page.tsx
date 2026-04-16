@@ -13,6 +13,8 @@ import {
 import { Button } from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/textarea';
 import { CustomSelect } from '@/components/shared/CustomSelect';
+import { trackGenerateLead } from '@/lib/analytics';
+import { metaTrackLead } from '@/lib/meta-pixel';
 import type { SelectOption } from '@/components/shared/CustomSelect';
 
 // ---------------------------------------------------------------------------
@@ -100,6 +102,8 @@ export default function ContactPage() {
       }
 
       setStatus('success');
+      trackGenerateLead({ form_name: 'contact' });
+      metaTrackLead({ content_name: 'Contact Form' });
       setForm({ name: '', email: '', subject: '', message: '' });
 
       // Scroll to top of form so success message is visible

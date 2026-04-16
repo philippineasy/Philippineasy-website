@@ -5,6 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faSpinner, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { trackServicePurchase } from '@/lib/analytics';
+import { metaTrackPurchase } from '@/lib/meta-pixel';
 
 export default function ServiceCompletionPage() {
   const searchParams = useSearchParams();
@@ -14,6 +16,10 @@ export default function ServiceCompletionPage() {
   useEffect(() => {
     // Give webhook time to process, then show success
     const timer = setTimeout(() => {
+      if (sessionId) {
+        trackServicePurchase({ transaction_id: sessionId, value: 0, service_name: 'Service' });
+        metaTrackPurchase({ value: 0, content_name: 'Service' });
+      }
       setStatus(sessionId ? 'success' : 'error');
     }, 2000);
     return () => clearTimeout(timer);

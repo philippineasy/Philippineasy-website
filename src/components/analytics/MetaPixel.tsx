@@ -1,11 +1,46 @@
-'use client';
+'use client'
 
-import Script from 'next/script';
+import Script from 'next/script'
+import { useEffect } from 'react'
 
-const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID
 
-const MetaPixel = () => {
-  if (!META_PIXEL_ID) return null;
+declare global {
+  interface Window {
+    fbq: (...args: any[]) => void
+  }
+}
+
+export default function MetaPixel() {
+  useEffect(() => {
+    if (!META_PIXEL_ID) return
+
+    // Apply stored consent on mount
+    try {
+      const stored = localStorage.getItem('cookieConsent')
+      if (stored) {
+        const consent = JSON.parse(stored)
+        if (consent.ads) {
+          window.fbq?.('consent', 'grant')
+        }
+      }
+    } catch { /* ignore malformed consent */ }
+
+    // Listen for consent updates from CookieBanner
+    const handleConsent = (e: Event) => {
+      const { ads } = (e as CustomEvent).detail
+      if (ads) {
+        window.fbq?.('consent', 'grant')
+      } else {
+        window.fbq?.('consent', 'revoke')
+      }
+    }
+
+    window.addEventListener('cookie-consent-update', handleConsent)
+    return () => window.removeEventListener('cookie-consent-update', handleConsent)
+  }, [])
+
+  if (!META_PIXEL_ID) return null
 
   return (
     <>
@@ -19,6 +54,7 @@ const MetaPixel = () => {
           t.src=v;s=b.getElementsByTagName(e)[0];
           s.parentNode.insertBefore(t,s)}(window, document,'script',
           'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('consent', 'revoke');
           fbq('init', '${META_PIXEL_ID}');
           fbq('track', 'PageView');
         `}
@@ -33,7 +69,5 @@ const MetaPixel = () => {
         />
       </noscript>
     </>
-  );
-};
-
-export default MetaPixel;
+  )
+}

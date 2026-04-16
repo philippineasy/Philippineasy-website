@@ -6,6 +6,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLifeRing, faMapMarkerAlt, faPaperPlane, faCheck, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { faFacebookF, faTwitter, faInstagram, faYoutube, faTelegram, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
+import { trackNewsletterSignup } from '@/lib/analytics';
+import { metaTrackLead } from '@/lib/meta-pixel';
 
 const Footer = () => {
   const { profile } = useAuth();
@@ -29,6 +31,8 @@ const Footer = () => {
         setNewsletterStatus('success');
         setNewsletterMessage(data.message);
         setNewsletterEmail('');
+        trackNewsletterSignup({ source: 'footer' });
+        metaTrackLead({ content_name: 'Newsletter Footer' });
       } else {
         setNewsletterStatus('error');
         setNewsletterMessage(data.error || 'Une erreur est survenue.');

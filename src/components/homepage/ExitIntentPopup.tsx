@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faGift, faSpinner, faCheck, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import { trackExitIntentShown, trackExitIntentConverted, trackNewsletterSignup } from '@/lib/analytics';
+import { metaTrackLead, metaTrackExitIntentConverted } from '@/lib/meta-pixel';
 
 export const ExitIntentPopup = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -16,6 +18,7 @@ export const ExitIntentPopup = () => {
       const subscribed = localStorage.getItem('newsletter-subscribed');
       if (!dismissed && !subscribed) {
         setIsVisible(true);
+        trackExitIntentShown();
       }
     }
   }, []);
@@ -54,6 +57,10 @@ export const ExitIntentPopup = () => {
         setStatus('success');
         setMessage(data.message);
         localStorage.setItem('newsletter-subscribed', 'true');
+        trackExitIntentConverted();
+        trackNewsletterSignup({ source: 'exit_intent' });
+        metaTrackLead({ content_name: 'Newsletter Exit Intent' });
+        metaTrackExitIntentConverted();
         // Auto-trigger download of Palawan guide as bonus
         setTimeout(() => {
           const link = document.createElement('a');

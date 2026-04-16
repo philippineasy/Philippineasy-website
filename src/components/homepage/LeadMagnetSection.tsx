@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileDownload, faEnvelope, faCheck, faSpinner, faUmbrellaBeach, faPassport, faWallet } from '@fortawesome/free-solid-svg-icons';
+import { trackGenerateLead, trackNewsletterSignup } from '@/lib/analytics';
+import { metaTrackLead } from '@/lib/meta-pixel';
 
 const leadMagnets = [
   {
@@ -53,6 +55,9 @@ export const LeadMagnetSection = () => {
       if (res.ok || res.status === 200) {
         setStatus('success');
         setMessage('Telechargement en cours...');
+        trackGenerateLead({ form_name: `lead_magnet_${selectedGuide}` });
+        trackNewsletterSignup({ source: 'lead_magnet' });
+        metaTrackLead({ content_name: `Lead Magnet ${selectedGuide}` });
         // Trigger download
         const guide = leadMagnets.find(g => g.id === selectedGuide);
         if (guide) {

@@ -8,6 +8,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLock, faSpinner, faCheckCircle, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
+import { trackBeginCheckout } from '@/lib/analytics';
+import { metaTrackInitiateCheckout } from '@/lib/meta-pixel';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -89,6 +91,14 @@ function CheckoutContent() {
 
   const clientSecret = searchParams.get('client_secret');
   const generationId = searchParams.get('generation_id');
+
+  // Track begin checkout
+  useEffect(() => {
+    if (clientSecret && generationId) {
+      trackBeginCheckout({ value: 0, items: [{ item_id: generationId, item_name: 'Itineraire IA', item_category: 'itinerary' }] });
+      metaTrackInitiateCheckout({ content_name: 'Itineraire IA' });
+    }
+  }, [clientSecret, generationId]);
 
   // Redirection si non connecte
   useEffect(() => {

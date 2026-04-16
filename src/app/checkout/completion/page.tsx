@@ -4,6 +4,8 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState, Suspense, useRef } from 'react';
 import { useCart } from '@/contexts/CartContext';
+import { trackPurchase } from '@/lib/analytics';
+import { metaTrackPurchase } from '@/lib/meta-pixel';
 
 function CompletionContent() {
   const searchParams = useSearchParams();
@@ -20,6 +22,9 @@ function CompletionContent() {
       hasProcessed.current = true;
       setStatus('succeeded');
       clearCart();
+      const piId = searchParams.get('payment_intent') || '';
+      trackPurchase({ transaction_id: piId, value: 0, items: [{ item_id: piId, item_name: 'Marketplace', item_category: 'marketplace' }] });
+      metaTrackPurchase({ value: 0, content_name: 'Marketplace' });
     } else if (paymentStatus === 'processing') {
       hasProcessed.current = true;
       setStatus('processing');

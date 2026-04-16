@@ -15,6 +15,8 @@ import {
 import { faTelegram } from '@fortawesome/free-brands-svg-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
+import { trackPurchase } from '@/lib/analytics';
+import { metaTrackPurchase } from '@/lib/meta-pixel';
 
 function CompletionContent() {
   const searchParams = useSearchParams();
@@ -54,6 +56,16 @@ function CompletionContent() {
         const data = await res.json();
         if (data.success) {
           setPaymentConfirmed(true);
+          trackPurchase({
+            transaction_id: paymentIntentId || generationId || '',
+            value: data.amount ?? 0,
+            items: [{ item_id: generationId || '', item_name: 'Itineraire IA', item_category: 'itinerary' }],
+          });
+          metaTrackPurchase({
+            value: data.amount ?? 0,
+            content_name: 'Itineraire IA',
+            content_ids: generationId ? [generationId] : undefined,
+          });
         } else {
           setError(data.error || 'Erreur lors de la confirmation du paiement');
         }
