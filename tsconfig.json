@@ -36,6 +36,10 @@
   ],
   "exclude": [
     "node_modules",
-    "supabase"
+    "supabase",
+    "skills_external_claude",
+    "skills_external_marketing",
+    "output",
+    "workflows"
   ]
 }
