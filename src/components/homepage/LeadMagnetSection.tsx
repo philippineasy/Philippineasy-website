@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactElement } from 'react';
 import { trackGenerateLead, trackNewsletterSignup } from '@/lib/analytics';
 import { metaTrackLead } from '@/lib/meta-pixel';
 
@@ -13,7 +13,7 @@ type Guide = {
   title: string;
   description: string;
   file: string;
-  Cover: () => JSX.Element;
+  Cover: () => ReactElement;
 };
 
 /* --- SVG covers --- */
