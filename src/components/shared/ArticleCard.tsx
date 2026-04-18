@@ -1,9 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Article } from '@/types';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClock, faArrowRight, faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
-import { Button } from '@/components/ui/Button';
 
 interface ArticleCardProps {
   article: Article;
@@ -11,7 +8,21 @@ interface ArticleCardProps {
   priority?: boolean;
 }
 
-const stripHtml = (html: string) => html.replace(/<[^>]*>?/gm, '');
+const stripHtml = (html: string) => html.replace(/<[^>]*>?/gm, '').replace(/&nbsp;/g, ' ').trim();
+
+const ClockIcon = () => (
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3 2" />
+  </svg>
+);
+
+const CalendarIcon = () => (
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="3" y="5" width="18" height="16" rx="2" />
+    <path d="M3 10h18M8 3v4M16 3v4" />
+  </svg>
+);
 
 const ArticleCard = ({ article, basePath, priority = false }: ArticleCardProps) => {
   const href = `/${basePath}/${article.category.slug}/${article.slug}`;
@@ -26,57 +37,114 @@ const ArticleCard = ({ article, basePath, priority = false }: ArticleCardProps) 
         textContent = firstParagraph.data.text;
       }
     }
-    
+
     if (textContent) {
-      return `${stripHtml(textContent).substring(0, 100)}...`;
+      const clean = stripHtml(textContent);
+      return clean.length > 120 ? `${clean.substring(0, 120)}…` : clean;
     }
 
-    return 'Cliquez pour lire la suite...';
+    return 'Cliquez pour lire la suite…';
   };
 
   const formattedDate = new Date(article.published_at).toLocaleDateString('fr-FR', {
     year: 'numeric',
-    month: 'long',
+    month: 'short',
     day: 'numeric',
   });
 
   return (
-    <div className="destination-card bg-card rounded-lg shadow-lg overflow-hidden flex flex-col h-full">
-      <Link href={href} className="relative w-full h-48">
-        <Image
-          src={article.image}
-          alt={article.title}
-          fill
-          className="object-cover card-image"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 450px"
-          quality={70}
-          priority={priority}
-        />
-      </Link>
-      <div className="p-6 flex flex-col flex-grow">
-        <h3 className="text-xl font-bold mb-2">{article.title}</h3>
-        <p className="text-muted-foreground mb-4 text-sm flex-grow">{getSnippet()}</p>
-        <div className="flex justify-between items-center text-xs text-muted-foreground mb-4">
-          <span className="flex items-center">
-            <FontAwesomeIcon icon={faCalendarAlt} className="w-4 h-4 mr-1.5" />
+    <Link
+      href={href}
+      className="group bg-card rounded-2xl overflow-hidden flex flex-col h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+      style={{
+        border: '0.5px solid #e5e7eb',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+      }}
+    >
+      <div className="relative w-full h-[180px] overflow-hidden">
+        {article.image ? (
+          <Image
+            src={article.image}
+            alt={article.title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 450px"
+            quality={70}
+            priority={priority}
+          />
+        ) : (
+          <div className="w-full h-full bg-soft-blue" />
+        )}
+      </div>
+      <div className="px-5 pt-[18px] pb-5 flex flex-col flex-1">
+        {article.category?.name && (
+          <span
+            className="inline-flex items-center self-start mb-2.5 px-2 py-0.5 rounded"
+            style={{
+              fontSize: '10px',
+              fontWeight: 700,
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              color: '#3B5BDB',
+              backgroundColor: '#F4F7FE',
+            }}
+          >
+            {article.category.name}
+          </span>
+        )}
+        <h3
+          className="text-foreground mb-2"
+          style={{
+            fontSize: '16px',
+            fontWeight: 600,
+            letterSpacing: '-0.01em',
+            lineHeight: 1.35,
+          }}
+        >
+          {article.title}
+        </h3>
+        <p
+          className="mb-4 flex-1 line-clamp-3"
+          style={{
+            fontSize: '13px',
+            color: '#64748b',
+            lineHeight: 1.55,
+          }}
+        >
+          {getSnippet()}
+        </p>
+        <div
+          className="flex items-center gap-4 pt-3 mb-3"
+          style={{ borderTop: '0.5px solid #f1f5f9' }}
+        >
+          <span
+            className="inline-flex items-center gap-1.5"
+            style={{ fontSize: '11px', color: '#94a3b8' }}
+          >
+            <CalendarIcon />
             {formattedDate}
           </span>
           {article.reading_time && (
-            <span className="flex items-center">
-              <FontAwesomeIcon icon={faClock} className="w-4 h-4 mr-1.5" />
-              {article.reading_time} min de lecture
+            <span
+              className="inline-flex items-center gap-1.5"
+              style={{ fontSize: '11px', color: '#94a3b8' }}
+            >
+              <ClockIcon />
+              {article.reading_time} min
             </span>
           )}
         </div>
-        <div className="mt-auto flex justify-between items-center pt-4 border-t border-border">
-          <Button variant="link" asChild className="p-0 h-auto font-semibold">
-            <Link href={href}>
-              Lire la suite <FontAwesomeIcon icon={faArrowRight} className="text-xs ml-1" />
-            </Link>
-          </Button>
-        </div>
+        <span
+          className="inline-flex items-center gap-1 text-primary text-sm font-medium"
+          aria-hidden="true"
+        >
+          Lire l&apos;article
+          <span className="transition-transform duration-200 group-hover:translate-x-0.5">
+            →
+          </span>
+        </span>
       </div>
-    </div>
+    </Link>
   );
 };
 

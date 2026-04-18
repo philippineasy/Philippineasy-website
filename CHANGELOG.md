@@ -5,6 +5,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Refonte homepage — Editorial design system
+- **Added** : Nouveau pattern de card editorial (rounded-2xl, border 0.5px #e5e7eb, shadow 0 1px 2px, hover translate-y + shadow-lg) applique a toute la homepage
+- **Added** : Tokens Tailwind `warm-yellow` (#FCD34D) et `soft-blue` (#F4F7FE) pour sections alternees et accents
+- **Added** : Composant `HeroSection.tsx` — hero refondu avec overlay gradient vertical bleu, kicker uppercase editorial (etoile orange + voyageurs), H1 clamp(2.25-3.25rem) letter-spacing -0.02em, CTA primaire orange + CTA bleu primary
+- **Added** : Composant `ArchipelMilleVisages.tsx` — section 2 colonnes photo + liste des 6 regions avec pins SVG inline, bloc carte blanche rounded-2xl
+- **Added** : Composant `RegionCards.tsx` — 3 cartes regions (Palawan, Cebu & Visayas, Siargao) sur fond soft-blue avec SVG placeholder coucher de soleil pour Cebu (TODO: remplacer par photo Supabase)
+- **Added** : Composant `InstallerCards.tsx` — 4 cartes thematiques (S'installer, Travailler, Investir, Etudier) avec SVG inline stroke-width 1.5
+- **Added** : Composant `ItineraireIABlock.tsx` — section signature gradient bleu (135deg #3B5BDB -> #1e40af) avec mockup itineraire realiste (header titre+budget, jour 1 expanded avec transport bar + activites photos + Google ratings, 3 jours collapsed)
+- **Added** : Composant `TestimonialsSection.tsx` — 3 temoignages avec glyphe guillemet SVG orange, etoiles SVG, pastilles initiales colorees (PD bleu, SL orange, MT rouge)
+- **Added** : Composant `FinalCtaSection.tsx` — CTA gradient bleu (#1e3a8a -> #3B5BDB) avec SVG decor (cercles jaunes + vagues bas), H2 "philippine" en #FCD34D, CTA orange + CTA ghost
+- **Changed** : `LeadMagnetSection.tsx` — 3 couvertures SVG colorees (Palawan cyan + iles karstiques + soleil, Visa bleu + checklist cochee, Budget orange + tableau total 1750€), badges couleurs, email gate conserve
+- **Changed** : `BestDealsSection.tsx` — cards refondues au pattern editorial + integration `KlookCarousel` avec mix palawan/cebu/siargao activities
+- **Changed** : `FeaturedNewsSection.tsx` — fond soft-blue, cards uniformisees (articles + topics forum avec SVG decoratif bulles de discussion), CTA "voir tous" transformes en mini-cards icone+titre+baseline
+- **Changed** : `src/app/page.tsx` — orchestration complete avec nouveau pattern, suppression de "Prepar ez votre Aventure" et ancien "CTA Itineraire" redondants
+- **Changed** : `ArticleCard` — refondu au pattern editorial (bordure 0.5px, rounded-2xl, SVG inline pour horloge/calendrier, badge categorie primary uppercase, hover translate + shadow-lg, image h180 avec zoom subtil)
+
 ### Systeme d'affiliation — Page /partenaires + Recommandations contextuelles
 - **Added** : Composant `AffiliateLink` — liens `rel="sponsored"` avec tracking GA4 (cta_clicked)
 - **Added** : Composant `AffiliateRecommendation` — bloc recommandation reutilisable avec cards partenaires

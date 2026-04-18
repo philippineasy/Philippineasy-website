@@ -1,0 +1,87 @@
+import Link from 'next/link';
+import Image from 'next/image';
+
+export const HeroSection = () => {
+  return (
+    <section className="relative flex items-center justify-center text-center px-4 h-[90vh] overflow-hidden">
+      <Image
+        src="/imagesHero/hero-home.webp"
+        alt="Vue aérienne d'une plage de sable blanc aux Philippines avec des bateaux traditionnels bangka"
+        fill
+        priority
+        fetchPriority="high"
+        className="object-cover z-0"
+        sizes="100vw"
+        quality={75}
+      />
+      <div
+        className="absolute inset-0 z-10"
+        style={{
+          backgroundImage:
+            'linear-gradient(to bottom, rgba(10,20,50,0.30) 0%, rgba(10,20,50,0.55) 100%)',
+        }}
+        aria-hidden="true"
+      />
+      <div className="relative z-20 max-w-3xl mx-auto">
+        <span
+          className="inline-flex items-center gap-2 mb-7 text-[13px] font-medium tracking-wide uppercase"
+          style={{ color: 'rgba(255,255,255,0.75)', letterSpacing: '0.08em' }}
+        >
+          <span className="text-accent" aria-hidden="true">★</span>
+          +10 000 voyageurs accompagnés depuis 2020
+        </span>
+        <h1
+          className="text-white font-semibold mb-6"
+          style={{
+            fontSize: 'clamp(2.25rem, 5.5vw, 3.25rem)',
+            lineHeight: 1.05,
+            letterSpacing: '-0.02em',
+          }}
+        >
+          Voyage & Expatriation aux{' '}
+          <span className="text-accent">Philippines</span>
+        </h1>
+        <p
+          className="text-base md:text-lg mb-10 mx-auto font-normal"
+          style={{
+            color: 'rgba(255,255,255,0.82)',
+            letterSpacing: '0.005em',
+            lineHeight: 1.6,
+            maxWidth: '34rem',
+          }}
+        >
+          Le guide francophone #1 pour voyager, vivre et s&apos;installer dans
+          l&apos;archipel aux 7 641 îles.
+        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <Link
+            href="/itineraire-personnalise-pour-les-philippines"
+            className="inline-flex items-center gap-2 px-8 py-3.5 bg-accent text-accent-foreground rounded-lg font-semibold text-base shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M5 3v4M3 5h4M6 17v4M4 19h4M13 3l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" />
+            </svg>
+            Créer mon itinéraire IA
+          </Link>
+          <Link
+            href="/voyager-aux-philippines"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg font-semibold text-base bg-primary text-primary-foreground shadow-lg transition-all duration-200 hover:bg-primary/90 hover:scale-[1.02] hover:shadow-xl"
+          >
+            Explorer l&apos;archipel
+            <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+};
