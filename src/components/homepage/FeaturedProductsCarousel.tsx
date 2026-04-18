@@ -64,15 +64,18 @@ export const FeaturedProductsCarousel = () => {
 
   if (loading) {
     return (
-      <section className="py-20 bg-card">
+      <section className="py-20 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="h-8 w-64 bg-muted rounded mx-auto mb-12 animate-pulse" />
           <div className="flex gap-4 overflow-hidden">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="flex-shrink-0 w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-4">
-                <div className="bg-card rounded-lg shadow border border-border overflow-hidden">
-                  <div className="h-48 bg-muted animate-pulse" />
-                  <div className="p-4 space-y-3">
+                <div
+                  className="bg-card rounded-2xl overflow-hidden"
+                  style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+                >
+                  <div className="h-[180px] bg-muted animate-pulse" />
+                  <div className="p-5 space-y-3">
                     <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
                     <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
                     <div className="h-5 bg-muted rounded animate-pulse w-1/3" />
@@ -103,22 +106,57 @@ export const FeaturedProductsCarousel = () => {
   }
 
   return (
-    <section className="py-20 bg-card">
+    <section className="py-20 md:py-24 bg-background">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center mb-12">Découvrez l'Artisanat <span className="text-accent">Local</span></h2>
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <h2
+            className="text-3xl md:text-4xl font-bold text-foreground mb-3"
+            style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
+          >
+            Découvrez l&apos;artisanat <span className="text-accent">local</span>
+          </h2>
+          <p className="text-muted-foreground text-base md:text-lg">
+            Produits authentiques de nos vendeurs philippins, sélectionnés avec soin.
+          </p>
+        </div>
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex">
             {products.map((product) => (
-              <div key={product.id} className="flex-grow-0 flex-shrink-0 w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-4">
+              <div key={product.id} className="flex-grow-0 flex-shrink-0 w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-3">
                 <ProductCard product={product} />
               </div>
             ))}
           </div>
         </div>
-        <div className="text-center mt-12">
-            <Link href="/marketplace" className="inline-block px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition duration-300 font-semibold">
-                Explorer la Marketplace
-            </Link>
+        <div className="mt-10 max-w-md mx-auto">
+          <Link
+            href="/marketplace-aux-philippines"
+            className="group flex items-center gap-4 bg-card rounded-2xl px-5 py-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+            style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+          >
+            <span
+              className="flex-shrink-0 inline-flex items-center justify-center rounded-xl"
+              style={{ width: '40px', height: '40px', backgroundColor: '#F4F7FE', color: '#3B5BDB' }}
+              aria-hidden="true"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <path d="M16 10a4 4 0 0 1-8 0" />
+              </svg>
+            </span>
+            <span className="flex-1 min-w-0">
+              <span className="block text-foreground" style={{ fontSize: '15px', fontWeight: 600, letterSpacing: '-0.01em' }}>
+                Explorer la marketplace
+              </span>
+              <span className="block mt-0.5" style={{ fontSize: '12px', color: '#64748b' }}>
+                Tous nos produits locaux &amp; vendeurs vérifiés.
+              </span>
+            </span>
+            <span className="flex-shrink-0 text-primary text-sm transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true">
+              →
+            </span>
+          </Link>
         </div>
       </div>
     </section>

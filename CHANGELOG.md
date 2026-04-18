@@ -5,6 +5,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Propagation du design system editorial — batch marchand/outils
+- **Changed** : `MeilleursPlansClientPage` — cards categories refondues (rounded-2xl 0.5px border, icone categorie dans carre 32x32 soft-blue, placeholder gradient avec icone si heroImage null) + bloc Easy+ refondu dans le design system (fond soft-blue, border 0.5px, kicker "★ PROGRAMME PRIVILEGE" uppercase, H2 avec "Easy+" en primary, checkmarks dans ronds bleu pale, CTA primary + lien secondaire avec fleche glisse, carte membre avec shadow primary translucide)
+- **Changed** : `OfferSelection` (itineraire Express/Premium/Conciergerie) — cards refondues (border 1.5px primary si selected, bandeau "RECOMMANDE" gradient bleu uppercase pour Premium, icone 36x36 rounded-xl colore par offre, kicker "PRIX" + valeur 32px 700 tabular-nums, checkmarks 16x16 ronds bleus sur fond soft-blue, bloc modifications en card editoriale)
+- **Changed** : `KeyStatCard` (composant partage) — icone dans carre 52x52 rounded-xl (bleu primary ou orange accent), valeur 32px 700 tabular-nums, label 12px gris letter-spacing
+- **Changed** : `FeaturedProductsCarousel` (homepage) — section header aligne ("Decouvrez l'artisanat **local**" + sous-titre), skeleton loading rounded-2xl 180px, CTA final transforme en mini-card editoriale (icone sac + titre + baseline + fleche)
+- **Changed** : `checkout/page.tsx` — kickers "RESUME DE LA COMMANDE" / "PAIEMENT" uppercase 11px, 2 cards 0.5px border rounded-2xl, total 24px 700 tabular-nums avec kicker
+
 ### Propagation du design system editorial sur tout le site
 - **Changed** : `ProductCard` (marketplace) — refondu au pattern editorial (rounded-2xl, border 0.5px, badge vendeur primary, bloc prix kicker "PRIX" + valeur tabular-nums 18px, lien "Voir →" primary)
 - **Changed** : `VoyagerClientPage` — cards destinations refondues (image 180px zoom hover, titre 18px 600, lien "Explorer X →") + bloc wrapper "Destinations Incontournables" aligne + 6 cartes conseils pratiques editoriales (icones FontAwesome dans carres 48x48 orange accent sur fond creme)

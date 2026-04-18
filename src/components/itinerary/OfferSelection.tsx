@@ -24,9 +24,9 @@ interface OfferSelectionProps {
 }
 
 const OFFER_CONFIG = {
-  express: { icon: faRocket, color: 'text-blue-500', accentBg: 'bg-blue-50', accentText: 'text-blue-700' },
-  premium: { icon: faStar, color: 'text-yellow-500', accentBg: 'bg-yellow-50', accentText: 'text-yellow-700' },
-  conciergerie: { icon: faCrown, color: 'text-purple-500', accentBg: 'bg-purple-50', accentText: 'text-purple-700' },
+  express: { icon: faRocket, iconBg: '#F4F7FE', iconColor: '#3B5BDB', badgeBg: '#F4F7FE', badgeColor: '#3B5BDB' },
+  premium: { icon: faStar, iconBg: '#FEF3C7', iconColor: '#F59E0B', badgeBg: '#FEF3C7', badgeColor: '#B45309' },
+  conciergerie: { icon: faCrown, iconBg: '#F3E8FF', iconColor: '#A855F7', badgeBg: '#F3E8FF', badgeColor: '#7E22CE' },
 } as const;
 
 const OFFER_ORDER: OfferType[] = ['express', 'premium', 'conciergerie'];
@@ -59,48 +59,88 @@ export function OfferSelection({ selectedOffer, onSelectOffer, currentPricing, d
               key={offerKey}
               variants={fadeInUp}
               onClick={() => onSelectOffer(offerKey)}
-              className={`
-                bg-card rounded-2xl cursor-pointer transition-all duration-200 relative flex flex-col
-                shadow-lg border
-                ${isSelected
-                  ? 'border-primary ring-4 ring-primary/20'
-                  : 'border-border hover:border-primary/40 hover:shadow-xl'
-                }
-              `}
+              className="bg-card rounded-2xl cursor-pointer transition-all duration-200 relative flex flex-col overflow-hidden hover:-translate-y-1"
+              style={{
+                border: isSelected ? '1.5px solid #3B5BDB' : '0.5px solid #e5e7eb',
+                boxShadow: isSelected ? '0 8px 24px rgba(59,91,219,0.15)' : '0 1px 2px rgba(0,0,0,0.03)',
+              }}
             >
-              {/* Recommended banner for Premium */}
               {isPremium && (
-                <div className="bg-primary text-primary-foreground text-xs font-semibold px-4 py-2 rounded-t-2xl flex items-center justify-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Recommande
+                <div
+                  className="flex items-center justify-center gap-1.5 py-2"
+                  style={{
+                    background: 'linear-gradient(135deg, #3B5BDB 0%, #1e40af 100%)',
+                    color: '#ffffff',
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  <Sparkles className="w-3 h-3" />
+                  Recommandé
                 </div>
               )}
 
-              <div className={`p-6 flex flex-col flex-1 ${isPremium ? '' : 'pt-6'}`}>
-                {/* Header: icon + name + badge */}
-                <div className="flex items-center justify-between mb-4">
+              <div className="p-6 flex flex-col flex-1">
+                <div className="flex items-center justify-between gap-3 mb-4">
                   <div className="flex items-center gap-2.5">
-                    <div className={`w-9 h-9 rounded-full ${config.accentBg} flex items-center justify-center`}>
-                      <FontAwesomeIcon icon={config.icon} className={`${config.color} text-sm`} />
-                    </div>
-                    <span className="font-bold text-lg text-foreground">{offer.name}</span>
+                    <span
+                      className="inline-flex items-center justify-center rounded-xl"
+                      style={{ width: '36px', height: '36px', backgroundColor: config.iconBg, color: config.iconColor }}
+                      aria-hidden="true"
+                    >
+                      <FontAwesomeIcon icon={config.icon} style={{ fontSize: '14px' }} />
+                    </span>
+                    <span className="text-foreground" style={{ fontSize: '16px', fontWeight: 600, letterSpacing: '-0.01em' }}>
+                      {offer.name}
+                    </span>
                   </div>
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${config.accentBg} ${config.accentText}`}>
+                  <span
+                    className="inline-flex items-center px-2 py-0.5 rounded"
+                    style={{
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      letterSpacing: '0.05em',
+                      textTransform: 'uppercase',
+                      backgroundColor: config.badgeBg,
+                      color: config.badgeColor,
+                    }}
+                  >
                     {offer.badge}
                   </span>
                 </div>
 
-                {/* Price */}
-                <p className="text-3xl font-bold text-primary mb-1">
+                <p
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: 600,
+                    color: '#94a3b8',
+                    letterSpacing: '0.06em',
+                    textTransform: 'uppercase',
+                    marginBottom: '2px',
+                  }}
+                >
+                  Prix
+                </p>
+                <p
+                  className="text-foreground tabular-nums mb-1"
+                  style={{ fontSize: '32px', fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1, color: '#3B5BDB' }}
+                >
                   {pricing.price > 0 ? formatPrice(pricing.price) : 'Sur devis'}
                 </p>
-                <p className="text-sm text-muted-foreground mb-5">{offer.description}</p>
+                <p className="mb-5 mt-2" style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.55 }}>
+                  {offer.description}
+                </p>
 
-                {/* Features */}
-                <ul className="space-y-2.5 mb-6 flex-1">
+                <ul className="space-y-2.5 mb-6 flex-1 pt-5" style={{ borderTop: '0.5px solid #f1f5f9' }}>
                   {offer.features.map((feature, idx) => (
-                    <li key={idx} className="text-sm text-foreground flex items-start gap-2.5">
-                      <span className="w-4 h-4 rounded-full bg-primary/10 text-primary flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <li key={idx} className="flex items-start gap-2.5" style={{ fontSize: '13px', color: '#334155', lineHeight: 1.5 }}>
+                      <span
+                        className="flex-shrink-0 inline-flex items-center justify-center rounded-full mt-0.5"
+                        style={{ width: '16px', height: '16px', backgroundColor: '#F4F7FE', color: '#3B5BDB' }}
+                        aria-hidden="true"
+                      >
                         <Check className="w-2.5 h-2.5" />
                       </span>
                       {feature}
@@ -108,21 +148,20 @@ export function OfferSelection({ selectedOffer, onSelectOffer, currentPricing, d
                   ))}
                 </ul>
 
-                {/* Modifications info */}
-                <div className="border-t border-border pt-4">
+                <div className="pt-4" style={{ borderTop: '0.5px solid #f1f5f9' }}>
                   {pricing.modifications === 0 ? (
-                    <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4 text-destructive/60" />
+                    <p className="flex items-center gap-2" style={{ fontSize: '12px', color: '#94a3b8' }}>
+                      <AlertTriangle className="w-3.5 h-3.5 text-destructive/60" />
                       Aucune modification incluse
                     </p>
                   ) : pricing.modifications === -1 ? (
-                    <p className="text-sm text-primary font-medium flex items-center gap-2">
-                      <Infinity className="w-4 h-4" />
-                      Modifications illimitees
+                    <p className="flex items-center gap-2" style={{ fontSize: '12px', color: '#3B5BDB', fontWeight: 600 }}>
+                      <Infinity className="w-3.5 h-3.5" />
+                      Modifications illimitées
                     </p>
                   ) : (
-                    <p className="text-sm text-primary font-medium flex items-center gap-2">
-                      <Check className="w-4 h-4" />
+                    <p className="flex items-center gap-2" style={{ fontSize: '12px', color: '#3B5BDB', fontWeight: 600 }}>
+                      <Check className="w-3.5 h-3.5" />
                       {pricing.modifications} modification{pricing.modifications > 1 ? 's' : ''} incluse{pricing.modifications > 1 ? 's' : ''}
                     </p>
                   )}
@@ -134,12 +173,16 @@ export function OfferSelection({ selectedOffer, onSelectOffer, currentPricing, d
       </motion.div>
 
       {/* Modifications supplementaires */}
-      <div className="mt-6 p-4 bg-card rounded-xl border border-border">
-        <p className="text-sm text-muted-foreground text-center">
-          <strong className="text-foreground">Besoin de plus de modifications ?</strong> Ajoutez-en a tout moment :
+      <div
+        className="mt-6 p-4 bg-card rounded-2xl"
+        style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+      >
+        <p className="text-center" style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.55 }}>
+          <strong className="text-foreground">Besoin de plus de modifications ?</strong> Ajoutez-en à tout moment :
           {Object.entries(MODIFICATION_PRICES).map(([key, value], idx) => (
             <span key={key}>
-              {idx > 0 && ' |'} {value.description} <strong className="text-foreground">{formatPrice(value.price)}</strong>
+              {idx > 0 && ' |'} {value.description}{' '}
+              <strong className="text-foreground tabular-nums">{formatPrice(value.price)}</strong>
             </span>
           ))}
         </p>
