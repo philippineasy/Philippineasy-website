@@ -7,7 +7,8 @@ import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 import { getArticlesByCategorySlug } from '@/services/articleService';
 import ArticleList from '@/components/shared/ArticleList';
-import { AffiliateRecommendation } from '@/components/affiliate/AffiliateRecommendation';
+import { KlookCarousel } from '@/components/affiliate/KlookCarousel';
+import { siargaoActivities } from '@/components/affiliate/klook-activities-data';
 
 export const metadata: Metadata = {
   title: 'Siargao : La Capitale du Surf aux Philippines',
@@ -103,27 +104,14 @@ const SiargaoPage = async () => {
         </AlternatingContent>
       </div>
 
-      <AffiliateRecommendation
-        title="Preparez votre sejour a Siargao"
-        icon={faUmbrellaBeach}
-        location="siargao_page"
-        items={[
-          {
-            name: 'Booking.com',
-            description: "Siargao grandit vite — reservez a l'avance pour avoir les meilleurs hostels de General Luna et les resorts de Cloud 9.",
-            advantage: 'Prix negocie + annulation gratuite',
-            url: 'https://www.booking.com/searchresults.fr.html?ss=Siargao',
-            recommended: true,
-          },
-          {
-            name: 'Klook',
-            description: 'Reservez vos cours de surf, island hopping (Naked Island, Daku, Guyam), et excursions aux lagons de Sugba.',
-            advantage: 'Jusqu\'a -30% vs prix sur place + annulation flexible',
-            url: 'https://affiliate.klook.com/redirect?aid=118789&aff_adid=1257882&k_site=https%3A%2F%2Fwww.klook.com%2Ffr%2Fsearch%2F%3Fquery%3DSiargao',
-            recommended: true,
-          },
-        ]}
-      />
+      <div className="container mx-auto px-4">
+        <KlookCarousel
+          activities={siargaoActivities}
+          destination="siargao"
+          title="Activites incontournables a Siargao"
+          subtitle="Surf a Cloud 9, island hopping et lagons secrets"
+        />
+      </div>
 
       <div className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-12">Nos Articles sur Siargao</h2>

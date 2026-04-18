@@ -2,9 +2,10 @@ import { Metadata } from 'next';
 import { HeroThematic } from '@/components/ui/HeroThematic';
 import { AlternatingContent } from '@/components/ui/AlternatingContent';
 import { KeyStatCard } from '@/components/ui/KeyStatCard';
-import { faUmbrellaBeach, faShip, faMountainSun } from '@fortawesome/free-solid-svg-icons';
+import { faShip, faMountainSun, faUmbrellaBeach } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
-import { AffiliateRecommendation } from '@/components/affiliate/AffiliateRecommendation';
+import { KlookCarousel } from '@/components/affiliate/KlookCarousel';
+import { palawanActivities } from '@/components/affiliate/klook-activities-data';
 import { createClient } from '@/utils/supabase/server';
 import { getArticlesByCategorySlug } from '@/services/articleService';
 import ArticleList from '@/components/shared/ArticleList';
@@ -103,29 +104,14 @@ const PalawanPage = async () => {
         </AlternatingContent>
       </div>
 
-      <AffiliateRecommendation
-        title="Preparez votre sejour a Palawan"
-        icon={faUmbrellaBeach}
-        location="palawan_page"
-        items={[
-          {
-            name: 'Booking.com',
-            description:
-              "Reservez a l'avance en haute saison (decembre-mai) — les meilleurs hotels d'El Nido et Coron partent vite. Des auberges backpacker a 10 EUR aux resorts de luxe.",
-            advantage: 'Prix negocie + annulation gratuite',
-            url: 'https://www.booking.com/searchresults.fr.html?ss=Palawan',
-            recommended: true,
-          },
-          {
-            name: 'Klook',
-            description:
-              "Reservez vos island hopping (Tour A, B, C, D), plongee sous-marine, transferts aeroport et excursions a El Nido et Coron aux meilleurs prix.",
-            advantage: "Jusqu'a -30% vs prix sur place + annulation flexible",
-            url: 'https://affiliate.klook.com/redirect?aid=118789&aff_adid=1257880&k_site=https%3A%2F%2Fwww.klook.com%2Ffr%2Fsearch%2F%3Fquery%3DPalawan',
-            recommended: true,
-          },
-        ]}
-      />
+      <div className="container mx-auto px-4">
+        <KlookCarousel
+          activities={palawanActivities}
+          destination="palawan"
+          title="Activites incontournables a Palawan"
+          subtitle="Island hopping, plongee, et excursions aux meilleurs prix"
+        />
+      </div>
 
       <div className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-12">Nos Articles sur Palawan</h2>
