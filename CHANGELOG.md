@@ -10,6 +10,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Changed** : `VoyagerClientPage` — cards destinations refondues (image 180px zoom hover, titre 18px 600, lien "Explorer X →") + bloc wrapper "Destinations Incontournables" aligne + 6 cartes conseils pratiques editoriales (icones FontAwesome dans carres 48x48 orange accent sur fond creme)
 - **Changed** : `VivreClientPage` — cards categories refondues + 4 cartes thematiques (S'installer/Travailler/Investir/Etudier) avec icones dans carres 48x48 bleu primary sur fond soft-blue
 - **Changed** : `ForumListClient` — cards categories forum refondues (badges colores par theme en 10px uppercase letter-spacing 0.05em, meta "Dernier" + avatar auteur + temps relatif, lien "Voir le forum →") + bloc login "Rejoignez la discussion" en card editoriale
+- **Changed** : `ServiceCard` (/services pricing) — bordure 1.5px primary si highlighted (+ shadow primary translucide), icone 52x52 rounded-xl, prix 36px 700 tabular-nums, checkmarks rounds colores, badge popin 10px uppercase
+- **Changed** : `EntitlementCard` + `PackProgressCard` (/mon-espace CRM) — rounded-2xl 0.5px border, icones rounded-xl dans fond soft-blue, typography editoriale, meta tabular-nums
+- **Changed** : `ProposalCards` (itineraire) — bordure 1.5px primary si selected, bande "RECOMMANDE POUR VOUS" en gradient bleu uppercase, kickers "POINTS FORTS / APERCU / BUDGET ESTIME" editoriaux, checkmarks 16x16 bleus, budget 20px 700 tabular-nums
+- **Changed** : `DaySchedule` (itineraire jours) — header pastille 28x28 bleu + location 15px 600, elements de periode en cards rounded-xl 0.5px (bordure primary 1.5px si highlighted), kickers periode 11px uppercase tracking
+- **Changed** : `HowItWorks` (itineraire intro) — wrapper card editorial avec titre "Comment ca marche ?"
+- **Changed** : `StatCard` + `InfoWidget` (/profil/boutique) — rounded-2xl 0.5px border, icone stat 44x44 rounded-xl, kicker titre 10px uppercase, valeurs tabular-nums 22px 700; widget titre avec icone 28x28 dans carre soft-blue
 
 ### Refonte homepage — Editorial design system
 - **Added** : Nouveau pattern de card editorial (rounded-2xl, border 0.5px #e5e7eb, shadow 0 1px 2px, hover translate-y + shadow-lg) applique a toute la homepage

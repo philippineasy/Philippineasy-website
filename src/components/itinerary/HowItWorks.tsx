@@ -31,10 +31,16 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <div className="bg-card rounded-2xl p-6 md:p-8 mb-12 max-w-4xl mx-auto border border-border/50 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
-      <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+    <div
+      className="bg-card rounded-2xl p-6 md:p-8 mb-12 max-w-4xl mx-auto"
+      style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+    >
+      <h2
+        className="text-foreground mb-6 flex items-center gap-2"
+        style={{ fontSize: '18px', fontWeight: 600, letterSpacing: '-0.01em' }}
+      >
         <FontAwesomeIcon icon={faCircleInfo} className="text-primary" />
-        Comment ca marche ?
+        Comment ça marche ?
       </h2>
       <motion.div
         className="grid grid-cols-1 md:grid-cols-3 gap-6 relative"

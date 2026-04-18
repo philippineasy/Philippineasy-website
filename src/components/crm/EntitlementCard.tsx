@@ -46,23 +46,39 @@ export default function EntitlementCard({
   return (
     <div
       className={cn(
-        'bg-card rounded-xl border border-border p-4 hover:border-primary/30 transition-colors',
+        'bg-card rounded-2xl p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
         entitlement.status === 'fully_used' && 'opacity-60',
         entitlement.status === 'expired' && 'opacity-40',
         className
       )}
+      style={{
+        border: '0.5px solid #e5e7eb',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+      }}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2.5">
-          <div className={cn(
-            'w-8 h-8 rounded-lg flex items-center justify-center text-sm',
-            entitlement.status === 'fully_used' ? 'bg-neutral-100 text-neutral-400 dark:bg-neutral-800' :
-            entitlement.status === 'expired' ? 'bg-red-50 text-red-400 dark:bg-red-900/20' :
-            'bg-primary/10 text-primary'
-          )}>
-            <FontAwesomeIcon icon={icon} />
+          <div
+            className={cn(
+              'w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0',
+              entitlement.status === 'fully_used' ? 'bg-neutral-100 text-neutral-400 dark:bg-neutral-800' :
+              entitlement.status === 'expired' ? 'bg-red-50 text-red-400 dark:bg-red-900/20' :
+              ''
+            )}
+            style={
+              entitlement.status !== 'fully_used' && entitlement.status !== 'expired'
+                ? { backgroundColor: '#F4F7FE', color: '#3B5BDB' }
+                : undefined
+            }
+          >
+            <FontAwesomeIcon icon={icon} style={{ fontSize: '14px' }} />
           </div>
-          <span className="font-medium text-sm">{display.label}</span>
+          <span
+            className="text-foreground"
+            style={{ fontSize: '13px', fontWeight: 600, letterSpacing: '-0.01em' }}
+          >
+            {display.label}
+          </span>
         </div>
         <StatusBadge status={entitlement.status} />
       </div>

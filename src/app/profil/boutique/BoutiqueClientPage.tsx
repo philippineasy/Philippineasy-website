@@ -49,27 +49,45 @@ type BoutiqueClientPageProps = {
 
 // Sub-components
 const StatCard = ({ icon, title, value, color }: { icon: any, title: string, value: string | number, color: string }) => (
-  <div className="bg-card p-4 rounded-lg shadow flex items-center">
-    <div className={`w-12 h-12 flex items-center justify-center rounded-full mr-4 ${color}`}>
-      <FontAwesomeIcon icon={icon} className="text-white" />
+  <div
+    className="bg-card rounded-2xl p-4 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+    style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+  >
+    <div className={`w-11 h-11 flex items-center justify-center rounded-xl flex-shrink-0 ${color}`}>
+      <FontAwesomeIcon icon={icon} className="text-white" style={{ fontSize: '16px' }} />
     </div>
-    <div>
-      <p className="text-sm text-muted-foreground">{title}</p>
-      <p className="text-2xl font-bold">{value}</p>
+    <div className="min-w-0">
+      <p style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: '2px' }}>
+        {title}
+      </p>
+      <p className="text-foreground tabular-nums" style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1 }}>
+        {value}
+      </p>
     </div>
   </div>
 );
 
 const InfoWidget = ({ icon, title, children }: { icon: any, title: string, children: React.ReactNode }) => (
-    <div className="bg-card p-4 rounded-lg shadow">
-        <h3 className="font-bold text-lg mb-3 flex items-center">
-            <FontAwesomeIcon icon={icon} className="mr-2 text-primary" />
-            {title}
-        </h3>
-        <div className="text-sm text-muted-foreground space-y-2">
-            {children}
-        </div>
+  <div
+    className="bg-card rounded-2xl p-5"
+    style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+  >
+    <h3
+      className="text-foreground mb-3 flex items-center gap-2"
+      style={{ fontSize: '15px', fontWeight: 600, letterSpacing: '-0.01em' }}
+    >
+      <span
+        className="inline-flex items-center justify-center rounded-lg"
+        style={{ width: '28px', height: '28px', backgroundColor: '#F4F7FE', color: '#3B5BDB' }}
+      >
+        <FontAwesomeIcon icon={icon} style={{ fontSize: '12px' }} />
+      </span>
+      {title}
+    </h3>
+    <div style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.55 }} className="space-y-2">
+      {children}
     </div>
+  </div>
 );
 
 const TabButton = ({ label, isActive, onClick }: { label: string, isActive: boolean, onClick: () => void }) => (

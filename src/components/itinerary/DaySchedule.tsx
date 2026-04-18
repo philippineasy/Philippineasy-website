@@ -86,22 +86,24 @@ export default function DaySchedule({
       <div
         key={period.key}
         id={elementId}
-        className={`p-4 rounded-lg transition-all duration-200 ${
-          isHighlighted ? 'bg-primary/10 ring-2 ring-primary' : 'bg-gray-50 hover:bg-gray-100'
-        }`}
+        className="p-4 rounded-xl transition-all duration-200 bg-card hover:-translate-y-0.5 hover:shadow-md"
+        style={{
+          border: isHighlighted ? '1.5px solid #3B5BDB' : '0.5px solid #e5e7eb',
+          boxShadow: isHighlighted
+            ? '0 4px 12px rgba(59,91,219,0.12)'
+            : '0 1px 2px rgba(0,0,0,0.03)',
+        }}
         onMouseEnter={() => onElementHover?.(elementId)}
         onMouseLeave={() => onElementHover?.(null)}
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
-            {/* En-tete de l'element */}
-            <div className="flex items-center gap-2 mb-2">
-              <FontAwesomeIcon icon={period.icon} className={`${period.color} w-4 h-4`} />
-              <span className="text-sm text-muted-foreground">{period.label}</span>
+            <div className="flex items-center gap-1.5 mb-2" style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#94a3b8' }}>
+              <FontAwesomeIcon icon={period.icon} className={`${period.color} w-3 h-3`} />
+              <span>{period.label}</span>
             </div>
 
-            {/* Nom */}
-            <h4 className="font-semibold text-lg text-foreground">{element.name}</h4>
+            <h4 className="text-foreground" style={{ fontSize: '16px', fontWeight: 600, letterSpacing: '-0.01em', lineHeight: 1.3 }}>{element.name}</h4>
 
             {/* Type ou cuisine */}
             {(element.type || element.cuisine) && (
@@ -163,30 +165,47 @@ export default function DaySchedule({
   };
 
   return (
-    <div className="border-2 border-primary/20 rounded-xl overflow-hidden">
-      {/* Header du jour */}
+    <div
+      className="bg-card rounded-2xl overflow-hidden"
+      style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+    >
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 bg-primary/5 border-l-4 border-primary flex items-center justify-between hover:bg-primary/10 transition-colors"
+        className="w-full px-5 py-4 flex items-center justify-between transition-colors hover:bg-soft-blue"
       >
         <div className="flex items-center gap-3">
-          <span className="bg-primary text-white text-sm font-bold px-3 py-1 rounded-full">
-            Jour {day.day}
+          <span
+            className="inline-flex items-center justify-center rounded-full tabular-nums"
+            style={{
+              width: '28px',
+              height: '28px',
+              backgroundColor: '#3B5BDB',
+              color: '#ffffff',
+              fontSize: '12px',
+              fontWeight: 700,
+            }}
+          >
+            {day.day}
           </span>
-          <span className="font-semibold text-primary">{day.location}</span>
+          <span
+            className="text-foreground"
+            style={{ fontSize: '15px', fontWeight: 600, letterSpacing: '-0.01em' }}
+          >
+            {day.location}
+          </span>
           {day.date && (
-            <span className="text-sm text-muted-foreground">({day.date})</span>
+            <span style={{ fontSize: '12px', color: '#94a3b8' }}>· {day.date}</span>
           )}
         </div>
         <FontAwesomeIcon
           icon={isExpanded ? faChevronUp : faChevronDown}
-          className="text-primary w-4 h-4"
+          style={{ color: '#94a3b8', fontSize: '12px' }}
         />
       </button>
 
-      {/* Contenu du jour */}
       {isExpanded && (
-        <div className="p-4 space-y-4">
+        <div className="px-5 pt-1 pb-5 space-y-3" style={{ borderTop: '0.5px solid #f1f5f9' }}>
+          <div className="h-1" />
           {PERIODS.map((period) => {
             const element = day[period.key as keyof DayData] as ElementData | undefined;
             return renderElement(period, element);

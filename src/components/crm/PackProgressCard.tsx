@@ -75,21 +75,36 @@ export default function PackProgressCard({
   return (
     <div
       className={cn(
-        'bg-card rounded-xl border border-border p-5 hover:border-primary/30 transition-all',
-        onClick && 'cursor-pointer hover:shadow-md',
+        'bg-card rounded-2xl p-5 transition-all duration-200',
+        onClick && 'cursor-pointer hover:-translate-y-0.5 hover:shadow-lg',
         className
       )}
+      style={{
+        border: '0.5px solid #e5e7eb',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+      }}
       onClick={onClick}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-            <FontAwesomeIcon icon={icon} />
+          <div
+            className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+            style={{ backgroundColor: '#F4F7FE', color: '#3B5BDB' }}
+          >
+            <FontAwesomeIcon icon={icon} style={{ fontSize: '16px' }} />
           </div>
-          <div>
-            <h3 className="font-semibold text-sm">{name}</h3>
-            <p className="text-xs text-muted-foreground">
+          <div className="min-w-0">
+            <h3
+              className="text-foreground truncate"
+              style={{ fontSize: '14px', fontWeight: 600, letterSpacing: '-0.01em' }}
+            >
+              {name}
+            </h3>
+            <p
+              className="mt-0.5 tabular-nums"
+              style={{ fontSize: '11px', color: '#94a3b8' }}
+            >
               {formattedDate} &middot; {purchase.amount_paid}€
             </p>
           </div>
