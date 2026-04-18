@@ -103,7 +103,7 @@ export function KlookCarousel({
           {activities.map((activity, idx) => (
             <div
               key={activity.id}
-              className="flex-[0_0_85%] sm:flex-[0_0_55%] md:flex-[0_0_42%] lg:flex-[0_0_34%] min-w-0 px-3"
+              className="flex-[0_0_90%] sm:flex-[0_0_60%] md:flex-[0_0_48%] lg:flex-[0_0_40%] min-w-0 px-2"
             >
               <ActivityCard
                 activity={activity}
@@ -157,20 +157,22 @@ function ActivityCard({ activity, isActive, onTrack }: ActivityCardProps) {
       target="_blank"
       rel="sponsored noopener noreferrer"
       onClick={onTrack}
-      className="group block rounded-2xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-xl transition-all duration-300"
+      className="group block rounded-2xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-2xl transition-shadow duration-300"
       animate={{
-        scale: isActive ? 1 : 0.96,
-        opacity: isActive ? 1 : 0.7,
+        scale: isActive ? 1 : 0.75,
+        opacity: isActive ? 1 : 0.35,
+        filter: isActive ? 'blur(0px)' : 'blur(1px)',
       }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
+      transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+      style={{ pointerEvents: isActive ? 'auto' : 'none' }}
     >
       {/* Image with overlay */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+      <div className="relative aspect-[3/2] overflow-hidden bg-muted">
         <Image
           src={activity.image}
           alt={activity.title}
           fill
-          sizes="(max-width: 640px) 85vw, (max-width: 768px) 55vw, (max-width: 1024px) 42vw, 34vw"
+          sizes="(max-width: 640px) 90vw, (max-width: 768px) 60vw, (max-width: 1024px) 48vw, 40vw"
           className="object-cover group-hover:scale-105 transition-transform duration-500"
           priority={isActive}
         />
