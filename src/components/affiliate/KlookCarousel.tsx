@@ -103,7 +103,7 @@ export function KlookCarousel({
           {activities.map((activity, idx) => (
             <div
               key={activity.id}
-              className="flex-[0_0_100%] md:flex-[0_0_60%] lg:flex-[0_0_50%] min-w-0 px-4"
+              className="flex-[0_0_85%] sm:flex-[0_0_55%] md:flex-[0_0_42%] lg:flex-[0_0_34%] min-w-0 px-3"
             >
               <ActivityCard
                 activity={activity}
@@ -165,66 +165,66 @@ function ActivityCard({ activity, isActive, onTrack }: ActivityCardProps) {
       transition={{ duration: 0.4, ease: 'easeOut' }}
     >
       {/* Image with overlay */}
-      <div className="relative aspect-[16/10] overflow-hidden bg-muted">
+      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         <Image
           src={activity.image}
           alt={activity.title}
           fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 50vw"
+          sizes="(max-width: 640px) 85vw, (max-width: 768px) 55vw, (max-width: 1024px) 42vw, 34vw"
           className="object-cover group-hover:scale-105 transition-transform duration-500"
           priority={isActive}
         />
         {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
 
         {/* Price badge */}
-        <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
-          <span className="text-xs text-muted-foreground">Des</span>{' '}
-          <span className="text-lg font-bold text-foreground">{activity.priceFrom}€</span>
+        <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm rounded-full px-3 py-1 shadow-lg">
+          <span className="text-[10px] text-muted-foreground">Des</span>{' '}
+          <span className="text-sm font-bold text-foreground">{activity.priceFrom}€</span>
         </div>
 
         {/* Duration badge */}
-        <div className="absolute top-4 left-4 bg-black/40 backdrop-blur-sm rounded-full px-3 py-1.5 text-white text-xs font-medium flex items-center gap-1.5">
-          <FontAwesomeIcon icon={faClock} className="text-[10px]" />
+        <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-sm rounded-full px-2.5 py-1 text-white text-[10px] font-medium flex items-center gap-1">
+          <FontAwesomeIcon icon={faClock} className="text-[9px]" />
           {activity.duration}
         </div>
 
         {/* Title & subtitle over image */}
-        <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
-          <h4 className="text-xl md:text-2xl font-bold leading-tight mb-1 line-clamp-2">
+        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+          <h4 className="text-base md:text-lg font-bold leading-tight mb-0.5 line-clamp-2">
             {activity.title}
           </h4>
-          <p className="text-sm text-white/90 line-clamp-1">{activity.subtitle}</p>
+          <p className="text-xs text-white/90 line-clamp-1">{activity.subtitle}</p>
         </div>
       </div>
 
       {/* Content below image */}
-      <div className="p-5 space-y-4">
+      <div className="p-4 space-y-3">
         {/* Rating */}
-        <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-2 text-xs">
           <div className="flex items-center gap-1 text-amber-500">
-            <FontAwesomeIcon icon={faStar} />
+            <FontAwesomeIcon icon={faStar} className="text-[11px]" />
             <span className="font-semibold text-foreground">{activity.rating}</span>
           </div>
           <span className="text-muted-foreground">·</span>
           <span className="text-muted-foreground">{activity.reviews}</span>
         </div>
 
-        {/* Highlights */}
-        <ul className="space-y-1.5">
-          {activity.highlights.map((h) => (
-            <li key={h} className="flex items-start gap-2 text-sm text-muted-foreground">
+        {/* Highlights — show 2 for compactness */}
+        <ul className="space-y-1">
+          {activity.highlights.slice(0, 2).map((h) => (
+            <li key={h} className="flex items-start gap-2 text-xs text-muted-foreground">
               <span className="mt-1 inline-block w-1 h-1 rounded-full bg-primary flex-shrink-0" />
-              <span>{h}</span>
+              <span className="line-clamp-1">{h}</span>
             </li>
           ))}
         </ul>
 
         {/* CTA */}
-        <div className="flex items-center justify-between pt-2">
-          <span className="inline-flex items-center gap-2 text-primary font-semibold group-hover:gap-3 transition-all">
+        <div className="flex items-center justify-between pt-1">
+          <span className="inline-flex items-center gap-1.5 text-primary text-sm font-semibold group-hover:gap-2 transition-all">
             Reserver sur Klook
-            <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-xs" />
+            <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px]" />
           </span>
           <AnimatePresence>
             {isActive && (
@@ -232,7 +232,7 @@ function ActivityCard({ activity, isActive, onTrack }: ActivityCardProps) {
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="text-xs text-green-700 dark:text-green-400 font-medium"
+                className="text-[10px] text-green-700 dark:text-green-400 font-medium"
               >
                 Annulation gratuite
               </motion.span>
