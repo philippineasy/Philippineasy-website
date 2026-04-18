@@ -5,9 +5,14 @@ import * as Sentry from "@sentry/nextjs";
 Sentry.init({
   dsn: "https://fb9bcec672b03a79d258af305cbf63bb@o4509711982002176.ingest.de.sentry.io/4509711984361552",
 
+  // Only report from production — dev errors are visible in console + terminal,
+  // no need to burn Sentry quota on Fast Refresh / HMR transient states.
+  enabled: process.env.NODE_ENV === 'production',
+  environment: process.env.NODE_ENV,
+
   // Reduce trace sampling in production to control Sentry quota usage.
   // Errors are always captured — only performance traces are sampled.
-  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+  tracesSampleRate: 0.1,
 
   // Capture Replay for 10% of all sessions,
   // plus for 100% of sessions with an error
