@@ -28,18 +28,52 @@ export const VoyagerClientPage = ({ initialDestinations, practicalTips }: { init
     <SectionClientPage
       initialCategories={initialDestinations}
       renderCard={(dest: Destination) => (
-        <div className="bg-card rounded-lg shadow-lg overflow-hidden feature-card h-full">
-          <div className="relative w-full h-48">
-            <Image src={dest.heroImage || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e'} alt={dest.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
+        <Link
+          href={`/voyager-aux-philippines/${dest.slug}`}
+          className="group bg-card rounded-2xl overflow-hidden flex flex-col h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+          style={{
+            border: '0.5px solid #e5e7eb',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+          }}
+        >
+          <div className="relative w-full h-[180px] overflow-hidden">
+            <Image
+              src={dest.heroImage || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e'}
+              alt={dest.name}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
           </div>
-          <div className="p-6">
-            <h3 className="text-xl font-bold mb-2">{dest.name}</h3>
-            <p className="text-muted-foreground mb-4">{dest.description}</p>
-            <Link href={`/voyager-aux-philippines/${dest.slug}`} className="text-primary hover:text-primary/90 font-semibold">
-              Explorer {dest.name} →
-            </Link>
+          <div className="px-5 pt-[18px] pb-5 flex flex-col flex-1">
+            <h3
+              className="text-foreground mb-2"
+              style={{
+                fontSize: '18px',
+                fontWeight: 600,
+                letterSpacing: '-0.01em',
+                lineHeight: 1.3,
+              }}
+            >
+              {dest.name}
+            </h3>
+            <p
+              className="mb-4 flex-1 line-clamp-3"
+              style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.55 }}
+            >
+              {dest.description}
+            </p>
+            <span
+              className="inline-flex items-center gap-1 text-primary text-sm font-medium"
+              aria-hidden="true"
+            >
+              Explorer {dest.name}
+              <span className="transition-transform duration-200 group-hover:translate-x-0.5">
+                →
+              </span>
+            </span>
           </div>
-        </div>
+        </Link>
       )}
     >
       <h1 className="text-4xl font-bold text-center mb-4">Voyager aux <span className="text-accent">Philippines</span></h1>
@@ -47,8 +81,11 @@ export const VoyagerClientPage = ({ initialDestinations, practicalTips }: { init
         Explorez la beauté et la diversité de l'archipel, des plages de rêve aux volcans majestueux.
       </p>
 
-      <div className="mb-16 bg-card p-8 rounded-lg shadow-lg">
-        <h2 className="text-3xl font-bold mb-8 text-center">Destinations <span className="text-accent">Incontournables</span></h2>
+      <div
+        className="mb-16 bg-card rounded-2xl p-6 md:p-8"
+        style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+      >
+        <h2 className="text-3xl font-bold mb-8 text-center" style={{ letterSpacing: '-0.02em' }}>Destinations <span className="text-accent">Incontournables</span></h2>
         <div className="flex flex-wrap -mx-4 items-center">
           <div className="w-full md:w-1/2 px-4 mb-8 md:mb-0">
             <div className="relative w-full h-auto" style={{ aspectRatio: '1.5/1' }}>
@@ -88,13 +125,34 @@ export const VoyagerClientPage = ({ initialDestinations, practicalTips }: { init
         <h2 className="text-3xl font-bold mb-8 text-center">Conseils Pratiques pour <span className="text-accent">Voyager</span></h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {practicalTips.map((tip, index) => (
-            <Link key={index} href={tip.link || '#'} className="block feature-card bg-card rounded-lg shadow-lg p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-              <div className="text-accent text-4xl mb-4"><FontAwesomeIcon icon={tip.icon} /></div>
-              <h3 className="text-xl font-bold mb-3">{tip.title}</h3>
-              <p className="text-muted-foreground">{tip.text}</p>
+            <Link
+              key={index}
+              href={tip.link || '#'}
+              className="group bg-card rounded-2xl p-6 flex flex-col h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+              style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+            >
+              <span
+                className="inline-flex items-center justify-center rounded-xl mb-4"
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  backgroundColor: '#FEF3C7',
+                  color: '#F59E0B',
+                }}
+                aria-hidden="true"
+              >
+                <FontAwesomeIcon icon={tip.icon} style={{ fontSize: '20px' }} />
+              </span>
+              <h3 className="text-foreground mb-2" style={{ fontSize: '16px', fontWeight: 600, letterSpacing: '-0.01em', lineHeight: 1.3 }}>
+                {tip.title}
+              </h3>
+              <p className="flex-1" style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.55 }}>
+                {tip.text}
+              </p>
               {tip.linkText && (
-                <span className="text-primary hover:text-primary/90 font-semibold mt-2 inline-block">
+                <span className="inline-flex items-center gap-1 text-primary text-sm font-medium mt-3" aria-hidden="true">
                   {tip.linkText}
+                  <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
                 </span>
               )}
             </Link>

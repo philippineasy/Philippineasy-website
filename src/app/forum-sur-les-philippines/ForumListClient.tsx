@@ -43,63 +43,169 @@ export const ForumListClient = ({ initialCategories }: ForumListClientProps) => 
     return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
-  const getBadgeColorClass = (name: string) => {
-    const nameLower = (name || '').toLowerCase();
-    if (nameLower.includes('expat')) return 'bg-primary/10 text-primary/90';
-    if (nameLower.includes('voyage')) return 'bg-yellow-100 text-yellow-800';
-    if (nameLower.includes('culture')) return 'bg-green-100 text-green-800';
-    if (nameLower.includes('travail')) return 'bg-purple-100 text-purple-800';
-    if (nameLower.includes('gastro')) return 'bg-red-100 text-red-800';
-    if (nameLower.includes('rencontre')) return 'bg-indigo-100 text-indigo-800';
-    return 'bg-muted text-foreground';
+  const getBadgeColors = (name: string) => {
+    const n = (name || '').toLowerCase();
+    if (n.includes('expat')) return { bg: '#F4F7FE', color: '#3B5BDB' };
+    if (n.includes('voyage')) return { bg: '#FEF3C7', color: '#B45309' };
+    if (n.includes('culture')) return { bg: '#DCFCE7', color: '#15803D' };
+    if (n.includes('travail')) return { bg: '#F3E8FF', color: '#7E22CE' };
+    if (n.includes('gastro')) return { bg: '#FEE2E2', color: '#B91C1C' };
+    if (n.includes('rencontre')) return { bg: '#E0E7FF', color: '#4338CA' };
+    return { bg: '#f1f5f9', color: '#334155' };
   };
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {initialCategories.map((category) => (
-          <div key={category.id} className="forum-card bg-card rounded-lg shadow-lg p-6 flex flex-col">
-            <div className="flex-grow">
-              <div className="flex justify-between items-start mb-3">
-                <h3 className="text-xl font-bold mr-2">{category.name}</h3>
-                <span className={`${getBadgeColorClass(category.name)} text-xs font-medium px-2.5 py-0.5 rounded-full whitespace-nowrap`}>
-                  {category.topic_count} sujet{category.topic_count !== 1 ? 's' : ''}
-                </span>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {initialCategories.map((category) => {
+          const badge = getBadgeColors(category.name);
+          return (
+            <Link
+              key={category.id}
+              href={`/forum-sur-les-philippines/${category.slug}`}
+              className="group bg-card rounded-2xl p-5 flex flex-col h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+              style={{
+                border: '0.5px solid #e5e7eb',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+              }}
+            >
+              <div className="flex-grow">
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <h3
+                    className="text-foreground"
+                    style={{
+                      fontSize: '17px',
+                      fontWeight: 600,
+                      letterSpacing: '-0.01em',
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {category.name}
+                  </h3>
+                  <span
+                    className="inline-flex items-center whitespace-nowrap px-2 py-0.5 rounded flex-shrink-0"
+                    style={{
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      letterSpacing: '0.05em',
+                      textTransform: 'uppercase',
+                      backgroundColor: badge.bg,
+                      color: badge.color,
+                    }}
+                  >
+                    {category.topic_count} sujet{category.topic_count !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                <p
+                  className="mb-4"
+                  style={{
+                    fontSize: '13px',
+                    color: '#64748b',
+                    lineHeight: 1.55,
+                    minHeight: '3em',
+                  }}
+                >
+                  {category.description}
+                </p>
               </div>
-              <p className="text-muted-foreground mb-4 text-sm min-h-[3em]">{category.description}</p>
-            </div>
-            <div className="border-t pt-3 mt-auto text-xs">
-              {category.last_topic_title ? (
-                <>
-                  <p className="mb-1 text-sm truncate" title={category.last_topic_title}>
-                    Dernier: <Link href={`/forum-sur-les-philippines/sujet/${category.last_topic_slug}`} className="text-primary hover:underline font-medium">{category.last_topic_title}</Link>
-                  </p>
-                  <div className="text-xs text-muted-foreground flex items-center">
-                    <div className="relative w-4 h-4 rounded-full inline-block mr-1.5 align-middle">
-                      <Image src={category.last_post_author_avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(category.last_post_author_username)}&background=random&size=24&font-size=0.5&length=1&color=fff`} alt={`Avatar de ${category.last_post_author_username}`} fill className="rounded-full" sizes="16px" />
+              <div
+                className="pt-3 mt-auto"
+                style={{ borderTop: '0.5px solid #f1f5f9' }}
+              >
+                {category.last_topic_title ? (
+                  <>
+                    <p
+                      className="truncate mb-1.5"
+                      style={{ fontSize: '12px', color: '#475569' }}
+                      title={category.last_topic_title}
+                    >
+                      <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', marginRight: '6px' }}>
+                        Dernier
+                      </span>
+                      <span className="font-medium text-foreground">
+                        {category.last_topic_title}
+                      </span>
+                    </p>
+                    <div className="flex items-center gap-1.5" style={{ fontSize: '11px', color: '#94a3b8' }}>
+                      <span className="relative flex-shrink-0" style={{ width: '16px', height: '16px' }}>
+                        <Image
+                          src={category.last_post_author_avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(category.last_post_author_username)}&background=random&size=24&font-size=0.5&length=1&color=fff`}
+                          alt=""
+                          fill
+                          className="rounded-full object-cover"
+                          sizes="16px"
+                        />
+                      </span>
+                      <span className="font-medium" style={{ color: '#64748b' }}>
+                        {category.last_post_author_username}
+                      </span>
+                      <span aria-hidden="true">·</span>
+                      <span>{formatRelativeTime(category.last_post_timestamp)}</span>
                     </div>
-                    <span className="font-medium">{category.last_post_author_username}</span> - {formatRelativeTime(category.last_post_timestamp)}
-                  </div>
-                </>
-              ) : (
-                <p className="text-xs text-muted-foreground italic">Aucune activité récente.</p>
-              )}
-            </div>
-            <Link href={`/forum-sur-les-philippines/${category.slug}`} className="mt-4 inline-block text-primary hover:text-primary/90 font-semibold text-sm self-start">
-              Voir le forum →
+                  </>
+                ) : (
+                  <p style={{ fontSize: '11px', color: '#94a3b8', fontStyle: 'italic' }}>
+                    Aucune activité récente.
+                  </p>
+                )}
+              </div>
+              <span
+                className="mt-4 inline-flex items-center gap-1 text-primary text-sm font-medium self-start"
+                aria-hidden="true"
+              >
+                Voir le forum
+                <span className="transition-transform duration-200 group-hover:translate-x-0.5">
+                  →
+                </span>
+              </span>
             </Link>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {!user && (
-        <div className="mt-16 text-center">
-          <Link href="/connexion" className="inline-block px-8 py-3 bg-primary text-card-foreground rounded-lg hover:bg-primary/90 transition duration-300 font-semibold">
-            <FontAwesomeIcon icon={faRightToBracket} className="mr-2" /> Connectez-vous pour participer !
-          </Link>
-          <p className="mt-4 text-muted-foreground">
-            Ou <Link href="/connexion#register" className="text-primary hover:underline">créez un compte gratuitement</Link>.
-          </p>
+        <div className="mt-16 max-w-md mx-auto">
+          <div
+            className="bg-card rounded-2xl p-6 text-center"
+            style={{
+              border: '0.5px solid #e5e7eb',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+            }}
+          >
+            <span
+              className="inline-flex items-center justify-center rounded-xl mb-3"
+              style={{
+                width: '48px',
+                height: '48px',
+                backgroundColor: '#F4F7FE',
+                color: '#3B5BDB',
+              }}
+              aria-hidden="true"
+            >
+              <FontAwesomeIcon icon={faRightToBracket} style={{ fontSize: '20px' }} />
+            </span>
+            <h3 className="text-foreground mb-1" style={{ fontSize: '16px', fontWeight: 600 }}>
+              Rejoignez la discussion
+            </h3>
+            <p className="mb-4" style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.55 }}>
+              Créez un compte gratuit pour répondre et démarrer vos propres sujets.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5">
+              <Link
+                href="/connexion"
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg font-semibold text-sm transition-all duration-200 hover:bg-primary/90 hover:scale-[1.02]"
+              >
+                Se connecter
+              </Link>
+              <Link
+                href="/connexion#register"
+                className="inline-flex items-center gap-1 text-primary text-sm font-medium hover:text-primary/80"
+              >
+                Créer un compte
+                <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          </div>
         </div>
       )}
     </>

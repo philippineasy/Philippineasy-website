@@ -5,6 +5,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Propagation du design system editorial sur tout le site
+- **Changed** : `ProductCard` (marketplace) — refondu au pattern editorial (rounded-2xl, border 0.5px, badge vendeur primary, bloc prix kicker "PRIX" + valeur tabular-nums 18px, lien "Voir →" primary)
+- **Changed** : `VoyagerClientPage` — cards destinations refondues (image 180px zoom hover, titre 18px 600, lien "Explorer X →") + bloc wrapper "Destinations Incontournables" aligne + 6 cartes conseils pratiques editoriales (icones FontAwesome dans carres 48x48 orange accent sur fond creme)
+- **Changed** : `VivreClientPage` — cards categories refondues + 4 cartes thematiques (S'installer/Travailler/Investir/Etudier) avec icones dans carres 48x48 bleu primary sur fond soft-blue
+- **Changed** : `ForumListClient` — cards categories forum refondues (badges colores par theme en 10px uppercase letter-spacing 0.05em, meta "Dernier" + avatar auteur + temps relatif, lien "Voir le forum →") + bloc login "Rejoignez la discussion" en card editoriale
+
 ### Refonte homepage — Editorial design system
 - **Added** : Nouveau pattern de card editorial (rounded-2xl, border 0.5px #e5e7eb, shadow 0 1px 2px, hover translate-y + shadow-lg) applique a toute la homepage
 - **Added** : Tokens Tailwind `warm-yellow` (#FCD34D) et `soft-blue` (#F4F7FE) pour sections alternees et accents
