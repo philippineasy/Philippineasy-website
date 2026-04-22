@@ -33,18 +33,20 @@ export const DropdownMenu = ({ label, items, isActive }: DropdownMenuProps) => {
     };
   }, []);
 
-  const baseClasses = "px-3 py-2 lg:px-4 rounded-lg transition duration-300 flex items-center space-x-2";
-  const activeClasses = "font-bold text-primary bg-primary/10";
+  const baseClasses = "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none";
+  const activeClasses = "bg-primary/10 text-primary font-bold";
   const defaultClasses = "text-foreground hover:text-primary hover:bg-primary/10";
 
   return (
     <div className="relative" ref={menuRef}>
-      <button 
-        onClick={() => setIsOpen(!isOpen)} 
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        aria-haspopup="true"
+        aria-expanded={isOpen}
         className={`${baseClasses} ${isActive ? activeClasses : defaultClasses}`}
       >
         <span>{label}</span>
-        <FontAwesomeIcon icon={faChevronDown} className="w-3 h-3 text-accent" />
+        <FontAwesomeIcon icon={faChevronDown} className="w-2.5 h-2.5 text-accent/80" />
       </button>
 
       {isOpen && (

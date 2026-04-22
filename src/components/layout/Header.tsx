@@ -172,7 +172,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
           <div className="flex items-center justify-between py-3.5">
             <Link
               href="/"
-              className="text-2xl md:text-[26px] font-bold text-primary tracking-[-0.02em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+              className="text-[20px] md:text-[22px] font-bold text-primary tracking-[-0.02em] leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
               aria-label="Philippin'Easy — Accueil"
             >
               Philippin&apos;<span className="text-accent">Easy</span>
