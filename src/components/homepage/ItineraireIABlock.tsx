@@ -1,103 +1,53 @@
 import Link from 'next/link';
-import Image from 'next/image';
 
-type Activity = {
-  time: string;
+type Day = {
+  d: number;
+  city: string;
   title: string;
-  thumb: string;
-  rating: string;
+  activities: string[];
 };
 
-type UpcomingDay = { n: number; location: string; title: string };
-
-const day1Activities: Activity[] = [
+const mockupDays: Day[] = [
   {
-    time: '11:00',
-    title: 'Check-in Crimson Resort & Spa',
-    thumb: '/imagesHero/hero-home.webp',
-    rating: '4.6',
+    d: 1,
+    city: 'Manille',
+    title: 'Arrivée & Intramuros',
+    activities: ['Check-in hôtel Makati', 'Fort Santiago', 'Dîner Binondo'],
   },
   {
-    time: '15:00',
-    title: 'Azure Beach Club',
-    thumb: '/images/voyager/iles-philippines-aeriennes.webp',
-    rating: '4.4',
+    d: 2,
+    city: 'Palawan',
+    title: 'Vol + El Nido',
+    activities: ['Vol MNL → ENI', 'Transfert Nacpan Beach'],
+  },
+  {
+    d: 3,
+    city: 'El Nido',
+    title: 'Tour A : lagons',
+    activities: ['Big Lagoon · Small Lagoon', 'Secret Lagoon · Shimizu'],
   },
 ];
 
-const upcomingDays: UpcomingDay[] = [
-  { n: 3, location: 'Mactan', title: 'Plongée & aventure marine' },
-  { n: 5, location: 'Bohol', title: 'Chocolate Hills & tarsiers' },
-  { n: 7, location: 'Cebu', title: 'Kawasan Falls & départ' },
+const features = [
+  'Horaires réalistes, temps de trajet inclus',
+  'Hôtels notés 4+ sur Google Maps',
+  'Budget estimé par jour',
+  'Export PDF et partage lien',
 ];
 
-const ClockIcon = ({ className }: { className?: string }) => (
+const CheckIcon = () => (
   <svg
-    width="11"
-    height="11"
+    width="12"
+    height="12"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
-    strokeWidth="1.8"
+    strokeWidth="3"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className={className}
     aria-hidden="true"
   >
-    <circle cx="12" cy="12" r="9" />
-    <path d="M12 7v5l3 2" />
-  </svg>
-);
-
-const BusIcon = ({ className }: { className?: string }) => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-    aria-hidden="true"
-  >
-    <rect x="4" y="5" width="16" height="12" rx="2" />
-    <path d="M4 11h16M8 17v2M16 17v2" />
-    <circle cx="8.5" cy="14" r="0.6" fill="currentColor" />
-    <circle cx="15.5" cy="14" r="0.6" fill="currentColor" />
-  </svg>
-);
-
-const DecorRings = () => (
-  <svg
-    className="absolute inset-0 w-full h-full pointer-events-none"
-    viewBox="0 0 800 500"
-    preserveAspectRatio="xMaxYMid slice"
-    aria-hidden="true"
-  >
-    <g
-      fill="none"
-      stroke="#ffffff"
-      strokeWidth="1"
-      strokeDasharray="4 6"
-      style={{ opacity: 0.13 }}
-    >
-      <circle cx="720" cy="110" r="60" />
-      <circle cx="720" cy="110" r="110" />
-      <circle cx="720" cy="110" r="170" />
-      <circle cx="720" cy="110" r="240" />
-    </g>
-    <g
-      fill="none"
-      stroke="#ffffff"
-      strokeWidth="1"
-      strokeDasharray="2 8"
-      style={{ opacity: 0.09 }}
-    >
-      <circle cx="80" cy="420" r="90" />
-      <circle cx="80" cy="420" r="150" />
-    </g>
+    <path d="M20 6L9 17l-5-5" />
   </svg>
 );
 
@@ -106,283 +56,170 @@ export const ItineraireIABlock = () => {
     <section className="py-10 md:py-16 bg-background">
       <div className="container mx-auto px-4">
         <div
-          className="relative overflow-hidden rounded-3xl mx-auto max-w-6xl"
+          className="relative overflow-hidden rounded-3xl mx-auto max-w-6xl text-white"
           style={{
-            background:
-              'linear-gradient(135deg, #3B5BDB 0%, #1e40af 100%)',
-            padding: 'clamp(2rem, 5vw, 3rem)',
+            background: 'linear-gradient(135deg, #3B5BDB 0%, #1e40af 100%)',
+            padding: 'clamp(2.5rem, 5vw, 4rem)',
           }}
         >
-          <DecorRings />
+          {/* Decorative dashed circles (top-right + bottom-left) */}
+          <span
+            className="absolute pointer-events-none rounded-full"
+            style={{
+              width: '320px',
+              height: '320px',
+              top: '-120px',
+              right: '-80px',
+              border: '2px dashed rgba(255, 255, 255, 0.13)',
+            }}
+            aria-hidden="true"
+          />
+          <span
+            className="absolute pointer-events-none rounded-full"
+            style={{
+              width: '200px',
+              height: '200px',
+              bottom: '-60px',
+              left: '-40px',
+              border: '2px dashed rgba(255, 255, 255, 0.13)',
+              opacity: 0.9,
+            }}
+            aria-hidden="true"
+          />
 
           <div className="relative grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12 items-center">
-            {/* Colonne gauche */}
+            {/* Left column — copy */}
             <div>
               <span
-                className="inline-flex items-center gap-2 mb-5 text-[13px] font-medium uppercase"
+                className="inline-block text-[13px] font-medium uppercase mb-4"
                 style={{
-                  color: 'rgba(255,255,255,0.75)',
                   letterSpacing: '0.08em',
+                  color: 'rgba(255, 255, 255, 0.78)',
                 }}
               >
-                <span className="text-accent" aria-hidden="true">✨</span>
+                <span className="text-accent mr-1.5" aria-hidden="true">✦</span>
                 Création IA gratuite
               </span>
 
               <h2
-                className="text-white font-bold mb-5"
+                className="font-bold mb-4 text-white"
                 style={{
-                  fontSize: 'clamp(1.75rem, 3.8vw, 2.25rem)',
-                  lineHeight: 1.1,
+                  fontSize: 'clamp(1.875rem, 3.5vw, 2.5rem)',
                   letterSpacing: '-0.02em',
+                  lineHeight: 1.1,
                 }}
               >
-                Votre itinéraire sur&nbsp;mesure,{' '}
-                <br className="hidden md:inline" />
-                prêt en 30&nbsp;secondes.
+                Votre itinéraire sur-mesure,{' '}
+                <span className="text-accent">prêt en 30&nbsp;secondes</span>
               </h2>
 
               <p
-                className="mb-7 leading-relaxed"
+                className="mb-6 text-[16px]"
                 style={{
-                  color: 'rgba(255,255,255,0.85)',
-                  fontSize: '15px',
-                  maxWidth: '32rem',
+                  color: 'rgba(255, 255, 255, 0.85)',
+                  lineHeight: 1.6,
                 }}
               >
-                Activités avec horaires et notes Google, restaurants
-                sélectionnés, hôtels, transports entre îles, carte interactive —
-                notre IA assemble tout pour vous en quelques instants.
+                Dites-nous votre style (détente, aventure, culture), votre
+                budget et la durée. Notre IA construit votre itinéraire jour par
+                jour, avec hébergements et transports.
               </p>
+
+              <ul className="flex flex-col gap-2.5 mb-7" role="list">
+                {features.map((feat) => (
+                  <li
+                    key={feat}
+                    className="flex items-center gap-2.5 text-[14px]"
+                    style={{ color: 'rgba(255, 255, 255, 0.92)' }}
+                  >
+                    <span
+                      className="inline-flex w-[22px] h-[22px] items-center justify-center rounded-full text-accent flex-shrink-0"
+                      style={{ backgroundColor: 'rgba(245, 158, 11, 0.2)' }}
+                      aria-hidden="true"
+                    >
+                      <CheckIcon />
+                    </span>
+                    <span>{feat}</span>
+                  </li>
+                ))}
+              </ul>
 
               <Link
                 href="/itineraire-personnalise-pour-les-philippines"
-                className="inline-flex items-center gap-2 px-7 py-3.5 bg-accent text-accent-foreground rounded-lg font-semibold text-base shadow-lg transition-all duration-200 hover:bg-accent/90 hover:scale-[1.02] hover:shadow-xl"
+                className="inline-flex items-center gap-2 px-7 py-3.5 bg-accent text-ink rounded-lg font-semibold text-base shadow-cta transition-all duration-200 hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
               >
                 Je crée mon itinéraire
-                <span aria-hidden="true">→</span>
+                <span
+                  aria-hidden="true"
+                  className="transition-transform duration-200 group-hover:translate-x-0.5"
+                >
+                  →
+                </span>
               </Link>
-
-              <p
-                className="mt-6 text-[13px] leading-relaxed"
-                style={{ color: 'rgba(255,255,255,0.7)', maxWidth: '30rem' }}
-              >
-                <span className="text-accent" aria-hidden="true">★</span>{' '}
-                <span className="text-white font-semibold">Easy+</span> —
-                recevez-le sur WhatsApp ou Telegram, avec support pendant le
-                voyage.
-              </p>
             </div>
 
-            {/* Colonne droite — mockup riche */}
+            {/* Right column — mockup window */}
             <div
-              className="bg-card rounded-2xl overflow-hidden"
-              style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}
+              className="bg-card rounded-2xl overflow-hidden text-foreground shadow-mockup"
+              role="img"
+              aria-label="Aperçu d'un itinéraire 10 jours généré par l'IA — Manille, Palawan, El Nido — budget 1 900 à 2 400 €"
             >
-              {/* Header */}
+              {/* Mac-style title bar */}
               <div
-                className="flex items-start justify-between gap-3 px-5 pt-5 pb-4"
-                style={{ borderBottom: '0.5px solid #e5e7eb' }}
+                className="flex items-center gap-1.5 px-4 py-3 border-b border-border/60"
+                style={{ background: '#F8FAFC' }}
               >
-                <div className="min-w-0">
-                  <p
-                    style={{
-                      fontSize: '10px',
-                      fontWeight: 600,
-                      letterSpacing: '0.08em',
-                      color: '#94a3b8',
-                      textTransform: 'uppercase',
-                      marginBottom: '3px',
-                    }}
-                  >
-                    Itinéraire 7 jours
-                  </p>
-                  <p
-                    className="text-foreground truncate"
-                    style={{ fontSize: '14px', fontWeight: 600 }}
-                  >
-                    Cebu &amp; Mactan — Luxe et découvertes
-                  </p>
-                </div>
-                <span
-                  className="flex-shrink-0 inline-flex items-center px-2 py-1 rounded-md text-[11px]"
-                  style={{
-                    backgroundColor: '#F4F7FE',
-                    color: '#3B5BDB',
-                    fontWeight: 600,
-                  }}
-                >
-                  ≈ 1 900 €
+                <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#EF4444' }} aria-hidden="true" />
+                <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#F59E0B' }} aria-hidden="true" />
+                <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#10B981' }} aria-hidden="true" />
+                <span className="ml-3 text-[12px] font-semibold text-muted-foreground">
+                  Mon voyage · 10 jours · Relax
                 </span>
               </div>
 
-              {/* Jour 1 expanded */}
-              <div className="px-5 pt-4 pb-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <span
-                    className="flex-shrink-0 inline-flex items-center justify-center rounded-full text-[11px]"
-                    style={{
-                      width: '24px',
-                      height: '24px',
-                      backgroundColor: '#F4F7FE',
-                      color: '#3B5BDB',
-                      fontWeight: 700,
-                    }}
+              {/* Body */}
+              <div className="px-5 py-4">
+                {mockupDays.map((day, idx) => (
+                  <div
+                    key={day.d}
+                    className={`flex gap-3.5 py-3 ${idx < mockupDays.length - 1 ? 'border-b border-slate-100' : ''}`}
                   >
-                    1
-                  </span>
-                  <p
-                    className="text-foreground"
-                    style={{ fontSize: '13px', fontWeight: 600 }}
-                  >
-                    Mactan
-                  </p>
-                  <span
-                    style={{
-                      fontSize: '12px',
-                      color: '#64748b',
-                      fontWeight: 400,
-                    }}
-                  >
-                    · Arrivée &amp; détente au resort
-                  </span>
-                </div>
-
-                {/* Transport bar */}
-                <div
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg mb-3"
-                  style={{ backgroundColor: '#f8fafc' }}
-                >
-                  <span
-                    className="flex-shrink-0 inline-flex items-center justify-center rounded-md"
-                    style={{
-                      width: '24px',
-                      height: '24px',
-                      backgroundColor: '#eff6ff',
-                      color: '#3B5BDB',
-                    }}
-                    aria-hidden="true"
-                  >
-                    <BusIcon />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p
-                      className="text-foreground truncate"
-                      style={{ fontSize: '12px', fontWeight: 500 }}
+                    <div
+                      className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-primary text-[13px] font-bold"
+                      style={{ backgroundColor: 'rgba(59, 91, 219, 0.1)' }}
+                      aria-hidden="true"
                     >
-                      Transfert privé · Aéroport → Crimson Resort
-                    </p>
-                  </div>
-                  <span
-                    className="flex-shrink-0"
-                    style={{
-                      fontSize: '10px',
-                      color: '#64748b',
-                      fontWeight: 500,
-                    }}
-                  >
-                    25 min · 1 200 ₱
-                  </span>
-                </div>
-
-                {/* Activités */}
-                <ul className="flex flex-col gap-2">
-                  {day1Activities.map((act) => (
-                    <li
-                      key={act.time}
-                      className="flex items-center gap-3 p-2 rounded-lg"
-                      style={{ border: '0.5px solid #e5e7eb' }}
-                    >
-                      <div
-                        className="relative flex-shrink-0 rounded-md overflow-hidden"
-                        style={{ width: '44px', height: '44px' }}
-                      >
-                        <Image
-                          src={act.thumb}
-                          alt=""
-                          fill
-                          className="object-cover"
-                          sizes="44px"
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 mb-0.5">
-                          <ClockIcon className="text-muted-foreground" />
-                          <span
-                            className="tabular-nums"
-                            style={{
-                              fontSize: '10px',
-                              color: '#64748b',
-                              fontWeight: 500,
-                            }}
-                          >
-                            {act.time}
-                          </span>
-                        </div>
-                        <p
-                          className="text-foreground truncate"
-                          style={{
-                            fontSize: '12px',
-                            fontWeight: 600,
-                            lineHeight: 1.25,
-                          }}
+                      J{day.d}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-baseline gap-2 mb-1 flex-wrap">
+                        <span
+                          className="text-[11px] font-bold uppercase tracking-[0.08em] text-accent"
                         >
-                          {act.title}
-                        </p>
+                          {day.city}
+                        </span>
+                        <span className="text-[14px] font-semibold text-foreground">
+                          {day.title}
+                        </span>
                       </div>
-                      <span
-                        className="flex-shrink-0 inline-flex items-center gap-0.5 text-accent"
-                        style={{ fontSize: '11px', fontWeight: 600 }}
-                      >
-                        {act.rating}
-                        <span style={{ fontSize: '9px' }}>★</span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                      <ul className="text-[12px] text-muted-foreground leading-[1.6] space-y-0.5">
+                        {day.activities.map((a) => (
+                          <li key={a}>· {a}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                ))}
 
-              {/* Jours suivants collapsed */}
-              <div
-                className="px-5 py-3"
-                style={{
-                  borderTop: '0.5px solid #e5e7eb',
-                  backgroundColor: '#fafbff',
-                }}
-              >
-                <ul className="flex flex-col gap-1.5">
-                  {upcomingDays.map((d) => (
-                    <li key={d.n} className="flex items-center gap-2.5">
-                      <span
-                        className="flex-shrink-0 inline-flex items-center justify-center rounded-full text-[10px]"
-                        style={{
-                          width: '20px',
-                          height: '20px',
-                          backgroundColor: '#F4F7FE',
-                          color: '#3B5BDB',
-                          fontWeight: 700,
-                        }}
-                      >
-                        {d.n}
-                      </span>
-                      <span
-                        className="text-foreground flex-shrink-0"
-                        style={{ fontSize: '12px', fontWeight: 600 }}
-                      >
-                        {d.location}
-                      </span>
-                      <span
-                        className="truncate"
-                        style={{
-                          fontSize: '11px',
-                          color: '#64748b',
-                        }}
-                      >
-                        {d.title}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                {/* Footer */}
+                <div className="flex items-center justify-between pt-3.5 mt-2.5 border-t border-slate-100">
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                    Budget estimé
+                  </span>
+                  <span className="text-[16px] font-bold text-accent tabular-nums">
+                    1&nbsp;900&nbsp;€ – 2&nbsp;400&nbsp;€
+                  </span>
+                </div>
               </div>
             </div>
           </div>

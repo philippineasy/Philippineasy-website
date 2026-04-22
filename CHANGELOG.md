@@ -35,6 +35,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Changed** : `src/app/page.tsx` — import et usage de `ArchipelMilleVisages` retires. Nouveau ordre : Hero → InstallerCards → RegionCards → ItineraireIABlock → ... (suite a refondre dans les etapes 5+).
 - **Note** : route `/voyager-aux-philippines/luzon-manille` n'existe pas encore (TODO backend). Le lien pointe sur `/voyager-aux-philippines` (page principale) en attendant.
 
+### Refonte homepage 2026 — Etape 5 : ItineraireIABlock proto-strict
+- **Changed** : `ItineraireIABlock` — refonte 1:1 avec le proto handoff. Container bleu gradient (`#3B5BDB → #1e40af`) radius `rounded-3xl`, padding clamp(2.5-4rem). 2 cercles decoratifs dashed white/13% (top-right 320x320 -120/-80, bottom-left 200x200 -60/-40). Grid 1×2 desktop / stack mobile gap-10/12.
+- **Added** : Eyebrow "✦ Création IA gratuite" en text-accent (etoile signature brand) + uppercase tracking-[0.08em] white/78.
+- **Changed** : H2 "Votre itineraire sur-mesure, **pret en 30 secondes**" (au lieu de "Votre itineraire sur mesure"). "Pret en 30 secondes" en accent. clamp(1.875-2.5rem) tracking-[-0.02em].
+- **Added** : 4 bullets check (etait paragraphe descriptif) — `Horaires realistes, temps de trajet inclus / Hotels notes 4+ sur Google Maps / Budget estime par jour / Export PDF et partage lien`. Check icone SVG dans cercle 22x22 `bg rgba(245,158,11,0.2)` text-accent.
+- **Changed** : Mockup riche photos+activites remplace par mockup style **fenetre Mac** : title bar gris avec 3 dots colores (rouge/jaune/vert) + titre "Mon voyage · 10 jours · Relax". Body : 3 jours condenses en liste (J1 Manille / J2 Palawan / J3 El Nido), chacun avec pastille `J{n}` 36x36 rounded-xl `bg rgba(59,91,219,0.1)` text-primary, eyebrow city accent uppercase, title 14px font-semibold, activites en `<ul>` `· {item}` muted 12px. Footer "BUDGET ESTIME" + "1 900 € – 2 400 €" en accent 16px tabular-nums.
+- **Changed** : CTA "Je cree mon itineraire →" passe en variant `accent` (bg-accent text-ink shadow-cta hover scale 1.02). focus-visible:ring sur fond primary (offset). motion-reduce safety.
+- **Added** : `role="img"` + `aria-label` sur le mockup pour les lecteurs d'ecran.
+- **Removed** : Mention "Easy+" Whatsapp/Telegram retiree (proto la place ailleurs).
+
 ### Propagation du design system editorial — batch marchand/outils
 - **Changed** : `MeilleursPlansClientPage` — cards categories refondues (rounded-2xl 0.5px border, icone categorie dans carre 32x32 soft-blue, placeholder gradient avec icone si heroImage null) + bloc Easy+ refondu dans le design system (fond soft-blue, border 0.5px, kicker "★ PROGRAMME PRIVILEGE" uppercase, H2 avec "Easy+" en primary, checkmarks dans ronds bleu pale, CTA primary + lien secondaire avec fleche glisse, carte membre avec shadow primary translucide)
 - **Changed** : `OfferSelection` (itineraire Express/Premium/Conciergerie) — cards refondues (border 1.5px primary si selected, bandeau "RECOMMANDE" gradient bleu uppercase pour Premium, icone 36x36 rounded-xl colore par offre, kicker "PRIX" + valeur 32px 700 tabular-nums, checkmarks 16x16 ronds bleus sur fond soft-blue, bloc modifications en card editoriale)
