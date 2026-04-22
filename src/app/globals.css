@@ -53,21 +53,22 @@
   body {
     @apply bg-background text-foreground;
   }
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
 }
 
 body {
     font-family: 'Poppins', sans-serif;
     scroll-behavior: smooth;
 }
-.section-bg-1 {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/imagesHero/hero-home.webp');
-    background-size: cover;
-    background-position: center;
-}
-.section-bg-2 {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1551776552-dde2a0367a2e');
-    background-size: cover;
-    background-position: center;
+@media (prefers-reduced-motion: reduce) {
+    body {
+        scroll-behavior: auto;
+    }
 }
 .hide-scroll::-webkit-scrollbar {
     display: none;
