@@ -75,11 +75,22 @@ export const HeroSection = () => {
           </Link>
           <Link
             href="/voyager-aux-philippines"
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg font-semibold text-base bg-primary text-primary-foreground shadow-lg transition-all duration-200 hover:bg-primary/90 hover:scale-[1.02] hover:shadow-xl"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg font-semibold text-base bg-primary text-primary-foreground shadow-lg transition-all duration-200 hover:bg-primary/90 hover:scale-[1.02] hover:shadow-xl motion-reduce:transition-none motion-reduce:hover:scale-100"
           >
             Explorer l&apos;archipel
             <span aria-hidden="true">→</span>
           </Link>
+        </div>
+
+        <div
+          className="mt-7 inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[13px]"
+          style={{ color: 'rgba(255,255,255,0.78)' }}
+        >
+          <span>
+            <strong className="text-white">4,9/5</strong> · 1 200+ avis
+          </span>
+          <span aria-hidden="true" className="opacity-50">·</span>
+          <span>Gratuit · Sans inscription</span>
         </div>
       </div>
     </section>

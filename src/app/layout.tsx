@@ -150,47 +150,42 @@ export default async function RootLayout({
     slug: string;
     name: string;
   }
+  // Nav alignee sur le proto handoff : 6 entrees top-level visibles
+  // (+ Admin conditionnel). Services et Marketplace conserves dans des sous-menus
+  // pour ne pas perdre l'acces tout en respectant le screenshot.
   const navLinks = [
     { href: '/itineraire-personnalise-pour-les-philippines', label: 'Créer Itinéraire', special: true },
-    {
-      label: 'Services',
-      href: '/services',
-      submenu: [
-        { href: '/services', label: 'Tous les services' },
-        { href: '/services#buddy', label: 'Buddy System', highlight: true },
-        { href: '/services#pack-ultime', label: 'Pack Ultime' },
-        { href: '/itineraire-personnalise-pour-les-philippines', label: 'Itinéraires IA' },
-      ]
-    },
     {
       label: 'Voyager',
       href: '/voyager-aux-philippines',
       submenu: voyagerCats.map((c: Category) => ({ href: `/voyager-aux-philippines/${c.slug}`, label: c.name }))
     },
-    { 
+    {
       label: "S'installer",
       href: '/vivre-aux-philippines',
       submenu: vivreCats.map((c: Category) => ({ href: `/vivre-aux-philippines/${c.slug}`, label: c.name }))
     },
-    { 
-      label: 'Communauté', 
+    {
+      label: 'Communauté',
       href: '/forum-sur-les-philippines',
       submenu: [
         { href: '/forum-sur-les-philippines', label: 'Forums' },
-        { href: '/rencontre-philippines', label: 'Rencontre', highlight: true },
         { href: '/actualites-sur-les-philippines', label: 'Actualités' },
         { href: '/application-mobile', label: 'App Mobile' },
+        { href: '/services', label: 'Services Easy+' },
+        { href: '/services#buddy', label: 'Buddy System' },
+        { href: '/services#pack-ultime', label: 'Pack Ultime' },
       ]
     },
-    { 
-      label: 'Bons Plans', 
+    { href: '/rencontre-philippines', label: 'Rencontres' },
+    {
+      label: 'Bons Plans',
       href: '/meilleurs-plans-aux-philippines',
-      submenu: plansCats.map((c: Category) => ({ href: `/meilleurs-plans-aux-philippines/${c.slug}`, label: c.name }))
-    },
-    { 
-      label: 'Marketplace', 
-      href: '/marketplace-aux-philippines',
-      submenu: productCats.map((c: Category) => ({ href: `/marketplace-aux-philippines/categorie/${c.slug}`, label: c.name }))
+      submenu: [
+        ...plansCats.map((c: Category) => ({ href: `/meilleurs-plans-aux-philippines/${c.slug}`, label: c.name })),
+        { href: '/marketplace-aux-philippines', label: 'Marketplace' },
+        ...productCats.map((c: Category) => ({ href: `/marketplace-aux-philippines/categorie/${c.slug}`, label: c.name })),
+      ]
     },
     { href: '/admin', label: 'Admin', admin: true, roles: ['super_admin', 'editor'] },
   ];

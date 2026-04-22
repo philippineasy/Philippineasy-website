@@ -8,7 +8,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faSignInAlt, faBars, faTimes, faBell } from '@fortawesome/free-solid-svg-icons';
 import { getNotifications, getUnreadNotificationCount, markAsRead, markAllAsRead } from '@/services/notificationService';
 import { useAuth } from '@/contexts/AuthContext';
-import { useEditMode } from '@/contexts/EditModeContext';
 import { UserMenu } from './UserMenu';
 import { Cart } from './Cart';
 import { DropdownMenu } from './DropdownMenu';
@@ -74,7 +73,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
             .from('profiles')
             .select('id, username')
             .in('id', actorIds);
-          
+
           const profilesMap = new Map(profilesData?.map(p => [p.id, p.username]));
 
           const notificationsWithActors = notifs.map(n => ({
@@ -91,7 +90,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
       fetchNotifications();
 
       const channel = supabase.channel(`realtime:notifications:${user.id}`)
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, 
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
         async (payload) => {
           const newNotif = payload.new as any;
           const { data: actorProfile } = await supabase.from('profiles').select('username').eq('id', newNotif.actor_id).single();
@@ -108,12 +107,10 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
         supabase.removeChannel(channel);
       };
     } else {
-      // Clear notifications when user logs out
       setNotifications([]);
       setUnreadCount(0);
     }
-  }, [user, supabase]);
-
+  }, [user]);
 
   interface NavLinkProps {
     href: string;
@@ -125,9 +122,9 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
 
   const NavLink = ({ href, label, special = false, admin = false }: NavLinkProps) => {
     const isActive = pathname.startsWith(href) || (activeMainCategory && label.toLowerCase() === activeMainCategory.toLowerCase());
-    const baseClasses = "px-3 py-2 lg:px-4 rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none";
-    const activeClasses = "font-bold text-primary bg-primary/10";
-    const specialClasses = "text-ink bg-accent shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] font-semibold motion-reduce:hover:scale-100";
+    const baseClasses = "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none";
+    const activeClasses = "bg-primary/10 text-primary font-bold";
+    const specialClasses = "bg-accent text-ink shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] font-semibold motion-reduce:hover:scale-100";
     const defaultClasses = "text-foreground hover:text-primary hover:bg-primary/10";
     const adminClasses = "text-destructive hover:text-destructive/90 hover:bg-destructive/10";
 
@@ -136,21 +133,22 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
     }
 
     return (
-      <Link href={href} className={`${baseClasses} ${special ? specialClasses : (admin ? adminClasses : defaultClasses)} ${isActive ? activeClasses : ''}`}>
-          {label}
+      <Link href={href} className={`${baseClasses} ${special ? specialClasses : (admin ? adminClasses : defaultClasses)} ${isActive && !special ? activeClasses : ''}`}>
+        {special && <span aria-hidden="true">+</span>}
+        {label}
       </Link>
     );
   };
-  
+
   interface MobileNavLinkProps {
     href: string;
     label: string;
     admin?: boolean;
   }
-  
+
   const MobileNavLink = ({ href, label, admin = false }: MobileNavLinkProps) => {
     const isActive = pathname.startsWith(href) || (href === '/actualites' && pathname.startsWith('/article'));
-    const baseClasses = "px-3 py-2 rounded-md transition duration-300 block";
+    const baseClasses = "px-3 py-2 rounded-md transition-colors duration-200 block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
     const activeClasses = "font-bold bg-primary/10";
     const defaultClasses = "text-foreground hover:text-primary hover:bg-primary/10";
     const adminClasses = "text-destructive hover:text-destructive/90 hover:bg-destructive/10";
@@ -160,130 +158,146 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
     }
 
     return (
-        <Link href={href} className={`${baseClasses} ${admin ? adminClasses : defaultClasses} ${isActive ? activeClasses : ''}`}>
-            {label}
-        </Link>
+      <Link href={href} className={`${baseClasses} ${admin ? adminClasses : defaultClasses} ${isActive ? activeClasses : ''}`}>
+        {label}
+      </Link>
     );
   };
 
-
   return (
     <>
-      <nav className="w-full bg-card/94 backdrop-blur-md border-b border-border/50 shadow-sm supports-[backdrop-filter]:bg-card/94">
+      <nav className="w-full bg-card/94 backdrop-blur-md border-b border-border/50 supports-[backdrop-filter]:bg-card/94">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col">
-            {/* Top row for the logo */}
-            <div className="flex justify-center py-4">
-              <Link href="/" className="text-4xl font-bold text-primary">
-                Philippin'<span className="text-accent">Easy</span>
-              </Link>
-            </div>
+          {/* Top row : wordmark left | actions right */}
+          <div className="flex items-center justify-between py-3.5">
+            <Link
+              href="/"
+              className="text-2xl md:text-[26px] font-bold text-primary tracking-[-0.02em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+              aria-label="Philippin'Easy — Accueil"
+            >
+              Philippin&apos;<span className="text-accent">Easy</span>
+            </Link>
 
-            {/* Bottom row for nav links and user actions */}
-            <div className="flex w-full justify-between items-center pt-3 pb-3">
-              {/* Desktop Navigation & Mobile Placeholder */}
-              <div className="hidden md:flex flex-1 justify-center items-center space-x-1 lg:space-x-1 flex-wrap">
-                {navLinks.map((link) => {
-                  if (link.submenu) {
-                    return (
-                      <DropdownMenu 
-                        key={link.label} 
-                        label={link.label} 
-                        items={link.submenu} 
-                        isActive={pathname.startsWith(link.href)}
-                      />
-                    )
-                  }
-                  return <NavLink key={link.href} {...link} />
-                })}
-              </div>
-
-              {/* Mobile placeholder */}
-              <div className="flex-1 md:hidden"></div>
-
-              <div className="flex justify-end items-center space-x-4">
-                <button onClick={() => setIsSearchModalOpen(true)} className="text-foreground hover:text-primary focus:outline-none hidden md:block" aria-label="Rechercher sur le site">
-                  <FontAwesomeIcon icon={faSearch} className="text-xl" />
-                </button>
-                {loading ? (
-                  <div className="w-8 h-8 bg-muted rounded-full animate-pulse"></div>
-                ) : user ? (
-                  <>
-                    <div className="relative" ref={notificationRef}>
-                      <button
-                        onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                        aria-label={unreadCount > 0 ? `Notifications (${unreadCount} non lues)` : 'Notifications'}
-                        aria-haspopup="true"
-                        aria-expanded={isNotificationsOpen}
-                        className={`relative text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded ${unreadCount > 0 ? 'animate-pulse motion-reduce:animate-none' : ''}`}
-                      >
-                        <FontAwesomeIcon icon={faBell} className="text-xl" />
-                        {unreadCount > 0 && (
-                          <span className="absolute -top-1 -right-2 w-4 h-4 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">{unreadCount}</span>
-                        )}
-                      </button>
-                      {isNotificationsOpen && (
-                        <div className="absolute right-0 mt-2 w-80 bg-card rounded-lg shadow-xl border border-border z-10">
-                          <div className="p-3 flex justify-between items-center border-b border-border">
-                            <h4 className="font-semibold">Notifications</h4>
-                            <button onClick={async () => {
-                              if (user) {
-                                await markAllAsRead(supabase, user.id);
-                                setUnreadCount(0);
-                              }
-                            }} className="text-xs text-primary hover:underline">Tout marquer comme lu</button>
-                          </div>
-                          <div className="max-h-96 overflow-y-auto">
-                            {notifications.length > 0 ? notifications.map(notif => (
-                              <Link key={notif.id} href={
-                                notif.type === 'new_reply' && notif.topic?.slug ? `/forum-sur-les-philippines/sujet/${notif.topic.slug}` :
-                                (notif.type === 'like' || notif.type === 'super_like') ? `/rencontre-philippines/likes` :
-                                (notif.type === 'new_match' || notif.type === 'new_message') && notif.link ? notif.link :
-                                '#'
-                              } onClick={async () => {
-                                if (!notif.is_read) {
-                                  await markAsRead(supabase, notif.id.toString());
-                                  setUnreadCount(prev => Math.max(0, prev - 1));
-                                }
-                                setIsNotificationsOpen(false);
-                              }} className={`block p-3 hover:bg-muted ${!notif.is_read ? 'bg-primary/10' : ''}`}>
-                                <p className="text-sm">
-                                  <span className="font-bold">{notif.actor.username}</span>
-                                  {notif.type === 'like' && ' a aimé votre profil.'}
-                                  {notif.type === 'super_like' && ' vous a envoyé un Super Like !'}
-                                  {notif.type === 'new_match' && ' a matché avec vous !'}
-                                  {notif.type === 'new_message' && ' vous a envoyé un message.'}
-                                  {notif.type === 'new_reply' && ` a répondu à votre sujet "${notif.topic?.title}"`}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">{new Date(notif.created_at).toLocaleString('fr-FR')}</p>
-                              </Link>
-                            )) : <p className="p-4 text-sm text-muted-foreground">Aucune notification.</p>}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <Cart />
-                    <UserMenu />
-                  </>
-                ) : (
-                  <Link href="/connexion" className="px-5 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition duration-300 flex items-center text-sm font-medium">
-                      <FontAwesomeIcon icon={faSignInAlt} className="mr-2 opacity-80" /> Connexion
-                  </Link>
-                )}
-              <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)} aria-label={isMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}>
-                <FontAwesomeIcon icon={isMenuOpen ? faTimes : faBars} className="text-2xl text-foreground" />
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setIsSearchModalOpen(true)}
+                aria-label="Rechercher sur le site"
+                className="hidden md:inline-flex w-9 h-9 items-center justify-center rounded-full text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <FontAwesomeIcon icon={faSearch} className="text-[16px]" />
               </button>
-              </div>
+
+              {loading ? (
+                <div className="w-9 h-9 bg-muted rounded-full animate-pulse motion-reduce:animate-none" />
+              ) : user ? (
+                <>
+                  <div className="relative" ref={notificationRef}>
+                    <button
+                      onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                      aria-label={unreadCount > 0 ? `Notifications (${unreadCount} non lues)` : 'Notifications'}
+                      aria-haspopup="true"
+                      aria-expanded={isNotificationsOpen}
+                      className={`relative w-9 h-9 inline-flex items-center justify-center rounded-full text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${unreadCount > 0 ? 'animate-pulse motion-reduce:animate-none' : ''}`}
+                    >
+                      <FontAwesomeIcon icon={faBell} className="text-[16px]" />
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
+                    </button>
+                    {isNotificationsOpen && (
+                      <div className="absolute right-0 mt-2 w-80 bg-card rounded-lg shadow-xl border border-border z-10">
+                        <div className="p-3 flex justify-between items-center border-b border-border">
+                          <h4 className="font-semibold">Notifications</h4>
+                          <button onClick={async () => {
+                            if (user) {
+                              await markAllAsRead(supabase, user.id);
+                              setUnreadCount(0);
+                            }
+                          }} className="text-xs text-primary hover:underline">Tout marquer comme lu</button>
+                        </div>
+                        <div className="max-h-96 overflow-y-auto">
+                          {notifications.length > 0 ? notifications.map(notif => (
+                            <Link key={notif.id} href={
+                              notif.type === 'new_reply' && notif.topic?.slug ? `/forum-sur-les-philippines/sujet/${notif.topic.slug}` :
+                              (notif.type === 'like' || notif.type === 'super_like') ? `/rencontre-philippines/likes` :
+                              (notif.type === 'new_match' || notif.type === 'new_message') && notif.link ? notif.link :
+                              '#'
+                            } onClick={async () => {
+                              if (!notif.is_read) {
+                                await markAsRead(supabase, notif.id.toString());
+                                setUnreadCount(prev => Math.max(0, prev - 1));
+                              }
+                              setIsNotificationsOpen(false);
+                            }} className={`block p-3 hover:bg-muted ${!notif.is_read ? 'bg-primary/10' : ''}`}>
+                              <p className="text-sm">
+                                <span className="font-bold">{notif.actor.username}</span>
+                                {notif.type === 'like' && ' a aimé votre profil.'}
+                                {notif.type === 'super_like' && ' vous a envoyé un Super Like !'}
+                                {notif.type === 'new_match' && ' a matché avec vous !'}
+                                {notif.type === 'new_message' && ' vous a envoyé un message.'}
+                                {notif.type === 'new_reply' && ` a répondu à votre sujet "${notif.topic?.title}"`}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">{new Date(notif.created_at).toLocaleString('fr-FR')}</p>
+                            </Link>
+                          )) : <p className="p-4 text-sm text-muted-foreground">Aucune notification.</p>}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <Cart />
+                  <UserMenu />
+                </>
+              ) : (
+                <Link
+                  href="/connexion"
+                  className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-lg text-[13px] font-semibold hover:bg-primary/90 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none"
+                >
+                  <FontAwesomeIcon icon={faSignInAlt} className="mr-2 opacity-80 text-[12px]" />
+                  Connexion
+                </Link>
+              )}
+
+              <button
+                className="md:hidden inline-flex w-9 h-9 items-center justify-center rounded-full hover:bg-primary/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label={isMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+                aria-expanded={isMenuOpen}
+              >
+                <FontAwesomeIcon icon={isMenuOpen ? faTimes : faBars} className="text-xl text-foreground" />
+              </button>
             </div>
           </div>
 
+          {/* Nav row (desktop) */}
+          <div className="hidden md:flex items-center justify-center gap-1 pb-3 flex-wrap">
+            {navLinks.map((link) => {
+              if (link.submenu && link.submenu.length > 0) {
+                return (
+                  <DropdownMenu
+                    key={link.label}
+                    label={link.label}
+                    items={link.submenu}
+                    isActive={pathname.startsWith(link.href)}
+                  />
+                );
+              }
+              return <NavLink key={link.href} {...link} />;
+            })}
+          </div>
+
+          {/* Mobile drawer */}
           {isMenuOpen && (
-            <div className="md:hidden absolute top-full right-0 mt-2 w-auto max-w-xs rounded-lg shadow-lg bg-secondary z-20 border border-border">
-              <div className="flex flex-col space-y-2 p-4">
+            <div className="md:hidden absolute top-full right-4 mt-2 w-auto max-w-xs rounded-lg shadow-xl bg-card z-20 border border-border">
+              <div className="flex flex-col space-y-1 p-3">
                 {navLinks.map((link) => !link.special && <MobileNavLink key={link.href} {...link} />)}
-                <MobileNavLink href="/itineraire-personnalise-pour-les-philippines" label="Créer Itinéraire" />
-                <button onClick={() => { setIsSearchModalOpen(true); setIsMenuOpen(false); }} className="px-3 py-2 rounded-md text-foreground hover:text-primary hover:bg-primary/10 transition duration-300 flex items-center">
-                    <FontAwesomeIcon icon={faSearch} className="mr-2" /> Rechercher
+                <MobileNavLink href="/itineraire-personnalise-pour-les-philippines" label="+ Créer Itinéraire" />
+                <button
+                  onClick={() => { setIsSearchModalOpen(true); setIsMenuOpen(false); }}
+                  className="px-3 py-2 rounded-md text-foreground hover:text-primary hover:bg-primary/10 transition-colors duration-200 flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  <FontAwesomeIcon icon={faSearch} className="mr-2" /> Rechercher
                 </button>
               </div>
             </div>

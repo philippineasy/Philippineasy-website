@@ -1,41 +1,30 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faSun,
-  faCloudSun,
-  faCloud,
-  faBolt,
-  faCloudShowersHeavy,
-  faQuestionCircle,
-  faPlane,
-} from '@fortawesome/free-solid-svg-icons';
-import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import { faPlane } from '@fortawesome/free-solid-svg-icons';
+import { LiveManilaTime } from './LiveManilaTime';
 
 // 4 villes phares (handoff). On garde les coords pour la précision API.
 const featuredCities = [
-  { displayName: 'Manille', lat: 14.5995, lon: 120.9842 },
-  { displayName: 'Cebu', lat: 10.3157, lon: 123.8918 },
-  { displayName: 'Palawan', lat: 9.7386, lon: 118.7328 },   // Puerto Princesa
-  { displayName: 'Siargao', lat: 9.7875, lon: 126.1586 },
+  { displayName: 'Manille', lat: 14.5995, lon: 120.9842, metaKind: 'feels' as const },
+  { displayName: 'Cebu', lat: 10.3157, lon: 123.8918, metaKind: 'humidity' as const },
+  { displayName: 'Palawan', lat: 9.7386, lon: 118.7328, metaKind: 'feels' as const },
+  { displayName: 'Siargao', lat: 9.7875, lon: 126.1586, metaKind: 'feels' as const },
 ];
 
 interface WeatherData {
   city: string;
   temp: number;
-  icon: IconDefinition;
-  colorClass: string;
+  emoji: string;
+  meta: string;
 }
 
-function getIconAndColorForCondition(condition: string): {
-  icon: IconDefinition;
-  colorClass: string;
-} {
+function getEmojiForCondition(condition: string): string {
   const c = condition.toLowerCase();
-  if (c.includes('sunny') || c.includes('clear')) return { icon: faSun, colorClass: 'text-accent' };
-  if (c.includes('partly cloudy')) return { icon: faCloudSun, colorClass: 'text-yellow-200' };
-  if (c.includes('cloudy') || c.includes('overcast')) return { icon: faCloud, colorClass: 'text-slate-300' };
-  if (c.includes('rain') || c.includes('drizzle') || c.includes('shower')) return { icon: faCloudShowersHeavy, colorClass: 'text-cyan-300' };
-  if (c.includes('thunder')) return { icon: faBolt, colorClass: 'text-yellow-300' };
-  return { icon: faQuestionCircle, colorClass: 'text-slate-400' };
+  if (c.includes('sunny') || c.includes('clear')) return '☀';
+  if (c.includes('partly cloudy')) return '⛅';
+  if (c.includes('cloudy') || c.includes('overcast')) return '☁';
+  if (c.includes('rain') || c.includes('drizzle') || c.includes('shower')) return '🌧';
+  if (c.includes('thunder')) return '⚡';
+  return '🌤';
 }
 
 async function getWeatherData(): Promise<WeatherData[]> {
@@ -53,12 +42,16 @@ async function getWeatherData(): Promise<WeatherData[]> {
       );
       if (!res.ok) throw new Error(`API ${city.displayName}: ${res.status}`);
       const data = await res.json();
-      const { icon, colorClass } = getIconAndColorForCondition(data.current.condition.text);
+      const cur = data.current;
+      const meta =
+        city.metaKind === 'humidity'
+          ? `humid. ${cur.humidity}%`
+          : `ressenti ${Math.round(cur.feelslike_c)}°`;
       return {
         city: city.displayName,
-        temp: Math.round(data.current.temp_c),
-        icon,
-        colorClass,
+        temp: Math.round(cur.temp_c),
+        emoji: getEmojiForCondition(cur.condition.text),
+        meta,
       };
     })
   );
@@ -88,37 +81,58 @@ export default async function WeatherTicker() {
   if (!weatherData || weatherData.length === 0) return null;
 
   return (
-    <div className="w-full bg-ink text-white text-[13px]" role="status" aria-live="polite">
-      <div className="container mx-auto px-4 py-2 flex items-center gap-x-5 gap-y-1 overflow-x-auto whitespace-nowrap md:flex-wrap md:overflow-visible md:whitespace-normal md:justify-center hide-scroll">
-        <span className="inline-flex items-center gap-2 font-semibold uppercase tracking-wider">
+    <div
+      className="bg-ink text-white/80 text-[12px] border-t border-white/5"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="flex items-stretch justify-center flex-wrap">
+        {/* Live badge */}
+        <span className="inline-flex items-center gap-2 px-4 py-[9px] bg-red-500/10 uppercase tracking-wider text-[11px] font-medium text-white/85 border-r border-white/10 whitespace-nowrap">
           <span
             className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse-dot motion-reduce:animate-none"
+            style={{ boxShadow: '0 0 0 3px rgba(239, 68, 68, 0.2)' }}
             aria-hidden="true"
           />
-          En direct
+          En direct · Manille <LiveManilaTime />
         </span>
+
+        {/* Cities */}
         {weatherData.map((w) => (
-          <span key={w.city} className="inline-flex items-center gap-1.5 text-white/85">
-            <span className="font-medium">{w.city}</span>
-            <FontAwesomeIcon
-              icon={w.icon}
-              className={`text-[11px] ${w.colorClass}`}
-              aria-hidden="true"
-            />
-            <span className="tabular-nums">{w.temp}°C</span>
+          <span
+            key={w.city}
+            className="inline-flex items-center gap-1.5 px-4 py-[9px] border-r border-white/10 whitespace-nowrap"
+          >
+            <span className="text-[13px] saturate-110" aria-hidden="true">
+              {w.emoji}
+            </span>
+            <b className="text-white font-semibold tracking-tight">{w.city}</b>
+            <span className="tabular-nums">{w.temp}°</span>
+            <span className="text-white/45 text-[11px] font-normal hidden md:inline">
+              {w.meta}
+            </span>
           </span>
         ))}
+
+        {/* FX */}
         {fxRate !== null && (
-          <span className="inline-flex items-center gap-1.5 text-white/85">
-            <span className="font-medium">1€</span>
-            <span className="tabular-nums">= {fxRate.toFixed(2)} ₱</span>
+          <span className="inline-flex items-center gap-1.5 px-4 py-[9px] border-r border-white/10 whitespace-nowrap">
+            <span>1 €</span>
+            <b className="text-warm-yellow font-semibold tabular-nums">
+              = {fxRate.toFixed(2)} ₱
+            </b>
           </span>
         )}
-        {/* TODO: brancher sur API tarifs (Skyscanner / Kiwi) — hardcodé MVP */}
-        <span className="inline-flex items-center gap-1.5 text-white/85">
-          <FontAwesomeIcon icon={faPlane} className="text-[11px] text-accent" aria-hidden="true" />
-          <span className="font-medium">Paris → Manille</span>
-          <span className="text-white/65">dès 682 €</span>
+
+        {/* Flight (TODO: brancher API tarifs en suivi) */}
+        <span className="inline-flex items-center gap-1.5 px-4 py-[9px] whitespace-nowrap">
+          <FontAwesomeIcon
+            icon={faPlane}
+            className="text-[12px] text-accent"
+            aria-hidden="true"
+          />
+          <span>Paris → MNL</span>
+          <b className="text-blue-300 font-semibold">dès 682 €</b>
         </span>
       </div>
     </div>
