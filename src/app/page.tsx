@@ -35,6 +35,7 @@ const homepageFAQs = [
 
 const BestDealsSection = dynamic(() => import('@/components/homepage/BestDealsSection').then(mod => mod.BestDealsSection));
 const BlogSection = dynamic(() => import('@/components/homepage/BlogSection').then(mod => mod.BlogSection));
+const RencontresTeaser = dynamic(() => import('@/components/homepage/RencontresTeaser').then(mod => mod.RencontresTeaser));
 const LeadMagnetSection = dynamic(() => import('@/components/homepage/LeadMagnetSection').then(mod => mod.LeadMagnetSection));
 
 // Enable ISR (Incremental Static Regeneration) for better performance
@@ -70,7 +71,10 @@ export default async function HomePage() {
       {/* Magazine — derniers articles du blog */}
       <BlogSection />
 
-      {/* Lead Magnet — Guides Gratuits (kept after blog per editorial order) */}
+      {/* Rencontres teaser — split copy + fanned profile cards stack */}
+      <RencontresTeaser />
+
+      {/* Lead Magnet — Guides Gratuits */}
       <LeadMagnetSection />
 
       {/* CTA final */}
