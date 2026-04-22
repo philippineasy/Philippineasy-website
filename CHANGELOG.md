@@ -45,6 +45,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Added** : `role="img"` + `aria-label` sur le mockup pour les lecteurs d'ecran.
 - **Removed** : Mention "Easy+" Whatsapp/Telegram retiree (proto la place ailleurs).
 
+### Refonte homepage 2026 — Etape 6 : Testimonials proto-strict
+- **Changed** : `TestimonialsSection` — refonte 1:1 avec le proto handoff. Section `bg-soft-blue` (etait `bg-background`). Eyebrow "Ils ont choisi les" en uppercase tracking-[0.08em]. H2 "Ils ont choisi les **Philippines**" clamp(1.875-2.5rem). Plus de lead (proto n'en a pas).
+- **Changed** : 3 testimonials remplaces par les contenus exacts du proto :
+  - Pierre D., 42 ans · Entrepreneur digital a Cebu · avatar #3B5BDB · "M'installer a Cebu a ete la meilleure decision..."
+  - Marie & Camille · Couple en voyage de noces · avatar #F59E0B · "L'itineraire IA nous a fait gagner deux semaines..."
+  - Sophie L., 28 ans · Digital nomade a Siargao · avatar #0EA5E9 (cyan) · "Trois mois en coliving a Siargao..."
+  (Anciens : Marc T. 63 ans futur retraite + Sophie L. voyageuse en couple — supprimes par proto-strict).
+- **Changed** : Card padding 28px (etait 28px direction p-7), border-[0.5px], shadow-card-rest, suppression du hover transform (proto n'en a pas pour les testimonials). 5 etoiles en accent (au lieu de array conditionnel filled/empty).
+- **Changed** : Avatar 44x44 (etait 40x40), font 14px font-bold tracking-[0.02em].
+- **Added** : `aria-label="Note X sur 5"` sur la rangee d'etoiles. Glyphe guillemet "99" SVG accent/25 top-right (deja present, conserve).
+
 ### Propagation du design system editorial — batch marchand/outils
 - **Changed** : `MeilleursPlansClientPage` — cards categories refondues (rounded-2xl 0.5px border, icone categorie dans carre 32x32 soft-blue, placeholder gradient avec icone si heroImage null) + bloc Easy+ refondu dans le design system (fond soft-blue, border 0.5px, kicker "★ PROGRAMME PRIVILEGE" uppercase, H2 avec "Easy+" en primary, checkmarks dans ronds bleu pale, CTA primary + lien secondaire avec fleche glisse, carte membre avec shadow primary translucide)
 - **Changed** : `OfferSelection` (itineraire Express/Premium/Conciergerie) — cards refondues (border 1.5px primary si selected, bandeau "RECOMMANDE" gradient bleu uppercase pour Premium, icone 36x36 rounded-xl colore par offre, kicker "PRIX" + valeur 32px 700 tabular-nums, checkmarks 16x16 ronds bleus sur fond soft-blue, bloc modifications en card editoriale)
