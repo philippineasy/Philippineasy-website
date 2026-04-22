@@ -84,6 +84,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Note backend** : profils statiques (TODO brancher GET /api/rencontres/teaser-profiles avec migration `dating_profiles.show_in_teaser`). PortraitSVG = placeholder editorial en attendant les photos opt-in.
 - **page.tsx** : import dynamique de `RencontresTeaser`, place entre `BlogSection` et `LeadMagnet` selon l'ordre proto.
 
+### Refonte homepage 2026 — Enhancement : BestDeals devient carousel infini
+- **Changed** : `BestDealsSection` — passage de 3 cards statiques a un **carousel embla** (loop + autoplay 6s + stopOnMouseEnter) qui presente TOUTES les activites Klook (palawanActivities + cebuActivities + siargaoActivities = ~15 cards). UI editoriale conservee a l'identique (tag overlay top-left, prix overlay bottom-right, pin location, rating, CTA Reserver bg-primary). Scroll responsive : 1 card mobile / 2 tablet / 3 desktop. Header avec prev/next arrows desktop a droite (style `KlookCarousel`). Dots pagination + arrows mobile dessous. Disclaimer "Liens d'affiliation" en bas avec lien `/partenaires`.
+- **Removed** : Le 2e `KlookCarousel` "Plus d'activites a reserver" sous la section — devenu redondant (toutes les activites sont deja dans le hero carousel). Le composant `KlookCarousel` reste dispo pour les pages destination.
+- **Tracking** : Chaque clic CTA "Reserver" track via `trackCtaClicked` avec `cta_text=klook_{id}` et `cta_location=best_deals_homepage` pour suivre le perf des hero deals vs autres surfaces affiliate.
+- **A11y** : `aria-roledescription="carousel"`, `aria-label`, dots `role="tablist"` + `role="tab"` + `aria-selected`, focus-visible sur tous les controls.
+
 ### Refonte homepage 2026 — Fix : BestDeals branche directement les vraies data Klook
 - **Fixed** : Les 3 hero cards de `BestDealsSection` utilisaient des images locales (Palawan, Siargao) et un SVG placeholder (Cebu Oslob whaleshark). User a demande l'UI exacte mais avec les vraies infos Klook (photos + liens affiliation) — comme dans le `KlookCarousel` dessous. **Resoud** : chaque hero card mappe directement sur `palawanActivities[0]`/`cebuActivities[0]`/`siargaoActivities[0]` (vraies images Unsplash deal-officielles, vrais prix, vrais ratings/reviews, vraies URLs affiliate aid=118789). UI inchangee (tag overlay + prix + pin location + rating + CTA Réserver).
 - **Removed** : `WhalesharkPlaceholder` SVG inline (plus utilise). Logique de fallback local supprimee.
