@@ -84,6 +84,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Note backend** : profils statiques (TODO brancher GET /api/rencontres/teaser-profiles avec migration `dating_profiles.show_in_teaser`). PortraitSVG = placeholder editorial en attendant les photos opt-in.
 - **page.tsx** : import dynamique de `RencontresTeaser`, place entre `BlogSection` et `LeadMagnet` selon l'ordre proto.
 
+### Refonte homepage 2026 — Fix : tags lisibles + image Cebu Supabase
+- **Fixed** : `RegionCards` tags pill — passes de `bg-white/92 text-ink` (illisible sur images claires en bas-gauche, comme Palawan/Siargao) a `bg-ink/72 text-white backdrop-blur-md shadow-sm` (frosted glass sombre, lisibilite garantie sur toute image). Style + moderne, brand-coherent.
+- **Changed** : `RegionCards` est passe en **async Server Component** qui fetch les categories `voyager-aux-philippines` depuis Supabase via `getCategoriesByMainCategory`. Pour chaque region (palawan/cebu-visayas/siargao), si une `heroImage` existe en DB, elle est utilisee. Sinon fallback image locale (`/images/palawan/...`, `/images/siargao/...`). Pour Luzon & Manille (pas de categorie en DB), garde le SVG placeholder editorial. **Resoud** : Cebu & Visayas affiche maintenant la vraie photo Supabase (coucher de soleil + ponton), comme sur `/voyager-aux-philippines`.
+- **Removed** : `CebuVisayasPlaceholder` (SVG inline) — n'est plus necessaire car la vraie photo Supabase est utilisee. Logique de fallback simplifiee (image DB → image locale → SVG placeholder Luzon → gradient subtle).
+
 ### Refonte homepage 2026 — Etape 10 : Footer 5-col proto-strict
 - **Changed** : `Footer` — refonte 1:1 avec le proto handoff. Bg `bg-ink` (#0F172A) au lieu de `bg-gray-900`. Padding pt-16 pb-6.
 - **Layout** : grid `lg:grid-cols-[1.3fr_3fr]` (top section). Col 1 = Brand. Col 2 = Nav block 4 sub-cols.
