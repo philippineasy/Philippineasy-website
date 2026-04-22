@@ -5,8 +5,8 @@ type SvgProps = { className?: string };
 
 const HouseIcon = ({ className }: SvgProps) => (
   <svg
-    width="40"
-    height="40"
+    width="28"
+    height="28"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -24,8 +24,8 @@ const HouseIcon = ({ className }: SvgProps) => (
 
 const BriefcaseIcon = ({ className }: SvgProps) => (
   <svg
-    width="40"
-    height="40"
+    width="28"
+    height="28"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -43,8 +43,8 @@ const BriefcaseIcon = ({ className }: SvgProps) => (
 
 const DollarIcon = ({ className }: SvgProps) => (
   <svg
-    width="40"
-    height="40"
+    width="28"
+    height="28"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -61,8 +61,8 @@ const DollarIcon = ({ className }: SvgProps) => (
 
 const GraduationIcon = ({ className }: SvgProps) => (
   <svg
-    width="40"
-    height="40"
+    width="28"
+    height="28"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -82,6 +82,7 @@ type Theme = {
   href: string;
   title: string;
   description: string;
+  cta: string;
   icon: ReactNode;
 };
 
@@ -89,26 +90,30 @@ const themes: Theme[] = [
   {
     href: '/vivre-aux-philippines/s-installer',
     title: "S'installer",
-    description: 'Visas, logement, vie quotidienne.',
-    icon: <HouseIcon className="text-primary" />,
+    description: 'Visas, logement, vie quotidienne aux Philippines.',
+    cta: 'En savoir plus',
+    icon: <HouseIcon />,
   },
   {
     href: '/vivre-aux-philippines/travailler',
     title: 'Travailler',
-    description: "Marché de l'emploi, création d'entreprise.",
-    icon: <BriefcaseIcon className="text-primary" />,
+    description: "Emploi, création d'entreprise, télétravail.",
+    cta: 'Guides pro',
+    icon: <BriefcaseIcon />,
   },
   {
     href: '/vivre-aux-philippines/investir',
     title: 'Investir',
-    description: 'Opportunités, immobilier, business.',
-    icon: <DollarIcon className="text-primary" />,
+    description: 'Opportunités, immobilier, fiscalité.',
+    cta: 'Opportunités',
+    icon: <DollarIcon />,
   },
   {
     href: '/vivre-aux-philippines/etudier',
     title: 'Étudier',
-    description: 'Universités, écoles internationales.',
-    icon: <GraduationIcon className="text-primary" />,
+    description: "Universités, écoles, cours d'anglais.",
+    cta: 'Découvrir',
+    icon: <GraduationIcon />,
   },
 ];
 
@@ -116,47 +121,52 @@ export const InstallerCards = () => {
   return (
     <section className="py-20 md:py-24 bg-background">
       <div className="container mx-auto px-4">
-        <div className="text-center max-w-2xl mx-auto mb-12">
+        <div className="text-center max-w-[720px] mx-auto mb-12">
+          <span className="text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+            Vivre aux Philippines
+          </span>
           <h2
-            className="text-3xl md:text-4xl font-bold text-foreground mb-3"
-            style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
+            className="text-[clamp(1.875rem,3.5vw,2.5rem)] font-bold text-foreground mt-3 mb-4"
+            style={{ letterSpacing: '-0.02em', lineHeight: 1.1 }}
           >
             S&apos;installer aux <span className="text-accent">Philippines</span>
           </h2>
-          <p className="text-muted-foreground text-base md:text-lg">
-            S&apos;installer, travailler, investir — toutes les clés pour
-            réussir votre projet de vie dans l&apos;archipel.
+          <p className="text-[17px] text-muted-foreground leading-[1.6]">
+            Quatre chemins pour faire des Philippines votre nouvelle maison.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[22px] max-w-6xl mx-auto">
           {themes.map((theme) => (
             <Link
               key={theme.href}
               href={theme.href}
-              className="group flex flex-col items-center text-center bg-card rounded-2xl px-5 py-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
-              style={{
-                border: '0.5px solid #e5e7eb',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-              }}
+              className="group flex flex-col items-center text-center bg-card rounded-2xl px-[22px] py-7 border-[0.5px] border-border shadow-card-rest transition-all duration-300 hover:-translate-y-1 hover:shadow-card motion-reduce:hover:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <div
-                className="w-12 h-12 flex items-center justify-center mb-[14px] transition-transform duration-200 group-hover:scale-105"
+                className="w-16 h-16 mb-[18px] flex items-center justify-center rounded-2xl text-primary transition-transform duration-300 group-hover:scale-105 motion-reduce:group-hover:scale-100"
+                style={{ backgroundColor: 'rgba(59, 91, 219, 0.08)' }}
               >
                 {theme.icon}
               </div>
               <h3
-                className="text-[16px] text-foreground mb-1.5"
-                style={{ fontWeight: 600, letterSpacing: '-0.01em' }}
+                className="text-[19px] font-semibold text-foreground mb-2"
+                style={{ letterSpacing: '-0.01em' }}
               >
                 {theme.title}
               </h3>
-              <p
-                className="text-[12px]"
-                style={{ color: '#64748b', lineHeight: 1.55 }}
-              >
+              <p className="text-[14px] text-muted-foreground leading-[1.55] mb-4 flex-1">
                 {theme.description}
               </p>
+              <span className="inline-flex items-center gap-1 text-primary text-sm font-medium">
+                {theme.cta}
+                <span
+                  aria-hidden="true"
+                  className="transition-transform duration-200 group-hover:translate-x-0.5"
+                >
+                  →
+                </span>
+              </span>
             </Link>
           ))}
         </div>
