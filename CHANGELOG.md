@@ -5,6 +5,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fix critique : webhook Resend inbound utilisait le mauvais endpoint API
+- **Fixed** : `src/app/api/webhooks/resend-inbound/route.ts` — endpoint API corrige de `https://api.resend.com/emails/{id}` vers `https://api.resend.com/emails/receiving/{id}`. Le premier path est pour les emails sortants (Sending) et renvoyait `404 Email not found` sur tous les inbound. Symptome : Resend Receiving capturait bien les emails sur `contact@philippineasy.com`, le webhook `email.received` etait correctement configure et POSTait sur la route, mais le forward vers `philippineasy@gmail.com` echouait silencieusement avec HTTP 500. Resultat dans le dashboard Resend : 9 events `email.received` en `Failed` sur 7 jours, 7 attempts par event, response body `{"error":"Failed to fetch email"}`. Aucune ligne `direction: 'inbound'` dans `email_log` Supabase.
+- **Added** : Verification optionnelle de signature Svix (Resend utilise Svix pour ses webhooks). Si `RESEND_WEBHOOK_SECRET` est defini en env, la route verifie le HMAC SHA-256 base64 sur `svix-id.svix-timestamp.body` contre le header `svix-signature`. Comparaison `crypto.timingSafeEqual` pour eviter les timing attacks. Skipped quand le secret n'est pas configure (mode degrade pour transition / dev).
+- **Changed** : Logging des erreurs enrichi — au lieu de `{error: 'Failed to fetch email'}` opaque, la route retourne maintenant `{error, upstream: 502, detail: <body>}` pour faciliter le debug futur. Code HTTP differencie : 401 sur signature invalide, 502 sur upstream Resend KO, 500 sur erreurs internes.
+- **Changed** : `replyTo` extrait depuis `emailData.reply_to[0]` au lieu de `from` brut — plus fidele a l'intent du sender (utile quand un visiteur soumet le formulaire avec une adresse different de l'enveloppe SMTP).
+- **Changed** : Subject extrait depuis le payload Resend complet (`emailData.subject`) au lieu du payload webhook tronque, pour eviter les sujets coupes a 64 chars.
+- **Note** : 9 events failed dans le dashboard Resend (datant des 7 derniers jours) doivent etre replay manuellement apres deploiement (bouton "Replay" sur chaque event, ou via API webhooks).
+
 ### Fix dependances : @react-email/render peer manquant (resend@6)
 - **Fixed** : Ajout `@react-email/render` 2.0.7 comme dependency directe. Resend@6.11.0 declare ce package en peer dep marque `optional: true`, mais le bundler Next.js (turbopack en dev, webpack en build) ne respecte pas le flag optional sur les imports indirects et echouait a compiler avec `Module not found: Can't resolve '@react-email/render'`. Routes affectees : `/api/contact`, `/api/webhooks/resend-inbound`, `src/emails/send.ts`. Solution recommandee par l'equipe Resend pour v6+. Coût bundle : ~30 KB. Verification post-install : `/api/contact` compile (400 validation au lieu de 500 ENOENT), articles continuent de rendre en 200.
 
