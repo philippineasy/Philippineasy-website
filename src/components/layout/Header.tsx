@@ -137,15 +137,19 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
     return (
       <Link href={href} className={`${baseClasses} ${special ? specialClasses : (admin ? adminClasses : defaultClasses)} ${isActive && !special ? activeClasses : ''}`}>
         {special && <span aria-hidden="true">+</span>}
-        {label}
-        {badge && (
-          <span
-            className="ml-0.5 inline-flex items-center px-1.5 py-px rounded-full bg-rose-500 text-white text-[9px] font-bold uppercase tracking-wider leading-none"
-            aria-label={`(${badge})`}
-          >
-            {badge}
-          </span>
-        )}
+        <span className="relative inline-flex items-center">
+          {label}
+          {badge && (
+            <>
+              <span
+                className="absolute -top-0.5 -right-2 w-1.5 h-1.5 rounded-full bg-accent animate-pulse-dot motion-reduce:animate-none"
+                style={{ boxShadow: '0 0 0 3px rgba(245, 158, 11, 0.22)' }}
+                aria-hidden="true"
+              />
+              <span className="sr-only">({badge})</span>
+            </>
+          )}
+        </span>
       </Link>
     );
   };
