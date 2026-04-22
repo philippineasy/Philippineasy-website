@@ -84,7 +84,14 @@ export const BestDealsSection = (_props: BestDealsSectionProps) => {
       slidesToScroll: 1,
       skipSnaps: false,
     },
-    [Autoplay({ delay: 6000, stopOnInteraction: false, stopOnMouseEnter: true })]
+    [
+      Autoplay({
+        delay: 4500,
+        stopOnInteraction: false,
+        stopOnMouseEnter: false,
+        playOnInit: true,
+      }),
+    ]
   );
 
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -116,40 +123,20 @@ export const BestDealsSection = (_props: BestDealsSectionProps) => {
   return (
     <section className="py-20 md:py-24 bg-background">
       <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="max-w-6xl mx-auto mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-          <div className="text-center md:text-left max-w-[720px] mx-auto md:mx-0">
-            <span className="text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
-              Partenariat Klook · GetYourGuide
-            </span>
-            <h2
-              className="text-[clamp(1.875rem,3.5vw,2.5rem)] font-bold text-foreground mt-3 mb-4"
-              style={{ letterSpacing: '-0.02em', lineHeight: 1.1 }}
-            >
-              Nos meilleurs <span className="text-accent">bons plans</span>
-            </h2>
-            <p className="text-[17px] text-muted-foreground leading-[1.6]">
-              Les activités et expériences sélectionnées par notre équipe locale.
-            </p>
-          </div>
-
-          {/* Desktop nav arrows */}
-          <div className="hidden md:flex gap-2 flex-shrink-0">
-            <button
-              onClick={scrollPrev}
-              aria-label="Activité précédente"
-              className="w-11 h-11 rounded-full border-[0.5px] border-border bg-card hover:bg-muted hover:border-primary/40 transition-colors duration-200 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              <FontAwesomeIcon icon={faChevronLeft} className="text-foreground text-[14px]" />
-            </button>
-            <button
-              onClick={scrollNext}
-              aria-label="Activité suivante"
-              className="w-11 h-11 rounded-full border-[0.5px] border-border bg-card hover:bg-muted hover:border-primary/40 transition-colors duration-200 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              <FontAwesomeIcon icon={faChevronRight} className="text-foreground text-[14px]" />
-            </button>
-          </div>
+        {/* Header — centered */}
+        <div className="text-center max-w-[720px] mx-auto mb-12">
+          <span className="text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+            Partenariat Klook · GetYourGuide
+          </span>
+          <h2
+            className="text-[clamp(1.875rem,3.5vw,2.5rem)] font-bold text-foreground mt-3 mb-4"
+            style={{ letterSpacing: '-0.02em', lineHeight: 1.1 }}
+          >
+            Nos meilleurs <span className="text-accent">bons plans</span>
+          </h2>
+          <p className="text-[17px] text-muted-foreground leading-[1.6]">
+            Les activités et expériences sélectionnées par notre équipe locale.
+          </p>
         </div>
 
         {/* Embla viewport */}
@@ -238,37 +225,37 @@ export const BestDealsSection = (_props: BestDealsSectionProps) => {
           </div>
         </div>
 
-        {/* Dots pagination */}
-        <div className="flex justify-center gap-2 mt-8" role="tablist" aria-label="Pagination du carrousel">
-          {scrollSnaps.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => scrollTo(i)}
-              aria-label={`Aller à l'activité ${i + 1}`}
-              role="tab"
-              aria-selected={i === selectedIndex}
-              className={`h-2 rounded-full transition-all duration-200 ${
-                i === selectedIndex
-                  ? 'w-8 bg-primary'
-                  : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
-              } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}
-            />
-          ))}
-        </div>
-
-        {/* Mobile nav arrows (under dots) */}
-        <div className="md:hidden flex justify-center gap-3 mt-5">
+        {/* Nav controls — arrows + dots, all centered */}
+        <div className="flex items-center justify-center gap-4 mt-8">
           <button
             onClick={scrollPrev}
             aria-label="Activité précédente"
-            className="w-10 h-10 rounded-full border-[0.5px] border-border bg-card hover:bg-muted transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="w-10 h-10 rounded-full border-[0.5px] border-border bg-card hover:bg-muted hover:border-primary/40 transition-colors duration-200 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex-shrink-0"
           >
             <FontAwesomeIcon icon={faChevronLeft} className="text-foreground text-[13px]" />
           </button>
+
+          <div className="flex gap-2" role="tablist" aria-label="Pagination du carrousel">
+            {scrollSnaps.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => scrollTo(i)}
+                aria-label={`Aller à l'activité ${i + 1}`}
+                role="tab"
+                aria-selected={i === selectedIndex}
+                className={`h-2 rounded-full transition-all duration-200 ${
+                  i === selectedIndex
+                    ? 'w-8 bg-primary'
+                    : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}
+              />
+            ))}
+          </div>
+
           <button
             onClick={scrollNext}
             aria-label="Activité suivante"
-            className="w-10 h-10 rounded-full border-[0.5px] border-border bg-card hover:bg-muted transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="w-10 h-10 rounded-full border-[0.5px] border-border bg-card hover:bg-muted hover:border-primary/40 transition-colors duration-200 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex-shrink-0"
           >
             <FontAwesomeIcon icon={faChevronRight} className="text-foreground text-[13px]" />
           </button>
