@@ -4,10 +4,66 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope, faLifeRing, faMapMarkerAlt, faPaperPlane, faCheck, faSpinner } from '@fortawesome/free-solid-svg-icons';
-import { faFacebookF, faTwitter, faInstagram, faYoutube, faTelegram, faWhatsapp } from '@fortawesome/free-brands-svg-icons';
+import { faPaperPlane, faCheck, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import {
+  faFacebookF,
+  faInstagram,
+  faYoutube,
+  faTelegram,
+} from '@fortawesome/free-brands-svg-icons';
 import { trackNewsletterSignup } from '@/lib/analytics';
 import { metaTrackLead } from '@/lib/meta-pixel';
+
+type FooterLink = { label: string; href: string };
+
+const footerCols: { title: string; links: FooterLink[] }[] = [
+  {
+    title: 'Voyager',
+    links: [
+      { label: 'Palawan', href: '/voyager-aux-philippines/palawan' },
+      { label: 'Cebu & Visayas', href: '/voyager-aux-philippines/cebu-visayas' },
+      { label: 'Siargao', href: '/voyager-aux-philippines/siargao' },
+      // TODO: routes Boracay et Manille a creer cote backend
+      { label: 'Boracay', href: '/voyager-aux-philippines' },
+      { label: 'Manille', href: '/voyager-aux-philippines' },
+      { label: 'Itinéraire IA', href: '/itineraire-personnalise-pour-les-philippines' },
+    ],
+  },
+  {
+    title: "S'installer",
+    links: [
+      { label: 'Visas', href: '/vivre-aux-philippines' },
+      { label: 'Logement', href: '/vivre-aux-philippines' },
+      { label: 'Travailler', href: '/vivre-aux-philippines' },
+      { label: 'Investir', href: '/vivre-aux-philippines' },
+      { label: 'Études', href: '/vivre-aux-philippines' },
+      { label: 'Santé', href: '/voyager-aux-philippines/sante-securite' },
+    ],
+  },
+  {
+    title: 'Communauté',
+    links: [
+      { label: 'Forum', href: '/forum-sur-les-philippines' },
+      { label: 'Rencontres', href: '/rencontre-philippines' },
+      { label: 'Témoignages', href: '/' },
+      { label: 'Buddy System', href: '/services#buddy' },
+      { label: 'Pack Ultime', href: '/services#pack-ultime' },
+    ],
+  },
+  {
+    title: "Philippin'Easy",
+    links: [
+      // TODO: page /a-propos a creer
+      { label: 'À propos', href: '/' },
+      { label: 'Contact', href: '/contact' },
+      // TODO: page /presse a creer
+      { label: 'Presse', href: '/contact' },
+      { label: 'Partenaires', href: '/partenaires' },
+      { label: 'Mentions légales', href: '/mentions-legales' },
+      { label: 'Confidentialité', href: '/confidentialite' },
+    ],
+  },
+];
 
 const Footer = () => {
   const { profile } = useAuth();
@@ -29,7 +85,7 @@ const Footer = () => {
       const data = await res.json();
       if (res.ok) {
         setNewsletterStatus('success');
-        setNewsletterMessage(data.message);
+        setNewsletterMessage(data.message || 'Inscription confirmée. Vérifiez votre boîte mail.');
         setNewsletterEmail('');
         trackNewsletterSignup({ source: 'footer' });
         metaTrackLead({ content_name: 'Newsletter Footer' });
@@ -43,93 +99,169 @@ const Footer = () => {
     }
   };
 
+  const year = new Date().getFullYear();
+
   return (
-    <footer className="bg-gray-900 text-white py-16">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+    <footer className="bg-ink text-slate-400 pt-16 pb-6 px-4">
+      <div className="container mx-auto max-w-[1200px]">
+        {/* Top : brand col + 4 nav cols */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_3fr] gap-12 pb-10 border-b border-white/10">
+          {/* Brand column */}
           <div>
-            <h3 className="text-2xl font-bold mb-6">
-              Philippin'<span className="text-yellow-500">Easy</span>
-            </h3>
-            <p className="text-gray-400 mb-6">
-              Votre guide complet pour vivre et voyager aux Philippines. Une communauté passionnée prête à vous accompagner.
+            <Link
+              href="/"
+              className="inline-block text-[26px] font-bold text-white tracking-[-0.02em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
+              aria-label="Philippin'Easy — Accueil"
+            >
+              Philippin&apos;<span className="text-accent">Easy</span>
+            </Link>
+
+            <p className="text-[14px] leading-[1.6] mt-4 mb-5 max-w-[320px]">
+              Le guide francophone #1 pour voyager, vivre et s&apos;installer
+              dans l&apos;archipel aux 7&nbsp;641&nbsp;îles.
             </p>
-            <div className="flex space-x-4">
-              <a href="https://www.facebook.com/share/1RfoyAcYFU/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-gray-400 hover:text-white transition duration-300"><FontAwesomeIcon icon={faFacebookF} /></a>
-              <a href="https://www.instagram.com/philippineseasy?igsh=MWYwNDg2eThiemdleg%3D%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-gray-400 hover:text-white transition duration-300"><FontAwesomeIcon icon={faInstagram} /></a>
+
+            {/* Socials */}
+            <div className="flex gap-2.5 mb-6">
+              <a
+                href="https://www.facebook.com/share/1RfoyAcYFU/?mibextid=wwXIfr"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook Philippin'Easy"
+                className="inline-flex w-[38px] h-[38px] items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-ink transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                <FontAwesomeIcon icon={faFacebookF} className="text-[15px]" />
+              </a>
+              <a
+                href="https://www.instagram.com/philippineseasy?igsh=MWYwNDg2eThiemdleg%3D%3D&utm_source=qr"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram Philippin'Easy"
+                className="inline-flex w-[38px] h-[38px] items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-ink transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                <FontAwesomeIcon icon={faInstagram} className="text-[15px]" />
+              </a>
+              <a
+                href="https://t.me/philippineasy"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Telegram Philippin'Easy"
+                className="inline-flex w-[38px] h-[38px] items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-ink transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                <FontAwesomeIcon icon={faTelegram} className="text-[15px]" />
+              </a>
+              <a
+                href="https://youtube.com/@philippineasy"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube Philippin'Easy"
+                className="inline-flex w-[38px] h-[38px] items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-ink transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                <FontAwesomeIcon icon={faYoutube} className="text-[15px]" />
+              </a>
             </div>
-          </div>
-          <div>
-            <h4 className="text-lg font-semibold mb-6">Navigation</h4>
-            <ul className="space-y-3">
-              <li><Link href="/vivre-aux-philippines" className="text-gray-400 hover:text-white transition duration-300">Y Vivre</Link></li>
-              <li><Link href="/voyager-aux-philippines" className="text-gray-400 hover:text-white transition duration-300">Voyager</Link></li>
-              <li><Link href="/rencontre-philippines" className="text-gray-400 hover:text-white transition duration-300">Rencontres</Link></li>
-              <li><Link href="/marketplace-aux-philippines" className="text-gray-400 hover:text-white transition duration-300">Marketplace</Link></li>
-              <li><Link href="/forum-sur-les-philippines" className="text-gray-400 hover:text-white transition duration-300">Forums</Link></li>
-              <li><Link href="/actualites-sur-les-philippines" className="text-gray-400 hover:text-white transition duration-300">Actualités</Link></li>
-              <li><Link href="/meilleurs-plans-aux-philippines" className="text-gray-400 hover:text-white transition duration-300">Meilleurs Plans</Link></li>
-              <li><Link href="/application-mobile" className="text-gray-400 hover:text-white transition duration-300">App Mobile</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-lg font-semibold mb-6">Contact & Support</h4>
-            <ul className="space-y-3">
-              <li className="flex items-start"><FontAwesomeIcon icon={faEnvelope} className="text-yellow-500 mt-1 mr-2" /><a href="mailto:contact@philippineasy.com" className="text-gray-400 hover:text-white transition duration-300">contact@philippineasy.com</a></li>
-              <li className="flex items-start"><FontAwesomeIcon icon={faLifeRing} className="text-yellow-500 mt-1 mr-2" /><Link href="/contact" className="text-gray-400 hover:text-white transition duration-300">Nous contacter</Link></li>
-              <li className="flex items-start"><FontAwesomeIcon icon={faMapMarkerAlt} className="text-yellow-500 mt-1 mr-2" /><span className="text-gray-400">Tandag, Philippines (Bureau Virtuel)</span></li>
-            </ul>
-            <div className="mt-6">
-            <h4 className="text-lg font-semibold mb-3">Nous suivre</h4>
-            <div className="flex space-x-4">
-              <a href="https://t.me/philippineasy" target="_blank" rel="noopener noreferrer" className="flex items-center text-gray-400 hover:text-white transition duration-300"><FontAwesomeIcon icon={faTelegram} className="text-lg mr-2" /><span>Telegram</span></a>
-              <a href="https://wa.me/639561900614?text=Hi%2C%20thanks%20for%20reaching%20out%20to%20Philippin'easy!%20We'll%20reply%20shortly." target="_blank" rel="noopener noreferrer" className="flex items-center text-gray-400 hover:text-white transition duration-300"><FontAwesomeIcon icon={faWhatsapp} className="text-lg mr-2" /><span>WhatsApp</span></a>
-            </div>
-            </div>
-          </div>
-          <div>
-            <h4 className="text-lg font-semibold mb-6">Newsletter</h4>
-            <p className="text-gray-400 mb-4">Conseils exclusifs et actus livrés dans votre boîte mail.</p>
-            <form className="mb-4" onSubmit={handleNewsletterSubmit}>
+
+            {/* Newsletter (compact, kept for revenue) */}
+            <form onSubmit={handleNewsletterSubmit} className="max-w-[340px]">
+              <label htmlFor="footer-newsletter-email" className="block text-[12px] uppercase tracking-[0.06em] font-semibold text-white/85 mb-2">
+                Newsletter mensuelle
+              </label>
               <div className="flex">
                 <input
+                  id="footer-newsletter-email"
                   type="email"
                   value={newsletterEmail}
-                  onChange={(e) => { setNewsletterEmail(e.target.value); if (newsletterStatus !== 'idle') setNewsletterStatus('idle'); }}
-                  className="px-4 py-2 w-full bg-gray-800 text-white rounded-l-lg focus:outline-none placeholder-gray-500"
-                  placeholder="Votre email"
+                  onChange={(e) => {
+                    setNewsletterEmail(e.target.value);
+                    if (newsletterStatus !== 'idle') setNewsletterStatus('idle');
+                  }}
+                  className="flex-1 px-3 py-2 bg-white/[0.06] text-white placeholder-slate-500 rounded-l-md border border-white/10 border-r-0 text-[13px] focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                  placeholder="votre@email.com"
                   required
                   disabled={newsletterStatus === 'loading'}
                 />
                 <button
                   type="submit"
-                  aria-label="Subscribe to newsletter"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition duration-300 disabled:opacity-50"
+                  aria-label="S'inscrire à la newsletter"
+                  className="px-3 py-2 bg-accent text-ink rounded-r-md hover:bg-accent/90 transition-colors duration-200 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
                   disabled={newsletterStatus === 'loading'}
                 >
-                  <FontAwesomeIcon icon={newsletterStatus === 'loading' ? faSpinner : newsletterStatus === 'success' ? faCheck : faPaperPlane} spin={newsletterStatus === 'loading'} />
+                  <FontAwesomeIcon
+                    icon={
+                      newsletterStatus === 'loading'
+                        ? faSpinner
+                        : newsletterStatus === 'success'
+                        ? faCheck
+                        : faPaperPlane
+                    }
+                    spin={newsletterStatus === 'loading'}
+                    className="text-[14px]"
+                  />
                 </button>
               </div>
+              {newsletterMessage && (
+                <p
+                  className={`text-[12px] mt-2 ${
+                    newsletterStatus === 'success' ? 'text-emerald-400' : 'text-red-400'
+                  }`}
+                >
+                  {newsletterMessage}
+                </p>
+              )}
             </form>
-            {newsletterMessage && (
-              <p className={`text-sm mb-2 ${newsletterStatus === 'success' ? 'text-green-400' : 'text-red-400'}`}>
-                {newsletterMessage}
-              </p>
-            )}
-            <p className="text-gray-500 text-sm">En vous inscrivant, vous acceptez notre politique de confidentialité.</p>
           </div>
+
+          {/* Nav 4-cols block */}
+          <nav aria-label="Navigation pied de page">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {footerCols.map((col) => (
+                <div key={col.title}>
+                  <h4 className="text-white text-[14px] font-bold mb-3.5">
+                    {col.title}
+                  </h4>
+                  <ul className="flex flex-col gap-2.5">
+                    {col.links.map((link) => (
+                      <li key={link.label}>
+                        <Link
+                          href={link.href}
+                          className="text-slate-400 text-[13px] hover:text-white transition-colors duration-200 focus-visible:outline-none focus-visible:underline"
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </nav>
         </div>
-        <div className="border-t border-gray-800 pt-8 text-center text-gray-500">
-          <p>© 2026 Philippin'Easy. Tous droits réservés.</p>
-          <div className="flex justify-center space-x-6 mt-4 flex-wrap">
-            <Link href="/mentions-legales" className="hover:text-white transition duration-300">Mentions légales</Link>
-            <Link href="/confidentialite" className="hover:text-white transition duration-300">Confidentialité</Link>
-            <Link href="/cgu" className="hover:text-white transition duration-300">CGU</Link>
-            <button onClick={() => (window as any).openCookieSettings?.()} className="hover:text-white transition duration-300">Gestion des cookies</button>
+
+        {/* Bottom */}
+        <div className="pt-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 text-[12px]">
+          <span className="text-slate-500">
+            © {year} Philippin&apos;Easy. Tous droits réservés.
+          </span>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-slate-500">
+            <Link href="/cgu" className="hover:text-white transition-colors duration-200 focus-visible:outline-none focus-visible:underline">
+              CGU
+            </Link>
+            <button
+              type="button"
+              onClick={() => (window as { openCookieSettings?: () => void }).openCookieSettings?.()}
+              className="hover:text-white transition-colors duration-200 focus-visible:outline-none focus-visible:underline"
+            >
+              Gestion des cookies
+            </button>
             {profile && (profile.role === 'super_admin' || profile.role === 'editor') && (
-              <Link href="/admin" className="hover:text-white transition duration-300">Admin</Link>
+              <Link href="/admin" className="hover:text-white transition-colors duration-200 focus-visible:outline-none focus-visible:underline">
+                Admin
+              </Link>
             )}
           </div>
+          <span className="text-slate-500">
+            Fait avec <span className="text-accent">♥</span> à Cebu &amp; Paris.
+          </span>
         </div>
       </div>
     </footer>

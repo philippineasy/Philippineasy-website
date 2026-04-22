@@ -84,6 +84,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Note backend** : profils statiques (TODO brancher GET /api/rencontres/teaser-profiles avec migration `dating_profiles.show_in_teaser`). PortraitSVG = placeholder editorial en attendant les photos opt-in.
 - **page.tsx** : import dynamique de `RencontresTeaser`, place entre `BlogSection` et `LeadMagnet` selon l'ordre proto.
 
+### Refonte homepage 2026 — Etape 10 : Footer 5-col proto-strict
+- **Changed** : `Footer` — refonte 1:1 avec le proto handoff. Bg `bg-ink` (#0F172A) au lieu de `bg-gray-900`. Padding pt-16 pb-6.
+- **Layout** : grid `lg:grid-cols-[1.3fr_3fr]` (top section). Col 1 = Brand. Col 2 = Nav block 4 sub-cols.
+- **Brand col** : wordmark "Philippin'**Easy**" 26px (Easy en accent) + tagline 14px white/40 max-w-320 + 4 socials ronds 38x38 `bg-white/[0.06]` hover `bg-accent text-ink` (Facebook, Instagram, Telegram, YouTube). **Newsletter compacte** conservee dessous (revenue value) avec label uppercase "Newsletter mensuelle" + input `bg-white/[0.06]` + bouton accent (paper plane, check ou spinner selon status). Branchement existant sur `/api/newsletter` + tracking GA4 + Meta Pixel preserves.
+- **Nav block** : 4 cols (`Voyager / S'installer / Communaute / Philippin'Easy`) avec liens proto. Mobile : grid 2 cols.
+  - Voyager : Palawan, Cebu & Visayas, Siargao, Boracay (TODO route), Manille (TODO route), Itineraire IA
+  - S'installer : Visas, Logement, Travailler, Investir, Etudes, Sante
+  - Communaute : Forum, Rencontres, Temoignages, Buddy System, Pack Ultime
+  - Philippin'Easy : A propos (TODO), Contact, Presse (TODO), Partenaires, Mentions legales, Confidentialite
+- **Titles col** : white 14px font-bold mb-3.5. **Links** : slate-400 13px hover:text-white transition-colors. focus-visible:underline pour a11y.
+- **Bottom** : border-t border-white/10 pt-6, flex justify-between : copyright (annee dynamique `new Date().getFullYear()`) + groupe milieu (CGU + Gestion cookies + Admin conditionnel) + tagline "Fait avec ♥ a Cebu & Paris" (♥ en accent).
+- **Removed** : Ancienne col "Contact & Support" (email/contact/location) — emails et contact deplaces dans la col "Philippin'Easy" et les pages liees. WhatsApp lien retire (deja dispo via TawkTo chat).
+- **A11y** : `<nav aria-label="Navigation pied de page">`, all socials `aria-label`, focus-visible ring sur tous les interactifs, motion-reduce safety sur transitions.
+
 ### Propagation du design system editorial — batch marchand/outils
 - **Changed** : `MeilleursPlansClientPage` — cards categories refondues (rounded-2xl 0.5px border, icone categorie dans carre 32x32 soft-blue, placeholder gradient avec icone si heroImage null) + bloc Easy+ refondu dans le design system (fond soft-blue, border 0.5px, kicker "★ PROGRAMME PRIVILEGE" uppercase, H2 avec "Easy+" en primary, checkmarks dans ronds bleu pale, CTA primary + lien secondaire avec fleche glisse, carte membre avec shadow primary translucide)
 - **Changed** : `OfferSelection` (itineraire Express/Premium/Conciergerie) — cards refondues (border 1.5px primary si selected, bandeau "RECOMMANDE" gradient bleu uppercase pour Premium, icone 36x36 rounded-xl colore par offre, kicker "PRIX" + valeur 32px 700 tabular-nums, checkmarks 16x16 ronds bleus sur fond soft-blue, bloc modifications en card editoriale)
