@@ -1,9 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
-import { EditableWrapper } from '@/components/shared/EditableWrapper';
 import { KlookCarousel } from '@/components/affiliate/KlookCarousel';
 import {
   palawanActivities,
@@ -13,213 +10,259 @@ import {
 import type { Article } from '@/types';
 
 interface BestDealsSectionProps {
-  initialDeals: Article[];
+  /** @deprecated kept for back-compat with page.tsx — not rendered after step 7 refactor */
+  initialDeals?: Article[];
 }
 
-// Curated mix: top activities across the 3 flagship destinations
-const homepageActivities = [
-  palawanActivities[0],
-  cebuActivities[0],
-  siargaoActivities[0],
-  palawanActivities[1],
-  cebuActivities[1],
-  siargaoActivities[1],
-].filter(Boolean);
-
-const getSummary = (content: unknown): string => {
-  let parsed = content;
-  if (typeof content === 'string') {
-    try {
-      parsed = JSON.parse(content);
-    } catch {
-      return content;
-    }
-  }
-  const blocks = (parsed as { blocks?: Array<{ type: string; data?: { text?: string } }> })?.blocks;
-  return blocks?.find((b) => b.type === 'paragraph')?.data?.text || '';
+type FeaturedDeal = {
+  title: string;
+  location: string;
+  image: string;
+  imageAlt?: string;
+  placeholder?: 'whaleshark';
+  rating: number;
+  reviews: string;
+  priceFrom: number;
+  url: string;
+  tag: string;
+  tagClass: 'amber' | 'emerald' | 'blue';
 };
 
-const stripHtml = (html: string) =>
-  html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+const palawanHero = palawanActivities[0];
+const cebuHero = cebuActivities[0];
+const siargaoHero = siargaoActivities[0];
 
-export const BestDealsSection = ({ initialDeals }: BestDealsSectionProps) => {
-  const [deals, setDeals] = useState(initialDeals);
+const featuredDeals: FeaturedDeal[] = [
+  {
+    title: palawanHero?.title ?? 'Island Hopping El Nido — Tour A',
+    location: 'Palawan · El Nido',
+    image: '/images/palawan/vue-aerienne-coron.webp',
+    imageAlt:
+      'Vue aérienne de Coron, lagons turquoise et îles karstiques',
+    rating: palawanHero?.rating ?? 4.8,
+    reviews: palawanHero?.reviews ?? '3 200+ avis',
+    priceFrom: palawanHero?.priceFrom ?? 20,
+    url: palawanHero?.url ?? '/meilleurs-plans-aux-philippines',
+    tag: 'Adventure',
+    tagClass: 'amber',
+  },
+  {
+    title: cebuHero?.title ?? 'Nage avec les requins-baleines',
+    location: 'Cebu · Oslob',
+    image: '',
+    placeholder: 'whaleshark',
+    rating: cebuHero?.rating ?? 4.7,
+    reviews: cebuHero?.reviews ?? '4 500+ avis',
+    priceFrom: cebuHero?.priceFrom ?? 55,
+    url: cebuHero?.url ?? '/meilleurs-plans-aux-philippines',
+    tag: 'Nature',
+    tagClass: 'emerald',
+  },
+  {
+    title: siargaoHero?.title ?? 'Cours de surf à Cloud 9',
+    location: 'Siargao · General Luna',
+    image: '/images/siargao/surf-a-siargao.webp',
+    imageAlt:
+      'Surfeur sur une vague à Siargao avec cocotiers en arrière-plan',
+    rating: siargaoHero?.rating ?? 4.8,
+    reviews: siargaoHero?.reviews ?? '500+ avis',
+    priceFrom: siargaoHero?.priceFrom ?? 28,
+    url: siargaoHero?.url ?? '/meilleurs-plans-aux-philippines',
+    tag: 'Surf',
+    tagClass: 'blue',
+  },
+];
 
-  const handleDealUpdate = (updatedDeal: Article) => {
-    setDeals((prev) =>
-      prev.map((d) => (d.id === updatedDeal.id ? updatedDeal : d))
-    );
-  };
+const tagStyles: Record<FeaturedDeal['tagClass'], { bg: string; color: string }> = {
+  amber: { bg: '#FEF3C7', color: '#854D0E' },
+  emerald: { bg: '#D1FAE5', color: '#065F46' },
+  blue: { bg: '#DBEAFE', color: '#1E40AF' },
+};
 
-  const handleDealReplace = (newDeal: Article) => {
-    setDeals((prev) => {
-      const index = prev.findIndex((d) => d.id === newDeal.id);
-      if (index !== -1) {
-        const next = [...prev];
-        next[index] = newDeal;
-        return next;
-      }
-      return prev;
-    });
-  };
+const PinIcon = () => (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    className="flex-shrink-0"
+  >
+    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+);
 
+// TODO: remplacer par photo Supabase quand disponible (Cebu Oslob whaleshark)
+const WhalesharkPlaceholder = () => (
+  <svg
+    viewBox="0 0 400 220"
+    preserveAspectRatio="xMidYMid slice"
+    className="w-full h-full"
+    role="img"
+    aria-label="Illustration océan profond avec silhouette de requin-baleine"
+  >
+    <defs>
+      <linearGradient id="oceanBg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stopColor="#0ea5e9" />
+        <stop offset="60%" stopColor="#075985" />
+        <stop offset="100%" stopColor="#082f49" />
+      </linearGradient>
+      <radialGradient id="lightShaft" cx="50%" cy="0%" r="100%">
+        <stop offset="0%" stopColor="#ffffff" stopOpacity="0.25" />
+        <stop offset="60%" stopColor="#ffffff" stopOpacity="0" />
+      </radialGradient>
+    </defs>
+    <rect width="400" height="220" fill="url(#oceanBg)" />
+    {/* Light shafts from surface */}
+    <rect width="400" height="220" fill="url(#lightShaft)" />
+    {/* Whaleshark silhouette */}
+    <g fill="#0c4a6e" opacity="0.85">
+      <ellipse cx="220" cy="130" rx="120" ry="32" />
+      <path d="M 100 130 L 140 110 L 145 130 L 140 150 Z" />
+      <ellipse cx="290" cy="115" rx="14" ry="8" />
+      <path d="M 320 130 Q 340 100, 350 110 Q 345 130, 320 130 Z" />
+      <path d="M 320 130 Q 340 160, 350 150 Q 345 130, 320 130 Z" />
+    </g>
+    {/* White spots characteristic of whalesharks */}
+    <g fill="#ffffff" opacity="0.4">
+      <circle cx="200" cy="125" r="3" />
+      <circle cx="220" cy="118" r="2.5" />
+      <circle cx="240" cy="128" r="3" />
+      <circle cx="260" cy="122" r="2.5" />
+      <circle cx="190" cy="138" r="2" />
+      <circle cx="215" cy="142" r="2.5" />
+      <circle cx="245" cy="138" r="2" />
+      <circle cx="275" cy="125" r="2" />
+    </g>
+    {/* Bubbles */}
+    <g fill="#ffffff" opacity="0.5">
+      <circle cx="60" cy="80" r="3" />
+      <circle cx="80" cy="60" r="2" />
+      <circle cx="55" cy="50" r="2.5" />
+      <circle cx="350" cy="170" r="2.5" />
+      <circle cx="365" cy="190" r="2" />
+    </g>
+  </svg>
+);
+
+export const BestDealsSection = (_props: BestDealsSectionProps) => {
   return (
     <section className="py-20 md:py-24 bg-background">
       <div className="container mx-auto px-4">
-        <div className="text-center max-w-2xl mx-auto mb-12">
+        <div className="text-center max-w-[720px] mx-auto mb-12">
+          <span className="text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+            Partenariat Klook · GetYourGuide
+          </span>
           <h2
-            className="text-3xl md:text-4xl font-bold text-foreground mb-3"
-            style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
+            className="text-[clamp(1.875rem,3.5vw,2.5rem)] font-bold text-foreground mt-3 mb-4"
+            style={{ letterSpacing: '-0.02em', lineHeight: 1.1 }}
           >
-            Nos <span className="text-accent">meilleurs plans</span> du moment
+            Nos meilleurs <span className="text-accent">bons plans</span>
           </h2>
-          <p className="text-muted-foreground text-base md:text-lg">
-            Hébergements, activités, services — nos sélections pour voyageurs
-            et expatriés.
+          <p className="text-[17px] text-muted-foreground leading-[1.6]">
+            Les activités et expériences sélectionnées par notre équipe locale.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {deals.map((deal) => (
-            <EditableWrapper
-              key={deal.id}
-              item={deal}
-              type="article"
-              onUpdate={handleDealUpdate}
-              onReplace={handleDealReplace}
-            >
-              <Link
-                href={`/meilleurs-plans/${deal.category.slug}/${deal.slug}`}
-                className="group bg-card rounded-2xl overflow-hidden flex flex-col h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
-                style={{
-                  border: '0.5px solid #e5e7eb',
-                  boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-                }}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-[22px] max-w-6xl mx-auto">
+          {featuredDeals.map((deal) => {
+            const tagStyle = tagStyles[deal.tagClass];
+            return (
+              <article
+                key={deal.title}
+                className="group flex flex-col bg-card rounded-2xl overflow-hidden border-[0.5px] border-border shadow-card-rest transition-all duration-300 hover:-translate-y-1 hover:shadow-card motion-reduce:hover:transform-none"
               >
-                <div className="relative h-[180px] overflow-hidden">
-                  {deal.image ? (
+                <div className="relative w-full h-[180px] overflow-hidden">
+                  {deal.placeholder === 'whaleshark' ? (
+                    <WhalesharkPlaceholder />
+                  ) : (
                     <Image
                       src={deal.image}
-                      alt={deal.title}
+                      alt={deal.imageAlt || ''}
                       fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 380px"
                     />
-                  ) : (
-                    <div className="w-full h-full bg-soft-blue" />
                   )}
-                </div>
-                <div className="px-5 pt-[18px] pb-5 flex flex-col flex-1">
-                  {deal.category?.name && (
-                    <span
-                      className="inline-flex items-center self-start mb-2.5 px-2 py-0.5 rounded"
-                      style={{
-                        fontSize: '10px',
-                        fontWeight: 700,
-                        letterSpacing: '0.05em',
-                        textTransform: 'uppercase',
-                        color: '#F59E0B',
-                        backgroundColor: '#FEF3C7',
-                      }}
-                    >
-                      {deal.category.name}
-                    </span>
-                  )}
-                  <h3
-                    className="text-foreground mb-2"
+                  {/* Tag badge top-left */}
+                  <span
+                    className="absolute top-3 left-3 inline-flex items-center px-2.5 py-1 rounded text-[11px] font-bold"
                     style={{
-                      fontSize: '16px',
-                      fontWeight: 600,
-                      letterSpacing: '-0.01em',
-                      lineHeight: 1.35,
+                      backgroundColor: tagStyle.bg,
+                      color: tagStyle.color,
                     }}
+                  >
+                    {deal.tag}
+                  </span>
+                  {/* Price overlay bottom-right */}
+                  <span
+                    className="absolute bottom-3 right-3 inline-flex items-center px-3 py-1.5 rounded bg-card text-accent text-[13px] font-bold shadow-md"
+                  >
+                    dès&nbsp;{deal.priceFrom}&nbsp;€
+                  </span>
+                </div>
+
+                <div className="px-5 pt-5 pb-5 flex flex-col flex-1">
+                  <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground uppercase font-medium mb-2 tracking-[0.04em]">
+                    <PinIcon />
+                    {deal.location}
+                  </div>
+                  <h3
+                    className="text-[16px] font-semibold text-foreground mb-2.5 leading-[1.35]"
+                    style={{ letterSpacing: '-0.01em' }}
                   >
                     {deal.title}
                   </h3>
-                  <p
-                    className="mb-4 flex-1 line-clamp-3"
-                    style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.55 }}
+                  <div className="flex items-baseline gap-2 mb-4">
+                    <span
+                      className="text-accent font-bold text-[14px]"
+                      aria-label={`Note ${deal.rating} sur 5`}
+                    >
+                      ★ {deal.rating}
+                    </span>
+                    <span className="text-[12px] text-muted-foreground">
+                      ({deal.reviews})
+                    </span>
+                  </div>
+                  <a
+                    href={deal.url}
+                    target="_blank"
+                    rel="sponsored noopener noreferrer"
+                    className="mt-auto w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg font-semibold text-sm transition-all duration-200 hover:bg-primary/90 hover:scale-[1.01] active:scale-[0.99] motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
-                    {stripHtml(getSummary(deal.content))}
-                  </p>
-                  <span
-                    className="inline-flex items-center gap-1 text-primary text-sm font-medium"
-                    aria-hidden="true"
-                  >
-                    Voir l&apos;offre
-                    <span className="transition-transform duration-200 group-hover:translate-x-0.5">
+                    Réserver
+                    <span
+                      aria-hidden="true"
+                      className="transition-transform duration-200 group-hover:translate-x-0.5"
+                    >
                       →
                     </span>
-                  </span>
+                  </a>
                 </div>
-              </Link>
-            </EditableWrapper>
-          ))}
+              </article>
+            );
+          })}
         </div>
 
-        <div className="mt-10 max-w-md mx-auto">
-          <Link
-            href="/meilleurs-plans"
-            className="group flex items-center gap-4 bg-card rounded-2xl px-5 py-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-            style={{
-              border: '0.5px solid #e5e7eb',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-            }}
-          >
-            <span
-              className="flex-shrink-0 inline-flex items-center justify-center rounded-xl"
-              style={{
-                width: '40px',
-                height: '40px',
-                backgroundColor: '#FEF3C7',
-                color: '#F59E0B',
-              }}
-              aria-hidden="true"
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-                <line x1="7" y1="7" x2="7.01" y2="7" />
-              </svg>
-            </span>
-            <span className="flex-1 min-w-0">
-              <span
-                className="block text-foreground"
-                style={{ fontSize: '15px', fontWeight: 600, letterSpacing: '-0.01em' }}
-              >
-                Tous les bons plans
-              </span>
-              <span
-                className="block mt-0.5"
-                style={{ fontSize: '12px', color: '#64748b' }}
-              >
-                Hébergements, services &amp; offres partenaires.
-              </span>
-            </span>
-            <span
-              className="flex-shrink-0 text-primary text-sm transition-transform duration-200 group-hover:translate-x-0.5"
-              aria-hidden="true"
-            >
-              →
-            </span>
-          </Link>
-        </div>
-
-        {/* Klook affiliate carousel — activités à réserver */}
+        {/* Klook affiliate carousel — kept for revenue value (not in proto) */}
         <div className="max-w-6xl mx-auto mt-20">
           <KlookCarousel
-            activities={homepageActivities}
+            activities={[
+              palawanActivities[1],
+              cebuActivities[1],
+              siargaoActivities[1],
+              palawanActivities[2],
+              cebuActivities[2],
+              siargaoActivities[2],
+            ].filter(Boolean)}
             destination="homepage"
-            title="Activités à réserver aux Philippines"
-            subtitle="Nos expériences favorites à Palawan, Cebu et Siargao — réservation en 2 clics."
+            title="Plus d'activités à réserver aux Philippines"
+            subtitle="Notre sélection complète d'expériences à Palawan, Cebu et Siargao."
           />
         </div>
       </div>
