@@ -23,6 +23,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Changed** : `HeroSection` — ajout stats row "**4,9/5** · 1 200+ avis · Gratuit · Sans inscription" sous les CTAs (white/78), motion-reduce sur le 2e CTA
 - **Fixed** : `DropdownMenu` (Voyager/S'installer/Communaute/Bons Plans) heritait de `text-base` (16px), incoherent avec les NavLinks simples (Rencontres) en `text-sm` (14px). Aligne sur le pattern NavLink (px-3.5 py-2 text-sm font-medium gap-1.5), chevron passe a `w-2.5 h-2.5 text-accent/80`. Ajout `aria-haspopup`/`aria-expanded` + focus-visible.
 - **Fixed** : `Header` wordmark — taille reduite de `text-[26px]` a `text-[22px]` (md) / `text-[20px]` (mobile) + `leading-none` pour mieux equilibrer avec les actions a droite (avatar 32px + pseudo).
+- **Added** : Badge "Nouveau" (pill rose `bg-rose-500 text-white text-[9px] uppercase tracking-wider`) sur l'entree Rencontres dans la nav principale, pour signaler le nouveau placement top-level. Prop `badge?: string` ajoutee a l'interface NavLink.
 
 ### Propagation du design system editorial — batch marchand/outils
 - **Changed** : `MeilleursPlansClientPage` — cards categories refondues (rounded-2xl 0.5px border, icone categorie dans carre 32x32 soft-blue, placeholder gradient avec icone si heroImage null) + bloc Easy+ refondu dans le design system (fond soft-blue, border 0.5px, kicker "★ PROGRAMME PRIVILEGE" uppercase, H2 avec "Easy+" en primary, checkmarks dans ronds bleu pale, CTA primary + lien secondaire avec fleche glisse, carte membre avec shadow primary translucide)

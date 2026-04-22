@@ -18,6 +18,7 @@ interface NavLink {
   special?: boolean;
   admin?: boolean;
   roles?: string[];
+  badge?: string;
   submenu?: { href: string; label: string; }[];
 }
 
@@ -118,9 +119,10 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
     special?: boolean;
     admin?: boolean;
     roles?: string[];
+    badge?: string;
   }
 
-  const NavLink = ({ href, label, special = false, admin = false }: NavLinkProps) => {
+  const NavLink = ({ href, label, special = false, admin = false, badge }: NavLinkProps) => {
     const isActive = pathname.startsWith(href) || (activeMainCategory && label.toLowerCase() === activeMainCategory.toLowerCase());
     const baseClasses = "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none";
     const activeClasses = "bg-primary/10 text-primary font-bold";
@@ -136,6 +138,14 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
       <Link href={href} className={`${baseClasses} ${special ? specialClasses : (admin ? adminClasses : defaultClasses)} ${isActive && !special ? activeClasses : ''}`}>
         {special && <span aria-hidden="true">+</span>}
         {label}
+        {badge && (
+          <span
+            className="ml-0.5 inline-flex items-center px-1.5 py-px rounded-full bg-rose-500 text-white text-[9px] font-bold uppercase tracking-wider leading-none"
+            aria-label={`(${badge})`}
+          >
+            {badge}
+          </span>
+        )}
       </Link>
     );
   };

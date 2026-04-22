@@ -177,7 +177,7 @@ export default async function RootLayout({
         { href: '/services#pack-ultime', label: 'Pack Ultime' },
       ]
     },
-    { href: '/rencontre-philippines', label: 'Rencontres' },
+    { href: '/rencontre-philippines', label: 'Rencontres', badge: 'Nouveau' },
     {
       label: 'Bons Plans',
       href: '/meilleurs-plans-aux-philippines',
