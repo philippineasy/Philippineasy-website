@@ -5,6 +5,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fix dependances : @react-email/render peer manquant (resend@6)
+- **Fixed** : Ajout `@react-email/render` 2.0.7 comme dependency directe. Resend@6.11.0 declare ce package en peer dep marque `optional: true`, mais le bundler Next.js (turbopack en dev, webpack en build) ne respecte pas le flag optional sur les imports indirects et echouait a compiler avec `Module not found: Can't resolve '@react-email/render'`. Routes affectees : `/api/contact`, `/api/webhooks/resend-inbound`, `src/emails/send.ts`. Solution recommandee par l'equipe Resend pour v6+. Coût bundle : ~30 KB. Verification post-install : `/api/contact` compile (400 validation au lieu de 500 ENOENT), articles continuent de rendre en 200.
+
 ### Refonte homepage 2026 — Etape 1 : tokens & config
 - **Added** : Tokens design — couleurs `ink` (#0F172A), `ink-dim` (#1E293B), box-shadows nommees (`card`, `hero`, `cta`, `like`, `mockup`, `card-rest`), keyframe + animation `pulse-dot` pour le dot live du WeatherTicker
 - **Added** : Variant Button `accent` (bg-accent + text-ink + shadow-cta + hover scale 1.02 + active scale 0.99), respecte `prefers-reduced-motion` via `motion-reduce` utilities
