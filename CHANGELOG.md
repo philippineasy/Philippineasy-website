@@ -5,6 +5,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Refonte homepage 2026 — Etape 1 : tokens & config
+- **Added** : Tokens design — couleurs `ink` (#0F172A), `ink-dim` (#1E293B), box-shadows nommees (`card`, `hero`, `cta`, `like`, `mockup`, `card-rest`), keyframe + animation `pulse-dot` pour le dot live du WeatherTicker
+- **Added** : Variant Button `accent` (bg-accent + text-ink + shadow-cta + hover scale 1.02 + active scale 0.99), respecte `prefers-reduced-motion` via `motion-reduce` utilities
+- **Added** : `text-balance` sur h1/h2/h3 et `text-pretty` sur p (Tailwind 3.4 native)
+- **Added** : `prefers-reduced-motion` sur `scroll-behavior` (auto au lieu de smooth)
+- **Removed** : `.section-bg-1` et `.section-bg-2` (URL Unsplash hardcodee, classes inutilisees dans tout le repo)
+- **Changed** : Cleanup keyframes accordion-* dupliquees dans `tailwind.config.js`
+- **Added** : `_handoff/` package (gitignore) — design package complet avec specs, brand, prototype HTML/JSX, screenshots
+- **Added** : `PLAN.md` a la racine — plan d'implementation valide (decisions Q1-Q7 actees, ordre des commits)
+
+### Refonte homepage 2026 — Etape 2 : Header & WeatherTicker
+- **Changed** : `WeatherTicker` — refonte editoriale : bg `ink` (noir #0F172A) au lieu de bg primary, 4 villes phares (Manille/Cebu/Palawan/Siargao) au lieu de 20 villes en scroll, point rouge pulse "EN DIRECT" via `animate-pulse-dot`, ajout taux EUR/PHP via Frankfurter API (open data, no key, cache 10min), teaser vol Paris→Manille (TODO API tarifs en suivi). Conserve fetch SSR cache 600s (decision Q6).
+- **Changed** : `Header` — polish : `bg-card/94 backdrop-blur-md border-b border-border/50` au lieu de `bg-card shadow-md`, CTA "Creer Itineraire" passe au pattern `accent` (text-ink + shadow-cta + hover scale 1.02 + motion-reduce safety). Ajout `focus-visible:ring-2` sur tous les NavLinks et icon-buttons. Bell : `aria-label` dynamique + `aria-haspopup`/`aria-expanded`. Modal search close : `aria-label`. Structure `navLinks` (layout.tsx) intacte.
+
 ### Propagation du design system editorial — batch marchand/outils
 - **Changed** : `MeilleursPlansClientPage` — cards categories refondues (rounded-2xl 0.5px border, icone categorie dans carre 32x32 soft-blue, placeholder gradient avec icone si heroImage null) + bloc Easy+ refondu dans le design system (fond soft-blue, border 0.5px, kicker "★ PROGRAMME PRIVILEGE" uppercase, H2 avec "Easy+" en primary, checkmarks dans ronds bleu pale, CTA primary + lien secondaire avec fleche glisse, carte membre avec shadow primary translucide)
 - **Changed** : `OfferSelection` (itineraire Express/Premium/Conciergerie) — cards refondues (border 1.5px primary si selected, bandeau "RECOMMANDE" gradient bleu uppercase pour Premium, icone 36x36 rounded-xl colore par offre, kicker "PRIX" + valeur 32px 700 tabular-nums, checkmarks 16x16 ronds bleus sur fond soft-blue, bloc modifications en card editoriale)

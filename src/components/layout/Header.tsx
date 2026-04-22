@@ -125,9 +125,9 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
 
   const NavLink = ({ href, label, special = false, admin = false }: NavLinkProps) => {
     const isActive = pathname.startsWith(href) || (activeMainCategory && label.toLowerCase() === activeMainCategory.toLowerCase());
-    const baseClasses = "px-3 py-2 lg:px-4 rounded-lg transition duration-300";
+    const baseClasses = "px-3 py-2 lg:px-4 rounded-lg transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none";
     const activeClasses = "font-bold text-primary bg-primary/10";
-    const specialClasses = "text-accent-foreground bg-accent hover:bg-accent/90 font-semibold";
+    const specialClasses = "text-ink bg-accent shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] font-semibold motion-reduce:hover:scale-100";
     const defaultClasses = "text-foreground hover:text-primary hover:bg-primary/10";
     const adminClasses = "text-destructive hover:text-destructive/90 hover:bg-destructive/10";
 
@@ -169,7 +169,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
 
   return (
     <>
-      <nav className="w-full bg-card shadow-md">
+      <nav className="w-full bg-card/94 backdrop-blur-md border-b border-border/50 shadow-sm supports-[backdrop-filter]:bg-card/94">
         <div className="container mx-auto px-4">
           <div className="flex flex-col">
             {/* Top row for the logo */}
@@ -210,7 +210,13 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
                 ) : user ? (
                   <>
                     <div className="relative" ref={notificationRef}>
-                      <button onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} className={`relative text-foreground hover:text-primary ${unreadCount > 0 ? 'animate-pulse' : ''}`}>
+                      <button
+                        onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                        aria-label={unreadCount > 0 ? `Notifications (${unreadCount} non lues)` : 'Notifications'}
+                        aria-haspopup="true"
+                        aria-expanded={isNotificationsOpen}
+                        className={`relative text-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded ${unreadCount > 0 ? 'animate-pulse motion-reduce:animate-none' : ''}`}
+                      >
                         <FontAwesomeIcon icon={faBell} className="text-xl" />
                         {unreadCount > 0 && (
                           <span className="absolute -top-1 -right-2 w-4 h-4 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">{unreadCount}</span>
@@ -288,7 +294,11 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
       {isSearchModalOpen && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[60] p-4">
           <div className="bg-card p-6 sm:p-8 rounded-lg shadow-xl w-full max-w-lg relative">
-            <button onClick={() => setIsSearchModalOpen(false)} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground focus:outline-none text-2xl leading-none">
+            <button
+              onClick={() => setIsSearchModalOpen(false)}
+              aria-label="Fermer la recherche"
+              className="absolute top-3 right-3 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded text-2xl leading-none"
+            >
               &times;
             </button>
             <h3 className="text-xl font-semibold mb-6 text-center text-foreground">Rechercher sur le site</h3>

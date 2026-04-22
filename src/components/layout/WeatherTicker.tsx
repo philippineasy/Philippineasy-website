@@ -1,71 +1,23 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSun, faCloudSun, faCloud, faBolt, faCloudShowersHeavy, faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
+import {
+  faSun,
+  faCloudSun,
+  faCloud,
+  faBolt,
+  faCloudShowersHeavy,
+  faQuestionCircle,
+  faPlane,
+} from '@fortawesome/free-solid-svg-icons';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 
-// Liste étendue de villes avec coordonnées pour plus de précision
-const cityData = [
+// 4 villes phares (handoff). On garde les coords pour la précision API.
+const featuredCities = [
   { displayName: 'Manille', lat: 14.5995, lon: 120.9842 },
   { displayName: 'Cebu', lat: 10.3157, lon: 123.8918 },
-  { displayName: 'Davao', lat: 7.1907, lon: 125.4553 },
-  { displayName: 'Quezon City', lat: 14.6760, lon: 121.0437 },
-  { displayName: 'Angeles', lat: 15.1453, lon: 120.5881 },
-  { displayName: 'Baguio', lat: 16.4023, lon: 120.5960 },
-  { displayName: 'Vigan', lat: 17.5747, lon: 120.3869 },
-  { displayName: 'Legazpi (Mayon)', lat: 13.1391, lon: 123.7438 },
-  { displayName: 'Banaue (Rizières)', lat: 16.9103, lon: 121.0581 },
-  { displayName: 'Puerto Princesa', lat: 9.7386, lon: 118.7328 },
-  { displayName: 'El Nido', lat: 11.1796, lon: 119.3925 },
-  { displayName: 'Coron', lat: 11.9986, lon: 120.2044 },
-  { displayName: 'Boracay', lat: 11.9675, lon: 121.9256 },
-  { displayName: 'Bohol', lat: 9.8498, lon: 124.2832 },
-  { displayName: 'Dumaguete', lat: 9.3087, lon: 123.3053 },
-  { displayName: 'Iloilo', lat: 10.7202, lon: 122.5621 },
-  { displayName: 'Siquijor', lat: 9.1859, lon: 123.6322 },
+  { displayName: 'Palawan', lat: 9.7386, lon: 118.7328 },   // Puerto Princesa
   { displayName: 'Siargao', lat: 9.7875, lon: 126.1586 },
-  { displayName: 'Cagayan de Oro', lat: 8.4541, lon: 124.6319 },
-  { displayName: 'Zamboanga', lat: 6.9214, lon: 122.0790 },
 ];
 
-async function getWeatherData() {
-  const apiKey = process.env.WEATHER_API_KEY;
-  if (!apiKey) {
-    console.error("ERREUR: La clé API météo (WEATHER_API_KEY) n'est pas définie.");
-    return [];
-  }
-
-  const results = await Promise.allSettled(cityData.map(async (city) => {
-    const locationQuery = `${city.lat},${city.lon}`;
-    const response = await fetch(`https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${locationQuery}&aqi=no`);
-    
-    if (!response.ok) throw new Error(`Erreur API pour "${city.displayName}": ${response.status}`);
-    
-    const data = await response.json();
-    
-    // CHANGEMENT 2 : Récupérer l'objet complet (icône + couleur)
-    const iconData = getIconAndColorForCondition(data.current.condition.text);
-
-    return {
-      city: city.displayName,
-      temp: Math.round(data.current.temp_c),
-      icon: iconData.icon,
-      colorClass: iconData.colorClass, // <-- On stocke la classe de couleur
-    };
-  }));
-
-  const successfulWeatherData = results
-    .filter(result => result.status === 'fulfilled')
-    .map(result => (result as PromiseFulfilledResult<WeatherData>).value);
-  
-  results.forEach((result, index) => {
-    if (result.status === 'rejected') {
-      console.warn(`Impossible de récupérer la météo pour ${cityData[index].displayName}: ${(result.reason as Error).message}`);
-    }
-  });
-
-  return successfulWeatherData;
-}
-
-// CHANGEMENT 1 : La fonction retourne maintenant un objet avec l'icône ET une classe de couleur
 interface WeatherData {
   city: string;
   temp: number;
@@ -73,52 +25,101 @@ interface WeatherData {
   colorClass: string;
 }
 
-function getIconAndColorForCondition(condition: string): { icon: IconDefinition, colorClass: string } {
-  const lowerCaseCondition = condition.toLowerCase();
-  
-  if (lowerCaseCondition.includes('sunny') || lowerCaseCondition.includes('clear')) {
-    return { icon: faSun, colorClass: 'text-accent/80' };
+function getIconAndColorForCondition(condition: string): {
+  icon: IconDefinition;
+  colorClass: string;
+} {
+  const c = condition.toLowerCase();
+  if (c.includes('sunny') || c.includes('clear')) return { icon: faSun, colorClass: 'text-accent' };
+  if (c.includes('partly cloudy')) return { icon: faCloudSun, colorClass: 'text-yellow-200' };
+  if (c.includes('cloudy') || c.includes('overcast')) return { icon: faCloud, colorClass: 'text-slate-300' };
+  if (c.includes('rain') || c.includes('drizzle') || c.includes('shower')) return { icon: faCloudShowersHeavy, colorClass: 'text-cyan-300' };
+  if (c.includes('thunder')) return { icon: faBolt, colorClass: 'text-yellow-300' };
+  return { icon: faQuestionCircle, colorClass: 'text-slate-400' };
+}
+
+async function getWeatherData(): Promise<WeatherData[]> {
+  const apiKey = process.env.WEATHER_API_KEY;
+  if (!apiKey) {
+    console.warn('WeatherTicker: WEATHER_API_KEY manquante — ticker masqué.');
+    return [];
   }
-  if (lowerCaseCondition.includes('partly cloudy')) {
-    return { icon: faCloudSun, colorClass: 'text-accent/80' }; // Le soleil domine
+
+  const results = await Promise.allSettled(
+    featuredCities.map(async (city) => {
+      const res = await fetch(
+        `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${city.lat},${city.lon}&aqi=no`,
+        { next: { revalidate: 600 } }
+      );
+      if (!res.ok) throw new Error(`API ${city.displayName}: ${res.status}`);
+      const data = await res.json();
+      const { icon, colorClass } = getIconAndColorForCondition(data.current.condition.text);
+      return {
+        city: city.displayName,
+        temp: Math.round(data.current.temp_c),
+        icon,
+        colorClass,
+      };
+    })
+  );
+
+  return results
+    .filter((r): r is PromiseFulfilledResult<WeatherData> => r.status === 'fulfilled')
+    .map((r) => r.value);
+}
+
+async function getEurPhpRate(): Promise<number | null> {
+  try {
+    const res = await fetch('https://api.frankfurter.app/latest?from=EUR&to=PHP', {
+      next: { revalidate: 600 },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const rate = data?.rates?.PHP;
+    return typeof rate === 'number' ? rate : null;
+  } catch {
+    return null;
   }
-  if (lowerCaseCondition.includes('cloudy') || lowerCaseCondition.includes('overcast')) {
-    return { icon: faCloud, colorClass: 'text-white' }; // Nuage neutre blanc
-  }
-  if (lowerCaseCondition.includes('rain') || lowerCaseCondition.includes('drizzle') || lowerCaseCondition.includes('shower')) {
-    return { icon: faCloudShowersHeavy, colorClass: 'text-cyan-300' }; // Couleur bleutée pour la pluie
-  }
-  if (lowerCaseCondition.includes('thunder')) {
-    return { icon: faBolt, colorClass: 'text-accent/90' }; // Jaune vif pour l'éclair
-  }
-  // Icône par défaut pour brouillard, neige (peu probable), etc.
-  return { icon: faQuestionCircle, colorClass: 'text-gray-400' };
 }
 
 export default async function WeatherTicker() {
-  const weatherData = await getWeatherData();
+  const [weatherData, fxRate] = await Promise.all([getWeatherData(), getEurPhpRate()]);
 
-  if (!weatherData || weatherData.length === 0) {
-    console.warn("Aucune donnée météo n'a pu être récupérée pour le bandeau.");
-    return null;
-  }
-  
-  const animationDuration = weatherData.length > 15 ? '60s' : '40s';
-  const tickerItems = [...weatherData, ...weatherData];
+  if (!weatherData || weatherData.length === 0) return null;
 
   return (
-    <div className="bg-primary text-primary-foreground shadow-md w-full overflow-hidden whitespace-nowrap">
-      <div className="inline-block animate-scroll" style={{ animationDuration }}>
-        {tickerItems.map((weather, index) => (
-          <span key={index} className="inline-flex items-center mx-4 py-2 text-sm font-semibold">
-            {/* CHANGEMENT 3 : La classe de couleur est maintenant dynamique */}
+    <div className="w-full bg-ink text-white text-[13px]" role="status" aria-live="polite">
+      <div className="container mx-auto px-4 py-2 flex items-center gap-x-5 gap-y-1 overflow-x-auto whitespace-nowrap md:flex-wrap md:overflow-visible md:whitespace-normal md:justify-center hide-scroll">
+        <span className="inline-flex items-center gap-2 font-semibold uppercase tracking-wider">
+          <span
+            className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse-dot motion-reduce:animate-none"
+            aria-hidden="true"
+          />
+          En direct
+        </span>
+        {weatherData.map((w) => (
+          <span key={w.city} className="inline-flex items-center gap-1.5 text-white/85">
+            <span className="font-medium">{w.city}</span>
             <FontAwesomeIcon
-              icon={weather.icon}
-              className={`mr-2 ${weather.colorClass}`}
+              icon={w.icon}
+              className={`text-[11px] ${w.colorClass}`}
+              aria-hidden="true"
             />
-            {weather.city}: {weather.temp}°C
+            <span className="tabular-nums">{w.temp}°C</span>
           </span>
         ))}
+        {fxRate !== null && (
+          <span className="inline-flex items-center gap-1.5 text-white/85">
+            <span className="font-medium">1€</span>
+            <span className="tabular-nums">= {fxRate.toFixed(2)} ₱</span>
+          </span>
+        )}
+        {/* TODO: brancher sur API tarifs (Skyscanner / Kiwi) — hardcodé MVP */}
+        <span className="inline-flex items-center gap-1.5 text-white/85">
+          <FontAwesomeIcon icon={faPlane} className="text-[11px] text-accent" aria-hidden="true" />
+          <span className="font-medium">Paris → Manille</span>
+          <span className="text-white/65">dès 682 €</span>
+        </span>
       </div>
     </div>
   );
