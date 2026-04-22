@@ -9,6 +9,7 @@ import { InstallerCards } from '@/components/homepage/InstallerCards';
 import { ItineraireIABlock } from '@/components/homepage/ItineraireIABlock';
 import { TestimonialsSection } from '@/components/homepage/TestimonialsSection';
 import { FinalCtaSection } from '@/components/homepage/FinalCtaSection';
+import { BlogSection } from '@/components/homepage/BlogSection';
 
 const homepageFAQs = [
   {
@@ -34,7 +35,6 @@ const homepageFAQs = [
 ];
 
 const BestDealsSection = dynamic(() => import('@/components/homepage/BestDealsSection').then(mod => mod.BestDealsSection));
-const BlogSection = dynamic(() => import('@/components/homepage/BlogSection').then(mod => mod.BlogSection));
 const RencontresTeaser = dynamic(() => import('@/components/homepage/RencontresTeaser').then(mod => mod.RencontresTeaser));
 const LeadMagnetSection = dynamic(() => import('@/components/homepage/LeadMagnetSection').then(mod => mod.LeadMagnetSection));
 

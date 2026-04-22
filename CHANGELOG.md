@@ -84,6 +84,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Note backend** : profils statiques (TODO brancher GET /api/rencontres/teaser-profiles avec migration `dating_profiles.show_in_teaser`). PortraitSVG = placeholder editorial en attendant les photos opt-in.
 - **page.tsx** : import dynamique de `RencontresTeaser`, place entre `BlogSection` et `LeadMagnet` selon l'ordre proto.
 
+### Refonte homepage 2026 — Articles editoriaux + branchement BlogSection
+- **Added** : 5 articles rediges (3000-5000 chars chacun, voix narrative humaine, anecdotes concretes, liens internes croises, lien partenaire Klook actif aid=118789, lien `/partenaires` pour les autres affilies en attente). Inseres en DB Supabase via SQL :
+  - id=125 `partir-aux-philippines-guide-complet-2026` (cat 10 conseils-voyage, 14 min)
+  - id=126 `budget-voyage-35-euros-jour-philippines` (cat 10, 8 min)
+  - id=127 `visa-longue-duree-srrv-13a-comparatif` (cat 1 visas-et-formalites, 11 min)
+  - id=128 `saison-pluies-quand-partir-philippines` (cat 10, 6 min)
+  - id=129 `rencontrer-philippine-codes-culturels` (cat 5 culture-integration, 9 min)
+- **Changed** : `BlogSection` passe de composant statique a **async Server Component** qui fetch les 5 articles via `supabase.from('articles').select(... category) WHERE slug IN (...) AND status='published'`. Genere les vraies URLs via `generateArticleUrl` (`/voyager-aux-philippines/conseils-voyage/<slug>`, etc.). Conserve l'UI editoriale exacte (featured 1.5fr + side stack 2 + row 3 + "Tous les articles"). Fallback graceful sur images locales et titres si fetch echoue.
+- **Changed** : `page.tsx` — `BlogSection` retiree du `dynamic()` (besoin d'etre async server component) et importee directement.
+- **Note** : Champ `image` des 5 articles laisse NULL en DB pour l'instant. Le composant fallback sur les images locales `/imagesHero/*` et `/images/voyager/*` deja en place. A remplacer par les vraies images apres generation Banana 2 (prompts fournis hors codebase).
+
 ### Refonte homepage 2026 — Enhancement : BestDeals devient carousel infini
 - **Changed** : `BestDealsSection` — passage de 3 cards statiques a un **carousel embla** (loop + autoplay 4.5s + stopOnInteraction false + stopOnMouseEnter false + playOnInit true) qui presente TOUTES les activites Klook (palawanActivities + cebuActivities + siargaoActivities = ~15 cards). UI editoriale conservee a l'identique (tag overlay top-left, prix overlay bottom-right, pin location, rating, CTA Reserver bg-primary). Scroll responsive : 1 card mobile / 2 tablet / 3 desktop.
 - **Header** : titre **centre** (eyebrow + H2 + lead) — pas d'arrows a droite (placees sous le carousel pour ne pas alterer l'alignement editorial).

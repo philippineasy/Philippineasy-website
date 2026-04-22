@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { createClient } from '@/utils/supabase/server';
+import { generateArticleUrl } from '@/lib/utils';
 
 type CategoryClass = 'blue' | 'emerald' | 'purple' | 'amber' | 'teal';
 
@@ -11,80 +13,106 @@ const categoryStyles: Record<CategoryClass, { bg: string; color: string }> = {
   teal: { bg: '#CCFBF1', color: '#115E59' },
 };
 
-type BlogPost = {
-  title: string;
-  category: string;
-  categoryClass: CategoryClass;
-  read: string;
-  date: string;
-  image: string;
-  imageAlt: string;
-  href: string;
+// Each homepage slot maps to a real article slug. The category badge,
+// fallback image and read-time are editorial overrides — they keep the
+// homepage visually stable even if the underlying article is updated.
+type Slot = {
+  slug: string;
+  badgeLabel: string;
+  badgeClass: CategoryClass;
+  fallbackImage: string;
+  fallbackImageAlt: string;
+  fallbackReadingTime: string;
+  fallbackTitle: string;
+  fallbackDate: string;
 };
 
-// TODO: brancher sur getHomepageArticles ou nouveau service getBlogArticles
-// quand la query DB sera prete. Contenus statiques alignes au proto en attendant.
-const featured = {
-  title: 'Partir aux Philippines : le guide complet 2026',
-  excerpt:
-    "Visa, budget, itinéraires, saisons, transports, culture. Tout ce qu'il faut savoir avant de réserver votre vol pour Manille — compilé par notre équipe sur place depuis 2020.",
-  category: 'Guide complet',
-  categoryClass: 'blue' as CategoryClass,
-  author: 'Marc L.',
-  authorInitial: 'M',
-  date: '18 mars 2026',
-  read: '14 min',
-  image: '/images/voyager/iles-philippines-aeriennes.webp',
-  imageAlt: 'Vue aérienne de îles karstiques et lagons turquoise des Philippines',
-  href: '/voyager-aux-philippines',
+const FEATURED: Slot = {
+  slug: 'partir-aux-philippines-guide-complet-2026',
+  badgeLabel: 'Guide complet',
+  badgeClass: 'blue',
+  fallbackImage: '/images/voyager/iles-philippines-aeriennes.webp',
+  fallbackImageAlt:
+    'Vue aérienne de îles karstiques et lagons turquoise des Philippines',
+  fallbackReadingTime: '14 min',
+  fallbackTitle: 'Partir aux Philippines : le guide complet 2026',
+  fallbackDate: '22 avril 2026',
 };
 
-const sidePosts: BlogPost[] = [
+const SIDE_SLOTS: Slot[] = [
   {
-    title: 'Budget voyage : 35€/jour aux Philippines, vraiment ?',
-    category: 'Budget',
-    categoryClass: 'emerald',
-    read: '8 min',
-    date: '12 mars',
-    image: '/imagesHero/maitriser-son-budget-aux-philippines.webp',
-    imageAlt: 'Pesos philippins étalés sur une carte des Philippines',
-    href: '/voyager-aux-philippines/budget',
+    slug: 'budget-voyage-35-euros-jour-philippines',
+    badgeLabel: 'Budget',
+    badgeClass: 'emerald',
+    fallbackImage: '/imagesHero/maitriser-son-budget-aux-philippines.webp',
+    fallbackImageAlt: 'Pesos philippins étalés sur une carte des Philippines',
+    fallbackReadingTime: '8 min',
+    fallbackTitle: 'Budget voyage : 35€/jour aux Philippines, vraiment ?',
+    fallbackDate: '15 avril',
   },
   {
-    title: 'Visa longue durée : SRRV, 13A, retraite — comparatif',
-    category: 'Visa',
-    categoryClass: 'purple',
-    read: '11 min',
-    date: '05 mars',
-    image: '/imagesHero/visa-philippines-processus.webp',
-    imageAlt: 'Passeport et visa philippin sur un bureau',
-    href: '/vivre-aux-philippines',
+    slug: 'visa-longue-duree-srrv-13a-comparatif',
+    badgeLabel: 'Visa',
+    badgeClass: 'purple',
+    fallbackImage: '/imagesHero/visa-philippines-processus.webp',
+    fallbackImageAlt: 'Passeport et visa philippin sur un bureau',
+    fallbackReadingTime: '11 min',
+    fallbackTitle: 'Visa longue durée : SRRV, 13A, retraite — comparatif',
+    fallbackDate: '8 avril',
   },
 ];
 
-const rowPosts: BlogPost[] = [
+const ROW_SLOTS: Slot[] = [
   {
-    title: 'Saison des pluies : quand partir et où éviter',
-    category: 'Climat',
-    categoryClass: 'amber',
-    read: '6 min',
-    date: '28 fév',
-    image: '/imagesHero/meteo-contrastee-aux-philippines.webp',
-    imageAlt: 'Ciel contrasté sur les Philippines, nuages de mousson',
-    href: '/voyager-aux-philippines/quand-partir',
+    slug: 'saison-pluies-quand-partir-philippines',
+    badgeLabel: 'Climat',
+    badgeClass: 'amber',
+    fallbackImage: '/imagesHero/meteo-contrastee-aux-philippines.webp',
+    fallbackImageAlt: 'Ciel contrasté sur les Philippines, nuages de mousson',
+    fallbackReadingTime: '6 min',
+    fallbackTitle: 'Saison des pluies : quand partir et où éviter',
+    fallbackDate: '1 avril',
   },
   {
-    title: 'Rencontrer une Philippine : les codes à connaître',
-    category: 'Culture',
-    categoryClass: 'teal',
-    read: '9 min',
-    date: '22 fév',
-    image: '/imagesHero/couple-rencontre-aux-philippines.webp',
-    imageAlt:
+    slug: 'rencontrer-philippine-codes-culturels',
+    badgeLabel: 'Culture',
+    badgeClass: 'teal',
+    fallbackImage: '/imagesHero/couple-rencontre-aux-philippines.webp',
+    fallbackImageAlt:
       'Couple franco-philippin marchant sur la plage au coucher du soleil',
-    href: '/rencontre-philippines',
+    fallbackReadingTime: '9 min',
+    fallbackTitle: 'Rencontrer une Philippine : les codes à connaître',
+    fallbackDate: '25 mars',
   },
 ];
+
+const FEATURED_AUTHOR = { name: 'Marc L.', initial: 'M' };
+
+interface FetchedArticle {
+  slug: string;
+  title: string;
+  image: string | null;
+  reading_time: number | null;
+  published_at: string | null;
+  category: { slug: string; main_category: string } | null;
+}
+
+const formatLongDate = (iso: string | null) =>
+  iso
+    ? new Date(iso).toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
+    : '';
+
+const formatShortDate = (iso: string | null) =>
+  iso
+    ? new Date(iso).toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+      })
+    : '';
 
 const Badge = ({
   category,
@@ -107,7 +135,56 @@ const Badge = ({
   );
 };
 
-export const BlogSection = () => {
+async function fetchSlots(slugs: string[]): Promise<Map<string, FetchedArticle>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('articles')
+    .select('slug, title, image, reading_time, published_at, category:categories(slug, main_category)')
+    .in('slug', slugs)
+    .eq('status', 'published');
+
+  if (error || !data) {
+    console.error('BlogSection: failed to fetch articles', error);
+    return new Map();
+  }
+  const map = new Map<string, FetchedArticle>();
+  (data as unknown as FetchedArticle[]).forEach((a) => map.set(a.slug, a));
+  return map;
+}
+
+const resolveSlot = (slot: Slot, fetched: Map<string, FetchedArticle>) => {
+  const article = fetched.get(slot.slug);
+  const url = article?.category
+    ? generateArticleUrl({
+        category: { slug: article.category.slug, main_category: article.category.main_category },
+        slug: article.slug,
+      })
+    : '/';
+  return {
+    href: url,
+    title: article?.title || slot.fallbackTitle,
+    image: article?.image || slot.fallbackImage,
+    imageAlt: article?.image ? slot.fallbackTitle : slot.fallbackImageAlt,
+    readingTime: article?.reading_time
+      ? `${article.reading_time} min`
+      : slot.fallbackReadingTime,
+    longDate: article?.published_at
+      ? formatLongDate(article.published_at)
+      : slot.fallbackDate,
+    shortDate: article?.published_at
+      ? formatShortDate(article.published_at)
+      : slot.fallbackDate,
+  };
+};
+
+export const BlogSection = async () => {
+  const allSlugs = [FEATURED, ...SIDE_SLOTS, ...ROW_SLOTS].map((s) => s.slug);
+  const fetched = await fetchSlots(allSlugs);
+
+  const featured = resolveSlot(FEATURED, fetched);
+  const sidePosts = SIDE_SLOTS.map((s) => ({ slot: s, ...resolveSlot(s, fetched) }));
+  const rowPosts = ROW_SLOTS.map((s) => ({ slot: s, ...resolveSlot(s, fetched) }));
+
   return (
     <section className="py-20 md:py-24 bg-soft-blue">
       <div className="container mx-auto px-4">
@@ -156,7 +233,7 @@ export const BlogSection = () => {
             />
             {/* Top-left badge */}
             <div className="absolute top-5 left-5 z-10">
-              <Badge category={featured.category} categoryClass={featured.categoryClass} />
+              <Badge category={FEATURED.badgeLabel} categoryClass={FEATURED.badgeClass} />
             </div>
             {/* Bottom overlay text */}
             <div className="absolute bottom-0 left-0 right-0 p-6 z-10 text-white">
@@ -164,7 +241,7 @@ export const BlogSection = () => {
                 <span className="text-warm-yellow">★ À la une</span>
                 <span aria-hidden="true">·</span>
                 <span style={{ color: 'rgba(255,255,255,0.85)' }}>
-                  {featured.read} de lecture
+                  {featured.readingTime} de lecture
                 </span>
               </div>
               <h3
@@ -177,7 +254,9 @@ export const BlogSection = () => {
                 className="text-[15px] leading-[1.55] mb-5 max-w-xl"
                 style={{ color: 'rgba(255,255,255,0.85)', textWrap: 'pretty' }}
               >
-                {featured.excerpt}
+                Visa, budget, itinéraires, saisons, transports, culture. Tout ce
+                qu&apos;il faut savoir avant de réserver votre vol pour Manille
+                — compilé par notre équipe sur place depuis 2020.
               </p>
               <div className="flex items-center gap-3 pt-4 border-t border-white/20">
                 <span
@@ -187,14 +266,14 @@ export const BlogSection = () => {
                   }}
                   aria-hidden="true"
                 >
-                  {featured.authorInitial}
+                  {FEATURED_AUTHOR.initial}
                 </span>
                 <div className="min-w-0 flex-1">
                   <strong className="block text-[13px] font-semibold">
-                    {featured.author}
+                    {FEATURED_AUTHOR.name}
                   </strong>
                   <span className="text-[12px]" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                    {featured.date}
+                    {featured.longDate}
                   </span>
                 </div>
                 <span className="ml-auto text-[13px] font-semibold text-warm-yellow">
@@ -214,7 +293,7 @@ export const BlogSection = () => {
           <div className="flex flex-col gap-[18px]">
             {sidePosts.map((post) => (
               <Link
-                key={post.href + post.title}
+                key={post.slot.slug}
                 href={post.href}
                 className="group flex bg-card rounded-[14px] overflow-hidden border-[0.5px] border-border shadow-card-rest transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card hover:border-primary/30 motion-reduce:hover:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
@@ -228,7 +307,11 @@ export const BlogSection = () => {
                   />
                 </div>
                 <div className="flex-1 min-w-0 px-4 py-3.5 flex flex-col gap-2 justify-center">
-                  <Badge category={post.category} categoryClass={post.categoryClass} size="sm" />
+                  <Badge
+                    category={post.slot.badgeLabel}
+                    categoryClass={post.slot.badgeClass}
+                    size="sm"
+                  />
                   <h4
                     className="text-[15px] font-semibold text-foreground leading-[1.35]"
                     style={{ letterSpacing: '-0.005em', textWrap: 'balance' }}
@@ -236,9 +319,9 @@ export const BlogSection = () => {
                     {post.title}
                   </h4>
                   <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground uppercase tracking-[0.04em]">
-                    <span>{post.date}</span>
+                    <span>{post.shortDate}</span>
                     <span aria-hidden="true">·</span>
-                    <span>{post.read}</span>
+                    <span>{post.readingTime}</span>
                   </div>
                 </div>
               </Link>
@@ -250,7 +333,7 @@ export const BlogSection = () => {
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-[18px]">
           {rowPosts.map((post) => (
             <Link
-              key={post.href + post.title}
+              key={post.slot.slug}
               href={post.href}
               className="group block bg-card rounded-[14px] overflow-hidden border-[0.5px] border-border shadow-card-rest transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card hover:border-primary/30 motion-reduce:hover:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
@@ -263,7 +346,11 @@ export const BlogSection = () => {
                   sizes="(max-width: 768px) 100vw, 380px"
                 />
                 <div className="absolute top-3 left-3">
-                  <Badge category={post.category} categoryClass={post.categoryClass} size="sm" />
+                  <Badge
+                    category={post.slot.badgeLabel}
+                    categoryClass={post.slot.badgeClass}
+                    size="sm"
+                  />
                 </div>
               </div>
               <div className="px-4 py-4">
@@ -274,9 +361,9 @@ export const BlogSection = () => {
                   {post.title}
                 </h4>
                 <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground uppercase tracking-[0.04em]">
-                  <span>{post.date}</span>
+                  <span>{post.shortDate}</span>
                   <span aria-hidden="true">·</span>
-                  <span>{post.read} lecture</span>
+                  <span>{post.readingTime} lecture</span>
                 </div>
               </div>
             </Link>
