@@ -34,8 +34,7 @@ const homepageFAQs = [
 ];
 
 const BestDealsSection = dynamic(() => import('@/components/homepage/BestDealsSection').then(mod => mod.BestDealsSection));
-const FeaturedNewsSection = dynamic(() => import('@/components/homepage/FeaturedNewsSection').then(mod => mod.FeaturedNewsSection));
-const FeaturedProductsCarousel = dynamic(() => import('@/components/homepage/FeaturedProductsCarousel').then(mod => mod.FeaturedProductsCarousel));
+const BlogSection = dynamic(() => import('@/components/homepage/BlogSection').then(mod => mod.BlogSection));
 const LeadMagnetSection = dynamic(() => import('@/components/homepage/LeadMagnetSection').then(mod => mod.LeadMagnetSection));
 
 // Enable ISR (Incremental Static Regeneration) for better performance
@@ -44,7 +43,7 @@ export const revalidate = 300; // Revalidate every 5 minutes (300 seconds)
 export default async function HomePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  const { bestDeals, featuredItems } = await getHomepageArticles(supabase);
+  const { bestDeals } = await getHomepageArticles(supabase);
 
   return (
     <div>
@@ -62,17 +61,17 @@ export default async function HomePage() {
       {/* Bloc Itinéraire IA (section signature) */}
       <ItineraireIABlock />
 
-      {/* Lead Magnet — Guides Gratuits */}
-      <LeadMagnetSection />
-
-      {/* Aperçu Meilleurs Plans (conservé, déplacé) */}
-      <BestDealsSection initialDeals={bestDeals} />
-
       {/* Témoignages */}
       <TestimonialsSection />
 
-      {/* À la Une (conservé, déplacé) */}
-      <FeaturedNewsSection initialFeaturedItems={featuredItems} />
+      {/* Bons Plans Klook — 3 hero deals + carousel */}
+      <BestDealsSection initialDeals={bestDeals} />
+
+      {/* Magazine — derniers articles du blog */}
+      <BlogSection />
+
+      {/* Lead Magnet — Guides Gratuits (kept after blog per editorial order) */}
+      <LeadMagnetSection />
 
       {/* CTA final */}
       <FinalCtaSection isAuthenticated={!!user} />
