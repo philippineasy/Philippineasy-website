@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic';
 import HomepageJsonLd from '@/components/shared/HomepageJsonLd';
 import FAQSchema from '@/components/shared/FAQSchema';
 import { HeroSection } from '@/components/homepage/HeroSection';
-import { ArchipelMilleVisages } from '@/components/homepage/ArchipelMilleVisages';
 import { RegionCards } from '@/components/homepage/RegionCards';
 import { InstallerCards } from '@/components/homepage/InstallerCards';
 import { ItineraireIABlock } from '@/components/homepage/ItineraireIABlock';
@@ -54,14 +53,11 @@ export default async function HomePage() {
       {/* Hero Section */}
       <HeroSection />
 
-      {/* Un archipel aux mille visages */}
-      <ArchipelMilleVisages />
-
-      {/* Explorez les Régions */}
-      <RegionCards />
-
-      {/* S'installer aux Philippines (4 cartes thématiques) */}
+      {/* S'installer aux Philippines (4 cartes Vivre) */}
       <InstallerCards />
+
+      {/* Un archipel aux mille visages — 4 régions grid 2×2 */}
+      <RegionCards />
 
       {/* Bloc Itinéraire IA (section signature) */}
       <ItineraireIABlock />
