@@ -7,6 +7,7 @@ import {
   cebuActivities,
   siargaoActivities,
 } from '@/components/affiliate/klook-activities-data';
+import type { KlookActivity } from '@/components/affiliate/klook-activities-data';
 import type { Article } from '@/types';
 
 interface BestDealsSectionProps {
@@ -15,59 +16,28 @@ interface BestDealsSectionProps {
 }
 
 type FeaturedDeal = {
-  title: string;
+  source: KlookActivity;
   location: string;
-  image: string;
-  imageAlt?: string;
-  placeholder?: 'whaleshark';
-  rating: number;
-  reviews: string;
-  priceFrom: number;
-  url: string;
   tag: string;
   tagClass: 'amber' | 'emerald' | 'blue';
 };
 
-const palawanHero = palawanActivities[0];
-const cebuHero = cebuActivities[0];
-const siargaoHero = siargaoActivities[0];
-
 const featuredDeals: FeaturedDeal[] = [
   {
-    title: palawanHero?.title ?? 'Island Hopping El Nido — Tour A',
+    source: palawanActivities[0],
     location: 'Palawan · El Nido',
-    image: '/images/palawan/vue-aerienne-coron.webp',
-    imageAlt:
-      'Vue aérienne de Coron, lagons turquoise et îles karstiques',
-    rating: palawanHero?.rating ?? 4.8,
-    reviews: palawanHero?.reviews ?? '3 200+ avis',
-    priceFrom: palawanHero?.priceFrom ?? 20,
-    url: palawanHero?.url ?? '/meilleurs-plans-aux-philippines',
     tag: 'Adventure',
     tagClass: 'amber',
   },
   {
-    title: cebuHero?.title ?? 'Nage avec les requins-baleines',
+    source: cebuActivities[0],
     location: 'Cebu · Oslob',
-    image: '',
-    placeholder: 'whaleshark',
-    rating: cebuHero?.rating ?? 4.7,
-    reviews: cebuHero?.reviews ?? '4 500+ avis',
-    priceFrom: cebuHero?.priceFrom ?? 55,
-    url: cebuHero?.url ?? '/meilleurs-plans-aux-philippines',
     tag: 'Nature',
     tagClass: 'emerald',
   },
   {
-    title: siargaoHero?.title ?? 'Cours de surf à Cloud 9',
+    source: siargaoActivities[0],
     location: 'Siargao · General Luna',
-    image: '/images/siargao/surf-a-siargao.webp',
-    imageAlt:
-      'Surfeur sur une vague à Siargao avec cocotiers en arrière-plan',
-    rating: siargaoHero?.rating ?? 4.8,
-    reviews: siargaoHero?.reviews ?? '500+ avis',
-    priceFrom: siargaoHero?.priceFrom ?? 28,
-    url: siargaoHero?.url ?? '/meilleurs-plans-aux-philippines',
     tag: 'Surf',
     tagClass: 'blue',
   },
@@ -97,59 +67,6 @@ const PinIcon = () => (
   </svg>
 );
 
-// TODO: remplacer par photo Supabase quand disponible (Cebu Oslob whaleshark)
-const WhalesharkPlaceholder = () => (
-  <svg
-    viewBox="0 0 400 220"
-    preserveAspectRatio="xMidYMid slice"
-    className="w-full h-full"
-    role="img"
-    aria-label="Illustration océan profond avec silhouette de requin-baleine"
-  >
-    <defs>
-      <linearGradient id="oceanBg" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#0ea5e9" />
-        <stop offset="60%" stopColor="#075985" />
-        <stop offset="100%" stopColor="#082f49" />
-      </linearGradient>
-      <radialGradient id="lightShaft" cx="50%" cy="0%" r="100%">
-        <stop offset="0%" stopColor="#ffffff" stopOpacity="0.25" />
-        <stop offset="60%" stopColor="#ffffff" stopOpacity="0" />
-      </radialGradient>
-    </defs>
-    <rect width="400" height="220" fill="url(#oceanBg)" />
-    {/* Light shafts from surface */}
-    <rect width="400" height="220" fill="url(#lightShaft)" />
-    {/* Whaleshark silhouette */}
-    <g fill="#0c4a6e" opacity="0.85">
-      <ellipse cx="220" cy="130" rx="120" ry="32" />
-      <path d="M 100 130 L 140 110 L 145 130 L 140 150 Z" />
-      <ellipse cx="290" cy="115" rx="14" ry="8" />
-      <path d="M 320 130 Q 340 100, 350 110 Q 345 130, 320 130 Z" />
-      <path d="M 320 130 Q 340 160, 350 150 Q 345 130, 320 130 Z" />
-    </g>
-    {/* White spots characteristic of whalesharks */}
-    <g fill="#ffffff" opacity="0.4">
-      <circle cx="200" cy="125" r="3" />
-      <circle cx="220" cy="118" r="2.5" />
-      <circle cx="240" cy="128" r="3" />
-      <circle cx="260" cy="122" r="2.5" />
-      <circle cx="190" cy="138" r="2" />
-      <circle cx="215" cy="142" r="2.5" />
-      <circle cx="245" cy="138" r="2" />
-      <circle cx="275" cy="125" r="2" />
-    </g>
-    {/* Bubbles */}
-    <g fill="#ffffff" opacity="0.5">
-      <circle cx="60" cy="80" r="3" />
-      <circle cx="80" cy="60" r="2" />
-      <circle cx="55" cy="50" r="2.5" />
-      <circle cx="350" cy="170" r="2.5" />
-      <circle cx="365" cy="190" r="2" />
-    </g>
-  </svg>
-);
-
 export const BestDealsSection = (_props: BestDealsSectionProps) => {
   return (
     <section className="py-20 md:py-24 bg-background">
@@ -172,23 +89,20 @@ export const BestDealsSection = (_props: BestDealsSectionProps) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-[22px] max-w-6xl mx-auto">
           {featuredDeals.map((deal) => {
             const tagStyle = tagStyles[deal.tagClass];
+            const { source } = deal;
             return (
               <article
-                key={deal.title}
+                key={source.id}
                 className="group flex flex-col bg-card rounded-2xl overflow-hidden border-[0.5px] border-border shadow-card-rest transition-all duration-300 hover:-translate-y-1 hover:shadow-card motion-reduce:hover:transform-none"
               >
                 <div className="relative w-full h-[180px] overflow-hidden">
-                  {deal.placeholder === 'whaleshark' ? (
-                    <WhalesharkPlaceholder />
-                  ) : (
-                    <Image
-                      src={deal.image}
-                      alt={deal.imageAlt || ''}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 380px"
-                    />
-                  )}
+                  <Image
+                    src={source.image}
+                    alt={source.title}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 380px"
+                  />
                   {/* Tag badge top-left */}
                   <span
                     className="absolute top-3 left-3 inline-flex items-center px-2.5 py-1 rounded text-[11px] font-bold"
@@ -203,7 +117,7 @@ export const BestDealsSection = (_props: BestDealsSectionProps) => {
                   <span
                     className="absolute bottom-3 right-3 inline-flex items-center px-3 py-1.5 rounded bg-card text-accent text-[13px] font-bold shadow-md"
                   >
-                    dès&nbsp;{deal.priceFrom}&nbsp;€
+                    dès&nbsp;{source.priceFrom}&nbsp;€
                   </span>
                 </div>
 
@@ -216,21 +130,21 @@ export const BestDealsSection = (_props: BestDealsSectionProps) => {
                     className="text-[16px] font-semibold text-foreground mb-2.5 leading-[1.35]"
                     style={{ letterSpacing: '-0.01em' }}
                   >
-                    {deal.title}
+                    {source.title}
                   </h3>
                   <div className="flex items-baseline gap-2 mb-4">
                     <span
                       className="text-accent font-bold text-[14px]"
-                      aria-label={`Note ${deal.rating} sur 5`}
+                      aria-label={`Note ${source.rating} sur 5`}
                     >
-                      ★ {deal.rating}
+                      ★ {source.rating}
                     </span>
                     <span className="text-[12px] text-muted-foreground">
-                      ({deal.reviews})
+                      ({source.reviews})
                     </span>
                   </div>
                   <a
-                    href={deal.url}
+                    href={source.url}
                     target="_blank"
                     rel="sponsored noopener noreferrer"
                     className="mt-auto w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg font-semibold text-sm transition-all duration-200 hover:bg-primary/90 hover:scale-[1.01] active:scale-[0.99] motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"

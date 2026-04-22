@@ -84,6 +84,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Note backend** : profils statiques (TODO brancher GET /api/rencontres/teaser-profiles avec migration `dating_profiles.show_in_teaser`). PortraitSVG = placeholder editorial en attendant les photos opt-in.
 - **page.tsx** : import dynamique de `RencontresTeaser`, place entre `BlogSection` et `LeadMagnet` selon l'ordre proto.
 
+### Refonte homepage 2026 — Fix : BestDeals branche directement les vraies data Klook
+- **Fixed** : Les 3 hero cards de `BestDealsSection` utilisaient des images locales (Palawan, Siargao) et un SVG placeholder (Cebu Oslob whaleshark). User a demande l'UI exacte mais avec les vraies infos Klook (photos + liens affiliation) — comme dans le `KlookCarousel` dessous. **Resoud** : chaque hero card mappe directement sur `palawanActivities[0]`/`cebuActivities[0]`/`siargaoActivities[0]` (vraies images Unsplash deal-officielles, vrais prix, vrais ratings/reviews, vraies URLs affiliate aid=118789). UI inchangee (tag overlay + prix + pin location + rating + CTA Réserver).
+- **Removed** : `WhalesharkPlaceholder` SVG inline (plus utilise). Logique de fallback local supprimee.
+- **Note** : `next.config.js` autorise deja `images.unsplash.com` dans `remotePatterns` — les images Klook officielles passent par next/image avec optimisation AVIF/WebP comme prevu.
+
 ### Refonte homepage 2026 — Fix : tags lisibles + image Cebu Supabase
 - **Fixed** : `RegionCards` tags pill — passes de `bg-white/92 text-ink` (illisible sur images claires en bas-gauche, comme Palawan/Siargao) a `bg-ink/72 text-white backdrop-blur-md shadow-sm` (frosted glass sombre, lisibilite garantie sur toute image). Style + moderne, brand-coherent.
 - **Changed** : `RegionCards` est passe en **async Server Component** qui fetch les categories `voyager-aux-philippines` depuis Supabase via `getCategoriesByMainCategory`. Pour chaque region (palawan/cebu-visayas/siargao), si une `heroImage` existe en DB, elle est utilisee. Sinon fallback image locale (`/images/palawan/...`, `/images/siargao/...`). Pour Luzon & Manille (pas de categorie en DB), garde le SVG placeholder editorial. **Resoud** : Cebu & Visayas affiche maintenant la vraie photo Supabase (coucher de soleil + ponton), comme sur `/voyager-aux-philippines`.
