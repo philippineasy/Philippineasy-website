@@ -50,3 +50,4 @@ supabase/.temp/
 tsconfig.tsbuildinfo
 .vercel
 .env*.local
+_handoff/
