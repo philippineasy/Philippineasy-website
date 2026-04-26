@@ -52,7 +52,8 @@ export default function MonEspaceDashboard() {
         .from('crm_messages')
         .select('*', { count: 'exact', head: true })
         .eq('is_admin_message', true)
-        .eq('is_read', false),
+        .eq('is_read', false)
+        .eq('to_user_id', user!.id),
     ]);
 
     setPurchases(purchasesRes.data || []);

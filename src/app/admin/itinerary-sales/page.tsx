@@ -85,11 +85,14 @@ function shortId(id: string): string {
 export default async function ItinerarySalesPage() {
   const supabase = await createClient();
 
-  // KPIs aggregated via direct query (no RPC dependency)
+  // Single fetch — used for both KPIs (full set) and recent table (slice top 50).
+  // We deliberately do NOT cap at 50 here so KPI counts are accurate.
+  // For very high volume (>5k rows) move KPIs to a Postgres function.
   const { data: allGens } = await supabase
     .from('itinerary_generations')
     .select('id, payment_status, amount_paid, created_at, offer_type, status, selected_variant')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(2000);
 
   const total = allGens?.length || 0;
   const paid = allGens?.filter((g) => g.payment_status === 'completed').length || 0;
@@ -122,16 +125,21 @@ export default async function ItinerarySalesPage() {
     if (v in variantBreakdown) variantBreakdown[v] += 1;
   }
 
-  // Detail rows: full record + user join
-  const { data: detailRows } = await supabase
-    .from('itinerary_generations')
-    .select(`
-      id, user_id, preferences, selected_variant, amount_paid,
-      payment_status, delivery_email, delivery_method, delivered_at,
-      status, created_at, offer_type, modifications_remaining
-    `)
-    .order('created_at', { ascending: false })
-    .limit(50);
+  // Detail rows for the table — needs full columns including preferences/delivery.
+  // Separate query because allGens above only has KPI columns (lighter payload
+  // for the aggregation pass), but we still cap at 50 for the table render.
+  const recentIds = (allGens || []).slice(0, 50).map((g) => g.id);
+  const { data: detailRows } = recentIds.length > 0
+    ? await supabase
+        .from('itinerary_generations')
+        .select(`
+          id, user_id, preferences, selected_variant, amount_paid,
+          payment_status, delivery_email, delivery_method, delivered_at,
+          status, created_at, offer_type, modifications_remaining
+        `)
+        .in('id', recentIds)
+        .order('created_at', { ascending: false })
+    : { data: [] };
 
   const rows: Generation[] = (detailRows || []) as Generation[];
 

@@ -189,12 +189,12 @@ export default async function MonEspaceItinerairesPage() {
                       </a>
                       <ResendButton generationId={g.id} email={g.delivery_email} />
                       {hasMods && (
-                        <Link
-                          href={`/mon-espace/itineraires/${g.id}/modifier`}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card text-foreground px-4 py-2 text-[13px] font-medium hover:border-primary/40 hover:text-primary transition-colors"
+                        <span
+                          className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border/60 bg-muted/40 text-muted-foreground px-4 py-2 text-[12px] font-medium cursor-not-allowed"
+                          title="Modifications via le support — bientôt accessible en self-service"
                         >
-                          Modifier ({g.modifications_remaining})
-                        </Link>
+                          {g.modifications_remaining} modification{g.modifications_remaining > 1 ? 's' : ''} restante{g.modifications_remaining > 1 ? 's' : ''}
+                        </span>
                       )}
                     </div>
                     <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">

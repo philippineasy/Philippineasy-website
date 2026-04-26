@@ -111,7 +111,9 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             <ul className="divide-y divide-border/40 list-none p-0 m-0">
               {items.map((item, index) => {
                 const product = item.products;
-                const lineTotal = (item.price * item.quantity).toFixed(2);
+                const unitPrice = Number(item.price ?? 0);
+                const qty = Number(item.quantity ?? 0);
+                const lineTotal = (unitPrice * qty).toFixed(2);
                 return (
                   <li key={index} className="flex items-center gap-4 px-5 py-4 lg:px-6">
                     <div className="relative w-16 h-16 lg:w-20 lg:h-20 shrink-0 rounded-xl overflow-hidden border border-border/50 bg-muted">
@@ -128,7 +130,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                         {product?.name || 'Produit indisponible'}
                       </strong>
                       <span className="block text-[12.5px] text-muted-foreground mt-0.5">
-                        Quantité : {item.quantity} · {item.price.toFixed(2)} € / unité
+                        Quantité : {qty} · {unitPrice.toFixed(2)} € / unité
                       </span>
                     </div>
                     <strong className="text-[15px] font-bold tabular-nums text-ink shrink-0">

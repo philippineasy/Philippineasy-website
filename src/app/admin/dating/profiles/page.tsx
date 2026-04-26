@@ -20,7 +20,8 @@ export default async function AdminDatingProfilesPage({
   let query = supabase
     .from('dating_profiles')
     .select('*, profiles!inner(*)')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(100);
 
   if (q) query = query.ilike('profiles.username', `%${q}%`);
   if (status) query = query.eq('is_validated', status === 'validated');

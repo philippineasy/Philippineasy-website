@@ -119,7 +119,8 @@ export function WhatsAppGate({ userId, entitlements, whatsappNumber }: Props) {
   }
 
   // Case B — number set → show CTA WhatsApp link
-  const waPhone = (whatsappNumber || number).replace(/[\s.\-()+]/g, '');
+  // We open a chat WITH the business number; the user's phone is already saved
+  // server-side so admins can also initiate contact toward the customer.
   const businessPhone = BUSINESS_WHATSAPP.replace(/[\s.\-()+]/g, '');
   const text = encodeURIComponent(
     `Bonjour, je suis client Philippineasy (numéro de support actif). Je viens vers vous pour…`
