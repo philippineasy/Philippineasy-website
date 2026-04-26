@@ -5,6 +5,58 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Refonte page Article 2026 — Etape 5 : A11y polish (skip-link + scroll-spy TOC + mobile collapsible)
+- **Changed** : `ArticleTOC` passe en client component pour scroll-spy. IntersectionObserver avec `rootMargin: '-120px 0px -60% 0px'` declenche l'active state quand une section H2/H3 entre dans le tiers superieur du viewport. Quand plusieurs sections intersectent, le DOM-order topmost gagne (evite les flickers entre H2 successifs courts).
+- **Changed** : Active link recoit `text-accent`, `border-l-2 border-accent` (au lieu de transparent) et `aria-current="true"` pour les screen readers.
+- **Added** : TOC mobile collapsible via `<details>` / `<summary>` (lg:hidden, desktop sticky-left preserve). Chevron rotated via `group-open:rotate-180`, motion-reduce honored. `max-h-[60vh]` + scroll interne pour les sommaires longs.
+- **Added** : Skip-link `<a href="#article-content">` en tete de page, `sr-only` par defaut, `focus:not-sr-only` qui le fait apparaitre fixe top-left avec fond accent + ring quand focus clavier — premier element interactif pour utilisateurs SR / clavier.
+- **Added** : `id="article-content"` sur le `<main>` wrapper (cible du skip-link).
+
+### Refonte page Article 2026 — Etape 4 : Footer (CTA IA + tags + share + author bio + related grid)
+- **Added** : `src/components/articles/ArticleFooter.tsx` (NEW) — composant qui regroupe les 4 zones de fin d'article. Remplace l'ancien rendu inline dans page.tsx (tags pill basique + RelatedArticles carousel).
+  - **CTA IA block** : carte gradient `from-primary to-primary/85` text-white avec 2 cercles dashed decoratifs (echo du `ItineraireIABlock` home), eyebrow ✦ "Creation IA gratuite", H3 generique "Pret pour votre voyage aux Philippines ?", paragraphe lead 16px, CTA accent rounded-full "Creer mon itineraire IA" -> `/itineraire-personnalise-pour-les-philippines`. Shadow-cta + focus-visible:ring offset primary.
+  - **Tags + Share row** : encadre top/bottom border-y, label "Mots-cles" uppercase tracking-[0.1em] muted, tags en pills `border-accent/30 text-accent bg-accent/5`, ShareButtons existant a droite ml-auto. Affiche le bloc tags meme s'il n'y en a pas (placeholder pour Share seul).
+  - **Author bio card** : bg-muted/30 rounded-2xl, avatar 64x64 initiales sur #3B5BDB, nom + role "Equipe editoriale Philippin'Easy" + bio 60ch "Basee entre Cebu, Palawan et Siargao depuis 2020...".
+  - **Related grid** : eyebrow "Continuer la lecture" + H2 "Dans la meme categorie", grid responsive 1/2/3 cols max 3 ArticleCards. Reutilise le composant `ArticleCard` existant avec basePath infere depuis `getMainCategoryPath(category.main_category)`.
+- **Removed** : Usage de `RelatedArticles` (carousel snap horizontal centered) dans page.tsx — son rendu jurait avec le nouveau ton editorial. Composant intact, toujours utilise par d'autres pages (categories etc.).
+
+### Refonte page Article 2026 — Etape 3 : EditorialRenderer (proto-strict typography + blocks)
+- **Added** : `src/components/articles/EditorialRenderer.tsx` (NEW) — renderer Editor.js dedie a la page article 2026. Remplace `ArticleContentRenderer` partage uniquement dans la page article (autres usages preserves).
+- **Added** : Styling block-by-block proto-strict :
+  - **H2** : `clamp(1.625rem, 3.2vw, 2.125rem)` font-bold tracking-[-0.02em], scroll-mt-32, mt-16 first:mt-0
+  - **H3** : 22px font-semibold tracking-[-0.01em], mt-10 mb-4
+  - **Paragraphes** : 17px leading-[1.7] text-foreground/90 text-pretty, mb-5
+  - **Inline `<a>`** : text-accent + underline + decoration-accent/30 + hover decoration-accent
+  - **`<ul>`** : checkmark ✓ accent (before-content) dans cercle bg-accent/12 22x22
+  - **`<ol>`** : badge numerote bg-accent/12 text-accent rounded-full 24x24 tabular-nums
+  - **`<table>`** : zebra rows (muted/30 odd), header bg-primary/5 + uppercase th tracking-[0.04em], rounded-xl border-border/60 + overflow-x-auto wrapper
+  - **`<blockquote>`** : border-l-4 accent + bg-accent/5 italic 19px font-medium + cite uppercase muted
+  - **delimiter** : `<hr>` decorative 24px wide, my-12
+  - **image** : aspect-16/10 rounded-14 + caption 13px muted center
+  - **embed** : 16:9 iframe + caption
+- **Removed** : Wrapper `prose prose-lg` dans page.tsx (EditorialRenderer est self-styled, plus de conflit avec le plugin typography).
+- **Note** : H2 inline-numerotes conservees telles quelles ("1. Pourquoi...", "2. Avant de partir...") — l'auto-numbering "Section 01" via eyebrow a ete tente puis retire pour eviter le doublon avec la numerotation editorialement deja presente dans les titres.
+
+### Refonte page Article 2026 — Etape 2 : Body 3-col grid (TOC sticky left + content + aside)
+- **Added** : `src/components/articles/ArticleTOC.tsx` (NEW, server-side a cette etape — sera client en etape 5 pour scroll-spy). Eyebrow "Dans ce guide" + ul des H2/H3, hover border-l-2 accent transition. lg:sticky lg:top-32 lg:max-h-[calc(100vh-9rem)] avec overflow-y interne pour les sommaires longs.
+- **Added** : `src/components/articles/ArticleAside.tsx` (NEW) — sidebar droite sticky avec 2 cards :
+  - **Card "A lire aussi"** : 3 articles related avec thumbnail 72x72 rounded-lg + title font-semibold + reading_time muted, hover image-scale-105
+  - **Card "Newsletter"** : bg gradient from-accent/5 to-accent/10 border-accent/20, eyebrow ✦ accent, H4 "Recevez nos meilleurs guides", paragraphe muted, input email + button accent rounded-lg shadow-cta. Submit vers `/api/newsletter` (existant).
+- **Changed** : `page.tsx` body switche de `lg:flex lg:space-x-8` (sidebar TOC + article wrapper bg-card shadow-xl) vers `grid grid-cols-1 lg:grid-cols-[220px_1fr_300px] gap-12`. 3 colonnes : TOC gauche / article centre / aside droite. Le wrapper bg-card shadow-xl autour de l'article a ete retire (etait une box artificielle, le proto preconise un layout plat avec contenu directement dans le grid).
+- **Decision design** : la spec `Article.md` indiquait TOC a gauche sticky (`grid-cols-[240px_1fr_300px]`) tandis que le proto `Article.jsx` mettait la TOC en haut du contenu — choix arbitre par le user en faveur de la spec (TOC sticky gauche) pour eviter que les 45 ancres d'un long article occupent tout l'above-the-fold.
+
+### Fix : H1 accent convention switch to **mot** markdown (single word, no italic)
+- **Fixed** : Le H1 de l'etape 1 mettait tout le segment apres ":" en accent italic (heuristique inventee), donnant "Partir aux Philippines : *le guide complet 2026*". User feedback : il preferait UN SEUL mot en accent au milieu (style proto "l'itineraire **complet** (El Nido...)") sans italic.
+- **Changed** : `ArticleHero` — `splitTitle()` heuristique remplacee par `renderTitleWithAccent()` qui parse les `**word**` markdown bold dans le titre et les rend en `<span className="text-accent">word</span>`. Plus d'italic. Backwards-compat : si le titre n'a pas de `**...**`, il est rendu tel quel sans accent.
+- **Changed** : `page.tsx` — `stripTitleAccent()` helper (regex `\*\*([^*]+)\*\*` -> `$1`) applique aux contextes texte brut : `<title>` Google, `og:title`, `og:image alt`, `twitter:title`. Convention invisible cote SEO/SR.
+- **Changed** : `ArticleHero` — `plainTitle()` (meme logique) applique aux props `ShareButtons title=` et `<Image alt=` du cover.
+- **Changed** : 5 articles seed en BDD migres vers la convention :
+  - 125 : "Partir aux Philippines : le guide \\*\\*complet\\*\\* 2026"
+  - 126 : "Budget voyage : 35€/jour aux Philippines, \\*\\*vraiment\\*\\* ?"
+  - 127 : "Visa longue duree : SRRV, 13A, retraite — \\*\\*comparatif\\*\\*"
+  - 128 : "Saison des pluies : quand \\*\\*partir\\*\\* et ou eviter"
+  - 129 : "Rencontrer une Philippine : les \\*\\*codes\\*\\* a connaitre"
+
 ### Refonte page Article 2026 — Etape 1 : Hero proto-strict (page-head + article-head + cover)
 - **Added** : `src/components/articles/ArticleHero.tsx` (NEW) — composant qui regroupe la nouvelle entree visuelle de la page article. Trois zones distinctes alignees pixel-perfect avec le proto handoff `_handoff/ui_kit/Article.jsx` :
   - **Page-head** : back link "Accueil" avec chevron + breadcrumb path uppercase tracking-[0.08em] (Accueil · VOYAGER · CONSEILS-VOYAGE), focus-visible:ring-2 sur les liens
