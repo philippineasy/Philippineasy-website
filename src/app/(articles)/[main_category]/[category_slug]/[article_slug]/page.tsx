@@ -8,12 +8,12 @@ import JsonLd from '@/components/shared/JsonLd';
 import { Article, EditorJSContent } from '@/types';
 import { generateArticleMetaDescription } from '@/utils/seo/metaDescriptionGenerator';
 import { getMainCategoryPath } from '@/lib/utils';
-import RelatedArticles from '@/components/shared/RelatedArticles';
 import ViewTracker from '@/components/shared/ViewTracker';
 import { ArticleHero } from '@/components/articles/ArticleHero';
 import { ArticleTOC } from '@/components/articles/ArticleTOC';
 import { ArticleAside } from '@/components/articles/ArticleAside';
 import { EditorialRenderer } from '@/components/articles/EditorialRenderer';
+import { ArticleFooter } from '@/components/articles/ArticleFooter';
 
 // Deduplicate fetch between generateMetadata and page render
 const getCachedArticle = cache(async (slug: string) => {
@@ -175,7 +175,13 @@ export default async function ArticlePage({
     <>
       <JsonLd article={typedArticle} basePath={main_category} />
       <ViewTracker articleId={typedArticle.id} />
-      <main className="container mx-auto px-4 py-12 md:py-16 pt-32">
+      <a
+        href="#article-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:px-4 focus:py-2 focus:bg-accent focus:text-ink focus:rounded-lg focus:shadow-lg focus:font-semibold"
+      >
+        Aller au contenu de l'article
+      </a>
+      <main className="container mx-auto px-4 py-12 md:py-16 pt-32" id="article-content">
         <ArticleHero
           article={typedArticle}
           mainCategoryPath={main_category}
@@ -190,16 +196,11 @@ export default async function ArticlePage({
           <article className="min-w-0">
             <EditorialRenderer content={parsedContent || { blocks: [], time: 0, version: '' }} />
 
-            {typedArticle.tags && typedArticle.tags.length > 0 && (
-              <div className="mt-8 pt-4 border-t">
-                <h3 className="text-sm font-semibold text-muted-foreground mb-2">Mots-cles :</h3>
-                <div className="flex flex-wrap gap-2">
-                  {typedArticle.tags.map(tag => <span key={tag} className="bg-muted/80 text-foreground px-3 py-1 rounded-full text-xs font-medium">{tag}</span>)}
-                </div>
-              </div>
-            )}
-
-            <RelatedArticles articles={relatedArticles || []} />
+            <ArticleFooter
+              article={typedArticle}
+              relatedArticles={relatedArticles || []}
+              canonicalUrl={canonicalUrl}
+            />
           </article>
 
           <ArticleAside relatedArticles={relatedArticles || []} />
