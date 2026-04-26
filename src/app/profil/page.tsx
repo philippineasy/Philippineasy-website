@@ -154,6 +154,7 @@ const ProfilPage = () => {
     const newUsername = formData.get('modal-username') as string;
     const newBio = formData.get('modal-bio') as string;
     const newLocation = formData.get('modal-location') as string;
+    const newWhatsapp = (formData.get('modal-whatsapp') as string)?.trim() || '';
 
     if (newUsername && newUsername !== profile.username) {
       updates.username = newUsername;
@@ -163,6 +164,17 @@ const ProfilPage = () => {
     }
     if (newLocation !== (profile.location || '')) {
       updates.location = newLocation;
+    }
+    if (newWhatsapp !== (profile.whatsapp_number || '')) {
+      // Sanitize: keep digits and leading +
+      const cleaned = newWhatsapp.replace(/[\s.\-()]/g, '');
+      if (cleaned === '' || /^\+?\d{8,16}$/.test(cleaned)) {
+        updates.whatsapp_number = cleaned;
+      } else {
+        toast.error('Numéro WhatsApp invalide. Format international attendu (ex: +33612345678).');
+        setIsSavingProfile(false);
+        return;
+      }
     }
 
     const avatarFile = formData.get('modal-avatar-file') as File;
@@ -310,7 +322,7 @@ const ProfilPage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-            <div className="bg-card p-6 rounded-lg shadow-md">
+            <div className="bg-card p-6 rounded-2xl border border-border/60 shadow-card-rest">
               <h2 className="text-2xl font-semibold mb-6 border-b pb-3 flex items-center">
                 <FontAwesomeIcon icon={faUserCircle} className="text-primary mr-3 text-2xl" /> Informations du Compte
               </h2>
@@ -420,7 +432,7 @@ const ProfilPage = () => {
               </Link>
             </div>
 
-            <div className="bg-card p-6 rounded-lg shadow-md">
+            <div className="bg-card p-6 rounded-2xl border border-border/60 shadow-card-rest">
                 <h2 className="text-2xl font-semibold mb-6 border-b pb-3 flex items-center">
                     <FontAwesomeIcon icon={faReceipt} className="text-green-500 mr-3 text-2xl" /> Mes Commandes
                 </h2>
@@ -441,7 +453,7 @@ const ProfilPage = () => {
                 </div>
             </div>
 
-            <div className="bg-card p-6 rounded-lg shadow-md">
+            <div className="bg-card p-6 rounded-2xl border border-border/60 shadow-card-rest">
               <h2 className="text-2xl font-semibold mb-6 border-b pb-3 flex items-center">
                 <FontAwesomeIcon icon={faComments} className="text-primary mr-3 text-2xl" /> Mon Activité sur le Forum
               </h2>
@@ -496,7 +508,7 @@ const ProfilPage = () => {
           </div>
 
           <div className="lg:col-span-1 space-y-8">
-            <div className="bg-muted p-6 rounded-lg shadow-md border border-border">
+            <div className="bg-gradient-to-br from-accent/5 to-accent/10 p-6 rounded-2xl border border-accent/20">
           <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
             <FontAwesomeIcon icon={faStar} className="text-accent/90 mr-2" /> Statut Philippin'Easy+
           </h3>
@@ -508,17 +520,18 @@ const ProfilPage = () => {
             Découvrir Easy+
           </Link>
         </div>
-        <div className="bg-card p-6 rounded-lg shadow-md">
+        <div className="bg-card p-6 rounded-2xl border border-border/60 shadow-card-rest">
           <h3 className="text-xl font-semibold mb-4">Actions Rapides</h3>
           <ul className="space-y-2">
             <li><Link href="/mon-espace" className="flex items-center text-primary hover:underline font-medium"><FontAwesomeIcon icon={faRoute} className="w-5 mr-2 text-center" /> Mon Espace Services</Link></li>
+            <li><Link href="/mon-espace/itineraires" className="flex items-center text-primary hover:underline"><FontAwesomeIcon icon={faMapSigns} className="w-5 mr-2 text-center" /> Mes itinéraires achetés</Link></li>
             <li><Link href="/itineraire-personnalise-pour-les-philippines" className="flex items-center text-primary hover:underline"><FontAwesomeIcon icon={faMapSigns} className="w-5 mr-2 text-center" /> Créer un itinéraire</Link></li>
             <li><Link href="/forum-sur-les-philippines/nouveau-sujet" className="flex items-center text-primary hover:underline"><FontAwesomeIcon icon={faPencilAlt} className="w-5 mr-2 text-center" /> Poser une question</Link></li>
             <li><Link href="/meilleurs-plans" className="flex items-center text-primary hover:underline"><FontAwesomeIcon icon={faTags} className="w-5 mr-2 text-center" /> Voir les bons plans</Link></li>
           </ul>
         </div>
 
-        <div className="bg-card p-6 rounded-lg shadow-md text-center">
+        <div className="bg-card p-6 rounded-2xl border border-border/60 shadow-card-rest text-center">
           <button onClick={handleSignOut} className="w-full px-5 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 transition duration-300 font-medium">
             <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" /> Se Déconnecter
           </button>
@@ -540,6 +553,11 @@ const ProfilPage = () => {
       <div>
         <label htmlFor="modal-location" className="block text-sm font-medium text-foreground">Localisation</label>
         <input type="text" id="modal-location" name="modal-location" defaultValue={profile.location || ''} placeholder="Non spécifié" className="mt-1 block w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-primary sm:text-sm" />
+      </div>
+      <div>
+        <label htmlFor="modal-whatsapp" className="block text-sm font-medium text-foreground">Numéro WhatsApp <span className="text-muted-foreground font-normal">(format international)</span></label>
+        <input type="tel" id="modal-whatsapp" name="modal-whatsapp" defaultValue={profile.whatsapp_number || ''} placeholder="+33 6 12 34 56 78" className="mt-1 block w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-primary sm:text-sm" />
+        <p className="mt-1 text-xs text-muted-foreground">Requis si vous avez acheté un service avec support WhatsApp.</p>
       </div>
       <div>
         <label htmlFor="modal-avatar-file" className="block text-sm font-medium text-foreground">Changer l'avatar</label>
