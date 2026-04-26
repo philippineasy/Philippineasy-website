@@ -31,7 +31,7 @@ async function fetchDashboardStats() {
     supabase.from('forum_topics').select('*', { count: 'exact', head: true }),
     supabase.from('forum_posts').select('*', { count: 'exact', head: true }),
     supabase.from('itinerary_generations').select('payment_status, amount_paid, created_at'),
-    supabase.from('service_purchases').select('status, amount, created_at'),
+    supabase.from('service_purchases').select('status, amount_paid, created_at'),
     supabase.from('dating_profiles').select('*', { count: 'exact', head: true }),
   ]);
 
@@ -47,7 +47,7 @@ async function fetchDashboardStats() {
   const servicePaid = serviceStats?.filter((s: any) => s.status === 'paid' || s.status === 'active').length || 0;
   const serviceRev30d = (serviceStats || [])
     .filter((s: any) => (s.status === 'paid' || s.status === 'active') && new Date(s.created_at) >= new Date(Date.now() - 30 * 86400000))
-    .reduce((sum: number, s: any) => sum + Number(s.amount || 0), 0);
+    .reduce((sum: number, s: any) => sum + Number(s.amount_paid || 0), 0);
 
   return {
     articles: { total: articles?.length || 0, published: articlePub, draft: articleDraft },

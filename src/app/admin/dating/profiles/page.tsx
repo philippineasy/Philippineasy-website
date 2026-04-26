@@ -17,17 +17,24 @@ export default async function AdminDatingProfilesPage({
 
   const supabase = createServiceRoleClient();
 
+  // PostgREST .ilike() / .eq() on joined relations (profiles.column) is not
+  // reliably supported via the JS client — we filter client-side after fetch.
   let query = supabase
     .from('dating_profiles')
     .select('*, profiles!inner(*)')
     .order('created_at', { ascending: false })
     .limit(100);
 
-  if (q) query = query.ilike('profiles.username', `%${q}%`);
   if (status) query = query.eq('is_validated', status === 'validated');
-  if (plan) query = query.eq('profiles.plan', plan);
 
-  const { data: profiles, error } = await query;
+  const { data: profilesRaw, error } = await query;
+
+  // Client-side filtering for joined-relation criteria
+  const profiles = (profilesRaw || []).filter((row: any) => {
+    if (q && !row.profiles?.username?.toLowerCase().includes(q.toLowerCase())) return false;
+    if (plan && row.profiles?.plan !== plan) return false;
+    return true;
+  });
 
   if (error) {
     return (

@@ -2,9 +2,10 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 import {
-  Map as MapIcon, Download, Mail, ExternalLink, Sparkles, Calendar,
-  CheckCircle2, Clock, AlertCircle,
+  Map as MapIcon, Download, ExternalLink, Sparkles,
+  CheckCircle2, AlertCircle, Calendar,
 } from 'lucide-react';
+import { ResendItineraryButton } from './ResendItineraryButton';
 import {
   DURATION_LABELS, OFFER_LABELS, formatPrice,
   type Duration, type OfferType,
@@ -37,13 +38,14 @@ export default async function MonEspaceItinerairesPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/connexion?redirect=/mon-espace/itineraires');
 
-  // All paid itineraries by this user
+  // All paid itineraries by this user (capped to prevent loading too much JSONB)
   const { data: gens } = await supabase
     .from('itinerary_generations')
     .select('id, preferences, selected_variant, amount_paid, payment_status, delivery_email, delivered_at, status, created_at, offer_type, modifications_remaining, itineraries')
     .eq('user_id', user.id)
     .eq('payment_status', 'completed')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(50);
 
   const { data: pendingGens } = await supabase
     .from('itinerary_generations')
@@ -187,7 +189,7 @@ export default async function MonEspaceItinerairesPage() {
                         <Download className="w-3.5 h-3.5" />
                         PDF
                       </a>
-                      <ResendButton generationId={g.id} email={g.delivery_email} />
+                      <ResendItineraryButton generationId={g.id} email={g.delivery_email} />
                       {hasMods && (
                         <span
                           className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border/60 bg-muted/40 text-muted-foreground px-4 py-2 text-[12px] font-medium cursor-not-allowed"
@@ -278,18 +280,3 @@ function EmptyPaidState({ pendingCount }: { pendingCount: number }) {
   );
 }
 
-function ResendButton({ generationId, email }: { generationId: string; email: string | null }) {
-  return (
-    <form action={`/api/itinerary/deliver`} method="POST" className="inline">
-      <input type="hidden" name="generation_id" value={generationId} />
-      <button
-        type="submit"
-        title={email ? `Renvoyer à ${email}` : 'Renvoyer par email'}
-        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card text-foreground px-4 py-2 text-[13px] font-medium hover:border-primary/40 hover:text-primary transition-colors"
-      >
-        <Mail className="w-3.5 h-3.5" />
-        Renvoyer par email
-      </button>
-    </form>
-  );
-}

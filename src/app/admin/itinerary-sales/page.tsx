@@ -143,11 +143,27 @@ export default async function ItinerarySalesPage() {
 
   const rows: Generation[] = (detailRows || []) as Generation[];
 
+  // profiles.email does NOT exist — emails live in auth.users.
+  // We fetch usernames from profiles, then resolve emails via auth admin API.
   const userIds = [...new Set(rows.map((r) => r.user_id).filter(Boolean) as string[])];
-  const { data: users } = userIds.length > 0
-    ? await supabase.from('profiles').select('id, username, email').in('id', userIds)
-    : { data: [] };
-  const userMap = new Map((users || []).map((u: any) => [u.id, u]));
+  const { data: profilesData } = userIds.length > 0
+    ? await supabase.from('profiles').select('id, username').in('id', userIds)
+    : { data: [] as { id: string; username: string }[] };
+
+  // Best-effort email lookup (may fail if not service-role); silent fallback.
+  const userMap = new Map<string, { id: string; username: string; email?: string }>();
+  for (const p of profilesData || []) userMap.set(p.id, { id: p.id, username: p.username });
+  await Promise.allSettled(
+    userIds.map(async (uid) => {
+      try {
+        const { data } = await supabase.auth.admin.getUserById(uid);
+        if (data?.user?.email) {
+          const existing = userMap.get(uid);
+          if (existing) userMap.set(uid, { ...existing, email: data.user.email });
+        }
+      } catch { /* fallback silent — email simply absent */ }
+    })
+  );
 
   const columns: Column<Generation>[] = [
     {

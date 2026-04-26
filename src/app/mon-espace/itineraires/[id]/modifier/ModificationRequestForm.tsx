@@ -38,15 +38,20 @@ export function ModificationRequestForm({ generationId, userId, modificationsRem
     setSubmitting(true);
 
     // Open / append to a CRM conversation tagged with this itinerary
-    const subject = `Modification itinéraire #${generationId.slice(0, 8)} (${scope})`;
+    // NOTE: crm_conversations.related_purchase_id is FK → service_purchases(id),
+    // not itinerary_generations. We track the itinerary id in the subject only
+    // (which contains the short id #abcdef12) to avoid FK violation.
+    const shortId = generationId.slice(0, 8);
+    const subject = `Modification itinéraire #${shortId} (${scope})`;
     let convoId: string | null = null;
 
-    // Try to find an existing conversation related to this purchase/itinerary
+    // Reuse an existing conversation if one already covers this itinerary
+    // (matches by subject prefix — admins see all related msgs threaded).
     const { data: existing } = await supabase
       .from('crm_conversations')
       .select('id')
       .eq('customer_id', userId)
-      .eq('related_purchase_id', generationId)
+      .ilike('subject', `Modification itinéraire #${shortId}%`)
       .limit(1)
       .maybeSingle();
 
@@ -59,7 +64,6 @@ export function ModificationRequestForm({ generationId, userId, modificationsRem
           customer_id: userId,
           subject,
           status: 'open',
-          related_purchase_id: generationId,
         })
         .select('id')
         .single();
@@ -73,6 +77,7 @@ export function ModificationRequestForm({ generationId, userId, modificationsRem
 
     const messageContent = [
       `Demande de modification (scope ${scope})`,
+      `Itinéraire #${generationId}`,
       modificationsRemaining > 0
         ? `Modifications restantes : ${modificationsRemaining}`
         : `Hors forfait — devis préalable demandé.`,
@@ -86,7 +91,6 @@ export function ModificationRequestForm({ generationId, userId, modificationsRem
       content: messageContent,
       is_admin_message: false,
       is_read: false,
-      related_purchase_id: generationId,
     });
 
     if (msgErr) {

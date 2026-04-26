@@ -6,6 +6,7 @@ import { supabase } from '@/utils/supabase/client';
 import { getAllUsers, updateUserRole, banUser, unbanUser } from '@/services/userService';
 import toast from 'react-hot-toast';
 import { CustomSelect, SelectOption } from '@/components/shared/CustomSelect';
+import ConfirmationModal from '@/components/shared/ConfirmationModal';
 import {
   AdminPageHeader,
   AdminCard,
@@ -18,7 +19,9 @@ import {
 } from '@/components/admin';
 
 interface User {
-  id: number;
+  // profiles.id is a UUID (string) in the DB schema, not a number.
+  // Previous typing as `number` broke ban / role RPCs at runtime.
+  id: string;
   username: string;
   email: string;
   role: string;
@@ -44,8 +47,9 @@ const ROLE_TONE: Record<string, 'rose' | 'violet' | 'sky' | 'neutral'> = {
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userRoles, setUserRoles] = useState<Record<number, string>>({});
+  const [userRoles, setUserRoles] = useState<Record<string, string>>({});
   const [search, setSearch] = useState('');
+  const [pendingBan, setPendingBan] = useState<{ user: User; days: number | null } | null>(null);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -63,7 +67,7 @@ export default function AdminUsersPage() {
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
-  const handleRoleChange = async (userId: number, newRole: string) => {
+  const handleRoleChange = async (userId: string, newRole: string) => {
     setUserRoles((prev) => ({ ...prev, [userId]: newRole }));
     const { error } = await updateUserRole(supabase, userId, newRole);
     if (error) {
@@ -74,7 +78,7 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleBan = async (userId: number, durationDays: number | null, reason: string) => {
+  const handleBan = async (userId: string, durationDays: number | null, reason: string) => {
     const { error } = await banUser(supabase, userId, reason, durationDays);
     if (error) toast.error("Erreur lors du bannissement de l'utilisateur.");
     else {
@@ -83,7 +87,7 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleUnban = async (userId: number) => {
+  const handleUnban = async (userId: string) => {
     const { error } = await unbanUser(supabase, userId);
     if (error) toast.error('Erreur lors de la levée du bannissement.');
     else {
@@ -158,14 +162,16 @@ export default function AdminUsersPage() {
       ) : (
         <div className="inline-flex flex-wrap gap-1.5">
           <button
-            onClick={() => handleBan(u.id, 7, 'Comportement inapproprié')}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-semibold bg-amber-500/10 text-amber-700 hover:bg-amber-500/20 transition-colors"
+            onClick={() => setPendingBan({ user: u, days: 7 })}
+            aria-label={`Bannir ${u.username || u.email} pour 7 jours`}
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-semibold bg-amber-500/10 text-amber-700 hover:bg-amber-500/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
           >
             <ShieldAlert className="w-3 h-3" /> 7 j
           </button>
           <button
-            onClick={() => handleBan(u.id, null, 'Comportement inapproprié')}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-semibold bg-rose-500/10 text-rose-700 hover:bg-rose-500/20 transition-colors"
+            onClick={() => setPendingBan({ user: u, days: null })}
+            aria-label={`Bannir ${u.username || u.email} définitivement`}
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-semibold bg-rose-500/10 text-rose-700 hover:bg-rose-500/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
           >
             <ShieldOff className="w-3 h-3" /> Perm.
           </button>
@@ -200,6 +206,7 @@ export default function AdminUsersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher (nom ou email)…"
+            aria-label="Rechercher un utilisateur par nom ou email"
             className="w-64 rounded-lg border border-border bg-card px-3 py-2 text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent placeholder:text-muted-foreground/60"
           />
         }
@@ -226,6 +233,29 @@ export default function AdminUsersPage() {
           />
         )}
       </AdminSection>
+
+      {pendingBan && (
+        <ConfirmationModal
+          isOpen={!!pendingBan}
+          onClose={() => setPendingBan(null)}
+          onConfirm={async () => {
+            await handleBan(pendingBan.user.id, pendingBan.days, 'Comportement inapproprié');
+            setPendingBan(null);
+          }}
+          title={pendingBan.days ? `Bannir pour ${pendingBan.days} jour${pendingBan.days > 1 ? 's' : ''}` : 'Bannissement permanent'}
+        >
+          <p className="text-[14px] text-foreground">
+            Bannir <strong>{pendingBan.user.username || pendingBan.user.email}</strong>
+            {pendingBan.days
+              ? <> pour <strong>{pendingBan.days} jour{pendingBan.days > 1 ? 's' : ''}</strong> ?</>
+              : <> de manière <strong className="text-rose-700">permanente</strong> ?</>
+            }
+          </p>
+          <p className="mt-2 text-[12px] text-muted-foreground">
+            L'utilisateur ne pourra plus se connecter ni interagir avec la plateforme pendant la durée du bannissement.
+          </p>
+        </ConfirmationModal>
+      )}
     </>
   );
 }

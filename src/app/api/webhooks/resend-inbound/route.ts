@@ -17,7 +17,15 @@ const WEBHOOK_SECRET = process.env.RESEND_WEBHOOK_SECRET;
 //   svix-timestamp: 1234567890
 //   svix-signature: v1,<base64sig> v1,<another>
 function verifySvixSignature(rawBody: string, headers: Headers): boolean {
-  if (!WEBHOOK_SECRET) return true; // optional — skip when secret is not configured
+  if (!WEBHOOK_SECRET) {
+    // Fail-CLOSED in production (no secret = reject), open only in dev.
+    if (process.env.NODE_ENV === 'production') {
+      console.error('[resend-inbound] RESEND_WEBHOOK_SECRET not configured in production — rejecting webhook');
+      return false;
+    }
+    console.warn('[resend-inbound] RESEND_WEBHOOK_SECRET not set — signature verification SKIPPED (dev only)');
+    return true;
+  }
   const id = headers.get('svix-id');
   const timestamp = headers.get('svix-timestamp');
   const signatureHeader = headers.get('svix-signature');

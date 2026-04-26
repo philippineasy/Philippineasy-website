@@ -49,13 +49,13 @@ export default function MonEspaceLayout({ children }: { children: React.ReactNod
           <aside className="w-56 flex-shrink-0 hidden md:block">
             <Link
               href="/profil"
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
             >
               <FontAwesomeIcon icon={faArrowLeft} />
               Mon Profil
             </Link>
 
-            <nav className="space-y-1">
+            <nav aria-label="Navigation Mon Espace" className="space-y-1">
               {NAV_ITEMS.map((item) => {
                 const isActive = item.exact
                   ? pathname === item.href
@@ -65,7 +65,8 @@ export default function MonEspaceLayout({ children }: { children: React.ReactNod
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                    aria-current={isActive ? 'page' : undefined}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
                       isActive
                         ? 'bg-primary/10 text-primary'
                         : 'text-muted-foreground hover:bg-card hover:text-foreground'
@@ -80,7 +81,7 @@ export default function MonEspaceLayout({ children }: { children: React.ReactNod
           </aside>
 
           {/* Mobile nav */}
-          <div className="md:hidden w-full mb-4">
+          <nav aria-label="Navigation Mon Espace mobile" className="md:hidden w-full mb-4">
             <div className="flex gap-1 overflow-x-auto pb-2">
               {NAV_ITEMS.map((item) => {
                 const isActive = item.exact
@@ -91,7 +92,8 @@ export default function MonEspaceLayout({ children }: { children: React.ReactNod
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap ${
+                    aria-current={isActive ? 'page' : undefined}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
                       isActive
                         ? 'bg-primary/10 text-primary'
                         : 'bg-card text-muted-foreground'
@@ -103,7 +105,7 @@ export default function MonEspaceLayout({ children }: { children: React.ReactNod
                 );
               })}
             </div>
-          </div>
+          </nav>
 
           {/* Content */}
           <main className="flex-1 min-w-0">

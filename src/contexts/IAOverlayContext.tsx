@@ -16,15 +16,9 @@ export function IAOverlayProvider({ children }: { children: React.ReactNode }) {
   const open = useCallback(() => setIsOpen(true), []);
   const close = useCallback(() => setIsOpen(false), []);
 
-  // ESC key closes the overlay
-  useEffect(() => {
-    if (!isOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [isOpen, close]);
+  // ESC handling is managed inside <IAOverlay /> itself (it knows about
+  // loading/paymentLoading states and must NOT close while a generation
+  // is in flight — protects 60-80s n8n+GPT call from accidental ESC).
 
   // Prevent body scroll while open
   useEffect(() => {

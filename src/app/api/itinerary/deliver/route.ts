@@ -26,10 +26,16 @@ export async function POST(request: Request) {
     }
 
     const supabase = await createClientForRouteHandler();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Authentification requise' }, { status: 401 });
+    }
+
     const { data: generation, error } = await supabase
       .from('itinerary_generations')
       .select('*')
       .eq('id', generation_id)
+      .eq('user_id', user.id) // ownership check — block tiers
       .single();
 
     if (error || !generation) {
@@ -55,7 +61,7 @@ export async function POST(request: Request) {
       try {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('first_name')
+          .select('username')
           .eq('id', generation.user_id)
           .single();
 
@@ -64,7 +70,7 @@ export async function POST(request: Request) {
 
         await sendItineraryEmail({
           to: email,
-          userName: profile?.first_name || undefined,
+          userName: profile?.username || undefined,
           itineraryTitle: selectedVariant?.preview?.title || selectedVariant?.full?.title || 'Votre itineraire',
           destination: destinations,
           days: days.length,

@@ -154,10 +154,15 @@ export function IAOverlay() {
     return () => window.removeEventListener('beforeunload', onBeforeUnload);
   }, [loading]);
 
-  // Focus trap
+  // Focus trap + ESC close (when not loading/payment-loading)
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !loading && !paymentLoading) {
+        e.preventDefault();
+        close();
+        return;
+      }
       if (e.key !== 'Tab') return;
       const sheet = sheetRef.current;
       if (!sheet) return;
@@ -177,7 +182,7 @@ export function IAOverlay() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [isOpen]);
+  }, [isOpen, loading, paymentLoading, close]);
 
   const toggleInterest = (k: Interest) => {
     setInterests((prev) =>
@@ -213,11 +218,14 @@ export function IAOverlay() {
       const data = await res.json();
       if (!data.success) throw new Error(data.error || 'Génération échouée');
       const list: Preview[] = Array.isArray(data.previews) ? data.previews : [];
+      if (list.length === 0) {
+        throw new Error("L'IA n'a pas pu générer de proposition. Réessayez ou ajustez vos préférences.");
+      }
       setPreviews(list);
       setGenerationId(data.generation_id || null);
       const reco = recommendedVariant(tripStyle);
       const exists = list.find((p) => p.variant === reco);
-      setSelectedVariant(exists ? reco : (list[0]?.variant || null));
+      setSelectedVariant(exists ? reco : list[0].variant);
       setStep(2);
       if (typeof window !== 'undefined' && (window as any).gtag) {
         (window as any).gtag('event', 'ia_itinerary_generated');
@@ -261,8 +269,13 @@ export function IAOverlay() {
           variant: selectedVariant, offer: selectedOffer, value: pricing.price,
         });
       }
-      // Redirect Stripe checkout
-      window.location.href = `/checkout/itinerary?client_secret=${data.clientSecret}&generation_id=${generationId}`;
+      // Redirect Stripe checkout — encode params (client_secret may contain
+      // characters that need URL-escaping in some Stripe environments)
+      const checkoutParams = new URLSearchParams({
+        client_secret: String(data.clientSecret),
+        generation_id: String(generationId),
+      });
+      window.location.href = `/checkout/itinerary?${checkoutParams.toString()}`;
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erreur lors du paiement');
       setPaymentLoading(false);

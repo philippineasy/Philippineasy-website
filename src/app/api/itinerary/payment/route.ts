@@ -60,18 +60,33 @@ export async function POST(request: Request) {
       // On utilise le price_id de la config côté serveur pour éviter la manipulation
     }
 
-    // Vérifier que la génération existe
+    // Auth FIRST — establish identity before any DB op
     const supabase = await createClientForRouteHandler();
-    const { data: generation, error: fetchError } = await supabase
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id || null;
+
+    // Vérifier que la génération existe ET appartient à l'utilisateur courant
+    // (ou est anonyme — user_id NULL — auquel cas tout user authentifié peut la
+    // récupérer, accepté pour le funnel anonyme → checkout post-inscription)
+    const genQuery = supabase
       .from('itinerary_generations')
-      .select('id, status, payment_status')
-      .eq('id', generation_id)
-      .single();
+      .select('id, status, payment_status, user_id')
+      .eq('id', generation_id);
+    const { data: generation, error: fetchError } = await genQuery.single();
 
     if (fetchError || !generation) {
       return NextResponse.json(
         { error: 'Génération non trouvée' },
         { status: 404 }
+      );
+    }
+
+    // Ownership check : si la génération a un user_id, il doit correspondre à
+    // l'utilisateur connecté. Empêche un user A de payer pour la génération de B.
+    if (generation.user_id && generation.user_id !== userId) {
+      return NextResponse.json(
+        { error: 'Non autorisé' },
+        { status: 403 }
       );
     }
 
@@ -82,9 +97,6 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-
-    const { data: { user } } = await supabase.auth.getUser();
-    const userId = user?.id || null;
 
     // =====================================================
     // RATE LIMITING PAR IP (2 tentatives/semaine)

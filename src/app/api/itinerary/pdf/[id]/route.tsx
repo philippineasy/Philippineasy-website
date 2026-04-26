@@ -168,11 +168,11 @@ export async function GET(
     // Get user name
     const { data: profile } = await supabase
       .from('profiles')
-      .select('first_name')
+      .select('username')
       .eq('id', user.id)
       .single();
 
-    const userName = profile?.first_name || undefined;
+    const userName = profile?.username || undefined;
     const preferences = generation.preferences || {};
     const duration = preferences.duration || `${days.length} jours`;
 

@@ -62,7 +62,8 @@ export default async function MonEspaceEasyPlusPage() {
     .single();
 
   const expiry = formatExpiry(profile?.easy_plus_expires_at);
-  const isActive = expiry.days !== null && expiry.days > 0;
+  // Subscription valid through end of expiry day → days >= 0 still counts as active.
+  const isActive = expiry.days !== null && expiry.days >= 0;
 
   return (
     <div className="space-y-8">
