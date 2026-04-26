@@ -60,7 +60,7 @@ export async function generateMetadata({
   }
 
   const description = generateArticleMetaDescription(
-    article.title,
+    stripTitleAccent(article.title),
     article.content,
     article.category?.name,
     { maxLength: 155, addEllipsis: true }
@@ -69,7 +69,7 @@ export async function generateMetadata({
   const canonicalUrl = `https://philippineasy.com/${main_category}/${category_slug}/${article_slug}`;
 
   return {
-    title: `${article.title} | Philippin'Easy`,
+    title: `${stripTitleAccent(article.title)} | Philippin'Easy`,
     description,
     authors: [
       {
@@ -92,7 +92,7 @@ export async function generateMetadata({
       },
     },
     openGraph: {
-      title: article.title,
+      title: stripTitleAccent(article.title),
       description,
       url: canonicalUrl,
       siteName: "Philippin'Easy",
@@ -102,7 +102,7 @@ export async function generateMetadata({
           url: article.image,
           width: 1200,
           height: 630,
-          alt: article.title,
+          alt: stripTitleAccent(article.title),
         },
       ],
       type: 'article',
@@ -113,7 +113,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: 'summary_large_image',
-      title: article.title,
+      title: stripTitleAccent(article.title),
       description,
       images: [article.image],
       creator: '@philippineasy',
@@ -123,6 +123,13 @@ export async function generateMetadata({
 }
 
 export const revalidate = 3600;
+
+// Strip the **accent** convention from titles when used as plain text
+// (meta tags, OG, Twitter, alt). The H1 itself preserves the markup
+// for renderTitleWithAccent in ArticleHero.
+function stripTitleAccent(title: string): string {
+  return title.replace(/\*\*([^*]+)\*\*/g, '$1');
+}
 
 function parseContent(content: Article['content']): EditorJSContent | null {
   if (typeof content === 'string') {

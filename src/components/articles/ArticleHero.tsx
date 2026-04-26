@@ -12,17 +12,21 @@ type Props = {
   canonicalUrl: string;
 };
 
-// Heuristic: highlight the segment after ':' in the title (most editorial titles
-// use this format). Fallback to the last word.
-function splitTitle(title: string): { lead: string; accent: string } {
-  const colonMatch = title.match(/^(.+?)\s*:\s*(.+)$/);
-  if (colonMatch) return { lead: colonMatch[1].trim(), accent: colonMatch[2].trim() };
-  const words = title.trim().split(/\s+/);
-  if (words.length <= 2) return { lead: '', accent: title };
-  return {
-    lead: words.slice(0, -1).join(' '),
-    accent: words[words.length - 1],
-  };
+// Title accent convention: wrap a single word with **double-asterisks**
+// in the article.title BDD field (markdown bold syntax). Renderer below
+// converts it to <span className="text-accent">. If no asterisks, the
+// title renders as-is. Falls back gracefully for old titles.
+function renderTitleWithAccent(title: string): React.ReactNode {
+  const parts = title.split(/(\*\*[^*]+\*\*)/);
+  return parts.map((part, i) => {
+    const m = part.match(/^\*\*(.+)\*\*$/);
+    if (m) return <span key={i} className="text-accent">{m[1]}</span>;
+    return <span key={i}>{part}</span>;
+  });
+}
+
+function plainTitle(title: string): string {
+  return title.replace(/\*\*([^*]+)\*\*/g, '$1');
 }
 
 function getInitials(name: string): string {
@@ -44,7 +48,6 @@ export function ArticleHero({
   excerpt,
   canonicalUrl,
 }: Props) {
-  const { lead, accent } = splitTitle(article.title);
   const authorName = article.author?.username || "Équipe Philippin'Easy";
   const authorRole = article.author?.username ? 'Rédacteur' : 'Équipe éditoriale';
   const initials = getInitials(authorName);
@@ -96,8 +99,7 @@ export function ArticleHero({
         </span>
 
         <h1 className="text-[clamp(2rem,4.5vw,3.5rem)] font-bold tracking-[-0.02em] leading-[1.1] text-ink text-balance">
-          {lead && <span>{lead} : </span>}
-          <span className="text-accent italic">{accent}</span>
+          {renderTitleWithAccent(article.title)}
         </h1>
 
         {excerpt && (
@@ -124,7 +126,7 @@ export function ArticleHero({
             </div>
           </div>
           <div className="ml-auto flex items-center gap-3">
-            <ShareButtons url={canonicalUrl} title={article.title} />
+            <ShareButtons url={canonicalUrl} title={plainTitle(article.title)} />
             <EditArticleButton articleSlug={article.slug} />
           </div>
         </div>
@@ -136,7 +138,7 @@ export function ArticleHero({
           <div className="relative w-full aspect-[2.5/1] rounded-[24px] overflow-hidden shadow-card">
             <Image
               src={article.image}
-              alt={article.title}
+              alt={plainTitle(article.title)}
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 1024px"
