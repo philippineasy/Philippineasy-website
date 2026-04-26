@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createClientForRouteHandler } from '@/utils/supabase/server';
 
+// n8n GPT-4.1 + Supabase chain takes ~60-80s typically. Default Vercel Hobby
+// is 10s, Pro is 60s. Bump to 90s to comfortably accommodate the workflow.
+export const maxDuration = 90;
+export const dynamic = 'force-dynamic';
+
 const N8N_WEBHOOK_URL = process.env.N8N_ITINERARY_GENERATE_URL || 'https://n8n.hugogotophilippines.com/webhook/itinerary-generate';
 const N8N_API_KEY = process.env.N8N_API_KEY;
 
@@ -44,35 +49,54 @@ export async function POST(request: Request) {
       body: JSON.stringify(n8nPayload),
     });
 
+    const rawText = await n8nResponse.text();
+
     if (!n8nResponse.ok) {
-      const errorText = await n8nResponse.text();
-      console.error('n8n error:', errorText);
+      console.error('[itinerary/generate] upstream n8n non-200', n8nResponse.status, rawText);
       return NextResponse.json(
-        { success: false, error: 'Erreur lors de la génération des itinéraires' },
-        { status: 500 }
+        { success: false, error: 'Le générateur IA est temporairement indisponible. Réessayez dans une minute.', upstream: n8nResponse.status },
+        { status: 502 }
       );
     }
 
-    const result = await n8nResponse.json();
+    if (!rawText || rawText.trim() === '') {
+      console.error('[itinerary/generate] upstream n8n returned empty body — workflow likely throwing before Respond node');
+      return NextResponse.json(
+        { success: false, error: 'Le générateur IA n\'a renvoyé aucun résultat. Vérifiez votre formulaire ou réessayez.' },
+        { status: 502 }
+      );
+    }
+
+    let result: any;
+    try {
+      result = JSON.parse(rawText);
+    } catch (jsonErr) {
+      console.error('[itinerary/generate] upstream n8n returned invalid JSON', rawText.slice(0, 500));
+      return NextResponse.json(
+        { success: false, error: 'Réponse IA invalide. Réessayez.' },
+        { status: 502 }
+      );
+    }
 
     if (!result.success) {
+      console.error('[itinerary/generate] workflow reported failure', result);
       return NextResponse.json(
-        { success: false, error: result.error || 'Erreur inconnue' },
-        { status: 500 }
+        { success: false, error: result.error || 'Erreur inconnue côté IA' },
+        { status: 502 }
       );
     }
 
-    // Retourner les aperçus (sans les itinéraires complets)
     return NextResponse.json({
       success: true,
       generation_id: result.generation_id,
       previews: result.previews,
+      meta: result.meta,
     });
 
   } catch (error) {
-    console.error('Itinerary generate error:', error);
+    console.error('[itinerary/generate] unexpected error', error);
     return NextResponse.json(
-      { success: false, error: 'Erreur serveur' },
+      { success: false, error: error instanceof Error ? error.message : 'Erreur serveur' },
       { status: 500 }
     );
   }

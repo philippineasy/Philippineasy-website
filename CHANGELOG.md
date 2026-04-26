@@ -5,6 +5,29 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fix critique : IAOverlay — payload n8n incorrect, validation rejetait tous les appels
+- **Diagnostic** : Investigation via MCP n8n-db sur le workflow `Philippineasy - Itinerary Generator V3` (id `beo6SrTfO1sUS9Sp`, actif). Le node "Valider les Entrees" a des enums stricts qui rejetaient mon payload :
+  - `budget` attend `'eco' | 'standard' | 'comfort' | 'luxury'` (j'envoyais `"2000"` un nombre)
+  - `interests` attend les clés EN `['beaches','snorkeling','hiking','culture','food','nightlife','surfing','offbeaten','local']` (j'envoyais `["plages","culture","nature"]` en FR)
+  - `tripStyle` accepte 5 valeurs : `'relax'|'adventure'|'culture'|'diving'|'mix'` — j'avais oublié `diving`
+  - `travelType` : `'solo'|'couple'|'famille'|'amis'`
+  - Quand validation throw, le workflow stoppe avant le node "Respond to Webhook" → n8n renvoie HTTP 200 mais content-length: 0 → notre route catch sur `JSON.parse('')` → 500 "Erreur serveur" générique
+- **Fixed** : `src/components/iaoverlay/IAOverlay.tsx` reécrit pour matcher la validation n8n :
+  - Step 0 : 5 cartes style (ajout **Plongée** 🤿 → `tripStyle: diving`) au lieu de 4
+  - Step 1 enrichi : pills travelType (Solo/Couple/Famille/Amis) + sliders durée/budget + chips interests (9 options EN avec emojis FR) + textarea additionalInfo (max 500 chars)
+  - Helper `eurToBudget(eur)` : <1500=eco / 1500-2999=standard / 3000-4499=comfort / 4500+=luxury (mapping cohérent avec le node "Preparer le Contexte" qui mappe → fourchettes PHP)
+  - Affichage du bucket budget en clair sous le slider (`2 000 € · Standard`)
+  - Step 2 : pills "Éco/Standard/Confort/Luxe" alignées sous le slider pour visualiser les seuils
+- **Improved** : `src/app/api/itinerary/generate/route.ts` :
+  - **Logging structuré** : `[itinerary/generate]` prefix sur tous les logs avec niveau (upstream non-200, empty body, invalid JSON, workflow failure, unexpected error). Plus de catch générique opaque.
+  - **HTTP differencie** : 502 sur upstream KO / empty body / invalid JSON, 500 uniquement sur exception inattendue
+  - **Lecture rawText d'abord** puis parse — permet de logger le body même invalide pour debug futur
+  - **Messages user-friendly** : "Le générateur IA est temporairement indisponible. Réessayez dans une minute." au lieu de "Erreur serveur"
+  - `export const maxDuration = 90` : Vercel timeout étendu à 90s pour accommoder GPT-4.1 + Supabase chain (mesure réelle ~62s end-to-end)
+  - `export const dynamic = 'force-dynamic'` : pas de cache sur la route (chaque appel = nouvelle generation)
+- **Validation end-to-end** : test local `POST /api/itinerary/generate` avec le payload corrigé → HTTP 200 en 62s, 3 previews retournés (variants relax/balanced/adventure), generation_id valide UUID. Sample title : "Détente et Douceur à Bohol et Panglao".
+- **Note** : la route `/itineraire-personnalise-pour-les-philippines` (page complète avec PreferencesForm) avait probablement le même bug puisque le payload format était identique. Le fix profite aussi à la page complète (même backend route).
+
 ### IAOverlay — modal planificateur IA proto-strict (3 steps + n8n wiring)
 - **Added** : `src/contexts/IAOverlayContext.tsx` (NEW) — Provider + `useIAOverlay()` hook (`isOpen`, `open()`, `close()`). Gere ESC pour fermer, lock body scroll a l'ouverture, focus trap entry. Mount unique dans `app/layout.tsx`.
 - **Added** : `src/components/iaoverlay/IAOverlay.tsx` (NEW) — Modal full-screen proto-strict (`_handoff/ui_kit/IAOverlay.jsx` + `specs/IAOverlay.md`).

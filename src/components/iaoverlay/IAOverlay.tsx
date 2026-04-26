@@ -5,15 +5,52 @@ import { useRouter } from 'next/navigation';
 import { useIAOverlay } from '@/contexts/IAOverlayContext';
 import type { Duration } from '@/config/itinerary-pricing';
 
-// Mapping helpers
-type StyleKey = 'Détente' | 'Aventure' | 'Culture' | 'Équilibré';
+// =============================================================
+// Mapping helpers — must match n8n workflow "Valider les Entrees" exactly
+// (workflow id beo6SrTfO1sUS9Sp — Philippineasy - Itinerary Generator V3)
+// =============================================================
 
-const STYLE_TO_TRIP: Record<StyleKey, string> = {
+type StyleKey = 'Détente' | 'Aventure' | 'Culture' | 'Plongée' | 'Équilibré';
+type TravelType = 'solo' | 'couple' | 'famille' | 'amis';
+type Budget = 'eco' | 'standard' | 'comfort' | 'luxury';
+type Interest =
+  | 'beaches' | 'snorkeling' | 'hiking' | 'culture' | 'food'
+  | 'nightlife' | 'surfing' | 'offbeaten' | 'local';
+
+const STYLE_TO_TRIP: Record<StyleKey, 'relax' | 'adventure' | 'culture' | 'diving' | 'mix'> = {
   Détente: 'relax',
   Aventure: 'adventure',
   Culture: 'culture',
+  Plongée: 'diving',
   Équilibré: 'mix',
 };
+
+const STYLE_OPTIONS: { key: StyleKey; emoji: string; desc: string }[] = [
+  { key: 'Détente', emoji: '🏖️', desc: 'Plages, lagons, hamac.' },
+  { key: 'Aventure', emoji: '🏔️', desc: 'Volcan, plongée, trek.' },
+  { key: 'Culture', emoji: '🎭', desc: 'Villages, histoire, cuisine.' },
+  { key: 'Plongée', emoji: '🤿', desc: 'Sites, épaves, requins-baleines.' },
+  { key: 'Équilibré', emoji: '🌈', desc: 'Un peu de tout.' },
+];
+
+const TRAVEL_TYPES: { key: TravelType; label: string; emoji: string }[] = [
+  { key: 'solo', label: 'Solo', emoji: '🧳' },
+  { key: 'couple', label: 'Couple', emoji: '💑' },
+  { key: 'famille', label: 'Famille', emoji: '👨‍👩‍👧' },
+  { key: 'amis', label: 'Amis', emoji: '👫' },
+];
+
+const INTEREST_OPTIONS: { key: Interest; label: string; emoji: string }[] = [
+  { key: 'beaches', label: 'Plages', emoji: '🏖️' },
+  { key: 'snorkeling', label: 'Snorkeling', emoji: '🐠' },
+  { key: 'hiking', label: 'Randonnée', emoji: '🥾' },
+  { key: 'surfing', label: 'Surf', emoji: '🏄' },
+  { key: 'culture', label: 'Culture', emoji: '🏛️' },
+  { key: 'food', label: 'Gastronomie', emoji: '🍜' },
+  { key: 'nightlife', label: 'Vie nocturne', emoji: '🍸' },
+  { key: 'offbeaten', label: 'Hors sentiers', emoji: '🗺️' },
+  { key: 'local', label: 'Authentique local', emoji: '🏘️' },
+];
 
 function daysToDuration(days: number): Duration {
   if (days <= 5) return '3-days';
@@ -25,12 +62,19 @@ function daysToDuration(days: number): Duration {
   return 'more';
 }
 
-const STYLE_OPTIONS: { key: StyleKey; emoji: string; desc: string }[] = [
-  { key: 'Détente', emoji: '🏖️', desc: 'Plages, lagons, hamac.' },
-  { key: 'Aventure', emoji: '🏔️', desc: 'Volcan, plongée, trek.' },
-  { key: 'Culture', emoji: '🎭', desc: 'Villages, histoire, cuisine.' },
-  { key: 'Équilibré', emoji: '🌈', desc: 'Un peu de tout.' },
-];
+function eurToBudget(eur: number): Budget {
+  if (eur < 1500) return 'eco';
+  if (eur < 3000) return 'standard';
+  if (eur < 4500) return 'comfort';
+  return 'luxury';
+}
+
+const BUDGET_LABELS: Record<Budget, string> = {
+  eco: 'Économique',
+  standard: 'Standard',
+  comfort: 'Confort',
+  luxury: 'Luxe',
+};
 
 type Preview = {
   variant: 'relax' | 'balanced' | 'adventure';
@@ -49,8 +93,11 @@ export function IAOverlay() {
 
   const [step, setStep] = useState<Step>(0);
   const [style, setStyle] = useState<StyleKey>('Détente');
+  const [travelType, setTravelType] = useState<TravelType>('couple');
   const [duration, setDuration] = useState(10);
   const [budget, setBudget] = useState(2000);
+  const [interests, setInterests] = useState<Interest[]>(['beaches', 'culture']);
+  const [additionalInfo, setAdditionalInfo] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +107,6 @@ export function IAOverlay() {
   const sheetRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Reset state when overlay re-opens
   useEffect(() => {
     if (isOpen) {
       setStep(0);
@@ -68,13 +114,11 @@ export function IAOverlay() {
       setPreviews(null);
       setGenerationId(null);
       setLoading(false);
-      // Move focus to close button on open (focus trap entry point)
       const t = setTimeout(() => closeButtonRef.current?.focus(), 50);
       return () => clearTimeout(t);
     }
   }, [isOpen]);
 
-  // Simple focus trap inside the sheet
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -82,7 +126,7 @@ export function IAOverlay() {
       const sheet = sheetRef.current;
       if (!sheet) return;
       const focusables = sheet.querySelectorAll<HTMLElement>(
-        'a[href],button:not([disabled]),input:not([disabled]),[tabindex]:not([tabindex="-1"])'
+        'a[href],button:not([disabled]),input:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'
       );
       if (focusables.length === 0) return;
       const first = focusables[0];
@@ -99,24 +143,31 @@ export function IAOverlay() {
     return () => window.removeEventListener('keydown', onKey);
   }, [isOpen]);
 
+  const toggleInterest = (k: Interest) => {
+    setInterests((prev) =>
+      prev.includes(k) ? prev.filter((x) => x !== k) : [...prev, k]
+    );
+  };
+
   const generate = useCallback(async () => {
     setLoading(true);
     setError(null);
     if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', 'ia_step_completed', { step: 2 });
+      (window as any).gtag('event', 'ia_step_completed', { step: 1 });
     }
     try {
+      const payload = {
+        travelType,
+        duration: daysToDuration(duration),
+        budget: eurToBudget(budget),
+        tripStyle: STYLE_TO_TRIP[style],
+        interests: interests.length > 0 ? interests : ['beaches'],
+        additionalInfo: additionalInfo.trim().slice(0, 500),
+      };
       const res = await fetch('/api/itinerary/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          travelType: 'couple',
-          duration: daysToDuration(duration),
-          budget: String(budget),
-          tripStyle: STYLE_TO_TRIP[style],
-          interests: ['plages', 'culture', 'nature'],
-          additionalInfo: '',
-        }),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -135,18 +186,20 @@ export function IAOverlay() {
     } finally {
       setLoading(false);
     }
-  }, [budget, duration, style]);
+  }, [additionalInfo, budget, duration, interests, style, travelType]);
 
   const goToFullPage = useCallback(() => {
     const params = new URLSearchParams({
       style: STYLE_TO_TRIP[style],
-      days: String(duration),
-      budget: String(budget),
+      duration: daysToDuration(duration),
+      budget: eurToBudget(budget),
+      travelType,
     });
+    if (interests.length > 0) params.set('interests', interests.join(','));
     if (generationId) params.set('gen', generationId);
     close();
     router.push(`/itineraire-personnalise-pour-les-philippines?${params.toString()}`);
-  }, [budget, close, duration, generationId, router, style]);
+  }, [budget, close, duration, generationId, interests, router, style, travelType]);
 
   if (!isOpen) return null;
 
@@ -161,10 +214,10 @@ export function IAOverlay() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="ia-overlay-title"
-        className="relative w-full max-w-[960px] max-h-[85vh] overflow-y-auto bg-card rounded-3xl shadow-2xl px-6 py-8 sm:px-10 sm:py-10"
+        className="relative w-full max-w-[960px] max-h-[90vh] overflow-y-auto bg-card rounded-3xl shadow-2xl px-6 py-8 sm:px-10 sm:py-10"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close button */}
+        {/* Close */}
         <button
           ref={closeButtonRef}
           type="button"
@@ -177,7 +230,7 @@ export function IAOverlay() {
           </svg>
         </button>
 
-        {/* Step indicator dots */}
+        {/* Step indicator */}
         <div className="flex items-center justify-center gap-2 mb-8" aria-hidden="true">
           {[0, 1, 2].map((i) => (
             <span
@@ -190,7 +243,7 @@ export function IAOverlay() {
           ))}
         </div>
 
-        {/* Step 0 — Style */}
+        {/* Step 0 — Style (5 cartes) */}
         {step === 0 && (
           <div>
             <span className="block text-[12px] uppercase tracking-[0.1em] font-semibold text-muted-foreground mb-2">
@@ -199,7 +252,7 @@ export function IAOverlay() {
             <h2 id="ia-overlay-title" className="text-[clamp(1.375rem,3vw,1.875rem)] font-bold tracking-[-0.02em] text-ink mb-6">
               Quelle <span className="text-accent">ambiance</span> cherchez-vous ?
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {STYLE_OPTIONS.map((o) => {
                 const selected = style === o.key;
                 return (
@@ -217,8 +270,8 @@ export function IAOverlay() {
                     ].join(' ')}
                   >
                     <span className="text-2xl mb-2" aria-hidden="true">{o.emoji}</span>
-                    <strong className="text-[16px] font-semibold text-ink">{o.key}</strong>
-                    <span className="text-[13px] text-muted-foreground mt-1">{o.desc}</span>
+                    <strong className="text-[15px] font-semibold text-ink">{o.key}</strong>
+                    <span className="text-[12px] text-muted-foreground mt-1">{o.desc}</span>
                   </button>
                 );
               })}
@@ -243,21 +296,50 @@ export function IAOverlay() {
           </div>
         )}
 
-        {/* Step 1 — Paramètres (durée + budget) */}
+        {/* Step 1 — Profil + paramètres */}
         {step === 1 && (
           <div>
             <span className="block text-[12px] uppercase tracking-[0.1em] font-semibold text-muted-foreground mb-2">
-              Étape 2 · Durée &amp; budget
+              Étape 2 · Profil &amp; préférences
             </span>
-            <h2 id="ia-overlay-title" className="text-[clamp(1.375rem,3vw,1.875rem)] font-bold tracking-[-0.02em] text-ink mb-8">
+            <h2 id="ia-overlay-title" className="text-[clamp(1.375rem,3vw,1.875rem)] font-bold tracking-[-0.02em] text-ink mb-6">
               Cadrons votre <span className="text-accent">voyage</span>
             </h2>
 
-            <div className="space-y-8">
+            <div className="space-y-7">
+              {/* Travel type */}
+              <div>
+                <span className="block text-[14px] font-medium text-foreground mb-2">Vous voyagez…</span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {TRAVEL_TYPES.map((t) => {
+                    const selected = travelType === t.key;
+                    return (
+                      <button
+                        key={t.key}
+                        type="button"
+                        onClick={() => setTravelType(t.key)}
+                        aria-pressed={selected}
+                        className={[
+                          'rounded-xl border px-3 py-2.5 text-[13px] font-medium transition-all flex items-center justify-center gap-1.5',
+                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+                          selected
+                            ? 'border-accent bg-accent/10 text-accent ring-1 ring-accent'
+                            : 'border-border bg-card text-foreground hover:border-accent/40',
+                        ].join(' ')}
+                      >
+                        <span aria-hidden="true">{t.emoji}</span>
+                        {t.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Duration slider */}
               <div>
                 <div className="flex items-baseline justify-between mb-2">
-                  <label htmlFor="ia-duration" className="text-[15px] font-medium text-foreground">Durée</label>
-                  <strong className="text-[18px] font-bold text-accent tabular-nums">{duration} jours</strong>
+                  <label htmlFor="ia-duration" className="text-[14px] font-medium text-foreground">Durée du séjour</label>
+                  <strong className="text-[16px] font-bold text-accent tabular-nums">{duration} jours</strong>
                 </div>
                 <input
                   id="ia-duration"
@@ -273,10 +355,13 @@ export function IAOverlay() {
                 </div>
               </div>
 
+              {/* Budget slider */}
               <div>
                 <div className="flex items-baseline justify-between mb-2">
-                  <label htmlFor="ia-budget" className="text-[15px] font-medium text-foreground">Budget par personne</label>
-                  <strong className="text-[18px] font-bold text-accent tabular-nums">{budget.toLocaleString('fr-FR')} €</strong>
+                  <label htmlFor="ia-budget" className="text-[14px] font-medium text-foreground">Budget par personne</label>
+                  <strong className="text-[16px] font-bold text-accent tabular-nums">
+                    {budget.toLocaleString('fr-FR')} € · {BUDGET_LABELS[eurToBudget(budget)]}
+                  </strong>
                 </div>
                 <input
                   id="ia-budget"
@@ -289,8 +374,54 @@ export function IAOverlay() {
                   className="w-full accent-accent cursor-pointer"
                 />
                 <div className="flex justify-between text-[11px] text-muted-foreground mt-1">
-                  <span>600 €</span><span>6 000 €</span>
+                  <span>Éco</span><span>Standard</span><span>Confort</span><span>Luxe</span>
                 </div>
+              </div>
+
+              {/* Interests */}
+              <div>
+                <span className="block text-[14px] font-medium text-foreground mb-2">
+                  Centres d'intérêt <span className="text-muted-foreground font-normal">(plusieurs choix)</span>
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {INTEREST_OPTIONS.map((it) => {
+                    const selected = interests.includes(it.key);
+                    return (
+                      <button
+                        key={it.key}
+                        type="button"
+                        onClick={() => toggleInterest(it.key)}
+                        aria-pressed={selected}
+                        className={[
+                          'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px] font-medium transition-all',
+                          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
+                          selected
+                            ? 'border-accent bg-accent/10 text-accent'
+                            : 'border-border bg-card text-foreground hover:border-accent/40',
+                        ].join(' ')}
+                      >
+                        <span aria-hidden="true">{it.emoji}</span>
+                        {it.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Additional info */}
+              <div>
+                <label htmlFor="ia-notes" className="block text-[14px] font-medium text-foreground mb-2">
+                  Note libre <span className="text-muted-foreground font-normal">(facultatif)</span>
+                </label>
+                <textarea
+                  id="ia-notes"
+                  value={additionalInfo}
+                  onChange={(e) => setAdditionalInfo(e.target.value.slice(0, 500))}
+                  rows={2}
+                  placeholder="Ex : nous voulons absolument voir El Nido, et éviter Manille."
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2 text-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent placeholder:text-muted-foreground/60 resize-none"
+                />
+                <span className="block text-right text-[11px] text-muted-foreground mt-1">{additionalInfo.length}/500</span>
               </div>
             </div>
 
@@ -300,7 +431,7 @@ export function IAOverlay() {
               </p>
             )}
 
-            <div className="mt-10 flex items-center justify-between gap-3">
+            <div className="mt-8 flex items-center justify-between gap-3">
               <button type="button" onClick={() => setStep(0)} className="text-[14px] text-muted-foreground hover:text-foreground font-medium px-3 py-2">
                 ← Retour
               </button>
@@ -325,14 +456,14 @@ export function IAOverlay() {
           </div>
         )}
 
-        {/* Step 2 — Result (previews from n8n) */}
+        {/* Step 2 — Result */}
         {step === 2 && (
           <div>
             <span className="block text-[12px] uppercase tracking-[0.1em] font-semibold text-accent mb-2">
               ✦ Votre itinéraire est prêt
             </span>
             <h2 id="ia-overlay-title" className="text-[clamp(1.375rem,3vw,1.875rem)] font-bold tracking-[-0.02em] text-ink mb-2">
-              {duration} jours · {style} · {budget.toLocaleString('fr-FR')} €
+              {duration} jours · {style} · {BUDGET_LABELS[eurToBudget(budget)]}
             </h2>
             <p className="text-[14px] text-muted-foreground mb-6">
               Notre IA a préparé {previews?.length || 3} variantes — choisissez celle qui vous parle.
