@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { IATriggerButton } from '@/components/iaoverlay/IATriggerButton';
 
 type Day = {
   d: number;
@@ -144,8 +144,8 @@ export const ItineraireIABlock = () => {
                 ))}
               </ul>
 
-              <Link
-                href="/itineraire-personnalise-pour-les-philippines"
+              <IATriggerButton
+                source="homepage_block"
                 className="inline-flex items-center gap-2 px-7 py-3.5 bg-accent text-ink rounded-lg font-semibold text-base shadow-cta transition-all duration-200 hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
               >
                 Je crée mon itinéraire
@@ -155,7 +155,7 @@ export const ItineraireIABlock = () => {
                 >
                   →
                 </span>
-              </Link>
+              </IATriggerButton>
             </div>
 
             {/* Right column — mockup window */}

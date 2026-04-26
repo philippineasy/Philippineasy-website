@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { UserMenu } from './UserMenu';
 import { Cart } from './Cart';
 import { DropdownMenu } from './DropdownMenu';
+import { useIAOverlay } from '@/contexts/IAOverlayContext';
 
 interface NavLink {
   href: string;
@@ -46,6 +47,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const { user, isAdmin, loading } = useAuth();
+  const iaOverlay = useIAOverlay();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -134,8 +136,27 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
       return null;
     }
 
+    // Special CTA "+ Créer Itinéraire" opens the IA overlay instead of navigating.
+    if (special) {
+      return (
+        <button
+          type="button"
+          onClick={() => {
+            iaOverlay.open();
+            if (typeof window !== 'undefined' && (window as any).gtag) {
+              (window as any).gtag('event', 'ia_overlay_opened', { source: 'header' });
+            }
+          }}
+          className={`${baseClasses} ${specialClasses}`}
+        >
+          <span aria-hidden="true">+</span>
+          <span className="relative inline-flex items-center">{label}</span>
+        </button>
+      );
+    }
+
     return (
-      <Link href={href} className={`${baseClasses} ${special ? specialClasses : (admin ? adminClasses : defaultClasses)} ${isActive && !special ? activeClasses : ''}`}>
+      <Link href={href} className={`${baseClasses} ${admin ? adminClasses : defaultClasses} ${isActive ? activeClasses : ''}`}>
         {special && <span aria-hidden="true">+</span>}
         <span className="relative inline-flex items-center">
           {label}
@@ -306,7 +327,19 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
             <div className="md:hidden absolute top-full right-4 mt-2 w-auto max-w-xs rounded-lg shadow-xl bg-card z-20 border border-border">
               <div className="flex flex-col space-y-1 p-3">
                 {navLinks.map((link) => !link.special && <MobileNavLink key={link.href} {...link} />)}
-                <MobileNavLink href="/itineraire-personnalise-pour-les-philippines" label="+ Créer Itinéraire" />
+                <button
+                  type="button"
+                  onClick={() => {
+                    iaOverlay.open();
+                    setIsMenuOpen(false);
+                    if (typeof window !== 'undefined' && (window as any).gtag) {
+                      (window as any).gtag('event', 'ia_overlay_opened', { source: 'header_mobile' });
+                    }
+                  }}
+                  className="px-3 py-2 rounded-md bg-accent text-ink shadow-cta font-semibold hover:bg-accent/90 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                >
+                  + Créer Itinéraire
+                </button>
                 <button
                   onClick={() => { setIsSearchModalOpen(true); setIsMenuOpen(false); }}
                   className="px-3 py-2 rounded-md text-foreground hover:text-primary hover:bg-primary/10 transition-colors duration-200 flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"

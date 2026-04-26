@@ -12,6 +12,8 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { EditModeProvider } from '@/contexts/EditModeContext';
+import { IAOverlayProvider } from '@/contexts/IAOverlayContext';
+import { IAOverlay } from '@/components/iaoverlay/IAOverlay';
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
@@ -198,6 +200,7 @@ export default async function RootLayout({
         <AuthProvider>
           <CartProvider>
             <EditModeProvider>
+              <IAOverlayProvider>
               <div className="fixed top-0 w-full z-50">
               <Header navLinks={navLinks} />
               <WeatherTicker />
@@ -209,7 +212,9 @@ export default async function RootLayout({
             <Footer />
             <TawkToChat />
             <ExitIntentPopup />
+            <IAOverlay />
             <Toaster position="bottom-right" />
+              </IAOverlayProvider>
             </EditModeProvider>
           </CartProvider>
         </AuthProvider>

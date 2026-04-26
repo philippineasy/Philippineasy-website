@@ -5,6 +5,30 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### IAOverlay — modal planificateur IA proto-strict (3 steps + n8n wiring)
+- **Added** : `src/contexts/IAOverlayContext.tsx` (NEW) — Provider + `useIAOverlay()` hook (`isOpen`, `open()`, `close()`). Gere ESC pour fermer, lock body scroll a l'ouverture, focus trap entry. Mount unique dans `app/layout.tsx`.
+- **Added** : `src/components/iaoverlay/IAOverlay.tsx` (NEW) — Modal full-screen proto-strict (`_handoff/ui_kit/IAOverlay.jsx` + `specs/IAOverlay.md`).
+  - Backdrop `bg-ink/72 backdrop-blur-sm`, click close, motion-reduce respecte (no blur)
+  - Sheet `max-w-960 max-h-85vh rounded-3xl shadow-2xl`, role="dialog" aria-modal="true" aria-labelledby
+  - Step indicator dots (3 etapes, active = bg-accent w-8)
+  - **Step 0** Style : grid 2x2 cartes Détente/Aventure/Culture/Equilibré, ring-2 ring-accent on selection, aria-pressed
+  - **Step 1** Parametres : 2 sliders accent-accent (Duree 3-30j, Budget 600-6000€/100), labels stronged tabular-nums, error inline si KO
+  - **Step 2** Result : eyebrow ✦ accent + H2 recap (durée·style·budget) + previews cards (variant pill, title, description, highlights pills, budget_estimate accent), fallback message si previews vide
+  - Loading state : spinner SVG animate-spin (motion-reduce safe), label "Notre IA cherche…", disabled sur le btn pendant fetch
+  - Focus trap manuel (Tab/Shift-Tab cycle entre 1er et dernier focusable de la sheet)
+- **Added** : Wiring n8n via `/api/itinerary/generate` (route existante qui forward vers `https://n8n.hugogotophilippines.com/webhook/itinerary-generate`).
+  - Mapping helpers : `daysToDuration()` (3-5j→`3-days` ... 31j+→`more`) + `STYLE_TO_TRIP` (Détente→`relax`, Aventure→`adventure`, Culture→`culture`, Equilibré→`mix`)
+  - Defaults raisonnables pour les champs non collectes par l'overlay : `travelType: "couple"`, `interests: ["plages","culture","nature"]`, `additionalInfo: ""`
+  - Au step 2, CTA "Voir l'itinéraire complet →" redirige vers `/itineraire-personnalise-pour-les-philippines?style=X&days=Y&budget=Z&gen=ID` (query params transmis pour pre-remplir la page complete et passer le `generation_id` n8n a la suite du funnel)
+- **Added** : `src/components/iaoverlay/IATriggerButton.tsx` (NEW) — bouton client utilisable depuis les server components (ItineraireIABlock, ArticleFooter) sans avoir a convertir le parent en client. Accepte `className` + `source` (analytics tag) + children.
+- **Changed** : `src/app/layout.tsx` — wrap dans `<IAOverlayProvider>`, mount unique `<IAOverlay />` apres ExitIntentPopup. Empilage : AuthProvider > CartProvider > EditModeProvider > IAOverlayProvider.
+- **Changed** : `src/components/layout/Header.tsx` — le NavLink `special: true` (CTA "+ Créer Itinéraire") n'est plus un `<Link href>` mais un `<button>` qui appelle `iaOverlay.open()`. Pareil pour la version mobile dans le drawer. Push event analytics `ia_overlay_opened` avec `source: "header"` ou `"header_mobile"`.
+- **Changed** : `src/components/homepage/ItineraireIABlock.tsx` — CTA "Je crée mon itinéraire" passe de `<Link>` a `<IATriggerButton source="homepage_block">`.
+- **Changed** : `src/components/articles/ArticleFooter.tsx` — CTA "Créer mon itinéraire IA" passe de `<Link>` a `<IATriggerButton source="article_footer">`.
+- **Note backend** : la spec mentionnait `POST /api/ai/itinerary` avec stream SSE — non implementé. On utilise l'endpoint REST existant `/api/itinerary/generate` (route Next 15 vers webhook n8n) qui retourne `{success, generation_id, previews}` une fois le workflow n8n termine. L'experience utilisateur est equivalente (loading puis result), sans surcharge SSE pour un flow qui prend < 30s typiquement.
+- **A11y** : role="dialog" aria-modal sur sheet, aria-labelledby vers le H2 de chaque step, aria-pressed sur les cartes style, aria-label sur close, focus management (close btn focused on open + focus trap), ESC ferme.
+- **Analytics** : events GA4 `ia_overlay_opened` (avec `source`), `ia_step_completed` (avec `step`), `ia_itinerary_generated`. PDF export n'est pas dans le scope overlay (delegue a la page complete post-paiement).
+
 ### Refonte page Article 2026 — Etape 5 : A11y polish (skip-link + scroll-spy TOC + mobile collapsible)
 - **Changed** : `ArticleTOC` passe en client component pour scroll-spy. IntersectionObserver avec `rootMargin: '-120px 0px -60% 0px'` declenche l'active state quand une section H2/H3 entre dans le tiers superieur du viewport. Quand plusieurs sections intersectent, le DOM-order topmost gagne (evite les flickers entre H2 successifs courts).
 - **Changed** : Active link recoit `text-accent`, `border-l-2 border-accent` (au lieu de transparent) et `aria-current="true"` pour les screen readers.

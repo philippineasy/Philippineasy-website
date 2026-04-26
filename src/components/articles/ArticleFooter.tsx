@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import ShareButtons from '@/components/shared/ShareButtons';
 import ArticleCard from '@/components/shared/ArticleCard';
+import { IATriggerButton } from '@/components/iaoverlay/IATriggerButton';
 import { getMainCategoryPath } from '@/lib/utils';
 import type { Article } from '@/types';
 
@@ -61,15 +61,15 @@ export function ArticleFooter({ article, relatedArticles, canonicalUrl }: Props)
           <p className="text-[16px] leading-[1.6] text-white/85 mb-6">
             Notre IA construit votre itinéraire sur-mesure en 30 secondes — hébergements pré-sélectionnés, ferries, vols intérieurs et carte interactive.
           </p>
-          <Link
-            href="/itineraire-personnalise-pour-les-philippines"
+          <IATriggerButton
+            source="article_footer"
             className="inline-flex items-center gap-2 rounded-full bg-accent text-ink px-5 py-3 text-[14px] font-semibold shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform motion-reduce:transition-none motion-reduce:hover:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M5 3v4M3 5h4M6 17v4M4 19h4M13 3l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" />
             </svg>
             Créer mon itinéraire IA
-          </Link>
+          </IATriggerButton>
         </div>
       </div>
 
