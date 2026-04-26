@@ -177,7 +177,7 @@ export default async function ArticlePage({
       <ViewTracker articleId={typedArticle.id} />
       <a
         href="#article-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:px-4 focus:py-2 focus:bg-accent focus:text-ink focus:rounded-lg focus:shadow-lg focus:font-semibold"
+        className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-4 focus-visible:left-4 focus-visible:z-[200] focus-visible:px-4 focus-visible:py-2 focus-visible:bg-accent focus-visible:text-ink focus-visible:rounded-lg focus-visible:shadow-lg focus-visible:font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink"
       >
         Aller au contenu de l'article
       </a>
