@@ -6,12 +6,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faTachometerAlt, faBoxOpen, faPhone, faComments, faFileDownload, faArrowLeft,
+  faTachometerAlt, faBoxOpen, faPhone, faComments, faFileDownload, faArrowLeft, faMap,
 } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@/contexts/AuthContext';
 
 const NAV_ITEMS = [
   { href: '/mon-espace', label: 'Tableau de bord', icon: faTachometerAlt, exact: true },
+  { href: '/mon-espace/itineraires', label: 'Mes Itinéraires', icon: faMap },
   { href: '/mon-espace/services', label: 'Mes Services', icon: faBoxOpen },
   { href: '/mon-espace/appels', label: 'Mes Appels', icon: faPhone },
   { href: '/mon-espace/messages', label: 'Messages', icon: faComments },
