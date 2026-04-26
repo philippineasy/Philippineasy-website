@@ -1,5 +1,4 @@
 import { cache } from 'react';
-import Image from 'next/image';
 import { getArticleBySlug, getRelatedArticles } from '@/services/articleService';
 import { createClient } from '@/utils/supabase/server';
 import { createBuildClient } from '@/utils/supabase/build-client';
@@ -11,11 +10,9 @@ import { generateArticleMetaDescription } from '@/utils/seo/metaDescriptionGener
 import { getMainCategoryPath } from '@/lib/utils';
 import ArticleContentRenderer from '@/components/shared/ArticleContentRenderer';
 import TableOfContents from '@/components/shared/TableOfContents';
-import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import RelatedArticles from '@/components/shared/RelatedArticles';
-import ShareButtons from '@/components/shared/ShareButtons';
 import ViewTracker from '@/components/shared/ViewTracker';
-import EditArticleButton from '@/components/shared/EditArticleButton';
+import { ArticleHero } from '@/components/articles/ArticleHero';
 
 // Deduplicate fetch between generateMetadata and page render
 const getCachedArticle = cache(async (slug: string) => {
@@ -159,28 +156,26 @@ export default async function ArticlePage({
 
   const parsedContent = parseContent(typedArticle.content);
 
-  // Build breadcrumb items
-  const breadcrumbItems: Array<{ href?: string; label: string }> = [
-    { href: '/', label: 'Accueil' },
-    { href: `/${main_category}`, label: typedArticle.category.main_category || main_category },
-  ];
-
-  if (typedArticle.category.main_category && typedArticle.category.slug !== typedArticle.category.main_category.toLowerCase()) {
-    breadcrumbItems.push({
-      href: `/${main_category}/${typedArticle.category.slug}`,
-      label: typedArticle.category.name,
-    });
-  }
-
-  breadcrumbItems.push({
-    label: typedArticle.title,
-  });
+  const excerpt = generateArticleMetaDescription(
+    typedArticle.title,
+    typedArticle.content,
+    typedArticle.category?.name,
+    { maxLength: 220, addEllipsis: true }
+  );
 
   return (
     <>
       <JsonLd article={typedArticle} basePath={main_category} />
       <ViewTracker articleId={typedArticle.id} />
       <main className="container mx-auto px-4 py-12 md:py-16 pt-32">
+        <ArticleHero
+          article={typedArticle}
+          mainCategoryPath={main_category}
+          categorySlug={category_slug}
+          excerpt={excerpt}
+          canonicalUrl={canonicalUrl}
+        />
+
         <div className="lg:flex lg:space-x-8">
           <aside className="w-full lg:w-1/4 hidden md:block mb-8 lg:mb-0">
             <div className="sticky top-28 p-4 bg-muted rounded-lg shadow-md border border-border">
@@ -189,31 +184,7 @@ export default async function ArticlePage({
             </div>
           </aside>
 
-          <article className="w-full lg:flex-grow bg-card rounded-lg shadow-xl p-6 md:p-10">
-            <Breadcrumb items={breadcrumbItems} />
-
-            <header className="mb-8 border-b pb-8">
-              <div className="flex justify-between items-start mb-4">
-                <h1 className="text-3xl md:text-4xl font-bold text-primary">{typedArticle.title}</h1>
-                <div className="flex items-center gap-3">
-                  <ShareButtons url={canonicalUrl} title={typedArticle.title} />
-                  <EditArticleButton articleSlug={typedArticle.slug} />
-                </div>
-              </div>
-
-              <div className="text-sm text-muted-foreground mb-6">
-                <span>Publie le : {new Date(typedArticle.published_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                <span className="mx-2">|</span>
-                <span>Temps de lecture estime : {typedArticle.reading_time} min</span>
-              </div>
-
-              {typedArticle.image && (
-                <div className="relative w-full h-96">
-                  <Image src={typedArticle.image} alt={typedArticle.title} fill priority className="object-cover rounded-lg shadow-md" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
-                </div>
-              )}
-            </header>
-
+          <article className="w-full lg:flex-grow">
             <div className="prose prose-lg max-w-none article-content">
               <ArticleContentRenderer content={parsedContent || { blocks: [], time: 0, version: '' }} />
             </div>

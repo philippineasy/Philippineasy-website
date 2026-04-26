@@ -5,6 +5,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Refonte page Article 2026 — Etape 1 : Hero proto-strict (page-head + article-head + cover)
+- **Added** : `src/components/articles/ArticleHero.tsx` (NEW) — composant qui regroupe la nouvelle entree visuelle de la page article. Trois zones distinctes alignees pixel-perfect avec le proto handoff `_handoff/ui_kit/Article.jsx` :
+  - **Page-head** : back link "Accueil" avec chevron + breadcrumb path uppercase tracking-[0.08em] (Accueil · VOYAGER · CONSEILS-VOYAGE), focus-visible:ring-2 sur les liens
+  - **Article-head** : badge category eyebrow `bg-accent/10 text-accent text-[11px] uppercase tracking-[0.1em]`, H1 `clamp(2rem,4.5vw,3.5rem)` avec heuristique de split (segment apres ":" mis en accent italic, sinon dernier mot), excerpt 18px muted (genere via `generateArticleMetaDescription` 220 chars), byline avec avatar rond 44x44 initiales sur bg #3B5BDB + nom + role + reading_time + date update, ShareButtons + EditArticleButton aligne a droite
+  - **Cover** : image 2.5:1 ratio, rounded-[24px], shadow-card, `next/image` priority + sizes responsive
+- **Changed** : `src/app/(articles)/[main_category]/[category_slug]/[article_slug]/page.tsx` — remplace l'ancien header inline (h1 + share + meta + image carre) par `<ArticleHero />`. Excerpt calcule cote serveur (220 chars max au lieu de 155 pour le SEO meta) et passe au composant. Imports nettoyes (suppression `Image`, `ShareButtons`, `EditArticleButton`, `Breadcrumb` qui sont desormais dans ArticleHero).
+- **Changed** : Le layout body (sidebar TOC + article wrapper bg-card shadow-xl) est conserve a l'identique pour cette etape — sera refondu en etape 2 (grid 2-col + TOC en haut + aside cards Newsletter/Related).
+- **Note** : H1 split heuristique — si le titre contient ":" (cas le plus frequent : "Budget voyage Philippines : 35 €/jour reel"), le segment apres ":" est mis en accent italic. Sinon le dernier mot. Permet un H1 visuellement editorial sans modifier les titres en BDD.
+
+### Chore : gitignore local workspace dirs
+- **Added** : `.gitignore` — `.claude/`, `output/`, `skills_external_claude/`, `skills_external_marketing/`, `workflows/`. Reduit le bruit dans `git status` (dossiers locaux marketing/skills/n8n non destines au repo).
+
 ### Fix critique : webhook Resend inbound utilisait le mauvais endpoint API
 - **Fixed** : `src/app/api/webhooks/resend-inbound/route.ts` — endpoint API corrige de `https://api.resend.com/emails/{id}` vers `https://api.resend.com/emails/receiving/{id}`. Le premier path est pour les emails sortants (Sending) et renvoyait `404 Email not found` sur tous les inbound. Symptome : Resend Receiving capturait bien les emails sur `contact@philippineasy.com`, le webhook `email.received` etait correctement configure et POSTait sur la route, mais le forward vers `philippineasy@gmail.com` echouait silencieusement avec HTTP 500. Resultat dans le dashboard Resend : 9 events `email.received` en `Failed` sur 7 jours, 7 attempts par event, response body `{"error":"Failed to fetch email"}`. Aucune ligne `direction: 'inbound'` dans `email_log` Supabase.
 - **Added** : Verification optionnelle de signature Svix (Resend utilise Svix pour ses webhooks). Si `RESEND_WEBHOOK_SECRET` est defini en env, la route verifie le HMAC SHA-256 base64 sur `svix-id.svix-timestamp.body` contre le header `svix-signature`. Comparaison `crypto.timingSafeEqual` pour eviter les timing attacks. Skipped quand le secret n'est pas configure (mode degrade pour transition / dev).
