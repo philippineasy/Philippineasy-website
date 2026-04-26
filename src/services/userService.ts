@@ -24,7 +24,7 @@ export const getAllUsers = async (supabase: SupabaseClient) => {
     return { data, error };
 };
 
-export const updateUserRole = async (supabase: SupabaseClient, userId: number, newRole: string) => {
+export const updateUserRole = async (supabase: SupabaseClient, userId: string, newRole: string) => {
     const { error } = await supabase.rpc('update_user_role', { user_id_to_update: userId, new_role: newRole });
     if (error) {
         console.error('Error updating role:', error);
@@ -32,7 +32,7 @@ export const updateUserRole = async (supabase: SupabaseClient, userId: number, n
     return { error };
 };
 
-export const banUser = async (supabase: SupabaseClient, userId: number, reason: string, durationDays: number | null) => {
+export const banUser = async (supabase: SupabaseClient, userId: string, reason: string, durationDays: number | null) => {
     const { error } = await supabase.rpc('ban_user', { user_id_to_ban: userId, ban_reason_text: reason, ban_duration_days: durationDays });
     if (error) {
         console.error('Error banning user:', error);
@@ -40,7 +40,7 @@ export const banUser = async (supabase: SupabaseClient, userId: number, reason: 
     return { error };
 };
 
-export const unbanUser = async (supabase: SupabaseClient, userId: number) => {
+export const unbanUser = async (supabase: SupabaseClient, userId: string) => {
     const { error } = await supabase.rpc('unban_user', { user_id_to_unban: userId });
     if (error) {
         console.error('Error unbanning user:', error);
