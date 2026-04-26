@@ -1,116 +1,121 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faUserTie, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
-import { supabase } from '@/utils/supabase/client';
-import StatusBadge from '@/components/crm/StatusBadge';
+import { AdminPageHeader, AdminCard, AdminEmptyState } from '@/components/admin';
+import { Users as UsersIcon } from 'lucide-react';
 import CustomerTable from './CustomerTable';
+import CustomerFilters from './CustomerFilters';
 
-export default function AdminCustomersPage() {
-  const [customers, setCustomers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [serviceFilter, setServiceFilter] = useState('');
+type Profile = {
+  id: string;
+  username: string | null;
+  avatar_url: string | null;
+  customer_since: string | null;
+  total_spent: number | null;
+  easy_plus_expires_at: string | null;
+  rencontre_premium_expires_at: string | null;
+};
 
-  useEffect(() => {
-    fetchCustomers();
-  }, []);
+type Purchase = { user_id: string; service_type: string; status: string };
+type ConvoCount = { customer_id: string };
 
-  const fetchCustomers = async () => {
-    setLoading(true);
-    // Fetch profiles that have made purchases (customer_since IS NOT NULL)
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, username, avatar_url, customer_since, total_spent, easy_plus_expires_at, rencontre_premium_expires_at')
-      .not('customer_since', 'is', null)
-      .order('customer_since', { ascending: false });
+export const dynamic = 'force-dynamic';
 
-    if (error) {
-      console.error('Error fetching customers:', error);
-      setLoading(false);
-      return;
-    }
+export default async function AdminCustomersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; service?: string }>;
+}) {
+  const { q, service } = await searchParams;
+  const supabase = createServiceRoleClient();
 
-    // For each customer, fetch their active purchases
-    const enriched = await Promise.all(
-      (data || []).map(async (profile) => {
-        const { data: purchases } = await supabase
-          .from('service_purchases')
-          .select('service_type, status')
-          .eq('user_id', profile.id)
-          .eq('status', 'active');
+  // Une seule requête profiles
+  const { data: profiles, error } = await supabase
+    .from('profiles')
+    .select('id, username, avatar_url, customer_since, total_spent, easy_plus_expires_at, rencontre_premium_expires_at')
+    .not('customer_since', 'is', null)
+    .order('customer_since', { ascending: false })
+    .limit(200);
 
-        const { count: unreadMessages } = await supabase
-          .from('crm_messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('is_admin_message', false)
-          .eq('is_read', false);
-
-        return {
-          ...profile,
-          active_services: purchases?.map((p: any) => p.service_type) || [],
-          purchases_count: purchases?.length || 0,
-          unread_messages: unreadMessages || 0,
-        };
-      })
+  if (error) {
+    return (
+      <AdminCard padding="lg">
+        <p className="text-rose-700 font-medium">Erreur lors du chargement : {error.message}</p>
+      </AdminCard>
     );
+  }
 
-    setCustomers(enriched);
-    setLoading(false);
-  };
+  const customerIds = (profiles || []).map(p => p.id);
 
-  const filteredCustomers = customers.filter((c) => {
-    const matchesSearch = !search ||
-      c.username?.toLowerCase().includes(search.toLowerCase());
-    const matchesService = !serviceFilter ||
-      c.active_services.some((s: string) => s.includes(serviceFilter));
-    return matchesSearch && matchesService;
+  // Batch : un seul SELECT sur les achats actifs de tous les clients
+  const purchasesByUser = new Map<string, string[]>();
+  if (customerIds.length > 0) {
+    const { data: purchases } = await supabase
+      .from('service_purchases')
+      .select('user_id, service_type, status')
+      .in('user_id', customerIds)
+      .eq('status', 'active') as { data: Purchase[] | null };
+
+    for (const p of purchases || []) {
+      const arr = purchasesByUser.get(p.user_id) || [];
+      arr.push(p.service_type);
+      purchasesByUser.set(p.user_id, arr);
+    }
+  }
+
+  // Batch : count des messages non-lus par customer (group via conversation)
+  const unreadByCustomer = new Map<string, number>();
+  if (customerIds.length > 0) {
+    const { data: convoMsgs } = await supabase
+      .from('crm_messages')
+      .select('crm_conversations!inner(customer_id)')
+      .eq('is_admin_message', false)
+      .eq('is_read', false)
+      .in('crm_conversations.customer_id', customerIds) as { data: { crm_conversations: ConvoCount }[] | null };
+
+    for (const row of convoMsgs || []) {
+      const cid = row.crm_conversations?.customer_id;
+      if (!cid) continue;
+      unreadByCustomer.set(cid, (unreadByCustomer.get(cid) || 0) + 1);
+    }
+  }
+
+  const enriched = (profiles as Profile[] || []).map(p => ({
+    id: p.id,
+    username: p.username || '—',
+    avatar_url: p.avatar_url || '',
+    customer_since: p.customer_since || '',
+    total_spent: Number(p.total_spent || 0),
+    active_services: purchasesByUser.get(p.id) || [],
+    purchases_count: (purchasesByUser.get(p.id) || []).length,
+    unread_messages: unreadByCustomer.get(p.id) || 0,
+  }));
+
+  // Filtrage server-side
+  const filtered = enriched.filter(c => {
+    if (q && !c.username.toLowerCase().includes(q.toLowerCase())) return false;
+    if (service && !c.active_services.some(s => s.includes(service))) return false;
+    return true;
   });
 
   return (
     <>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Clients</h1>
-          <p className="text-muted-foreground mt-1">{customers.length} clients au total</p>
-        </div>
-      </div>
+      <AdminPageHeader
+        eyebrow="CRM"
+        title={<>Clients <span className="text-accent">{enriched.length}</span></>}
+        description={`${filtered.length} client${filtered.length > 1 ? 's' : ''} affiché${filtered.length > 1 ? 's' : ''}.`}
+      />
 
-      {/* Filters */}
-      <div className="flex gap-4 mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm" />
-          <input
-            type="text"
-            placeholder="Rechercher un client..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-        </div>
-        <select
-          value={serviceFilter}
-          onChange={(e) => setServiceFilter(e.target.value)}
-          className="bg-card border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-        >
-          <option value="">Tous les services</option>
-          <option value="buddy">Buddy System</option>
-          <option value="voyage_serein">Voyage Serein</option>
-          <option value="pack_ultime">Pack Ultime</option>
-          <option value="easy_plus">Easy+</option>
-          <option value="guide_pdf">Guides PDF</option>
-        </select>
-      </div>
+      <CustomerFilters defaultQ={q || ''} defaultService={service || ''} />
 
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <FontAwesomeIcon icon={faSpinner} className="text-2xl animate-spin text-muted-foreground" />
-        </div>
+      {filtered.length > 0 ? (
+        <CustomerTable customers={filtered} />
       ) : (
-        <CustomerTable customers={filteredCustomers} />
+        <AdminCard padding="lg">
+          <AdminEmptyState
+            icon={<UsersIcon className="w-6 h-6" />}
+            title={q || service ? 'Aucun résultat' : 'Aucun client'}
+            description={q || service ? 'Essaye de modifier les filtres.' : 'Pas encore de client. Les profils apparaîtront ici dès le premier achat.'}
+          />
+        </AdminCard>
       )}
     </>
   );

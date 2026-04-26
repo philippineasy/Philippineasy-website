@@ -137,8 +137,7 @@ async function checkEmailPreference(userId: string, category: string): Promise<b
       .single();
 
     if (!data) return true; // No preferences row — send by default
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (data as any)[column] !== false;
+    return (data as unknown as Record<string, unknown>)[column] !== false;
   } catch {
     return true; // On error, send rather than silently drop
   }

@@ -175,6 +175,7 @@ export async function createManualProfile(formData: FormData) {
       .update({
         plan: 'premium',
         premium_expires_at: premiumExpiry.toISOString(),
+        rencontre_premium_expires_at: premiumExpiry.toISOString(),
       })
       .eq('id', userId);
   }

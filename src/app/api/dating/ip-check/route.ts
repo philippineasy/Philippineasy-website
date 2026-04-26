@@ -1,28 +1,38 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextResponse } from 'next/server';
 
+// IPv4 + IPv6 simple validation (suffisant pour empêcher SSRF / path injection)
+const IPV4 = /^(25[0-5]|2[0-4]\d|[01]?\d?\d)(\.(25[0-5]|2[0-4]\d|[01]?\d?\d)){3}$/;
+const IPV6 = /^[0-9a-fA-F:]+$/;
+
 export async function POST(request: Request) {
   const supabase = await createClient();
-  const { ip, user_id } = await request.json();
+  const { ip } = await request.json();
 
-  if (!ip) {
+  if (!ip || typeof ip !== 'string') {
     return NextResponse.json({ error: 'IP address is required' }, { status: 400 });
   }
+  if (!IPV4.test(ip) && !IPV6.test(ip)) {
+    return NextResponse.json({ error: 'Invalid IP address format' }, { status: 400 });
+  }
+
+  // user_id ne vient JAMAIS du body — un attaquant pourrait sinon faire bannir
+  // un autre utilisateur. On le récupère depuis la session.
+  const { data: { user } } = await supabase.auth.getUser();
+  const userId = user?.id ?? null;
 
   try {
-    const response = await fetch(`https://ipinfo.io/${ip}?token=${process.env.IPINFO_TOKEN}`);
+    const response = await fetch(`https://ipinfo.io/${encodeURIComponent(ip)}?token=${process.env.IPINFO_TOKEN}`);
     if (!response.ok) {
       throw new Error('Failed to fetch IP info');
     }
     const data = await response.json();
 
-    // Check for VPN, proxy, or hosting provider
     const isSuspicious = data.vpn || data.proxy || data.hosting;
 
     if (isSuspicious) {
-      // Log the attempt
       await supabase.from('users_restricted').insert({
-        user_id: user_id || null,
+        user_id: userId,
         ip_address: ip,
         reason: `Suspicious IP detected: ${JSON.stringify(data)}`,
       });
@@ -30,7 +40,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ is_vpn: false });
-  } catch (error: any) {
+  } catch (error) {
     console.error('IP check error:', error);
     return NextResponse.json({ error: 'Failed to verify IP address.' }, { status: 500 });
   }

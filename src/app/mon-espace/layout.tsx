@@ -1,118 +1,20 @@
-'use client';
+import { redirect } from 'next/navigation';
+import type { Metadata } from 'next';
+import { createClient } from '@/utils/supabase/server';
+import MonEspaceShell from './MonEspaceShell';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faTachometerAlt, faBoxOpen, faPhone, faComments, faFileDownload, faArrowLeft, faMap, faCrown,
-} from '@fortawesome/free-solid-svg-icons';
-import { useAuth } from '@/contexts/AuthContext';
+export const metadata: Metadata = {
+  title: 'Mon Espace · Philippineasy',
+  robots: { index: false, follow: false },
+};
 
-const NAV_ITEMS = [
-  { href: '/mon-espace', label: 'Tableau de bord', icon: faTachometerAlt, exact: true },
-  { href: '/mon-espace/itineraires', label: 'Mes Itinéraires', icon: faMap },
-  { href: '/mon-espace/services', label: 'Mes Services', icon: faBoxOpen },
-  { href: '/mon-espace/appels', label: 'Mes Appels', icon: faPhone },
-  { href: '/mon-espace/messages', label: 'Messages', icon: faComments },
-  { href: '/mon-espace/guides', label: 'Guides PDF', icon: faFileDownload },
-  { href: '/mon-espace/easy-plus', label: 'Easy+', icon: faCrown },
-];
+export default async function MonEspaceLayout({ children }: { children: React.ReactNode }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-export default function MonEspaceLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-  const router = useRouter();
-  const pathname = usePathname();
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/connexion');
-    }
-  }, [user, loading, router]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center pt-20">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+  if (!user) {
+    redirect('/connexion?redirect=/mon-espace');
   }
 
-  if (!user) return null;
-
-  return (
-    <div className="min-h-screen bg-muted pt-20">
-      <div className="container mx-auto max-w-7xl px-4 py-8">
-        <div className="flex gap-8">
-          {/* Sidebar */}
-          <aside className="w-56 flex-shrink-0 hidden md:block">
-            <Link
-              href="/profil"
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
-            >
-              <FontAwesomeIcon icon={faArrowLeft} />
-              Mon Profil
-            </Link>
-
-            <nav aria-label="Navigation Mon Espace" className="space-y-1">
-              {NAV_ITEMS.map((item) => {
-                const isActive = item.exact
-                  ? pathname === item.href
-                  : pathname.startsWith(item.href);
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    aria-current={isActive ? 'page' : undefined}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
-                      isActive
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-muted-foreground hover:bg-card hover:text-foreground'
-                    }`}
-                  >
-                    <FontAwesomeIcon icon={item.icon} className="w-4" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
-          </aside>
-
-          {/* Mobile nav */}
-          <nav aria-label="Navigation Mon Espace mobile" className="md:hidden w-full mb-4">
-            <div className="flex gap-1 overflow-x-auto pb-2">
-              {NAV_ITEMS.map((item) => {
-                const isActive = item.exact
-                  ? pathname === item.href
-                  : pathname.startsWith(item.href);
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    aria-current={isActive ? 'page' : undefined}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
-                      isActive
-                        ? 'bg-primary/10 text-primary'
-                        : 'bg-card text-muted-foreground'
-                    }`}
-                  >
-                    <FontAwesomeIcon icon={item.icon} />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
-          </nav>
-
-          {/* Content */}
-          <main className="flex-1 min-w-0">
-            {children}
-          </main>
-        </div>
-      </div>
-    </div>
-  );
+  return <MonEspaceShell>{children}</MonEspaceShell>;
 }

@@ -51,7 +51,6 @@ export async function POST(
       );
     }
 
-    // Vérifier le quota de modifications
     const modificationsRemaining = itinerary.modifications_remaining ?? 0;
     const isConciergerie = itinerary.offer_type === 'conciergerie';
     const isUnlimited = isConciergerie && modificationsRemaining === -1;
@@ -63,7 +62,31 @@ export async function POST(
       );
     }
 
-    // Créer la demande de modification
+    // Décrémenter ATOMIQUEMENT en premier — empêche le double-spend par
+    // double-clic / requêtes parallèles. Si la condition .gt() ne matche pas,
+    // .select() retourne 0 row.
+    let newModificationsRemaining = modificationsRemaining;
+    if (!isUnlimited) {
+      const { data: claimed, error: claimErr } = await supabase
+        .from('itinerary_generations')
+        .update({ modifications_remaining: modificationsRemaining - 1 })
+        .eq('id', itineraryId)
+        .gt('modifications_remaining', 0)
+        .select('modifications_remaining');
+      if (claimErr) {
+        console.error('Modification claim error:', claimErr);
+        return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
+      }
+      if (!claimed || claimed.length === 0) {
+        return NextResponse.json(
+          { error: 'Quota de modifications épuisé', modifications_remaining: 0 },
+          { status: 403 }
+        );
+      }
+      newModificationsRemaining = claimed[0].modifications_remaining;
+    }
+
+    // Créer la demande de modification (après le claim atomique)
     const { error: insertError } = await supabase
       .from('itinerary_modifications')
       .insert({
@@ -77,20 +100,17 @@ export async function POST(
 
     if (insertError) {
       console.error('Insert modification error:', insertError);
+      // Compensating action : restaurer le quota
+      if (!isUnlimited) {
+        await supabase
+          .from('itinerary_generations')
+          .update({ modifications_remaining: modificationsRemaining })
+          .eq('id', itineraryId);
+      }
       return NextResponse.json(
         { error: 'Erreur lors de l\'enregistrement' },
         { status: 500 }
       );
-    }
-
-    // Décrémenter le compteur si pas illimité
-    let newModificationsRemaining = modificationsRemaining;
-    if (!isUnlimited) {
-      newModificationsRemaining = modificationsRemaining - 1;
-      await supabase
-        .from('itinerary_generations')
-        .update({ modifications_remaining: newModificationsRemaining })
-        .eq('id', itineraryId);
     }
 
     return NextResponse.json({

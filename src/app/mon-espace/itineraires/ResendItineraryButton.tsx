@@ -17,6 +17,11 @@ export function ResendItineraryButton({ generationId, email }: Props) {
 
   const handleClick = async () => {
     if (inflight.current || submitting) return;
+    if (!email) {
+      setError('Aucun email enregistré');
+      setTimeout(() => setError(null), 5000);
+      return;
+    }
     inflight.current = true;
     setSubmitting(true);
     setError(null);
@@ -27,7 +32,7 @@ export function ResendItineraryButton({ generationId, email }: Props) {
         body: JSON.stringify({
           generation_id: generationId,
           delivery_email: true,
-          email: email || undefined,
+          email,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -49,9 +54,9 @@ export function ResendItineraryButton({ generationId, email }: Props) {
     <button
       type="button"
       onClick={handleClick}
-      disabled={submitting}
-      title={email ? `Renvoyer à ${email}` : 'Renvoyer par email'}
-      aria-label={email ? `Renvoyer l'itinéraire à ${email}` : 'Renvoyer l\'itinéraire par email'}
+      disabled={submitting || !email}
+      title={email ? `Renvoyer à ${email}` : 'Aucun email enregistré'}
+      aria-label={email ? `Renvoyer l'itinéraire à ${email}` : 'Aucun email enregistré'}
       aria-live="polite"
       className={[
         'inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-[13px] font-medium transition-colors',

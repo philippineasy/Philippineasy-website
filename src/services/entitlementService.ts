@@ -35,7 +35,9 @@ export const consumeEntitlement = async (
   entitlementId: string,
   adminId?: string
 ) => {
-  // Fetch current state
+  // Lire l'état pour calculer used+1 et déterminer si c'est le dernier usage.
+  // (Le claim atomique ci-dessous protège contre le double-spend en imposant
+  // que used_quantity n'a pas changé depuis cette lecture.)
   const { data: entitlement, error: fetchError } = await supabase
     .from('purchase_entitlements')
     .select('*')
@@ -47,8 +49,14 @@ export const consumeEntitlement = async (
     return { data: null, error: fetchError || new Error('Entitlement not found') };
   }
 
-  const newUsed = entitlement.used_quantity + 1;
+  const currentUsed = entitlement.used_quantity;
+  const newUsed = currentUsed + 1;
   const isFullyUsed = entitlement.total_quantity !== null && newUsed >= entitlement.total_quantity;
+
+  // Garde quota : si total défini, refuser si on dépasse
+  if (entitlement.total_quantity !== null && newUsed > entitlement.total_quantity) {
+    return { data: null, error: new Error('Entitlement quota exhausted') };
+  }
 
   const updatePayload: Record<string, unknown> = {
     used_quantity: newUsed,
@@ -61,14 +69,22 @@ export const consumeEntitlement = async (
     updatePayload.validated_at = new Date().toISOString();
   }
 
-  const { error: updateError } = await supabase
+  // UPDATE atomique : la clause .eq('used_quantity', currentUsed) garantit
+  // qu'aucun autre process n'a consommé entre notre lecture et l'écriture.
+  // Si une race a lieu, .select() retourne 0 row → on retry/échoue proprement.
+  const { data: updated, error: updateError } = await supabase
     .from('purchase_entitlements')
     .update(updatePayload)
-    .eq('id', entitlementId);
+    .eq('id', entitlementId)
+    .eq('used_quantity', currentUsed)
+    .select('id');
 
   if (updateError) {
     console.error('Error consuming entitlement:', updateError);
     return { data: null, error: updateError };
+  }
+  if (!updated || updated.length === 0) {
+    return { data: null, error: new Error('Concurrent modification — please retry') };
   }
 
   return { data: { ...entitlement, ...updatePayload }, error: null };

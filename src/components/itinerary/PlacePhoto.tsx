@@ -57,7 +57,6 @@ export function PlacePhoto({ coordinates, name, className = '', fallbackIcon }: 
   return (
     <div className={`relative overflow-hidden ${className}`}>
       {!loaded && <div className="absolute inset-0 bg-muted animate-pulse" />}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={photoUrl}
         alt={name || 'Place photo'}

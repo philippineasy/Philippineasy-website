@@ -29,30 +29,24 @@ export const bookSlot = async (
   bookingId: string,
   slotId: string
 ) => {
-  // Get slot details
-  const { data: slot, error: slotError } = await supabase
-    .from('call_slots')
-    .select('*')
-    .eq('id', slotId)
-    .eq('is_available', true)
-    .single();
-
-  if (slotError || !slot) {
-    return { data: null, error: slotError || new Error('Slot not available') };
-  }
-
-  // Mark slot as taken
-  const { error: updateSlotError } = await supabase
+  // UPDATE atomique : ne marque le slot pris QUE s'il est encore dispo.
+  // Si deux clients réservent en parallèle, un seul .select() retourne une row.
+  const { data: claimed, error: claimErr } = await supabase
     .from('call_slots')
     .update({ is_available: false })
-    .eq('id', slotId);
+    .eq('id', slotId)
+    .eq('is_available', true)
+    .select('id, starts_at');
 
-  if (updateSlotError) {
-    console.error('Error booking slot:', updateSlotError);
-    return { data: null, error: updateSlotError };
+  if (claimErr) {
+    console.error('Error booking slot:', claimErr);
+    return { data: null, error: claimErr };
   }
+  if (!claimed || claimed.length === 0) {
+    return { data: null, error: new Error('Slot not available') };
+  }
+  const slot = claimed[0];
 
-  // Update booking with slot info
   const { data, error } = await supabase
     .from('call_bookings')
     .update({
@@ -66,6 +60,8 @@ export const bookSlot = async (
     .single();
 
   if (error) {
+    // Compensating action : libérer le slot si le booking a échoué
+    await supabase.from('call_slots').update({ is_available: true }).eq('id', slotId);
     console.error('Error updating booking:', error);
     return { data: null, error };
   }

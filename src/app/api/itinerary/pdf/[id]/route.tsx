@@ -4,6 +4,8 @@ import { renderToBuffer } from '@react-pdf/renderer';
 import { ItineraryPDF } from '@/components/pdf/ItineraryPDF';
 import React from 'react';
 
+export const maxDuration = 60;
+
 const PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 const PLACES_API_BASE = 'https://places.googleapis.com/v1';
 
@@ -25,7 +27,8 @@ async function fetchPlacePhoto(name: string, location?: string): Promise<string 
     if (!photoName) return null;
 
     const mediaRes = await fetch(
-      `${PLACES_API_BASE}/${photoName}/media?maxWidthPx=400&skipHttpRedirect=true&key=${PLACES_API_KEY}`
+      `${PLACES_API_BASE}/${photoName}/media?maxWidthPx=400&skipHttpRedirect=true`,
+      { headers: { 'X-Goog-Api-Key': PLACES_API_KEY } }
     );
     const mediaData = await mediaRes.json();
     return mediaData.photoUri || null;
@@ -132,29 +135,32 @@ export async function GET(
       transport: d.transport || undefined,
     }));
 
-    // Enrich with Google Places photos (max 15 to keep generation fast)
-    let photoCount = 0;
+    // Enrich with Google Places photos — collect targets first, then fetch
+    // EN PARALLÈLE (max 15) pour éviter le timeout Vercel sur les longs itinéraires.
     const MAX_PHOTOS = 15;
+    type PhotoTarget = { setUrl: (url: string | null) => void; name: string; location: string };
+    const targets: PhotoTarget[] = [];
     for (const day of days) {
       const location = day.location || '';
       for (const act of (day.activities || [])) {
-        if (photoCount >= MAX_PHOTOS) break;
-        act.photoUrl = await fetchPlacePhoto(act.name, location);
-        if (act.photoUrl) photoCount++;
+        if (act.name) targets.push({ setUrl: (u) => { act.photoUrl = u; }, name: act.name, location });
       }
       for (const mt of ['breakfast', 'lunch', 'dinner'] as const) {
-        if (photoCount >= MAX_PHOTOS) break;
         const meal = day.meals?.[mt];
-        if (meal?.restaurant) {
-          meal.photoUrl = await fetchPlacePhoto(meal.restaurant, location);
-          if (meal.photoUrl) photoCount++;
-        }
+        if (meal?.restaurant) targets.push({ setUrl: (u) => { meal.photoUrl = u; }, name: meal.restaurant, location });
       }
-      if (photoCount < MAX_PHOTOS && day.accommodation?.name && day.accommodation.name !== 'N/A') {
-        day.accommodation.photoUrl = await fetchPlacePhoto(day.accommodation.name, location);
-        if (day.accommodation.photoUrl) photoCount++;
+      if (day.accommodation?.name && day.accommodation.name !== 'N/A') {
+        const acc = day.accommodation;
+        targets.push({ setUrl: (u) => { acc.photoUrl = u; }, name: acc.name, location });
       }
     }
+    const limited = targets.slice(0, MAX_PHOTOS);
+    await Promise.all(
+      limited.map(async (t) => {
+        const url = await fetchPlacePhoto(t.name, t.location);
+        t.setUrl(url);
+      })
+    );
 
     const itineraryData = {
       title: variant.preview?.title || full.title || 'Votre itineraire Philippines',
@@ -206,7 +212,10 @@ export async function GET(
   } catch (error) {
     console.error('PDF generation error:', error);
     return NextResponse.json(
-      { error: 'Erreur generation PDF', details: error instanceof Error ? error.message : 'Unknown' },
+      {
+        error: 'Erreur generation PDF',
+        details: process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : undefined,
+      },
       { status: 500 }
     );
   }

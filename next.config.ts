@@ -164,13 +164,16 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // matching all API routes
+        // CORS pour les routes API : restreindre au domaine principal et aux
+        // previews Vercel. Les webhooks (Stripe, Resend, n8n) sont server-to-server
+        // et n'ont pas besoin de CORS — donc pas grave si on les bloque ici.
         source: "/api/:path*",
         headers: [
           { key: "Access-Control-Allow-Credentials", value: "true" },
-          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Access-Control-Allow-Origin", value: process.env.NEXT_PUBLIC_SITE_URL || "https://philippineasy.com" },
           { key: "Access-Control-Allow-Methods", value: "GET,DELETE,PATCH,POST,PUT" },
           { key: "Access-Control-Allow-Headers", value: "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" },
+          { key: "Vary", value: "Origin" },
         ],
       },
       {

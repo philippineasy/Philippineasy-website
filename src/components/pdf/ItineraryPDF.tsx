@@ -81,6 +81,7 @@ function StarRating({ rating }: { rating?: number }) {
 function PlacePhoto({ url }: { url?: string }) {
   if (!url) return null;
   return (
+    // eslint-disable-next-line jsx-a11y/alt-text -- @react-pdf/renderer Image has no alt prop
     <Image src={url} style={{ width: 60, height: 40, borderRadius: 4, objectFit: 'cover', marginRight: 8 }} />
   );
 }

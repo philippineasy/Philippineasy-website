@@ -75,7 +75,7 @@ export type Profile = {
   created_at: string;
   username: string;
   avatar_url: string;
-  role: 'user' | 'super_admin' | 'editor' | 'moderator' | 'premium' | 'vendor';
+  role: 'member' | 'super_admin' | 'editor' | 'moderator';
   plan: UserPlan;
   bio?: string;
   location?: string;

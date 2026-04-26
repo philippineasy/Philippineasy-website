@@ -82,7 +82,7 @@ export async function activateService(supabase: SupabaseClient, purchaseId: stri
     });
 
     // Update customer stats
-    await updateCustomerStats(supabase, userId, purchase.amount_paid);
+    await updateCustomerStats(supabase, userId, Number(purchase.amount_paid ?? 0));
 
     // Send purchase confirmation email
     const user = await getUserEmail(userId);
@@ -260,8 +260,9 @@ async function updateCustomerStats(
     .eq('id', userId)
     .single();
 
+  // total_spent peut arriver en string depuis Postgres (numeric) → cast Number
   const updates: Record<string, unknown> = {
-    total_spent: (profile?.total_spent || 0) + amountPaid,
+    total_spent: Number(profile?.total_spent ?? 0) + Number(amountPaid ?? 0),
   };
 
   if (!profile?.customer_since) {

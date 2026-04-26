@@ -31,31 +31,35 @@ function formatRemaining(time: ReturnType<typeof getTimeRemaining>) {
 }
 
 export default function CountdownTimer({ expiresAt, label, className }: CountdownTimerProps) {
-  const [time, setTime] = useState(() => getTimeRemaining(expiresAt));
+  // Initialiser à null pour éviter une hydration mismatch (Date.now() diffère
+  // entre le rendu serveur et le rendu client). On remplit dans useEffect.
+  const [time, setTime] = useState<ReturnType<typeof getTimeRemaining> | null>(null);
 
   useEffect(() => {
+    setTime(getTimeRemaining(expiresAt));
     const interval = setInterval(() => {
       setTime(getTimeRemaining(expiresAt));
-    }, 60000); // Update every minute
+    }, 60000);
     return () => clearInterval(interval);
   }, [expiresAt]);
 
-  const isUrgent = !time.expired && time.days < 3;
-  const isCritical = !time.expired && time.days === 0 && time.hours < 24;
+  const isUrgent = !!time && !time.expired && time.days < 3;
+  const isCritical = !!time && !time.expired && time.days === 0 && time.hours < 24;
 
   return (
     <span
       className={cn(
         'text-sm font-medium',
-        time.expired && 'text-red-500',
-        isUrgent && !time.expired && 'text-amber-500',
-        isCritical && !time.expired && 'text-red-500 animate-pulse',
-        !isUrgent && !time.expired && 'text-muted-foreground',
+        time?.expired && 'text-red-500',
+        isUrgent && !time!.expired && 'text-amber-500',
+        isCritical && !time!.expired && 'text-red-500 animate-pulse',
+        !isUrgent && !time?.expired && 'text-muted-foreground',
         className
       )}
+      suppressHydrationWarning
     >
       {label && <span className="mr-1">{label} :</span>}
-      {formatRemaining(time)}
+      {time ? formatRemaining(time) : '—'}
     </span>
   );
 }

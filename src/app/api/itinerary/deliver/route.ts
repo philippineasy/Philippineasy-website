@@ -85,12 +85,15 @@ export async function POST(request: Request) {
 
     // Telegram: send via n8n (Telegram node needs bot credentials)
     if (wantTelegram) {
-      try {
+      if (!N8N_API_KEY) {
+        console.error('N8N_API_KEY not configured — cannot dispatch Telegram delivery');
+        errors.push('telegram: configuration manquante');
+      } else try {
         const n8nResponse = await fetch(N8N_DELIVER_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-N8N-API-Key': N8N_API_KEY || '',
+            'X-N8N-API-Key': N8N_API_KEY,
           },
           body: JSON.stringify({
             generation_id,
@@ -113,15 +116,16 @@ export async function POST(request: Request) {
       }
     }
 
-    // Update delivery preferences
+    // Upsert (la row peut ne pas exister si la génération a été créée avant
+    // l'introduction de la table delivery_preferences).
     await supabase
       .from('delivery_preferences')
-      .update({
+      .upsert({
+        generation_id,
         delivery_status: errors.length === 0 ? 'sent' : 'failed',
         delivered_at: errors.length === 0 ? new Date().toISOString() : null,
         error_log: errors.length > 0 ? errors.join('; ') : null,
-      })
-      .eq('generation_id', generation_id);
+      }, { onConflict: 'generation_id' });
 
     return NextResponse.json({
       success: errors.length === 0,

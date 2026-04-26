@@ -34,7 +34,7 @@ const ROLE_OPTIONS: SelectOption[] = [
   { value: 'super_admin', label: 'Super Admin' },
   { value: 'editor', label: 'Editor' },
   { value: 'moderator', label: 'Moderator' },
-  { value: 'member', label: 'Member' },
+  { value: 'member', label: 'Membre' },
 ];
 
 const ROLE_TONE: Record<string, 'rose' | 'violet' | 'sky' | 'neutral'> = {

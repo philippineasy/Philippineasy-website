@@ -18,8 +18,8 @@ export default async function MessagePage({
   }
 
   const [otherUserProfile, currentUserProfile] = await Promise.all([
-    getProfileById(otherUserId),
-    getProfileById(user.id)
+    getProfileById(supabase, otherUserId),
+    getProfileById(supabase, user.id),
   ]);
 
   if (!otherUserProfile || !currentUserProfile) {

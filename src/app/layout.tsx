@@ -13,12 +13,11 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { EditModeProvider } from '@/contexts/EditModeContext';
 import { IAOverlayProvider } from '@/contexts/IAOverlayContext';
-import { IAOverlay } from '@/components/iaoverlay/IAOverlay';
+import ClientOverlays from '@/components/layout/ClientOverlays';
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
 import MetaPixel from '@/components/analytics/MetaPixel';
-import { ExitIntentPopup } from '@/components/homepage/ExitIntentPopup';
 config.autoAddCss = false;
 
 const poppins = Poppins({ 
@@ -211,8 +210,7 @@ export default async function RootLayout({
             <CookieBanner />
             <Footer />
             <TawkToChat />
-            <ExitIntentPopup />
-            <IAOverlay />
+            <ClientOverlays />
             <Toaster position="bottom-right" />
               </IAOverlayProvider>
             </EditModeProvider>

@@ -113,8 +113,13 @@ export async function POST(request: Request) {
         .single() as { data: RateLimitResult | null; error: Error | null };
 
       if (rateLimitError) {
+        // Fail-CLOSED : si le check échoue, on refuse (sinon une panne DB
+        // permettrait de spammer les paiements de test sans limite).
         console.error('Rate limit check error:', rateLimitError);
-        // Continue en cas d'erreur (fail-open)
+        return NextResponse.json(
+          { error: 'Service temporairement indisponible, réessayez dans un instant.' },
+          { status: 503 }
+        );
       } else if (rateLimit && !rateLimit.allowed && rateLimit.reset_at) {
         const resetDate = new Date(rateLimit.reset_at).toLocaleDateString('fr-FR', {
           weekday: 'long',

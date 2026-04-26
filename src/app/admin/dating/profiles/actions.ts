@@ -20,17 +20,26 @@ export async function validateProfile(userId: string, isValidated: boolean) {
 
 export async function grantPremium(userId: string, plan: 'premium' | 'free') {
   const supabase = createServiceRoleClient();
-  
-  let updateData: { plan: 'premium' | 'free'; premium_expires_at?: string | null; stripe_subscription_id?: null } = { plan };
+
+  // We write BOTH legacy column (premium_expires_at, read by admin/dating UI)
+  // AND the canonical column (rencontre_premium_expires_at, read by crons +
+  // activationService). Don't drop one without migrating the other.
+  const updateData: {
+    plan: 'premium' | 'free';
+    premium_expires_at?: string | null;
+    rencontre_premium_expires_at?: string | null;
+    stripe_subscription_id?: null;
+  } = { plan };
 
   if (plan === 'premium') {
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 30);
     updateData.premium_expires_at = expiryDate.toISOString();
-    // Ensure no conflicting subscription ID
+    updateData.rencontre_premium_expires_at = expiryDate.toISOString();
     updateData.stripe_subscription_id = null;
   } else {
     updateData.premium_expires_at = null;
+    updateData.rencontre_premium_expires_at = null;
   }
 
   const { error } = await supabase

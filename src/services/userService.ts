@@ -1,7 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { supabase } from '@/utils/supabase/client';
 
-export const getProfileById = async (userId: string) => {
+export const getProfileById = async (supabase: SupabaseClient, userId: string) => {
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
