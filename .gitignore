@@ -52,3 +52,12 @@ tsconfig.tsbuildinfo
 .env*.local
 _handoff/
 _articles_drafts/
+
+# Claude Code local config
+.claude/
+
+# Local workspace (marketing, guides, skills, workflows)
+output/
+skills_external_claude/
+skills_external_marketing/
+workflows/
