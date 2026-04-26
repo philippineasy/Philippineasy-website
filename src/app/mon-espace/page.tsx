@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/utils/supabase/client';
 import EntitlementGrid from '@/components/crm/EntitlementGrid';
 import PackProgressCard from '@/components/crm/PackProgressCard';
+import { WhatsAppGate } from '@/components/crm/WhatsAppGate';
 import type { ServicePurchase, EntitlementSummary } from '@/types/services';
 
 export default function MonEspaceDashboard() {
@@ -94,6 +95,13 @@ export default function MonEspaceDashboard() {
             : 'Découvrez nos services pour votre voyage aux Philippines.'}
         </p>
       </div>
+
+      {/* WhatsApp gate — only renders if user has active whatsapp_support entitlement */}
+      <WhatsAppGate
+        userId={user!.id}
+        entitlements={entitlements}
+        whatsappNumber={profile?.whatsapp_number}
+      />
 
       {/* Top row: Pack summary + next call */}
       {purchases.length > 0 && (

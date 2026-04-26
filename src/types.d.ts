@@ -80,6 +80,11 @@ export type Profile = {
   bio?: string;
   location?: string;
   website?: string;
+  whatsapp_number?: string | null;
+  customer_since?: string | null;
+  total_spent?: number | null;
+  easy_plus_expires_at?: string | null;
+  rencontre_premium_expires_at?: string | null;
 };
 
 export type PageProps<T = any> = {
