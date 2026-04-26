@@ -180,8 +180,10 @@ async function handleServiceCheckout(
 
   console.log(`Service checkout completed: ${serviceType} for user ${userId}, purchase ${purchaseId}`);
 
-  // Update purchase status to paid
-  const { error: updateError } = await supabaseAdmin
+  // Idempotent : ne passe en 'paid' QUE depuis 'pending'. Si Stripe retry
+  // l'event, le second appel ne match plus et on n'active pas deux fois
+  // (sinon entitlements + appels + emails dupliqués).
+  const { data: claimed, error: updateError } = await supabaseAdmin
     .from('service_purchases')
     .update({
       status: 'paid',
@@ -189,27 +191,29 @@ async function handleServiceCheckout(
       stripe_subscription_id: session.subscription as string || null,
       updated_at: new Date().toISOString(),
     })
-    .eq('id', purchaseId);
+    .eq('id', purchaseId)
+    .eq('status', 'pending')
+    .select('id');
 
   if (updateError) {
     console.error(`Failed to update purchase ${purchaseId}:`, updateError);
     return;
   }
+  if (!claimed || claimed.length === 0) {
+    console.log(`Service checkout ${purchaseId} already processed — skipping activation`);
+    return;
+  }
 
-  // Update customer_since if first purchase
   await supabaseAdmin.rpc('update_customer_since_if_null', {
     p_user_id: userId,
   }).then(({ error }) => {
-    // Ignore errors from missing function — will be handled by activation service
     if (error) console.log('update_customer_since_if_null not available, skipping');
   });
 
-  // Trigger auto-activation
   const { activateService } = await import('@/services/activationService');
   const { error: activationError } = await activateService(supabaseAdmin, purchaseId);
   if (activationError) {
     console.error(`Activation failed for purchase ${purchaseId}:`, activationError);
-    // Purchase stays in 'paid' status for manual retry
   }
 }
 
@@ -225,7 +229,8 @@ async function handleItineraryPayment(
   console.log(`Payment succeeded for generation ${generation_id}, variant ${selected_variant}`);
 
   try {
-    const { error: updateError } = await supabaseAdmin
+    // Idempotent : on ne complète que si pas déjà completed (évite double email).
+    const { data: claimed, error: updateError } = await supabaseAdmin
       .from('itinerary_generations')
       .update({
         payment_status: 'completed',
@@ -234,16 +239,21 @@ async function handleItineraryPayment(
         delivered_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
-      .eq('id', generation_id);
+      .eq('id', generation_id)
+      .neq('payment_status', 'completed')
+      .select('id');
 
     if (updateError) {
       console.error('Error updating generation:', updateError);
       throw updateError;
     }
+    if (!claimed || claimed.length === 0) {
+      console.log(`Itinerary payment ${generation_id} already processed — skipping email`);
+      return;
+    }
 
     console.log(`Generation ${generation_id} marked as delivered (auto-profile delivery)`);
 
-    // Send payment confirmation email
     const { data: generation } = await supabaseAdmin
       .from('itinerary_generations')
       .select('user_id, destination, duration_days')
@@ -279,6 +289,18 @@ async function handleMarketplacePayment(
 
   try {
     const parsedCartItems = JSON.parse(cartItems);
+
+    // Idempotent : si un order existe déjà pour ce payment_intent_id (Stripe
+    // a retried), on retourne sans rien faire (UNIQUE constraint en BDD).
+    const { data: existing } = await supabaseAdmin
+      .from('orders')
+      .select('id')
+      .eq('stripe_payment_intent_id', paymentIntent.id)
+      .maybeSingle();
+    if (existing) {
+      console.log(`Marketplace order ${existing.id} already exists for ${paymentIntent.id} — skipping`);
+      return;
+    }
 
     const { data: order, error: orderError } = await supabaseAdmin
       .from('orders')

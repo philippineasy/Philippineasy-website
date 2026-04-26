@@ -46,8 +46,29 @@ export async function POST(request: Request) {
     datingProfile.message_daily_count = 0;
   }
 
-  if (profile.plan === 'free' && datingProfile.message_daily_count >= 2) {
-    return NextResponse.json({ error: 'Daily message limit reached. Upgrade to premium.' }, { status: 429 });
+  // Pour les free : claim atomique du quota AVANT d'insérer le message.
+  // L'UPDATE conditionnel garantit qu'aucune autre requête parallèle n'a
+  // déjà incrémenté le compteur depuis notre lecture (sinon, double-spend).
+  if (profile.plan === 'free') {
+    const currentCount = datingProfile.message_daily_count;
+    if (currentCount >= 2) {
+      return NextResponse.json({ error: 'Daily message limit reached. Upgrade to premium.' }, { status: 429 });
+    }
+    const { data: claimed, error: claimErr } = await supabase
+      .from('dating_profiles')
+      .update({ message_daily_count: currentCount + 1 })
+      .eq('user_id', user.id)
+      .eq('message_daily_count', currentCount)
+      .lt('message_daily_count', 2)
+      .select('message_daily_count');
+
+    if (claimErr) {
+      console.error('Quota claim error:', claimErr);
+      return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
+    }
+    if (!claimed || claimed.length === 0) {
+      return NextResponse.json({ error: 'Daily message limit reached. Upgrade to premium.' }, { status: 429 });
+    }
   }
 
   // Insert the message
@@ -58,15 +79,14 @@ export async function POST(request: Request) {
     .single();
 
   if (messageError) {
+    // Compensating action : restaurer le quota si l'insert échoue
+    if (profile.plan === 'free') {
+      await supabase
+        .from('dating_profiles')
+        .update({ message_daily_count: datingProfile.message_daily_count })
+        .eq('user_id', user.id);
+    }
     return NextResponse.json({ error: messageError.message }, { status: 500 });
-  }
-
-  // Increment message count for free users
-  if (profile.plan === 'free') {
-    await supabase
-      .from('dating_profiles')
-      .update({ message_daily_count: datingProfile.message_daily_count + 1 })
-      .eq('user_id', user.id);
   }
 
   // Send message notification to recipient (non-blocking)
