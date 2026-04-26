@@ -9,10 +9,11 @@ import { Article, EditorJSContent } from '@/types';
 import { generateArticleMetaDescription } from '@/utils/seo/metaDescriptionGenerator';
 import { getMainCategoryPath } from '@/lib/utils';
 import ArticleContentRenderer from '@/components/shared/ArticleContentRenderer';
-import TableOfContents from '@/components/shared/TableOfContents';
 import RelatedArticles from '@/components/shared/RelatedArticles';
 import ViewTracker from '@/components/shared/ViewTracker';
 import { ArticleHero } from '@/components/articles/ArticleHero';
+import { ArticleTOC } from '@/components/articles/ArticleTOC';
+import { ArticleAside } from '@/components/articles/ArticleAside';
 
 // Deduplicate fetch between generateMetadata and page render
 const getCachedArticle = cache(async (slug: string) => {
@@ -183,15 +184,10 @@ export default async function ArticlePage({
           canonicalUrl={canonicalUrl}
         />
 
-        <div className="lg:flex lg:space-x-8">
-          <aside className="w-full lg:w-1/4 hidden md:block mb-8 lg:mb-0">
-            <div className="sticky top-28 p-4 bg-muted rounded-lg shadow-md border border-border">
-              <h2 className="text-lg font-semibold text-foreground mb-3 border-b pb-2">Sommaire</h2>
-              {parsedContent && <TableOfContents blocks={parsedContent.blocks || []} />}
-            </div>
-          </aside>
+        <div className="mt-12 grid grid-cols-1 lg:grid-cols-[220px_1fr_300px] gap-8 lg:gap-12">
+          {parsedContent && <ArticleTOC blocks={parsedContent.blocks || []} />}
 
-          <article className="w-full lg:flex-grow">
+          <article className="min-w-0">
             <div className="prose prose-lg max-w-none article-content">
               <ArticleContentRenderer content={parsedContent || { blocks: [], time: 0, version: '' }} />
             </div>
@@ -207,6 +203,8 @@ export default async function ArticlePage({
 
             <RelatedArticles articles={relatedArticles || []} />
           </article>
+
+          <ArticleAside relatedArticles={relatedArticles || []} />
         </div>
       </main>
     </>
