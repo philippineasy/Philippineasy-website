@@ -276,7 +276,7 @@ export function IAOverlay() {
 
   return (
     <div
-      className="fixed inset-0 z-[300] flex items-start sm:items-center justify-center p-2 sm:p-6 bg-ink/72 backdrop-blur-sm motion-reduce:backdrop-blur-none overflow-y-auto"
+      className="fixed inset-0 z-[300] flex items-start sm:items-center justify-center p-0 sm:p-6 bg-ink/72 backdrop-blur-sm motion-reduce:backdrop-blur-none overflow-y-auto"
       onClick={() => { if (!loading && !paymentLoading) close(); }}
       role="presentation"
     >
@@ -285,7 +285,7 @@ export function IAOverlay() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="ia-overlay-title"
-        className="relative w-full max-w-[1040px] my-2 sm:my-8 bg-card rounded-3xl shadow-2xl px-5 py-7 sm:px-10 sm:py-10"
+        className="relative w-full sm:max-w-[920px] min-h-screen sm:min-h-0 sm:my-6 bg-card sm:rounded-3xl shadow-2xl px-4 pt-6 pb-28 sm:px-9 sm:py-9 sm:pb-9"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -647,34 +647,48 @@ export function IAOverlay() {
               <p role="alert" className="mb-4 text-[13px] text-destructive bg-destructive/10 border border-destructive/30 rounded-lg px-3 py-2">{error}</p>
             )}
 
-            {/* === Payment CTA === */}
-            {previews && previews.length > 0 && selectedVariant && currentPricing && (
-              <div className="border-t border-border/60 pt-6 mt-2 flex flex-wrap items-center justify-between gap-3">
+            {/* === Recommencer link (sticky CTA below handles payment) === */}
+            {previews && previews.length > 0 && selectedVariant && (
+              <div className="pt-4 mt-2 flex justify-start">
                 <button type="button" onClick={() => { setStep(0); setPreviews(null); setGenerationId(null); setSelectedVariant(null); }} disabled={paymentLoading} className="text-[13px] text-muted-foreground hover:text-foreground font-medium px-3 py-2 disabled:opacity-50">
                   ← Recommencer
                 </button>
-                <div className="flex flex-col items-end gap-1.5">
-                  <button
-                    type="button"
-                    onClick={handlePayment}
-                    disabled={paymentLoading}
-                    className="inline-flex items-center gap-2 rounded-full bg-accent text-ink px-6 py-3 text-[15px] font-semibold shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform motion-reduce:transition-none motion-reduce:hover:transform-none disabled:opacity-60 disabled:cursor-wait disabled:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
-                  >
-                    {paymentLoading ? (
-                      <><svg className="animate-spin motion-reduce:animate-none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>Préparation paiement…</>
-                    ) : currentPricing.price > 0 ? (
-                      <>🔒 Débloquer pour {formatPrice(currentPricing.price)} →</>
-                    ) : (
-                      <>Demander un devis →</>
-                    )}
-                  </button>
-                  <span className="text-[11px] text-muted-foreground flex items-center gap-1">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                    Paiement sécurisé Stripe · Livraison instantanée par email
-                  </span>
-                </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* === Sticky bottom payment CTA (only on step 2 when ready) === */}
+        {step === 2 && previews && previews.length > 0 && selectedVariant && currentPricing && (
+          <div className="fixed sm:absolute left-0 right-0 bottom-0 sm:bottom-0 sm:rounded-b-3xl bg-card/96 backdrop-blur-md border-t border-border/60 px-4 sm:px-9 py-3.5 sm:py-4 z-10 shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+            <div className="flex items-center justify-between gap-3">
+              <div className="hidden sm:flex flex-col leading-tight">
+                <span className="text-[11px] uppercase tracking-[0.06em] text-muted-foreground font-semibold">{OFFER_LABELS[selectedOffer].name}</span>
+                <span className="text-[15px] font-bold text-ink">
+                  {selectedVariant && VARIANT_CONFIG[selectedVariant].label} · {DURATION_LABELS[dur]}
+                </span>
+              </div>
+              <div className="flex flex-col items-end gap-0.5 sm:flex-1 sm:items-end">
+                <button
+                  type="button"
+                  onClick={handlePayment}
+                  disabled={paymentLoading}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-accent text-ink px-6 py-3 text-[15px] font-semibold shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform motion-reduce:transition-none motion-reduce:hover:transform-none disabled:opacity-60 disabled:cursor-wait disabled:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                >
+                  {paymentLoading ? (
+                    <><svg className="animate-spin motion-reduce:animate-none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>Préparation paiement…</>
+                  ) : currentPricing.price > 0 ? (
+                    <>🔒 Débloquer pour {formatPrice(currentPricing.price)} →</>
+                  ) : (
+                    <>Demander un devis →</>
+                  )}
+                </button>
+                <span className="hidden sm:flex text-[10.5px] text-muted-foreground items-center gap-1 mt-0.5">
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Stripe · Livraison instantanée par email
+                </span>
+              </div>
+            </div>
           </div>
         )}
       </div>
