@@ -171,14 +171,21 @@ export default async function MonEspaceItinerairesPage() {
                   {/* Actions */}
                   <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-border/40">
                     <div className="flex flex-wrap gap-2">
+                      <Link
+                        href={`/itineraire/${g.id}`}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-accent text-ink px-4 py-2 text-[13px] font-semibold shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        Voir le détail (carte, photos, jours)
+                      </Link>
                       <a
                         href={`/api/itinerary/pdf/${g.id}`}
                         target="_blank"
                         rel="noopener"
-                        className="inline-flex items-center gap-1.5 rounded-full bg-accent text-ink px-4 py-2 text-[13px] font-semibold shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card text-foreground px-4 py-2 text-[13px] font-medium hover:border-primary/40 hover:text-primary transition-colors"
                       >
                         <Download className="w-3.5 h-3.5" />
-                        Télécharger PDF
+                        PDF
                       </a>
                       <ResendButton generationId={g.id} email={g.delivery_email} />
                       {hasMods && (

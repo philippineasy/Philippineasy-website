@@ -348,89 +348,32 @@ const ProfilPage = () => {
               </div>
             </div>
 
-            <div className="bg-card p-6 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.08)] border border-border/50">
-              <h2 className="text-2xl font-semibold mb-6 border-b border-border pb-3 flex items-center">
-                <FontAwesomeIcon icon={faRoute} className="text-accent mr-3 text-2xl" /> Mes Itineraires Achetes
-              </h2>
-              <div className="space-y-4">
-                {savedItineraries.length > 0 ? (
-                  savedItineraries.map((itinerary) => {
-                    const variantColors = {
-                      relax: 'border-l-teal-400',
-                      balanced: 'border-l-emerald-400',
-                      adventure: 'border-l-amber-400',
-                    } as const;
-                    const borderColor = variantColors[itinerary.selected_variant as keyof typeof variantColors] || 'border-l-primary';
-
-                    return (
-                      <div
-                        key={itinerary.id}
-                        className={`bg-card border border-border/50 border-l-4 ${borderColor} p-4 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.08)] transition-all`}
-                      >
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
-                          <div className="flex-grow">
-                            <div className="flex flex-wrap items-center gap-2 mb-2">
-                              <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors ${
-                                itinerary.selected_variant === 'relax' ? 'border-transparent bg-teal-100 text-teal-800' :
-                                itinerary.selected_variant === 'balanced' ? 'border-transparent bg-emerald-100 text-emerald-800' :
-                                'border-transparent bg-amber-100 text-amber-800'
-                              }`}>
-                                {getVariantLabel(itinerary.selected_variant)}
-                              </span>
-                              <span className="inline-flex items-center rounded-full border border-transparent bg-purple-100 text-purple-800 px-2.5 py-0.5 text-xs font-semibold">
-                                {getOfferLabel(itinerary.offer_type)}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {getDurationLabel(itinerary.preferences?.duration)}
-                              </span>
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              Achete le {new Date(itinerary.created_at).toLocaleDateString('fr-FR')} • {itinerary.amount_paid?.toFixed(2) || '0.00'}€
-                            </p>
-                            {itinerary.delivered_at && (
-                              <p className="text-xs text-green-600 mt-1 font-medium">
-                                Envoye le {new Date(itinerary.delivered_at).toLocaleDateString('fr-FR')}
-                              </p>
-                            )}
-                          </div>
-                          <div className="flex gap-2">
-                            <Link
-                              href={`/itineraire/${itinerary.id}`}
-                              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-9 px-3 bg-accent text-accent-foreground hover:bg-accent/90 transition-colors gap-1"
-                            >
-                              <FontAwesomeIcon icon={faMapSigns} /> Voir
-                            </Link>
-                            <button
-                              onClick={() => handleRedeliverItinerary(itinerary.id)}
-                              disabled={isRedelivering === itinerary.id}
-                              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium h-9 px-3 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors gap-1"
-                            >
-                              {isRedelivering === itinerary.id ? (
-                                <><FontAwesomeIcon icon={faEdit} className="animate-spin" /> Envoi...</>
-                              ) : (
-                                <><FontAwesomeIcon icon={faEdit} /> Renvoyer</>
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div className="text-center py-8">
-                    <FontAwesomeIcon icon={faMapSigns} className="text-muted-foreground/30 text-4xl mb-3" />
-                    <p className="text-muted-foreground">Vous n&apos;avez pas encore d&apos;itineraire achete.</p>
-                    <p className="text-sm text-muted-foreground/70 mt-1">Creez votre premier itineraire personnalise aux Philippines !</p>
+            <Link
+              href="/mon-espace/itineraires"
+              className="block bg-card p-6 rounded-2xl border border-border/60 shadow-card-rest hover:border-primary/40 hover:shadow-card transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-4 min-w-0">
+                  <span className="shrink-0 w-12 h-12 rounded-2xl bg-accent/15 text-accent flex items-center justify-center" aria-hidden="true">
+                    <FontAwesomeIcon icon={faRoute} className="text-xl" />
+                  </span>
+                  <div className="min-w-0">
+                    <h2 className="text-[18px] font-bold text-ink leading-tight mb-0.5">
+                      Mes Itinéraires Achetés
+                    </h2>
+                    <p className="text-[13px] text-muted-foreground">
+                      {savedItineraries.length > 0
+                        ? `${savedItineraries.length} itinéraire${savedItineraries.length > 1 ? 's' : ''} débloqué${savedItineraries.length > 1 ? 's' : ''} · carte, photos et détails dans Mon Espace`
+                        : 'Aucun itinéraire débloqué pour l\'instant'}
+                    </p>
                   </div>
-                )}
+                </div>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-accent text-ink px-4 py-2 text-[13px] font-semibold shadow-cta">
+                  <FontAwesomeIcon icon={faMapSigns} />
+                  Voir tout →
+                </span>
               </div>
-              <Link
-                href="/itineraire-personnalise-pour-les-philippines"
-                className="mt-6 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-semibold h-10 px-5 bg-accent text-accent-foreground hover:bg-accent/90 transition-all gap-1.5"
-              >
-                <FontAwesomeIcon icon={faPlus} /> Creer un nouvel itineraire
-              </Link>
-            </div>
+            </Link>
 
             <div className="bg-card p-6 rounded-2xl border border-border/60 shadow-card-rest">
                 <h2 className="text-2xl font-semibold mb-6 border-b pb-3 flex items-center">
