@@ -1,6 +1,12 @@
 import Link from 'next/link';
 import { ProfilesClient } from './ProfilesClient';
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
+import { Plus, Filter } from 'lucide-react';
+import {
+  AdminPageHeader,
+  AdminCard,
+  AdminEmptyState,
+} from '@/components/admin';
 
 export default async function AdminDatingProfilesPage({
   searchParams,
@@ -16,26 +22,23 @@ export default async function AdminDatingProfilesPage({
     .select('*, profiles!inner(*)')
     .order('created_at', { ascending: false });
 
-  if (q) {
-    query = query.ilike('profiles.username', `%${q}%`);
-  }
-  if (status) {
-    query = query.eq('is_validated', status === 'validated');
-  }
-  if (plan) {
-    query = query.eq('profiles.plan', plan);
-  }
+  if (q) query = query.ilike('profiles.username', `%${q}%`);
+  if (status) query = query.eq('is_validated', status === 'validated');
+  if (plan) query = query.eq('profiles.plan', plan);
 
   const { data: profiles, error } = await query;
 
   if (error) {
-    return <p className="text-red-500">Erreur lors du chargement des profils: {error.message}</p>;
+    return (
+      <AdminCard padding="lg">
+        <p className="text-rose-700 font-medium">Erreur lors du chargement des profils: {error.message}</p>
+      </AdminCard>
+    );
   }
 
-  // Fetch emails individually per user (more robust than listUsers)
   const emailMap = new Map<string, string>();
   const userResults = await Promise.allSettled(
-    profiles.map(p => supabase.auth.admin.getUserById(p.user_id))
+    profiles.map((p) => supabase.auth.admin.getUserById(p.user_id))
   );
   userResults.forEach((result, index) => {
     if (result.status === 'fulfilled' && result.value.data?.user?.email) {
@@ -43,58 +46,85 @@ export default async function AdminDatingProfilesPage({
     }
   });
 
-  const profilesWithEmail = profiles.map(profile => ({
+  const profilesWithEmail = profiles.map((profile) => ({
     ...profile,
     email: emailMap.get(profile.user_id),
   }));
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Gestion des Profils Rencontre</h1>
-        <Link href="/admin/dating/profiles/add" className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm">
-          + Ajouter un profil
-        </Link>
-      </div>
+    <>
+      <AdminPageHeader
+        eyebrow="Modération · Rencontre"
+        title={<>Gestion des <span className="text-accent">profils</span></>}
+        description={`${profilesWithEmail.length} profil${profilesWithEmail.length > 1 ? 's' : ''} ${q ? `correspondant à « ${q} »` : 'au total'}.`}
+        actions={
+          <Link
+            href="/admin/dating/profiles/add"
+            className="inline-flex items-center gap-1.5 rounded-full bg-accent text-ink px-4 py-2 text-[13px] font-semibold shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+          >
+            <Plus className="w-4 h-4" />
+            Ajouter un profil
+          </Link>
+        }
+      />
 
-      <div className="bg-white p-4 rounded-lg shadow-md mb-8">
-        <form className="grid md:grid-cols-4 gap-4">
-          <input
-            type="text"
-            name="q"
-            defaultValue={q}
-            placeholder="Rechercher par nom..."
-            className="p-2 border rounded"
-          />
-          <select name="status" defaultValue={status} className="p-2 border rounded">
-            <option value="">Tous les statuts</option>
-            <option value="validated">Validé</option>
-            <option value="pending">En attente</option>
-          </select>
-          <select name="plan" defaultValue={plan} className="p-2 border rounded">
-            <option value="">Tous les abonnements</option>
-            <option value="premium">Premium</option>
-            <option value="free">Gratuit</option>
-          </select>
-          <button type="submit" className="p-2 bg-blue-600 text-white rounded">Filtrer</button>
+      <AdminCard padding="md" className="mb-6">
+        <form className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div className="md:col-span-1">
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground mb-1.5">Recherche</label>
+            <input type="text" name="q" defaultValue={q} placeholder="Nom d'utilisateur…" className="w-full rounded-lg border border-border bg-card px-3 py-2 text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent placeholder:text-muted-foreground/60" />
+          </div>
+          <div>
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground mb-1.5">Statut</label>
+            <select name="status" defaultValue={status} className="w-full rounded-lg border border-border bg-card px-3 py-2 text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+              <option value="">Tous</option>
+              <option value="validated">Validé</option>
+              <option value="pending">En attente</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground mb-1.5">Abonnement</label>
+            <select name="plan" defaultValue={plan} className="w-full rounded-lg border border-border bg-card px-3 py-2 text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+              <option value="">Tous</option>
+              <option value="premium">Premium</option>
+              <option value="free">Gratuit</option>
+            </select>
+          </div>
+          <div className="flex items-end">
+            <button type="submit" className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary text-primary-foreground px-4 py-2 text-[13px] font-semibold hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+              <Filter className="w-4 h-4" />
+              Filtrer
+            </button>
+          </div>
         </form>
-      </div>
+      </AdminCard>
 
-      <div className="bg-white p-8 rounded-lg shadow-md">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Utilisateur</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Abonnement</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Inscrit le</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <ProfilesClient profiles={profilesWithEmail} />
-        </table>
-      </div>
-    </div>
+      {profilesWithEmail.length > 0 ? (
+        <AdminCard padding="sm" className="overflow-hidden p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-[14px]">
+              <thead>
+                <tr className="bg-muted/40 border-b border-border/60">
+                  <th className="px-4 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Utilisateur</th>
+                  <th className="px-4 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Statut</th>
+                  <th className="px-4 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Abonnement</th>
+                  <th className="px-4 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Type</th>
+                  <th className="px-4 py-3 text-left font-semibold text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Inscrit le</th>
+                  <th className="px-4 py-3 text-right font-semibold text-[11px] uppercase tracking-[0.08em] text-muted-foreground">Actions</th>
+                </tr>
+              </thead>
+              <ProfilesClient profiles={profilesWithEmail} />
+            </table>
+          </div>
+        </AdminCard>
+      ) : (
+        <AdminCard padding="lg">
+          <AdminEmptyState
+            title="Aucun profil"
+            description={q ? `Aucun profil ne correspond à « ${q} »` : 'Pas encore de profil dating à modérer.'}
+          />
+        </AdminCard>
+      )}
+    </>
   );
 }

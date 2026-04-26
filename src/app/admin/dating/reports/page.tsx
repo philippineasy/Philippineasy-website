@@ -1,7 +1,23 @@
 import { createClient } from '@/utils/supabase/server';
-import Link from 'next/link';
+import { Flag } from 'lucide-react';
+import {
+  AdminPageHeader,
+  AdminCard,
+  AdminTable,
+  AdminBadge,
+  AdminEmptyState,
+  type Column,
+} from '@/components/admin';
 
-const AdminDatingReportsPage = async () => {
+type Report = {
+  id: string | number;
+  created_at: string;
+  reporter: { username: string } | null;
+  reported: { username: string } | null;
+  message: { content: string } | null;
+};
+
+export default async function AdminDatingReportsPage() {
   const supabase = await createClient();
 
   const { data: reports, error } = await supabase
@@ -10,42 +26,91 @@ const AdminDatingReportsPage = async () => {
     .order('created_at', { ascending: false });
 
   if (error) {
-    return <p className="text-red-500">Erreur lors du chargement des signalements: {error.message}. Avez-vous appliqué la nouvelle migration ?</p>;
+    return (
+      <AdminCard padding="lg">
+        <p className="text-rose-700 font-medium">
+          Erreur lors du chargement des signalements: {error.message}.{' '}
+          <span className="text-muted-foreground">Avez-vous appliqué la nouvelle migration ?</span>
+        </p>
+      </AdminCard>
+    );
   }
 
-  return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8">Messages Signalés</h1>
-      <div className="bg-white p-8 rounded-lg shadow-md">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Signalé par</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Utilisateur signalé</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {reports.map((report: any) => (
-              <tr key={report.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{report.reporter.username}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{report.reported.username}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate max-w-xs">{report.message.content}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(report.created_at).toLocaleString('fr-FR')}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  {/* Actions will be added here */}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-};
+  const rows = (reports || []) as Report[];
 
-export default AdminDatingReportsPage;
+  const columns: Column<Report>[] = [
+    {
+      key: 'reporter',
+      label: 'Signalé par',
+      width: '160px',
+      render: (r) => (
+        <span className="font-medium text-ink">{r.reporter?.username || '—'}</span>
+      ),
+    },
+    {
+      key: 'reported',
+      label: 'Utilisateur signalé',
+      width: '160px',
+      render: (r) => (
+        <AdminBadge tone="rose" dot>{r.reported?.username || '—'}</AdminBadge>
+      ),
+    },
+    {
+      key: 'message',
+      label: 'Message',
+      render: (r) => (
+        <p className="text-[13px] text-foreground/80 max-w-md truncate">
+          {r.message?.content || <span className="italic text-muted-foreground">Message indisponible</span>}
+        </p>
+      ),
+    },
+    {
+      key: 'date',
+      label: 'Date',
+      width: '160px',
+      render: (r) => (
+        <span className="text-[12px] text-muted-foreground">
+          {new Date(r.created_at).toLocaleString('fr-FR', {
+            day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+          })}
+        </span>
+      ),
+    },
+    {
+      key: 'actions',
+      label: 'Actions',
+      align: 'right',
+      width: '180px',
+      render: () => (
+        <span className="text-[11px] text-muted-foreground italic">À implémenter</span>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <AdminPageHeader
+        eyebrow="Modération · Rencontre"
+        title={<>Messages <span className="text-accent">signalés</span></>}
+        description={
+          rows.length > 0
+            ? <>{rows.length} signalement{rows.length > 1 ? 's' : ''} en attente de revue.</>
+            : 'Aucun signalement en cours.'
+        }
+      />
+
+      <AdminTable<Report>
+        columns={columns}
+        rows={rows}
+        rowKey={(r) => r.id}
+        empty={
+          <AdminEmptyState
+            icon={<Flag className="w-6 h-6" />}
+            title="Aucun signalement"
+            description="Tous les messages signalés par les utilisateurs apparaîtront ici."
+          />
+        }
+      />
+    </>
+  );
+}

@@ -1,7 +1,9 @@
 import { createClient } from '@/utils/supabase/server';
 import { PhotosClient } from './PhotosClient';
+import { Camera } from 'lucide-react';
+import { AdminPageHeader, AdminCard, AdminEmptyState } from '@/components/admin';
 
-const AdminDatingPhotosPage = async () => {
+export default async function AdminDatingPhotosPage() {
   const supabase = await createClient();
 
   const { data: photos, error } = await supabase
@@ -10,15 +12,42 @@ const AdminDatingPhotosPage = async () => {
     .order('created_at', { ascending: false });
 
   if (error) {
-    return <p className="text-red-500">Erreur lors du chargement des photos: {error.message}</p>;
+    return (
+      <AdminCard padding="lg">
+        <p className="text-rose-700 font-medium">Erreur lors du chargement des photos: {error.message}</p>
+      </AdminCard>
+    );
   }
 
-  return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8">Modération des Photos</h1>
-      <PhotosClient photos={photos} />
-    </div>
-  );
-};
+  const pending = photos?.filter((p: any) => p.status === 'pending').length || 0;
+  const approved = photos?.filter((p: any) => p.status === 'approved').length || 0;
+  const rejected = photos?.filter((p: any) => p.status === 'rejected').length || 0;
 
-export default AdminDatingPhotosPage;
+  return (
+    <>
+      <AdminPageHeader
+        eyebrow="Modération · Rencontre"
+        title={<>Modération des <span className="text-accent">photos</span></>}
+        description={
+          <>
+            <span className="text-amber-700 font-semibold">{pending}</span> en attente ·{' '}
+            <span className="text-emerald-700 font-semibold">{approved}</span> approuvées ·{' '}
+            <span className="text-rose-700 font-semibold">{rejected}</span> rejetées
+          </>
+        }
+      />
+
+      {photos && photos.length > 0 ? (
+        <PhotosClient photos={photos} />
+      ) : (
+        <AdminCard padding="lg">
+          <AdminEmptyState
+            icon={<Camera className="w-6 h-6" />}
+            title="Aucune photo"
+            description="Aucune photo dating uploadée pour le moment."
+          />
+        </AdminCard>
+      )}
+    </>
+  );
+}
