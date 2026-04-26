@@ -8,12 +8,12 @@ import JsonLd from '@/components/shared/JsonLd';
 import { Article, EditorJSContent } from '@/types';
 import { generateArticleMetaDescription } from '@/utils/seo/metaDescriptionGenerator';
 import { getMainCategoryPath } from '@/lib/utils';
-import ArticleContentRenderer from '@/components/shared/ArticleContentRenderer';
 import RelatedArticles from '@/components/shared/RelatedArticles';
 import ViewTracker from '@/components/shared/ViewTracker';
 import { ArticleHero } from '@/components/articles/ArticleHero';
 import { ArticleTOC } from '@/components/articles/ArticleTOC';
 import { ArticleAside } from '@/components/articles/ArticleAside';
+import { EditorialRenderer } from '@/components/articles/EditorialRenderer';
 
 // Deduplicate fetch between generateMetadata and page render
 const getCachedArticle = cache(async (slug: string) => {
@@ -188,9 +188,7 @@ export default async function ArticlePage({
           {parsedContent && <ArticleTOC blocks={parsedContent.blocks || []} />}
 
           <article className="min-w-0">
-            <div className="prose prose-lg max-w-none article-content">
-              <ArticleContentRenderer content={parsedContent || { blocks: [], time: 0, version: '' }} />
-            </div>
+            <EditorialRenderer content={parsedContent || { blocks: [], time: 0, version: '' }} />
 
             {typedArticle.tags && typedArticle.tags.length > 0 && (
               <div className="mt-8 pt-4 border-t">
