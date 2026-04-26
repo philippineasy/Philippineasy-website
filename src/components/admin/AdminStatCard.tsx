@@ -12,7 +12,7 @@ type Props = {
   hint?: React.ReactNode;
   icon?: React.ReactNode;
   trend?: Trend;
-  accent?: 'primary' | 'accent' | 'emerald' | 'rose' | 'sky' | 'violet';
+  accent?: 'primary' | 'accent' | 'emerald' | 'rose' | 'sky' | 'violet' | 'amber';
 };
 
 const ACCENT_BG: Record<NonNullable<Props['accent']>, string> = {
@@ -22,6 +22,7 @@ const ACCENT_BG: Record<NonNullable<Props['accent']>, string> = {
   rose: 'bg-rose-500/10 text-rose-600',
   sky: 'bg-sky-500/10 text-sky-600',
   violet: 'bg-violet-500/10 text-violet-600',
+  amber: 'bg-amber-500/10 text-amber-600',
 };
 
 // KPI / stat card for admin dashboards.

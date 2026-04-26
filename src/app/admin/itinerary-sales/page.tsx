@@ -85,13 +85,7 @@ function shortId(id: string): string {
 export default async function ItinerarySalesPage() {
   const supabase = await createClient();
 
-  // KPIs aggregated
-  const { data: kpis } = await supabase.rpc('admin_itinerary_kpis').single().then(
-    () => ({ data: null }),
-    () => ({ data: null })
-  ).catch(() => ({ data: null }));
-
-  // Fallback: aggregate via direct queries
+  // KPIs aggregated via direct query (no RPC dependency)
   const { data: allGens } = await supabase
     .from('itinerary_generations')
     .select('id, payment_status, amount_paid, created_at, offer_type, status, selected_variant')
