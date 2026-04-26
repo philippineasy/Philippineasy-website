@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faTachometerAlt, faBoxOpen, faPhone, faComments, faFileDownload, faArrowLeft, faMap,
+  faTachometerAlt, faBoxOpen, faPhone, faComments, faFileDownload, faArrowLeft, faMap, faCrown,
 } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { href: '/mon-espace/appels', label: 'Mes Appels', icon: faPhone },
   { href: '/mon-espace/messages', label: 'Messages', icon: faComments },
   { href: '/mon-espace/guides', label: 'Guides PDF', icon: faFileDownload },
+  { href: '/mon-espace/easy-plus', label: 'Easy+', icon: faCrown },
 ];
 
 export default function MonEspaceLayout({ children }: { children: React.ReactNode }) {
