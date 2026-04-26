@@ -1,106 +1,209 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faNewspaper, faUsers, faComments } from '@fortawesome/free-solid-svg-icons';
-import { supabase } from '@/utils/supabase/client';
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
+import { createClient } from '@/utils/supabase/server';
+import {
+  Newspaper, Users, MessagesSquare, Map, CreditCard,
+  Heart, Phone, TrendingUp, ArrowUpRight,
+} from 'lucide-react';
+import {
+  AdminPageHeader,
+  AdminStatCard,
+  AdminCard,
+  AdminSection,
+  AdminBadge,
+} from '@/components/admin';
 
-const AdminDashboardPage = () => {
-  const [stats, setStats] = useState({
-    articles: { total: 0, published: 0, draft: 0, scheduled: 0 },
-    users: { total: 0, online: 0 },
-    forum: { topics: 0, posts: 0 }
-  });
+export const dynamic = 'force-dynamic';
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      const { data: articleData, error: articleError } = await supabase.from('articles').select('status');
-      const { count: userCount, error: userError } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
-      const { data: onlineUsers, error: onlineUsersError } = await supabase.functions.invoke('online-users', {
-        method: 'GET',
-      });
-      const { count: topicCount, error: topicError } = await supabase.from('forum_topics').select('*', { count: 'exact', head: true });
-      const { count: postCount, error: postError } = await supabase.from('forum_posts').select('*', { count: 'exact', head: true });
+async function fetchDashboardStats() {
+  const supabase = await createClient();
 
-      if (articleError || userError || onlineUsersError || topicError || postError) {
-        console.error('Error fetching stats:', articleError, userError, onlineUsersError, topicError, postError);
-        return;
-      }
+  const [
+    { data: articles },
+    { count: usersCount },
+    { count: topicsCount },
+    { count: postsCount },
+    { data: itineraryStats },
+    { data: serviceStats },
+    { count: datingProfilesCount },
+  ] = await Promise.all([
+    supabase.from('articles').select('status'),
+    supabase.from('profiles').select('*', { count: 'exact', head: true }),
+    supabase.from('forum_topics').select('*', { count: 'exact', head: true }),
+    supabase.from('forum_posts').select('*', { count: 'exact', head: true }),
+    supabase.from('itinerary_generations').select('payment_status, amount_paid, created_at'),
+    supabase.from('service_purchases').select('status, amount, created_at'),
+    supabase.from('dating_profiles').select('*', { count: 'exact', head: true }),
+  ]);
 
-      const articleStats = {
-        total: articleData?.length || 0,
-        published: articleData?.filter(a => a.status === 'published').length || 0,
-        draft: articleData?.filter(a => a.status === 'draft').length || 0,
-        scheduled: articleData?.filter(a => a.status === 'scheduled').length || 0,
-      };
+  const articlePub = articles?.filter((a: any) => a.status === 'published').length || 0;
+  const articleDraft = articles?.filter((a: any) => a.status === 'draft').length || 0;
 
-      setStats({
-        articles: articleStats,
-        users: { total: userCount || 0, online: (onlineUsers as unknown[])?.length || 0 },
-        forum: { topics: topicCount || 0, posts: postCount || 0 }
-      });
-    };
+  const itinPaid = itineraryStats?.filter((g: any) => g.payment_status === 'completed').length || 0;
+  const itinTotal = itineraryStats?.length || 0;
+  const itinRev30d = (itineraryStats || [])
+    .filter((g: any) => g.payment_status === 'completed' && new Date(g.created_at) >= new Date(Date.now() - 30 * 86400000))
+    .reduce((s: number, g: any) => s + Number(g.amount_paid || 0), 0);
 
-    fetchStats();
-  }, [supabase]);
+  const servicePaid = serviceStats?.filter((s: any) => s.status === 'paid' || s.status === 'active').length || 0;
+  const serviceRev30d = (serviceStats || [])
+    .filter((s: any) => (s.status === 'paid' || s.status === 'active') && new Date(s.created_at) >= new Date(Date.now() - 30 * 86400000))
+    .reduce((sum: number, s: any) => sum + Number(s.amount || 0), 0);
 
-  const StatCard = ({ title, icon, data }: { title: string, icon: IconProp, data: { [key: string]: string | number } }) => {
-    const frenchLabels: { [key: string]: string } = {
-      total: 'Total',
-      online: 'En ligne',
-      published: 'Publiés',
-      draft: 'Brouillons',
-      scheduled: 'Planifiés',
-      topics: 'Sujets',
-      posts: 'Messages'
-    };
-
-    return (
-      <div className="bg-card p-6 rounded-lg shadow-lg">
-        <div className="flex items-center text-primary mb-4">
-          <FontAwesomeIcon icon={icon} className="fa-2x mr-3" />
-          <h2 className="text-2xl font-bold">{title}</h2>
-        </div>
-        <div className="space-y-2">
-          {Object.entries(data).map(([key, value]) => (
-            <div key={key} className="flex justify-between items-center py-2 border-b border-border last:border-b-0">
-              <span className="text-muted-foreground">{frenchLabels[key.toLowerCase()] || key}:</span>
-              <span className="font-bold text-foreground">{String(value)}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
+  return {
+    articles: { total: articles?.length || 0, published: articlePub, draft: articleDraft },
+    users: usersCount || 0,
+    forum: { topics: topicsCount || 0, posts: postsCount || 0 },
+    itineraries: { total: itinTotal, paid: itinPaid },
+    services: { paid: servicePaid },
+    dating: datingProfilesCount || 0,
+    revenue30d: itinRev30d + serviceRev30d,
+    revItineraires30d: itinRev30d,
+    revServices30d: serviceRev30d,
   };
+}
+
+export default async function AdminDashboardPage() {
+  const stats = await fetchDashboardStats();
+
+  const conversionItin = stats.itineraries.total > 0
+    ? Math.round((stats.itineraries.paid / stats.itineraries.total) * 100)
+    : 0;
 
   return (
     <>
-      <h1 className="text-4xl font-bold text-center mb-12">Tableau de Bord Administrateur</h1>
-      <section className="mb-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <StatCard title="Articles" icon={faNewspaper} data={stats.articles} />
-        <StatCard title="Utilisateurs" icon={faUsers} data={stats.users} />
-        <StatCard title="Forum" icon={faComments} data={stats.forum} />
-      </section>
+      <AdminPageHeader
+        eyebrow="Tableau de bord"
+        title={<>Vue d'<span className="text-accent">ensemble</span></>}
+        description={<>Pulse de la plateforme Philippin'Easy — contenus, ventes, communauté et IA.</>}
+      />
 
-      <h2 className="text-3xl font-semibold text-center mb-8">Accès Rapides</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <Link href="/admin/articles" className="bg-card p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-          <h2 className="text-2xl font-bold text-primary mb-2">Gérer les Articles</h2>
-          <p className="text-muted-foreground">Créer, modifier et supprimer des articles.</p>
-        </Link>
-        <Link href="/admin/users" className="bg-card p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-          <h2 className="text-2xl font-bold text-primary mb-2">Gérer les Utilisateurs</h2>
-          <p className="text-muted-foreground">Modifier les rôles des utilisateurs.</p>
-        </Link>
-        <Link href="/admin/forum" className="bg-card p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
-          <h2 className="text-2xl font-bold text-primary mb-2">Gérer le Forum</h2>
-          <p className="text-muted-foreground">Administrer les catégories et les paramètres du forum.</p>
-        </Link>
-      </div>
+      <AdminSection eyebrow="Activité commerciale" title="Revenus & conversions (30 derniers jours)">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+          <AdminStatCard
+            label="Revenu total 30 j"
+            value={`${stats.revenue30d.toFixed(2)}€`}
+            hint={<>Itinéraires {stats.revItineraires30d.toFixed(0)}€ · Services {stats.revServices30d.toFixed(0)}€</>}
+            accent="accent"
+            icon={<CreditCard className="w-5 h-5" />}
+          />
+          <AdminStatCard
+            label="Itinéraires payés"
+            value={stats.itineraries.paid}
+            hint={`${stats.itineraries.total} générations totales`}
+            accent="primary"
+            icon={<Map className="w-5 h-5" />}
+          />
+          <AdminStatCard
+            label="Conversion IA"
+            value={`${conversionItin}%`}
+            hint={`${stats.itineraries.paid} sur ${stats.itineraries.total}`}
+            accent={conversionItin >= 15 ? 'emerald' : conversionItin >= 5 ? 'accent' : 'rose'}
+            icon={<TrendingUp className="w-5 h-5" />}
+          />
+          <AdminStatCard
+            label="Services actifs"
+            value={stats.services.paid}
+            hint="Buddy / Voyage Serein / Pack Ultime"
+            accent="violet"
+            icon={<Phone className="w-5 h-5" />}
+          />
+        </div>
+      </AdminSection>
+
+      <AdminSection eyebrow="Engagement" title="Contenus & communauté">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+          <AdminStatCard
+            label="Articles publiés"
+            value={stats.articles.published}
+            hint={`${stats.articles.draft} brouillons`}
+            accent="primary"
+            icon={<Newspaper className="w-5 h-5" />}
+          />
+          <AdminStatCard label="Utilisateurs" value={stats.users} accent="sky" icon={<Users className="w-5 h-5" />} />
+          <AdminStatCard
+            label="Forum"
+            value={stats.forum.topics}
+            hint={`${stats.forum.posts} messages`}
+            accent="emerald"
+            icon={<MessagesSquare className="w-5 h-5" />}
+          />
+          <AdminStatCard
+            label="Profils Rencontre"
+            value={stats.dating}
+            accent="rose"
+            icon={<Heart className="w-5 h-5" />}
+          />
+        </div>
+      </AdminSection>
+
+      <AdminSection eyebrow="Actions rapides" title="Tableaux de suivi">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <QuickLink
+            href="/admin/itinerary-sales"
+            icon={<Map className="w-5 h-5" />}
+            title="Itinéraires IA"
+            description={`Suivi ventes, conversion, breakdown par offre. ${conversionItin}% conversion actuelle.`}
+            badge={<AdminBadge tone="primary" dot>{stats.itineraries.paid} payés</AdminBadge>}
+          />
+          <QuickLink
+            href="/admin/customers"
+            icon={<Users className="w-5 h-5" />}
+            title="Clients & CRM"
+            description="Profils achat, conversations, notes admin, historique transactions."
+          />
+          <QuickLink
+            href="/admin/calls"
+            icon={<Phone className="w-5 h-5" />}
+            title="Planning appels"
+            description="Créneaux disponibles, réservations à venir, historique."
+          />
+          <QuickLink
+            href="/admin/revenue"
+            icon={<TrendingUp className="w-5 h-5" />}
+            title="Revenus consolidés"
+            description="Vue agrégée tous services + itinéraires, breakdown mensuel."
+            badge={<AdminBadge tone="accent">30j: {stats.revenue30d.toFixed(0)}€</AdminBadge>}
+          />
+          <QuickLink
+            href="/admin/articles"
+            icon={<Newspaper className="w-5 h-5" />}
+            title="Articles"
+            description={`${stats.articles.total} articles. Création, édition, planification.`}
+          />
+          <QuickLink
+            href="/admin/dating"
+            icon={<Heart className="w-5 h-5" />}
+            title="Modération Rencontre"
+            description="Validation profils, photos, signalements."
+          />
+        </div>
+      </AdminSection>
     </>
   );
-};
+}
 
-export default AdminDashboardPage;
+function QuickLink({
+  href, icon, title, description, badge,
+}: {
+  href: string; icon: React.ReactNode; title: string; description: string; badge?: React.ReactNode;
+}) {
+  return (
+    <Link href={href} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-2xl">
+      <AdminCard hoverable>
+        <div className="flex items-start gap-3 mb-2">
+          <span className="shrink-0 w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center" aria-hidden="true">
+            {icon}
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between gap-2 mb-0.5">
+              <strong className="text-[15px] font-semibold text-ink truncate">{title}</strong>
+              <ArrowUpRight className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden="true" />
+            </div>
+            <p className="text-[12.5px] text-muted-foreground leading-snug">{description}</p>
+          </div>
+        </div>
+        {badge && <div className="mt-3">{badge}</div>}
+      </AdminCard>
+    </Link>
+  );
+}

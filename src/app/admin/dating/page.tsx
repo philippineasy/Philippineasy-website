@@ -1,57 +1,114 @@
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserCheck, faUserTimes, faVenusMars, faCamera, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
+import { Heart, UserCheck, UserX, Camera, Flag, Plus, ArrowUpRight } from 'lucide-react';
+import {
+  AdminPageHeader,
+  AdminStatCard,
+  AdminCard,
+  AdminSection,
+} from '@/components/admin';
 
-const StatCard = ({ title, value, icon }: { title: string, value: number, icon: any }) => (
-  <div className="bg-white p-6 rounded-lg shadow-md flex items-center space-x-4">
-    <FontAwesomeIcon icon={icon} className="text-3xl text-primary" />
-    <div>
-      <p className="text-gray-600 text-sm">{title}</p>
-      <p className="text-2xl font-bold">{value}</p>
-    </div>
-  </div>
-);
+export const dynamic = 'force-dynamic';
 
-const AdminDatingPage = async () => {
+export default async function AdminDatingPage() {
   const supabase = createServiceRoleClient();
 
-  const { count: totalProfiles } = await supabase.from('dating_profiles').select('*', { count: 'exact', head: true });
-  const { count: validatedProfiles } = await supabase.from('dating_profiles').select('*', { count: 'exact', head: true }).eq('is_validated', true);
-  const { count: pendingProfiles } = await supabase.from('dating_profiles').select('*', { count: 'exact', head: true }).eq('is_validated', false);
+  const [{ count: total }, { count: validated }, { count: pending }, { count: photos }] = await Promise.all([
+    supabase.from('dating_profiles').select('*', { count: 'exact', head: true }),
+    supabase.from('dating_profiles').select('*', { count: 'exact', head: true }).eq('is_validated', true),
+    supabase.from('dating_profiles').select('*', { count: 'exact', head: true }).eq('is_validated', false),
+    supabase.from('dating_photos').select('*', { count: 'exact', head: true }),
+  ]);
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8">Modération de la Section Rencontre</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <StatCard title="Profils au total" value={totalProfiles || 0} icon={faVenusMars} />
-        <StatCard title="Profils validés" value={validatedProfiles || 0} icon={faUserCheck} />
-        <StatCard title="Profils en attente" value={pendingProfiles || 0} icon={faUserTimes} />
-      </div>
+    <>
+      <AdminPageHeader
+        eyebrow="Modération · Rencontre"
+        title={<>Section <span className="text-accent">Rencontre</span></>}
+        description="Validation des profils, modération des photos et traitement des signalements."
+        actions={
+          <Link
+            href="/admin/dating/profiles/add"
+            className="inline-flex items-center gap-1.5 rounded-full bg-accent text-ink px-4 py-2 text-[13px] font-semibold shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+          >
+            <Plus className="w-4 h-4" />
+            Ajouter un profil
+          </Link>
+        }
+      />
 
-      <div className="mb-6">
-        <Link href="/admin/dating/profiles/add" className="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm">
-          + Ajouter un profil manuellement
-        </Link>
-      </div>
+      <AdminSection eyebrow="Vue d'ensemble" title="Profils & médias">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+          <AdminStatCard
+            label="Profils au total"
+            value={total || 0}
+            accent="primary"
+            icon={<Heart className="w-5 h-5" />}
+          />
+          <AdminStatCard
+            label="Profils validés"
+            value={validated || 0}
+            accent="emerald"
+            icon={<UserCheck className="w-5 h-5" />}
+          />
+          <AdminStatCard
+            label="En attente de modération"
+            value={pending || 0}
+            accent={pending && pending > 5 ? 'amber' : 'sky'}
+            icon={<UserX className="w-5 h-5" />}
+          />
+          <AdminStatCard
+            label="Photos uploadées"
+            value={photos || 0}
+            accent="violet"
+            icon={<Camera className="w-5 h-5" />}
+          />
+        </div>
+      </AdminSection>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Link href="/admin/dating/profiles" className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
-          <h2 className="text-xl font-bold flex items-center"><FontAwesomeIcon icon={faUserCheck} className="mr-3 text-primary" />Gestion des profils</h2>
-          <p className="text-gray-600 mt-2">Valider, bannir, et gérer les utilisateurs de la section rencontre.</p>
-        </Link>
-        <Link href="/admin/dating/photos" className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
-          <h2 className="text-xl font-bold flex items-center"><FontAwesomeIcon icon={faCamera} className="mr-3 text-primary" />Modération des photos</h2>
-          <p className="text-gray-600 mt-2">Visualiser et modérer les photos de profil.</p>
-        </Link>
-        <Link href="/admin/dating/reports" className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow">
-          <h2 className="text-xl font-bold flex items-center"><FontAwesomeIcon icon={faEnvelope} className="mr-3 text-primary" />Messages signalés</h2>
-          <p className="text-gray-600 mt-2">Consulter les conversations signalées par les utilisateurs.</p>
-        </Link>
-      </div>
-    </div>
+      <AdminSection eyebrow="Outils" title="Modération">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <ModTile
+            href="/admin/dating/profiles"
+            icon={<UserCheck className="w-5 h-5" />}
+            title="Gestion des profils"
+            description="Valider, bannir, et gérer les utilisateurs."
+          />
+          <ModTile
+            href="/admin/dating/photos"
+            icon={<Camera className="w-5 h-5" />}
+            title="Modération des photos"
+            description="Approuver, rejeter ou flagger les photos uploadées."
+          />
+          <ModTile
+            href="/admin/dating/reports"
+            icon={<Flag className="w-5 h-5" />}
+            title="Messages signalés"
+            description="Conversations signalées par les utilisateurs."
+          />
+        </div>
+      </AdminSection>
+    </>
   );
-};
+}
 
-export default AdminDatingPage;
+function ModTile({ href, icon, title, description }: { href: string; icon: React.ReactNode; title: string; description: string }) {
+  return (
+    <Link href={href} className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-2xl">
+      <AdminCard hoverable>
+        <div className="flex items-start gap-3">
+          <span className="shrink-0 w-9 h-9 rounded-xl bg-rose-500/10 text-rose-600 flex items-center justify-center" aria-hidden="true">
+            {icon}
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between gap-2 mb-0.5">
+              <strong className="text-[15px] font-semibold text-ink truncate">{title}</strong>
+              <ArrowUpRight className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden="true" />
+            </div>
+            <p className="text-[12.5px] text-muted-foreground leading-snug">{description}</p>
+          </div>
+        </div>
+      </AdminCard>
+    </Link>
+  );
+}
