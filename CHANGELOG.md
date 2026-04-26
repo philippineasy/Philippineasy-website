@@ -5,6 +5,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### IAOverlay v2 — funnel complet (variants + offers + paiement) + warning anti-quit
+- **Changed** : Step 2 de l'overlay devient le **funnel complet self-contained** au lieu d'un teaser qui redirigeait vers la page formulaire (qui se rouvrait vide). Reproduit dans le proto handoff style l'enchainement de la page `/itineraire-personnalise-pour-les-philippines` :
+  - **3 ProposalCards** : choix du variant (relax/balanced/adventure) avec recommended badge auto-place sur le variant matchant le tripStyle (relax→relax, adventure/diving→adventure, culture/mix→balanced). Card includes title + description + 3 highlights + 2 teaser_days + budget_estimate. Selectable au clic + Enter/Space (radiogroup ARIA).
+  - **3 Offer Cards** : Express / Premium (badge Recommandé) / Conciergerie. Pricing dynamique via `PRICING_GRID[offer][duration]` + `formatPrice()`. Liste des features depuis `OFFER_LABELS`. Premium pre-selectionne par defaut (matche le pattern original).
+  - **CTA paiement** : "🔒 Débloquer pour {prix} →" qui appelle `POST /api/itinerary/payment` avec `{generation_id, selected_variant, offer_type, duration, price_id}` puis redirect `/checkout/itinerary?client_secret=X&generation_id=Y` (pattern Stripe Payment Intent existant). Conciergerie 1-mois+ (price=0) redirige vers `/contact?subject=conciergerie-voyage`.
+  - Mention discrete sous le CTA : "Paiement sécurisé Stripe · Livraison instantanée par email"
+- **Added** : Warning `beforeunload` natif active pendant `loading=true` — affiche le dialogue browser "L'IA travaille encore — êtes-vous sûr de quitter ?" si l'utilisateur ferme l'onglet ou navigue ailleurs pendant la generation (~60-80s).
+- **Added** : Bloc d'alerte visible en step 1 pendant `loading` : icone spin + "Notre IA travaille pour vous (~60-80 secondes)" + texte muted "Merci de **ne pas quitter cette page** ni rafraîchir — vos 3 propositions arrivent." Sur fond primary/5 + border primary/20.
+- **Added** : Backdrop click + close button **disabled** pendant `loading || paymentLoading` — empeche la fermeture accidentelle pendant les phases critiques. Close button avec `disabled:opacity-30 disabled:cursor-not-allowed`.
+- **Added** : Analytics event `ia_checkout_started` avec `{variant, offer, value}` quand le user clique le CTA paiement.
+- **Removed** : Le bouton "Voir l'itinéraire complet →" qui redirigeait vers `/itineraire-personnalise-pour-les-philippines?gen=ID` (la page ne lit pas encore les query params, donc rouvrait un formulaire blanc — UX cassee). Remplace par le funnel paiement direct.
+- **Decision design** : on respecte le proto handoff "3 steps indicateurs" mais le step 2 contient maintenant l'integralite du funnel (variants + offers + payment). L'overlay devient le tunnel de conversion principal du site, plus puissant que le proto initial. La page `/itineraire-personnalise-pour-les-philippines` continue d'exister comme fallback pour les utilisateurs qui arrivent en direct via SEO/lien externe.
+
 ### Fix critique : IAOverlay — payload n8n incorrect, validation rejetait tous les appels
 - **Diagnostic** : Investigation via MCP n8n-db sur le workflow `Philippineasy - Itinerary Generator V3` (id `beo6SrTfO1sUS9Sp`, actif). Le node "Valider les Entrees" a des enums stricts qui rejetaient mon payload :
   - `budget` attend `'eco' | 'standard' | 'comfort' | 'luxury'` (j'envoyais `"2000"` un nombre)
