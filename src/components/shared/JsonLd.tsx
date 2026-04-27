@@ -20,6 +20,70 @@ const extractYouTubeId = (url: string): string | null => {
   return null;
 };
 
+/**
+ * Detecte si l'article est un tutoriel "Comment faire..." et extrait les
+ * etapes pour generer un HowTo schema. Trigger :
+ * - Au moins 1 H2 commencant par "Comment ", "Etapes ", "Tutoriel "
+ * - OU une `list` ordered (style: "ordered") avec >= 3 items
+ *
+ * Retourne null si pas un tuto. Sinon retourne {name, totalTime, steps[]}
+ * pour HowTo schema. Eligible Google rich result "How-to" (carrousel
+ * d'etapes dans SERP, gros gain CTR).
+ */
+const extractHowToSteps = (
+  content: string | EditorJSContent,
+  fallbackName: string,
+): { name: string; steps: { name: string; text: string }[] } | null => {
+  if (typeof content === 'string') return null;
+  const blocks = content?.blocks || [];
+
+  // Trouve une H2 "Comment ..." pour devenir le nom du HowTo
+  let howtoName: string | null = null;
+  let howtoStartIdx = -1;
+  for (let i = 0; i < blocks.length; i++) {
+    const b = blocks[i];
+    if (b.type === 'header' && b.data?.level === 2 && typeof b.data?.text === 'string') {
+      const text = b.data.text.replace(/<[^>]+>/g, '').trim();
+      if (/^(comment|etapes|tutoriel|how to)\s/i.test(text)) {
+        howtoName = text;
+        howtoStartIdx = i;
+        break;
+      }
+    }
+  }
+
+  if (howtoName === null) return null;
+
+  // Cherche la liste ordered qui suit le H2 (jusqu'au prochain H2)
+  let orderedList: Array<{ content?: string; text?: string }> | null = null;
+  for (let i = howtoStartIdx + 1; i < blocks.length; i++) {
+    const b = blocks[i];
+    if (b.type === 'header' && b.data?.level === 2) break;
+    if (b.type === 'list' && b.data?.style === 'ordered' && Array.isArray(b.data.items) && b.data.items.length >= 3) {
+      orderedList = b.data.items;
+      break;
+    }
+  }
+
+  if (!orderedList) return null;
+
+  const steps = orderedList.map((item, idx) => {
+    const raw = (typeof item === 'string' ? item : (item.content || item.text || '')).toString();
+    const clean = raw.replace(/<[^>]+>/g, '').trim();
+    // Premiere phrase = name, le reste = text
+    const firstSentence = clean.split(/[.:]/, 1)[0].trim().substring(0, 80);
+    return {
+      name: firstSentence || `Etape ${idx + 1}`,
+      text: clean,
+    };
+  });
+
+  return {
+    name: howtoName || fallbackName,
+    steps,
+  };
+};
+
 /** Extract all YouTube embeds from EditorJS content */
 const extractVideos = (content: string | EditorJSContent) => {
   if (typeof content === 'string') return [];
@@ -77,6 +141,7 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
   const readingTime = Math.ceil(wordCount / 200);
 
   const videos = extractVideos(article.content);
+  const howto = extractHowToSteps(article.content, article.title);
 
   // CRITICAL : NewsArticle est reserve a l'info de presse (perissable, < 30j de
   // pertinence). Pour les guides evergreen (Sugba Lagoon, Buddy System, etc.)
@@ -156,6 +221,27 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      {howto && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'HowTo',
+              name: howto.name,
+              description: description.substring(0, 200),
+              inLanguage: 'fr-FR',
+              step: howto.steps.map((s, idx) => ({
+                '@type': 'HowToStep',
+                position: idx + 1,
+                name: s.name,
+                text: s.text,
+                url: `${articleUrl}#step-${idx + 1}`,
+              })),
+            }),
+          }}
+        />
+      )}
       {videos.map((v) => (
         <script
           key={v.id}
