@@ -188,11 +188,14 @@ async function activatePackUltime(
   }));
   await supabase.from('call_bookings').insert(bookings);
 
-  // Activate Easy+ on profile
+  // Activate Easy+ on profile (1 an = 365 jours, conforme a l'annonce Pack Ultime)
   await activateEasyPlus(supabase, userId, 'easy_plus_yearly');
 
-  // Activate Rencontre Premium on profile
-  await activateRencontrePremium(supabase, userId);
+  // Activate Rencontre Premium on profile — 180 jours (6 mois) pour Pack Ultime,
+  // PAS le default 30j. Sinon mismatch entre entitlement (180j) et profile (30j),
+  // l'enforcement runtime se fait sur profile.rencontre_premium_expires_at donc
+  // le client perdrait 5 mois de Premium.
+  await activateRencontrePremium(supabase, userId, 180);
 
   // Create CRM conversation
   await createWelcomeConversation(supabase, userId, purchaseId, 'Pack Ultime');
@@ -221,8 +224,12 @@ async function activateEasyPlus(
     .eq('id', userId);
 }
 
-async function activateRencontrePremium(supabase: SupabaseClient, userId: string) {
-  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+async function activateRencontrePremium(
+  supabase: SupabaseClient,
+  userId: string,
+  durationDays: number = 30,
+) {
+  const expiresAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString();
 
   await supabase
     .from('profiles')
