@@ -18,7 +18,10 @@ type SitemapEntry = {
 
 /* ---------- Revalidation ---------- */
 
-export const revalidate = 3600; // Régénérer le sitemap toutes les heures
+// 10 min : compromis entre performance (cache long) et fraicheur (nouveaux
+// articles publies via /admin doivent apparaitre rapidement dans le sitemap
+// sans attendre 1h, sinon Google rate les nouveautes au crawl suivant).
+export const revalidate = 600;
 
 /* ---------- Route ---------- */
 
