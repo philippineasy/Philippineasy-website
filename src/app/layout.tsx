@@ -127,14 +127,26 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const supabase = await createClient();
-  const results = await Promise.all([
+
+  // SSR-hydrate de l'auth pour eviter le flash "non connecte" cote client.
+  // getUser() valide le JWT (contrairement a getSession qui lit juste le cookie).
+  const { data: { user: ssrUser } } = await supabase.auth.getUser();
+
+  const [voyagerResult, vivreResult, plansResult, productCategoriesResult, profileResult, vendorResult] = await Promise.all([
     getCategoriesByMainCategory(supabase, 'voyager-aux-philippines'),
     getCategoriesByMainCategory(supabase, 'vivre-aux-philippines'),
     getCategoriesByMainCategory(supabase, 'meilleurs-plans-aux-philippines'),
-    getProductCategories(supabase)
+    getProductCategories(supabase),
+    ssrUser
+      ? supabase.from('profiles').select('*').eq('id', ssrUser.id).single()
+      : Promise.resolve({ data: null, error: null }),
+    ssrUser
+      ? supabase.from('vendors').select('id').eq('user_id', ssrUser.id).eq('status', 'approved').maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
   ]);
 
-  const [voyagerResult, vivreResult, plansResult, productCategoriesResult] = results;
+  const initialProfile = profileResult.data ?? null;
+  const initialIsVendor = !!vendorResult.data;
 
   // Handle errors gracefully, maybe show a minimal layout
   if (voyagerResult.error || vivreResult.error || plansResult.error) {
@@ -196,7 +208,11 @@ export default async function RootLayout({
       <body className={`${poppins.className} bg-muted`}>
         <GoogleAnalytics />
         <MetaPixel />
-        <AuthProvider>
+        <AuthProvider
+          initialUser={ssrUser}
+          initialProfile={initialProfile}
+          initialIsVendor={initialIsVendor}
+        >
           <CartProvider>
             <EditModeProvider>
               <IAOverlayProvider>

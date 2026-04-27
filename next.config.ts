@@ -1,5 +1,6 @@
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
+import path from "path";
 
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
@@ -7,6 +8,9 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Force la racine du workspace pour eviter le warning Next 15.5+ qui detecte
+  // le package-lock.json dans ~/ comme racine.
+  outputFileTracingRoot: path.join(__dirname),
 
   // Production optimizations
   compiler: {
