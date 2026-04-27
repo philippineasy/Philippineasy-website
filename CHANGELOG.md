@@ -5,7 +5,72 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### IAOverlay v2 — funnel complet (variants + offers + paiement) + warning anti-quit
+### Auth Supabase — fix bug "il faut N reloads pour voir le profil" (commit ad7ea38)
+- **Diagnostic** (cause racine identifiee apres des mois de symptome) :
+  - `AuthContext` partait `loading=true` a chaque page load avec un hack `setTimeout(500)` qui appelait `supabase.auth.getSession()` apres 500ms si `INITIAL_SESSION` n'etait pas fire. Pendant ces 500ms, le `Header` rendait "non connecte" -> l'utilisateur faisait F5 -> meme race condition -> loop. Ce hack etait un patch sur un bug `INITIAL_SESSION` non-firing connu en `@supabase/ssr@0.6`.
+  - `@supabase/ssr@0.6.1` etait en retard de 4 mineurs ; `0.7+` corrige le bug `INITIAL_SESSION`.
+  - `@supabase/auth-helpers-nextjs@0.10.0` (deprecated) etait installe en parallele de `@supabase/ssr` -> 2 systemes auth dans node_modules pouvant interferer sur les cookies.
+  - `src/utils/supabase/client.ts` exposait un singleton instancie au module-load (sans memo HMR-safe), pas safe en SSR si appele par accident.
+- **Bumps** :
+  - `next` 15.3.8 -> 15.5.15 — patche **CVE-2025-66478** (RCE via React Server Components), **CVE-2026-23864** (DoS RSC), **CVE-2025-55184** (DoS), **CVE-2025-55183** (exposition source code).
+  - `@supabase/ssr` 0.6.1 -> 0.10.2 — fix `INITIAL_SESSION`.
+  - `@supabase/supabase-js` 2.98.0 -> 2.104.1.
+  - `eslint-config-next` 15.3.4 -> 15.5.15.
+- **Removed** : `@supabase/auth-helpers-nextjs` (dead dep, plus de conflit cookies).
+- **Refactor** `src/contexts/AuthContext.tsx` :
+  - Accepte `initialUser` + `initialProfile` + `initialIsVendor` en props -> hydrate depuis le SSR. Le HTML envoye par le serveur contient deja le profil, plus aucun flash "non connecte".
+  - Demarre `loading=false` si `initialUser` est present.
+  - Retire le hack `setTimeout(500)` + le `getSession()` fallback.
+  - `onAuthStateChange` skip le re-fetch profil si l'event ramene le meme user que celui hydrate (compare via `lastFetchedUserId` ref).
+  - `profileRef` pour eviter de re-subscribe sur chaque mutation profil.
+- **Refactor** `src/app/layout.tsx` :
+  - Appelle `supabase.auth.getUser()` (verifie le JWT, contrairement a `getSession` qui lit juste le cookie sans validation).
+  - Fetch `profile` + `vendors` en parallele des `categories` via `Promise.all` (zero overhead vs avant).
+  - Passe `initialUser` / `initialProfile` / `initialIsVendor` a `AuthProvider`.
+- **Refactor** `src/utils/supabase/client.ts` :
+  - Singleton vrai memoise sur `globalThis.__supabase_browser__` (HMR-safe en dev, garantit une seule instance par tab).
+  - `throw` si appele en SSR (au lieu d'instancier silencieusement un client browser cote serveur).
+  - `Proxy` pour preserver l'API `import { supabase } from '...'` existante (33 fichiers consommateurs, aucun changement).
+- **next.config.ts** : `outputFileTracingRoot` pour eteindre le warning Next 15.5+ qui detectait `~/package-lock.json` comme racine du workspace.
+- **Resultat** : sur la 1ere requete, le HTML SSR contient deja le bon `user`/`profile`. Le client est hydrate avec. Plus aucun flash, plus aucune race, fini les multi-reload.
+
+### Securite — 4 vagues de code review exhaustives (commits 6c84f56, 20592a8, 7f5a638)
+- **15 critiques + 12 HIGH** identifies et corriges. Methodologie : 4 passes successives de `code-reviewer` agent jusqu'a "0 critical restant".
+- **IDOR (Insecure Direct Object Reference)** :
+  - `/api/itinerary/confirm-payment` : auth obligatoire + check ownership + UPDATE conditionnel `.neq('payment_status','completed')` + verif `metadata.generation_id` cross-check.
+  - `/api/dating/ip-check` : `user_id` derive de la session (etait pris du body, n'importe qui pouvait usurper). Validation IPv4/IPv6 stricte (anti-SSRF).
+  - `/api/stripe/create-payment-intent` (marketplace) : prix re-fetch en BDD cote serveur. Le client ne peut plus envoyer son propre prix.
+  - `/api/itinerary/payment` : prix derive de `PRICING_GRID` server-side, ownership check, rate-limit fail-CLOSED (etait fail-open si Redis HS).
+- **Race conditions** :
+  - `callService.bookSlot` : UPDATE atomique `.eq('is_available', true)` + compensating action si insert booking echoue.
+  - `entitlementService.consumeEntitlement` : claim atomique `.eq('used_quantity', currentUsed)` + retry signal propre.
+  - `/api/itinerary/[id]/modification` : decrement atomique `.gt('modifications_remaining', 0)` + compensating restore.
+  - `/api/dating/messages` : claim atomique du quota free `.eq('message_daily_count', currentCount).lt(...,2)` + compensating restore. Bloque le double-spend par double-clic ou onglets paralleles.
+- **Stripe webhook idempotence** (Stripe peut retry chaque event sur timeout / redeploy) :
+  - `handleServiceCheckout` : `.eq('status','pending')` -> bloque double-activation (entitlements/calls/emails dupliques).
+  - `handleItineraryPayment` : `.neq('payment_status','completed')` -> bloque double email confirmation.
+  - `handleMarketplacePayment` : pre-check existence par `stripe_payment_intent_id` -> evite l'erreur sur la UNIQUE constraint et le bruit de logs.
+- **Securite headers** :
+  - CORS `Access-Control-Allow-Origin: '*'` -> `process.env.NEXT_PUBLIC_SITE_URL` + `Vary: Origin`.
+- **DB / types alignes sur le schema** :
+  - `grantPremium` ecrit aussi `rencontre_premium_expires_at` (sinon le cron ratait la notification d'expiration sur les premiums grantes via admin).
+  - `Profile.role` aligne sur la DB (`'member'` au lieu de `'user'`).
+  - `delivery_preferences` : `.upsert` au lieu de `.update` (la row peut ne pas exister).
+  - `activationService.updateCustomerStats` : Number cast (Supabase retourne les `numeric` en string en JS).
+  - `userService.getProfileById` : recoit `supabase` en parametre (plus de singleton browser cote SSR).
+  - `userService.userId` : `number` -> `string` (UUID, pour matcher `profiles.id`).
+- **Performance / UX** :
+  - `mon-espace/layout` : Server Component avec `redirect()` server-side (plus de flash FOUC) + `metadata.robots.noindex` (pas d'indexation Google des espaces prives).
+  - `IAOverlay` + `ExitIntentPopup` lazy-loaded via `ClientOverlays` wrapper (~30KB de bundle initial economises sur 100% des pages).
+  - PDF route : photos Google Places en parallele (`Promise.all`, cap 15) + `maxDuration=60` + API key en header `X-Goog-Api-Key` (plus dans l'URL queryString) + `error.message` non expose en prod.
+  - `ResendItineraryButton` : disable si pas d'email (evite erreurs 400).
+  - `CountdownTimer` : init `null` pour eviter hydration mismatch.
+  - `N8N_API_KEY` : guarde proprement dans `deliver` route.
+- **Admin** :
+  - `/admin/customers` reecrit en Server Component pur (drop service-role import dead, drop FontAwesome, design system 2026, batch queries plus de N+1, unread filtre par `customer_id` au lieu de global, filtres server-side dans URL).
+- **Lint** : 3 warnings finaux (img tags, alt PDF, eslint-disable inutile) corriges.
+
+
 - **Changed** : Step 2 de l'overlay devient le **funnel complet self-contained** au lieu d'un teaser qui redirigeait vers la page formulaire (qui se rouvrait vide). Reproduit dans le proto handoff style l'enchainement de la page `/itineraire-personnalise-pour-les-philippines` :
   - **3 ProposalCards** : choix du variant (relax/balanced/adventure) avec recommended badge auto-place sur le variant matchant le tripStyle (relax→relax, adventure/diving→adventure, culture/mix→balanced). Card includes title + description + 3 highlights + 2 teaser_days + budget_estimate. Selectable au clic + Enter/Space (radiogroup ARIA).
   - **3 Offer Cards** : Express / Premium (badge Recommandé) / Conciergerie. Pricing dynamique via `PRICING_GRID[offer][duration]` + `formatPrice()`. Liste des features depuis `OFFER_LABELS`. Premium pre-selectionne par defaut (matche le pattern original).
