@@ -1,8 +1,15 @@
 import { createClient } from '@/utils/supabase/server';
 import { getHomepageArticles } from '@/services/articleService';
 import dynamic from 'next/dynamic';
+import type { Metadata } from 'next';
 import HomepageJsonLd from '@/components/shared/HomepageJsonLd';
 import FAQSchema from '@/components/shared/FAQSchema';
+
+// Canonical explicite sur la home (le root layout n'en declare plus pour eviter
+// la propagation a toutes les pages enfants, qui etaient vues comme duplicates).
+export const metadata: Metadata = {
+  alternates: { canonical: 'https://philippineasy.com/' },
+};
 import { HeroSection } from '@/components/homepage/HeroSection';
 import { RegionCards } from '@/components/homepage/RegionCards';
 import { InstallerCards } from '@/components/homepage/InstallerCards';

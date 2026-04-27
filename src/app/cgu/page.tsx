@@ -4,6 +4,7 @@ import WebPageJsonLd from '@/components/shared/WebPageJsonLd';
 export const metadata: Metadata = {
   title: "Conditions Générales d'Utilisation - Philippin'Easy",
   description: "Consultez les conditions générales d'utilisation (CGU) du site Philippin'Easy.",
+  alternates: { canonical: 'https://philippineasy.com/cgu' },
 };
 
 const CGUPage = () => {

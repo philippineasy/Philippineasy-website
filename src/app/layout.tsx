@@ -94,9 +94,11 @@ export const metadata: Metadata = {
     images: [siteConfig.ogImage],
     creator: "@philippineasy",
   },
-  alternates: {
-    canonical: '/',
-  },
+  // PAS de `canonical` ici. Sinon Next propage cette valeur a TOUTES les pages
+  // enfants qui ne declarent pas leur propre canonical, et Google les voit
+  // toutes comme duplicates de la home (bug ressenti pendant des mois,
+  // identique a celui detecte sur Ondayvaluemoney). Chaque page declare son
+  // propre canonical via metadata/generateMetadata.
   icons: {
     icon: '/logo-philippineasy.png',
     shortcut: '/logo-philippineasy.png',

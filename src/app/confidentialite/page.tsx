@@ -4,6 +4,7 @@ import WebPageJsonLd from '@/components/shared/WebPageJsonLd';
 export const metadata: Metadata = {
   title: "Politique de Confidentialité - Philippin'Easy",
   description: "Découvrez comment Philippin'Easy utilise les cookies et protège vos données personnelles.",
+  alternates: { canonical: 'https://philippineasy.com/confidentialite' },
 };
 
 const ConfidentialitePage = () => {
