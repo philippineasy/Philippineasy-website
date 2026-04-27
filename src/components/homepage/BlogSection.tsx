@@ -74,14 +74,14 @@ const ROW_SLOTS: Slot[] = [
     fallbackDate: '1 avril',
   },
   {
-    slug: 'rencontrer-philippine-codes-culturels',
+    slug: 'codes-culturels-philippins-couple-famille-religion',
     badgeLabel: 'Culture',
     badgeClass: 'teal',
     fallbackImage: '/imagesHero/couple-rencontre-aux-philippines.webp',
     fallbackImageAlt:
       'Couple franco-philippin marchant sur la plage au coucher du soleil',
     fallbackReadingTime: '9 min',
-    fallbackTitle: 'Rencontrer une Philippine : les codes à connaître',
+    fallbackTitle: 'Codes culturels philippins en couple',
     fallbackDate: '25 mars',
   },
 ];

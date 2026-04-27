@@ -5,6 +5,73 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### SEO — Phase E : decannibalisation cluster "rencontre philippines" (commits e81f6e1 + new)
+3 articles ciblaient la meme requete "rencontrer femmes philippines" -> Google ne savait pas lequel ranker, tous coulaient. Apres lecture editoriale des 3 (vraiment differents en ton, pas duplicates), strategie de differentiation par intent secondaire :
+
+- **Article B** (id 116, 12 clics, position 11.3) GARDE comme winner. Title update :
+  - Ancien : "Rencontres aux Philippines : comprendre la culture et eviter les pieges"
+  - Nouveau : "Rencontrer une Philippine : 5 ans aux Philippines, mes **erreurs** et mes conseils"
+  - Cible : "comment rencontrer une philippine", "rencontre philippines retour experience"
+- **Article C** (id 129, 0 clic, 107 blocks le plus long) PIVOTE sur intent culturel different :
+  - Ancien : "Rencontrer une Philippine : les **codes** a connaitre" + slug `rencontrer-philippine-codes-culturels`
+  - Nouveau : "Codes **culturels** philippins en couple : famille, religion, communication" + slug `codes-culturels-philippins-couple-famille-religion`
+  - Cible : "culture philippines couple", "codes culturels philippins", "comprendre culture filipina"
+  - 301 redirect depuis l'ancien slug
+- **Article A** (id 65, 2 clics, ton touristique cliche) KILL via `status='draft'`. 301 redirect vers article B pour recuperer trafic + autorite backlinks.
+- src/components/homepage/BlogSection.tsx : update slug hardcode du featured article (rencontrer-philippine-codes-culturels -> codes-culturels-philippins-couple-famille-religion).
+- next.config.ts : 2 nouvelles redirections 301 dans le bloc redirects().
+
+Effet attendu (3-4 semaines via re-crawl Google) : 14 clics existants consolides sur 1 winner avec position +5 attendue, + ouverture nouvel intent culturel (article C) = ~20-30 clics/mois supplementaires.
+
+### SEO — Phase H : HowTo schema auto-detection sur articles tutoriels (commit e81f6e1)
+- src/components/shared/JsonLd.tsx : extractHowToSteps() detecte auto les articles type tuto et genere HowTo schema en complement du Article/BlogPosting.
+- Triggers : H2 commencant par "Comment", "Etapes", "Tutoriel" + liste `style: ordered` >= 3 items qui suit.
+- Pour chaque step : 1ere phrase = name (max 80 chars), texte complet = text, url = articleUrl#step-N (deep link).
+- Eligible Google rich result "How-to" carrousel (gros boost CTR sur requetes procedurales).
+- Articles existants beneficiant : sugba-lagoon-siargao ("Comment Aller a Sugba Lagoon"), guide-achat-activation-sim, ouvrir-compte-bancaire-philippines (id 131 etapes ouverture compte).
+
+### SEO — Phase F : schema markup BlogPosting + Service (commit 482ad00)
+- src/components/shared/JsonLd.tsx : @type conditionnel selon basePath. NewsArticle pour `actualites-sur-les-philippines` uniquement (info perissable < 30j), BlogPosting pour les guides evergreen voyager/vivre/meilleurs-plans. Etait force a NewsArticle pour TOUS = mismatch contenu/schema = penalisation rich results.
+- Author Person schema enrichi (E-E-A-T) : @id stable, jobTitle, knowsAbout pour permettre a Google de linker tous les articles du meme auteur.
+- Publisher Organization avec @id stable lie a HomepageJsonLd.
+- isAccessibleForFree: true (clarifie pas de paywall).
+- src/components/shared/ServicesJsonLd.tsx (NEW) : 3 Service schemas (Buddy / Voyage Serein / Pack Ultime) + Brand AggregateRating (4.9/5, 320 avis, 10000 voyageurs - chiffres deja visibles, pas inventes). @graph pour combiner.
+
+### SEO — Phase D : 4 articles drafts categories vides (commits 482ad00 + Phase G nouveau)
+Categories vides dans le sitemap = "Discovered, currently not indexed" Google. Solution : remplir.
+- ID 130 : "Vols interieurs et transports aux Philippines : guide pratique 2026" (transports, 2041 mots, 10 min)
+- ID 131 : "Ouvrir un compte bancaire aux Philippines en 2026 : guide complet pour expatries" (banque-finances, 2495 mots, 12 min)
+- ID 132 : "Island hopping aux Philippines : 10 excursions incontournables" (activites-excursions, 2394 mots, 11 min)
+- Article hotels (hebergements) en cours de redaction
+Tous en `status='draft'` -> a valider + ajouter image hero via /admin avant publication. Format EditorJS v2.31.0, cross-links internes (5 par article), tableaux prix, FAQ, sources verifiees WebSearch.
+
+### SEO — Phase C : tighten CSP (commit 6d52cd0)
+- connect-src '*' (trou geant) -> liste explicite Supabase, Stripe, Sentry, Tawk, GA, Facebook, Maps, Places.
+- Ajout base-uri 'self' (anti-injection <base>), frame-ancestors 'none' (anti-clickjacking), object-src 'none' (bloque Flash legacy), form-action 'self' https://hooks.stripe.com, upgrade-insecure-requests (force HTTPS sub-resources).
+- script-src : ajout connect.facebook.net (Pixel). style-src : ajout fonts.googleapis.com. font-src : ajout fonts.gstatic.com. img-src : restreint a 'self' + data + blob + https.
+
+### SEO — Phase B : metadata pages commerciales (commit 6d52cd0)
+- /services layout.tsx : keywords cibles, OG image complete, Twitter card, robots googleBot max-image-preview large.
+- /forum-sur-les-philippines/nouveau-sujet/layout.tsx (NEW) : noindex (auth requise).
+- /marketplace-aux-philippines/vendeur/connexion/layout.tsx (NEW) : noindex (auth).
+
+### SEO — Phase A : sitemap clean (commit 6d52cd0)
+- Retire profilePages (`/rencontre-philippines/profil/UUID`) : contenu USER prive avec noindex meta -> sitemap = signal contradictoire + fuite UUIDs publique.
+- Retire vendorPages tant que slug = ID numerique (SEO-hostile).
+- Filtre categoryPages : exclut categories sans aucun article publie (resout "Discovered, not indexed" sur 5 categories vides).
+
+### SEO — CRITICAL : drop canonical propagation root layout (commit f36d9dc)
+src/app/layout.tsx avait `alternates: { canonical: '/' }` dans le root metadata. Next.js propage cette valeur a TOUTES les pages enfants qui ne declarent pas le leur explicitement -> Google voit toutes les pages comme duplicates de la home. **Cause racine du bug d'indexation depuis des mois** (95 clics/mois pour 46 articles publies, c'est anormalement bas).
+
+Fixes :
+- Retire `alternates.canonical` de root layout + commentaire explicatif.
+- Ajout canonical explicite a /(home), /cgu, /confidentialite, /mentions-legales.
+- Cree /contact/layout.tsx (NEW) avec metadata complete + canonical (la page etait 'use client', impossible d'exporter metadata directement).
+
+Effet attendu (3-6 semaines re-crawl) : pages "Discovered, not indexed" passent en "indexed", articles indexes mais avec home comme canonical retrouvent leur identite, position moyenne baisse (= meilleure) sur long-tail, trafic organique 2-3x sur les pages content de qualite.
+
+Source : memory project Ondayvaluemoney `seo-fixes.md` (meme bug fix le 2026-02-23).
+
 ### Auth Supabase — fix bug "il faut N reloads pour voir le profil" (commit ad7ea38)
 - **Diagnostic** (cause racine identifiee apres des mois de symptome) :
   - `AuthContext` partait `loading=true` a chaque page load avec un hack `setTimeout(500)` qui appelait `supabase.auth.getSession()` apres 500ms si `INITIAL_SESSION` n'etait pas fire. Pendant ces 500ms, le `Header` rendait "non connecte" -> l'utilisateur faisait F5 -> meme race condition -> loop. Ce hack etait un patch sur un bug `INITIAL_SESSION` non-firing connu en `@supabase/ssr@0.6`.

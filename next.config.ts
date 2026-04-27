@@ -142,6 +142,21 @@ const nextConfig: NextConfig = {
       // NOTE: /article/:slug* est géré dynamiquement par middleware.ts
       // car nous devons interroger la DB pour trouver la bonne catégorie
 
+      // Redirections cannibalisation rencontre (Phase E SEO 2026-04-27)
+      // Article A "rencontre-femmes-philippines-guide-culturel" passe en draft
+      // (status=draft) -> rediriger trafic backlinks vers le winner B.
+      // Article C renomme : "rencontrer-philippine-codes-culturels" pivote sur
+      // intent culturel different -> nouveau slug, 301 depuis l'ancien.
+      {
+        source: '/vivre-aux-philippines/culture-integration/rencontre-femmes-philippines-guide-culturel',
+        destination: '/vivre-aux-philippines/culture-integration/guide-rencontrer-femmes-philippines-conseils-et-astuces',
+        permanent: true,
+      },
+      {
+        source: '/vivre-aux-philippines/culture-integration/rencontrer-philippine-codes-culturels',
+        destination: '/vivre-aux-philippines/culture-integration/codes-culturels-philippins-couple-famille-religion',
+        permanent: true,
+      },
       // Redirections pour les articles recategorises (anciennement dans Actualites)
       {
         source: '/actualites-sur-les-philippines/actualites/guide-ultime-visita-iglesia-manille-eglises-historiques',
