@@ -21,7 +21,7 @@ export type EntitlementStatus = 'available' | 'in_use' | 'fully_used' | 'expired
 export type FeatureType =
   | 'call_30min' | 'whatsapp_support' | 'itinerary_conciergerie' | 'itinerary_premium'
   | 'easy_plus' | 'rencontre_premium' | 'guide_pdf_visa' | 'guide_pdf_cout_vie'
-  | 'guide_pdf_destinations' | 'private_group' | 'unlimited_modifications';
+  | 'guide_pdf_destinations' | 'pdf_library_access' | 'private_group' | 'unlimited_modifications';
 
 // =====================================================
 // Database row types
@@ -211,6 +211,7 @@ export const FEATURE_DISPLAY: Record<FeatureType, {
   guide_pdf_visa: { label: 'Guide Visa Philippines', icon: 'faFileDownload', unit: 'téléchargement', isTimeBased: false },
   guide_pdf_cout_vie: { label: 'Guide Coût de la Vie', icon: 'faFileDownload', unit: 'téléchargement', isTimeBased: false },
   guide_pdf_destinations: { label: 'Guide Destinations Secrètes', icon: 'faFileDownload', unit: 'téléchargement', isTimeBased: false },
+  pdf_library_access: { label: 'Bibliothèque PDF complète', icon: 'faBookOpen', unit: 'accès', isTimeBased: true },
   private_group: { label: 'Groupe Privé', icon: 'faUserFriends', unit: 'accès', isTimeBased: false },
   unlimited_modifications: { label: 'Modifications Illimitées', icon: 'faEdit', unit: 'accès', isTimeBased: false },
 };
@@ -259,7 +260,10 @@ export const PACK_ENTITLEMENTS: Record<string, PackEntitlementConfig[]> = {
     { feature_type: 'whatsapp_support', total_quantity: null, duration_days: 14 },
     { feature_type: 'easy_plus', total_quantity: 1, duration_days: 365 },
     { feature_type: 'rencontre_premium', total_quantity: 1, duration_days: 180 },
-    { feature_type: 'guide_pdf_visa', total_quantity: 1, duration_days: null },
+    // Bibliotheque PDF complete pendant la duree du pack (60j) — donne acces a
+    // TOUS les guides PDF existants ET futurs sans avoir a maintenir une liste
+    // hardcodee. Approche future-proof.
+    { feature_type: 'pdf_library_access', total_quantity: 1, duration_days: 60 },
     { feature_type: 'private_group', total_quantity: 1, duration_days: null },
   ],
   pack_ultime_long: [
@@ -268,7 +272,7 @@ export const PACK_ENTITLEMENTS: Record<string, PackEntitlementConfig[]> = {
     { feature_type: 'whatsapp_support', total_quantity: null, duration_days: 21 },
     { feature_type: 'easy_plus', total_quantity: 1, duration_days: 365 },
     { feature_type: 'rencontre_premium', total_quantity: 1, duration_days: 180 },
-    { feature_type: 'guide_pdf_visa', total_quantity: 1, duration_days: null },
+    { feature_type: 'pdf_library_access', total_quantity: 1, duration_days: 90 },
     { feature_type: 'private_group', total_quantity: 1, duration_days: null },
   ],
   pack_ultime_expat: [
@@ -277,8 +281,7 @@ export const PACK_ENTITLEMENTS: Record<string, PackEntitlementConfig[]> = {
     { feature_type: 'whatsapp_support', total_quantity: null, duration_days: 30 },
     { feature_type: 'easy_plus', total_quantity: 1, duration_days: 365 },
     { feature_type: 'rencontre_premium', total_quantity: 1, duration_days: 180 },
-    { feature_type: 'guide_pdf_visa', total_quantity: 1, duration_days: null },
-    { feature_type: 'guide_pdf_cout_vie', total_quantity: 1, duration_days: null },
+    { feature_type: 'pdf_library_access', total_quantity: 1, duration_days: 120 },
     { feature_type: 'private_group', total_quantity: 1, duration_days: null },
   ],
   guide_pdf_visa: [

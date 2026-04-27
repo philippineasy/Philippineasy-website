@@ -32,7 +32,7 @@ const TOOLTIPS = {
   suiviWhatsapp: "Support en temps réel pendant votre voyage : problèmes de transport, recommandations restaurants, urgences. Réponse garantie sous 2h max",
   easyPlus: "-20% chez tous nos partenaires (hôtels, activités, transports), support prioritaire 24/7, guides premium offerts, assistant IA illimité WhatsApp/Telegram",
   rencontrePremium: "Profil vérifié et mis en avant, likes illimités, voir qui vous a liké, filtres avancés (localisation, âge, centres d'intérêt), messagerie prioritaire",
-  guidePdf: "Guide complet et détaillé : Visa Philippines 2026, Coût de la vie détaillé, ou Destinations secrètes - format PDF téléchargeable et imprimable",
+  guidePdf: "Accès à tous les guides PDF Philippineasy pendant la durée de ton pack (Visa Philippines, Coût de la vie, Destinations secrètes, et tous les nouveaux guides à venir) — format PDF téléchargeable et imprimable",
   groupePrive: "Accès à vie au Discord/Telegram exclusif avec la communauté d'expats et voyageurs francophones aux Philippines - entraide, bons plans, rencontres",
   itinerairePremium: "Itinéraire IA personnalisé avec modifications gratuites, export PDF, liens Google Maps, recommandations hébergements et restaurants",
   callAvantDepart: "Call vidéo de 30min avec Hugo pour préparer votre voyage : derniers conseils, check-list personnalisée, réponse à toutes vos questions",
@@ -53,7 +53,7 @@ const serviceFAQs = [
   {
     question: 'Le Pack Ultime inclut-il vraiment tout ?',
     answer:
-      "Oui ! Le Pack Ultime comprend l'itinéraire Conciergerie, le Buddy System complet, le suivi WhatsApp pendant tout votre séjour, l'abonnement Easy+ 1 an, Rencontre Premium 6 mois, un guide PDF au choix et l'accès à vie au groupe privé.",
+      "Oui ! Le Pack Ultime comprend l'itinéraire Conciergerie, le Buddy System complet, le suivi WhatsApp pendant tout votre séjour, l'abonnement Easy+ 1 an, Rencontre Premium 6 mois, l'accès à TOUS nos guides PDF (existants et à venir) pendant la durée de ton pack, et l'accès à vie au groupe privé.",
   },
   {
     question: 'Puis-je payer en plusieurs fois ?',
@@ -355,7 +355,7 @@ export default function ServicesPage() {
                 </li>
                 <li className="flex items-start gap-2 text-sm">
                   <FontAwesomeIcon icon={faCheck} className="text-primary mt-0.5 flex-shrink-0" />
-                  <span>Guide PDF au choix <InfoTooltip content={TOOLTIPS.guidePdf} /></span>
+                  <span>Accès à TOUS les guides PDF pendant ton pack <InfoTooltip content={TOOLTIPS.guidePdf} /></span>
                 </li>
                 <li className="flex items-start gap-2 text-sm">
                   <FontAwesomeIcon icon={faCheck} className="text-primary mt-0.5 flex-shrink-0" />

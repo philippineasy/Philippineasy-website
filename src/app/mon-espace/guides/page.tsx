@@ -31,6 +31,8 @@ const GUIDES = [
 export default function MesGuidesPage() {
   const { user } = useAuth();
   const [ownedGuides, setOwnedGuides] = useState<string[]>([]);
+  const [hasLibraryAccess, setHasLibraryAccess] = useState(false);
+  const [libraryExpiresAt, setLibraryExpiresAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,6 +42,24 @@ export default function MesGuidesPage() {
   const fetchGuides = async () => {
     setLoading(true);
 
+    // 1. Bibliotheque complete (Pack Ultime) : un seul entitlement
+    //    `pdf_library_access` actif = acces a TOUS les guides existants
+    //    et futurs sans maintenir de liste hardcodee.
+    const { data: libraryRows } = await supabase
+      .from('purchase_entitlements')
+      .select('expires_at')
+      .eq('user_id', user!.id)
+      .eq('feature_type', 'pdf_library_access')
+      .in('status', ['available', 'in_use'])
+      .order('expires_at', { ascending: false })
+      .limit(1);
+
+    const lib = libraryRows?.[0];
+    const libActive = !!(lib && (!lib.expires_at || new Date(lib.expires_at) > new Date()));
+    setHasLibraryAccess(libActive);
+    setLibraryExpiresAt(lib?.expires_at ?? null);
+
+    // 2. Guides individuels (achats unitaires guide_pdf_*)
     const { data } = await supabase
       .from('purchase_entitlements')
       .select('feature_type')
@@ -63,9 +83,26 @@ export default function MesGuidesPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Guides PDF</h1>
 
+      {hasLibraryAccess && (
+        <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 rounded-xl p-4 flex items-center gap-3">
+          <FontAwesomeIcon icon={faCheck} className="text-amber-600 text-xl" />
+          <div className="flex-1">
+            <div className="font-semibold text-sm">Bibliothèque PDF complète activée</div>
+            <div className="text-xs text-muted-foreground">
+              Accès à tous les guides existants et à venir
+              {libraryExpiresAt && (
+                <> jusqu&apos;au {new Date(libraryExpiresAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</>
+              )}
+              .
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {GUIDES.map((guide) => {
-          const isOwned = ownedGuides.includes(guide.type);
+          const isOwned = hasLibraryAccess || ownedGuides.includes(guide.type);
+          const ownedVia = hasLibraryAccess && !ownedGuides.includes(guide.type) ? 'library' : 'individual';
 
           return (
             <div
@@ -82,7 +119,7 @@ export default function MesGuidesPage() {
                 {isOwned ? (
                   <span className="flex items-center gap-1 text-xs font-medium text-emerald-600 bg-emerald-500/10 px-2 py-1 rounded-full">
                     <FontAwesomeIcon icon={faCheck} />
-                    Acheté
+                    {ownedVia === 'library' ? 'Inclus pack' : 'Acheté'}
                   </span>
                 ) : (
                   <FontAwesomeIcon icon={faLock} className="text-muted-foreground" />

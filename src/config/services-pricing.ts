@@ -116,7 +116,7 @@ export const SERVICE_DETAILS: Record<ServiceType, {
       'Suivi WhatsApp durée complète',
       'Easy+ 1 an inclus',
       'Rencontre Premium 6 mois',
-      'Guide PDF au choix',
+      'Accès à TOUS les guides PDF pendant ton pack',
       'Groupe privé à vie',
     ],
     badge: 'Best Value',
