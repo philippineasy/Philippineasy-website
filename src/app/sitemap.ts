@@ -96,7 +96,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   /* ---------- Dynamic: Articles ---------- */
   const { data: articles, error: articlesError } = await supabase
     .from('articles')
-    .select('slug, published_at, category:categories(slug, main_category), image')
+    .select('slug, published_at, category_id, category:categories(slug, main_category), image')
     .eq('status', 'published');
 
   if (articlesError) console.error('Sitemap: articles query failed', articlesError.message);
@@ -140,20 +140,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }) || [])
       .filter(Boolean) as SitemapEntry[];
 
-  /* ---------- Dynamic: Catégories ---------- */
+  /* ---------- Dynamic: Catégories (uniquement celles avec >=1 article publie) ---------- */
+  // Une categorie vide = thin content -> Google la rejette ("Discovered, not indexed")
+  // -> on attend qu'elle ait du contenu avant de la soumettre au sitemap.
+  const publishedCategoryIds = new Set(
+    (articles ?? []).map((a: { category_id?: number }) => a.category_id).filter(Boolean)
+  );
+
   const { data: allCategories, error: categoriesError } = await supabase
     .from('categories')
-    .select('slug, main_category');
+    .select('id, slug, main_category');
 
   if (categoriesError) console.error('Sitemap: categories query failed', categoriesError.message);
 
   const categoryPages: SitemapEntry[] =
-    (allCategories?.map(({ slug, main_category }) => {
+    (allCategories?.map(({ id, slug, main_category }) => {
       if (!main_category) return null;
+      if (!publishedCategoryIds.has(id)) return null; // skip categories vides
       const mainCategoryPath = getMainCategoryPath(main_category);
       return {
         url: `${BASE_URL}/${mainCategoryPath}/${slug}`,
-        lastModified: '2026-04-15',
+        lastModified: currentDate,
         changeFrequency: 'weekly' as const,
         priority: 0.6,
       };
@@ -217,35 +224,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     })) || []);
 
-  /* ---------- Dynamic: Vendeurs ---------- */
-  const { data: vendors, error: vendorsError } = await supabase
-    .from('vendors')
-    .select('id, created_at');
-
-  if (vendorsError) console.error('Sitemap: vendors query failed', vendorsError.message);
-
-  const vendorPages: SitemapEntry[] =
-    (vendors?.map(({ id, created_at }) => ({
-      url: `${BASE_URL}/marketplace-aux-philippines/vendeur/${id}`,
-      lastModified: new Date(created_at).toISOString(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.6,
-    })) || []);
-
-  /* ---------- Dynamic: Profils Rencontre ---------- */
-  const { data: profiles, error: profilesError } = await supabase
-    .from('dating_profiles')
-    .select('user_id, updated_at');
-
-  if (profilesError) console.error('Sitemap: dating_profiles query failed', profilesError.message);
-
-  const profilePages: SitemapEntry[] =
-    (profiles?.map(({ user_id, updated_at }) => ({
-      url: `${BASE_URL}/rencontre-philippines/profil/${user_id}`,
-      lastModified: new Date(updated_at).toISOString(),
-      changeFrequency: 'daily' as const,
-      priority: 0.7,
-    })) || []);
+  // VOLONTAIREMENT EXCLUS DU SITEMAP :
+  // - Profils dating (`/rencontre-philippines/profil/UUID`) : contenu UTILISATEUR
+  //   prive, indexable seulement sous authentification. La page a deja `noindex`
+  //   meta. Avoir ces UUIDs dans un sitemap public = fuite donnees + signal
+  //   contradictoire pour Google = penalisation crawl budget.
+  // - Vendeurs (`/marketplace-aux-philippines/vendeur/ID`) : tant que le slug
+  //   reste un ID numerique (SEO-hostile, faible valeur). A reactiver quand
+  //   les vendeurs auront un slug texte humain.
 
   /* ---------- Merge ---------- */
   return [
@@ -258,7 +244,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...forumCategoryPages,
     ...productPages,
     ...productCategoryPages,
-    ...vendorPages,
-    ...profilePages,
   ] as MetadataRoute.Sitemap;
 }

@@ -184,8 +184,32 @@ const nextConfig: NextConfig = {
         source: '/:path*',
         headers: [
           {
+            // CSP renforce 2026-04-27 :
+            // - connect-src : liste explicite au lieu de '*' (etait un trou geant)
+            // - base-uri 'self' : empeche l'injection de <base href> malveillant
+            // - form-action : limite ou les forms peuvent submit (anti-CSRF visuel)
+            // - frame-ancestors 'none' : anti-clickjacking (HSTS already in place)
+            // - object-src 'none' : bloque <object>/<embed> Flash legacy
+            // - upgrade-insecure-requests : force HTTPS sur les sub-resources
+            // 'unsafe-inline' + 'unsafe-eval' restent pour script-src tant que
+            // Tawk/GTM/Sentry inline-init ne sont pas migres vers nonces CSP
+            // (pattern Next 15 mais necessite refacto + middleware nonce, non
+            // shippe dans cette session pour eviter de casser les widgets).
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.tawk.to https://*.sentry.io https://cdn.jsdelivr.net https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://embed.tawk.to; img-src * data: blob:; font-src 'self' data: https://embed.tawk.to; connect-src * wss://*.tawk.to https://www.google-analytics.com https://analytics.google.com; frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://www.youtube.com https://youtube.com;",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.tawk.to https://*.sentry.io https://cdn.jsdelivr.net https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net",
+              "style-src 'self' 'unsafe-inline' https://embed.tawk.to https://fonts.googleapis.com",
+              "img-src 'self' data: blob: https: https://www.facebook.com",
+              "font-src 'self' data: https://embed.tawk.to https://fonts.gstatic.com",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.sentry.io https://*.ingest.sentry.io wss://*.tawk.to https://*.tawk.to https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://region1.google-analytics.com https://www.facebook.com https://connect.facebook.net https://maps.googleapis.com https://places.googleapis.com",
+              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://www.youtube.com https://youtube.com https://embed.tawk.to https://www.facebook.com",
+              "frame-ancestors 'none'",
+              "base-uri 'self'",
+              "form-action 'self' https://hooks.stripe.com",
+              "object-src 'none'",
+              "upgrade-insecure-requests",
+            ].join('; '),
           },
           {
             key: 'Strict-Transport-Security',
