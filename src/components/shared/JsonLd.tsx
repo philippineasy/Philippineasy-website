@@ -76,24 +76,40 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
   const wordCount = description.split(' ').length;
   const readingTime = Math.ceil(wordCount / 200);
 
-  // Detect YouTube videos in article content
   const videos = extractVideos(article.content);
 
-  const newsArticle: Record<string, unknown> = {
-    '@type': 'NewsArticle',
+  // CRITICAL : NewsArticle est reserve a l'info de presse (perissable, < 30j de
+  // pertinence). Pour les guides evergreen (Sugba Lagoon, Buddy System, etc.)
+  // qui restent valides des annees, Google attend BlogPosting. Mismatch =
+  // contenu deprio dans les rich results / Google News indexing.
+  const isNewsArticle = basePath === 'actualites-sur-les-philippines';
+  const articleType = isNewsArticle ? 'NewsArticle' : 'BlogPosting';
+
+  // Auteur enrichi (signal E-E-A-T) : url pointe vers son profil public si
+  // disponible, sinon le siteUrl. Le Person.@id permet a Google de relier
+  // tous les articles du meme auteur.
+  const authorName = article.author?.username || "Philippin'Easy";
+  const authorSlug = (article.author?.username || 'philippineasy').toLowerCase().replace(/[^a-z0-9]/g, '-');
+
+  const articleSchema: Record<string, unknown> = {
+    '@type': articleType,
     headline: article.title,
-    image: [article.image],
+    image: article.image ? [article.image] : undefined,
     datePublished: article.published_at,
     dateModified: article.updated_at || article.published_at,
     author: [
       {
         '@type': 'Person',
-        name: article.author?.username || "Philippin'Easy",
+        '@id': `${siteUrl}/#person-${authorSlug}`,
+        name: authorName,
         url: siteUrl,
+        jobTitle: 'Expat aux Philippines & Fondateur Philippin\'Easy',
+        knowsAbout: ['Philippines', 'Expatriation', 'Voyage', 'Vie aux Philippines'],
       },
     ],
     publisher: {
       '@type': 'Organization',
+      '@id': `${siteUrl}/#organization`,
       name: "Philippin'Easy",
       logo: {
         '@type': 'ImageObject',
@@ -104,9 +120,10 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
       url: siteUrl,
     },
     description: description.substring(0, 200),
-    wordCount: wordCount,
+    wordCount,
     timeRequired: `PT${readingTime}M`,
     inLanguage: 'fr-FR',
+    isAccessibleForFree: true,
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': articleUrl,
@@ -115,9 +132,8 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
     keywords: ['Philippines', article.category?.name, article.title].filter(Boolean).join(', '),
   };
 
-  // Add video reference to article if videos are present
   if (videos.length > 0) {
-    newsArticle.video = videos.map((v) => ({
+    articleSchema.video = videos.map((v) => ({
       '@type': 'VideoObject',
       name: v.caption || article.title,
       description: v.caption || description.substring(0, 200),
@@ -130,7 +146,7 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
 
   const jsonLd = {
     '@context': 'https://schema.org',
-    ...newsArticle,
+    ...articleSchema,
   };
 
   return (

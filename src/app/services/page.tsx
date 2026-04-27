@@ -15,6 +15,7 @@ import {
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import ServiceCard, { Feature } from '@/components/services/ServiceCard';
 import FAQSchema from '@/components/shared/FAQSchema';
+import ServicesJsonLd from '@/components/shared/ServicesJsonLd';
 import InfoTooltip from '@/components/ui/InfoTooltip';
 import {
   BUDDY_PRICING,
@@ -65,6 +66,7 @@ export default function ServicesPage() {
   return (
     <div className="min-h-screen">
       <FAQSchema faqs={serviceFAQs} />
+      <ServicesJsonLd />
 
       {/* Hero Section */}
       <section className="relative bg-muted py-20 px-4">
