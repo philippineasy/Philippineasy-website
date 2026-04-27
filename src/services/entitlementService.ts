@@ -131,8 +131,23 @@ export const createEntitlements = async (
     duration_days: number | null;
   }>
 ) => {
+  // IDEMPOTENCE : si l'activation est rejouee (ex: webhook Stripe retry apres
+  // erreur partielle), eviter de creer des doublons pour ce purchase_id.
+  const { data: existing } = await supabase
+    .from('purchase_entitlements')
+    .select('feature_type')
+    .eq('purchase_id', purchaseId);
+
+  const existingTypes = new Set((existing ?? []).map((e: { feature_type: string }) => e.feature_type));
+  const toCreate = entitlements.filter((e) => !existingTypes.has(e.feature_type));
+
+  if (toCreate.length === 0) {
+    console.log(`createEntitlements: tous les entitlements existent deja pour purchase ${purchaseId}, skip`);
+    return { data: [] as PurchaseEntitlement[], error: null };
+  }
+
   const now = new Date();
-  const rows = entitlements.map((e) => ({
+  const rows = toCreate.map((e) => ({
     purchase_id: purchaseId,
     user_id: userId,
     feature_type: e.feature_type,

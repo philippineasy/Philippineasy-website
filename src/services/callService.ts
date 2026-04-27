@@ -74,6 +74,18 @@ export const updateCallStatus = async (
   status: CallStatus,
   extra?: Partial<CallBooking>
 ) => {
+  // Lit l'etat actuel pour : (1) detecter si on liber un slot reservable,
+  // (2) detecter si on consomme un credit call_30min de l'entitlement
+  const { data: existing } = await supabase
+    .from('call_bookings')
+    .select('purchase_id, user_id, slot_id, status')
+    .eq('id', bookingId)
+    .single();
+
+  if (!existing) {
+    return { data: null, error: new Error('Booking not found') };
+  }
+
   const updatePayload: Record<string, unknown> = {
     status,
     updated_at: new Date().toISOString(),
@@ -95,8 +107,84 @@ export const updateCallStatus = async (
     console.error('Error updating call status:', error);
     return { data: null, error };
   }
+
+  // Side effects post-update :
+  const wasReserved = existing.status === 'scheduled' || existing.status === 'confirmed';
+
+  // 1) Liberation du slot calendrier si annulation/no-show (slot redevient
+  //    reservable par d'autres clients).
+  if ((status === 'cancelled' || status === 'no_show') && existing.slot_id && wasReserved) {
+    await supabase
+      .from('call_slots')
+      .update({ is_available: true })
+      .eq('id', existing.slot_id);
+  }
+
+  // 2) Liberation du credit call_30min sur l'entitlement :
+  //    - cancelled = annulation avant l'appel -> credit rendu (decrement used_quantity)
+  //    - no_show   = client a rate l'appel    -> NE PAS rendre le credit (penalite)
+  //    - completed = appel realise            -> consomme le credit (increment used_quantity)
+  if (existing.purchase_id) {
+    if (status === 'cancelled' && wasReserved) {
+      await refundCallCredit(supabase, existing.purchase_id, existing.user_id);
+    } else if (status === 'completed' && existing.status !== 'completed') {
+      await consumeCallCredit(supabase, existing.purchase_id, existing.user_id);
+    }
+  }
+
   return { data: data as CallBooking, error: null };
 };
+
+/** Decremente atomiquement used_quantity du call_30min entitlement lie au pack. */
+async function refundCallCredit(supabase: SupabaseClient, purchaseId: string, userId: string) {
+  const { data: ent } = await supabase
+    .from('purchase_entitlements')
+    .select('id, used_quantity, status')
+    .eq('purchase_id', purchaseId)
+    .eq('user_id', userId)
+    .eq('feature_type', 'call_30min')
+    .maybeSingle();
+
+  if (!ent || ent.used_quantity <= 0) return;
+
+  const newUsed = ent.used_quantity - 1;
+  await supabase
+    .from('purchase_entitlements')
+    .update({
+      used_quantity: newUsed,
+      // Si etait fully_used, repasse en in_use (credit a nouveau dispo)
+      status: ent.status === 'fully_used' ? 'in_use' : ent.status,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', ent.id)
+    .eq('used_quantity', ent.used_quantity); // CAS atomique
+}
+
+/** Incremente atomiquement used_quantity quand l'appel est completed. */
+async function consumeCallCredit(supabase: SupabaseClient, purchaseId: string, userId: string) {
+  const { data: ent } = await supabase
+    .from('purchase_entitlements')
+    .select('id, total_quantity, used_quantity')
+    .eq('purchase_id', purchaseId)
+    .eq('user_id', userId)
+    .eq('feature_type', 'call_30min')
+    .maybeSingle();
+
+  if (!ent) return;
+
+  const newUsed = ent.used_quantity + 1;
+  const isFullyUsed = ent.total_quantity !== null && newUsed >= ent.total_quantity;
+
+  await supabase
+    .from('purchase_entitlements')
+    .update({
+      used_quantity: newUsed,
+      status: isFullyUsed ? 'fully_used' : 'in_use',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', ent.id)
+    .eq('used_quantity', ent.used_quantity);
+}
 
 export const getCallsByUser = async (supabase: SupabaseClient, userId: string) => {
   const { data, error } = await supabase

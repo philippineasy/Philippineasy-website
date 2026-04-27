@@ -97,23 +97,65 @@ export async function POST(req: NextRequest) {
 
   // =====================================================
   // customer.subscription.deleted
+  // Cascade : expire le service_purchase + tous ses entitlements + cancel
+  // les call_bookings non encore consommes. Sinon le user garde indument
+  // l'acces a tout (Easy+, library PDF, Premium dating, calls reservables).
   // =====================================================
   if (event.type === 'customer.subscription.deleted') {
     const subscription = event.data.object as Stripe.Subscription;
 
-    // Expire any service purchases linked to this subscription
-    const { error: purchaseError } = await supabaseAdmin
+    // 1. Recupere les service_purchases impactes
+    const { data: impactedPurchases } = await supabaseAdmin
       .from('service_purchases')
-      .update({ status: 'expired', updated_at: new Date().toISOString() })
+      .select('id, user_id, service_type')
       .eq('stripe_subscription_id', subscription.id)
       .eq('status', 'active');
 
-    if (purchaseError) {
-      console.error(`Failed to expire purchases for subscription ${subscription.id}:`, purchaseError);
+    if (impactedPurchases && impactedPurchases.length > 0) {
+      const purchaseIds = impactedPurchases.map((p) => p.id);
+
+      // 2. Expire les service_purchases
+      await supabaseAdmin
+        .from('service_purchases')
+        .update({ status: 'expired', updated_at: new Date().toISOString() })
+        .in('id', purchaseIds);
+
+      // 3. Expire les entitlements lies (Easy+, rencontre_premium, pdf_library_access...)
+      await supabaseAdmin
+        .from('purchase_entitlements')
+        .update({ status: 'expired', updated_at: new Date().toISOString() })
+        .in('purchase_id', purchaseIds)
+        .in('status', ['available', 'in_use']);
+
+      // 4. Cancel les call_bookings non encore completes
+      await supabaseAdmin
+        .from('call_bookings')
+        .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+        .in('purchase_id', purchaseIds)
+        .in('status', ['scheduled', 'confirmed']);
+
+      // 5. Reset les flags profile pour les services impactes (Easy+, Rencontre Premium)
+      for (const purchase of impactedPurchases) {
+        if (purchase.service_type.startsWith('easy_plus_')) {
+          await supabaseAdmin
+            .from('profiles')
+            .update({ easy_plus_expires_at: new Date().toISOString() })
+            .eq('id', purchase.user_id);
+        }
+        if (purchase.service_type === 'rencontre_premium' || purchase.service_type.startsWith('pack_ultime_')) {
+          await supabaseAdmin
+            .from('profiles')
+            .update({
+              plan: 'free',
+              rencontre_premium_expires_at: new Date().toISOString(),
+            })
+            .eq('id', purchase.user_id);
+        }
+      }
     }
 
-    // Reset dating plan (legacy)
-    const { data: cancelledProfile, error } = await supabaseAdmin
+    // Reset dating plan (legacy stripe_subscription_id sur profiles)
+    const { data: cancelledProfile } = await supabaseAdmin
       .from('profiles')
       .update({
         plan: 'free',
@@ -121,11 +163,7 @@ export async function POST(req: NextRequest) {
       })
       .eq('stripe_subscription_id', subscription.id)
       .select('id')
-      .single();
-
-    if (error) {
-      console.error(`Failed to update plan on subscription deletion for ${subscription.id}:`, error);
-    }
+      .maybeSingle();
 
     // Send cancellation email
     if (cancelledProfile) {
@@ -134,6 +172,102 @@ export async function POST(req: NextRequest) {
         sendSubscriptionCancelledEmail(user.email, user.name, 'Abonnement Premium').catch((err) =>
           console.error('Subscription cancelled email error:', err)
         );
+      }
+    }
+  }
+
+  // =====================================================
+  // charge.refunded — cascade revoke pour les achats one-shot (non-subscription)
+  // Sans ce handler, un user rembourse continue a beneficier de son Pack
+  // Ultime / Buddy / Voyage Serein indument.
+  // =====================================================
+  if (event.type === 'charge.refunded') {
+    const charge = event.data.object as Stripe.Charge;
+    const paymentIntentId = typeof charge.payment_intent === 'string'
+      ? charge.payment_intent
+      : charge.payment_intent?.id;
+
+    if (paymentIntentId) {
+      const { data: refundedPurchases } = await supabaseAdmin
+        .from('service_purchases')
+        .select('id, user_id, service_type')
+        .eq('stripe_payment_intent_id', paymentIntentId)
+        .in('status', ['paid', 'active', 'activating']);
+
+      if (refundedPurchases && refundedPurchases.length > 0) {
+        const purchaseIds = refundedPurchases.map((p) => p.id);
+
+        await supabaseAdmin
+          .from('service_purchases')
+          .update({ status: 'refunded', updated_at: new Date().toISOString() })
+          .in('id', purchaseIds);
+
+        await supabaseAdmin
+          .from('purchase_entitlements')
+          .update({ status: 'expired', updated_at: new Date().toISOString() })
+          .in('purchase_id', purchaseIds)
+          .in('status', ['available', 'in_use']);
+
+        await supabaseAdmin
+          .from('call_bookings')
+          .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+          .in('purchase_id', purchaseIds)
+          .in('status', ['scheduled', 'confirmed']);
+
+        // Reset profile flags si applicable
+        for (const purchase of refundedPurchases) {
+          if (purchase.service_type.startsWith('pack_ultime_')) {
+            // Pack Ultime → revert Easy+ et Rencontre Premium accordes
+            await supabaseAdmin
+              .from('profiles')
+              .update({
+                easy_plus_expires_at: new Date().toISOString(),
+                plan: 'free',
+                rencontre_premium_expires_at: new Date().toISOString(),
+              })
+              .eq('id', purchase.user_id);
+          } else if (purchase.service_type === 'easy_plus_lifetime') {
+            await supabaseAdmin
+              .from('profiles')
+              .update({ easy_plus_expires_at: new Date().toISOString() })
+              .eq('id', purchase.user_id);
+          }
+        }
+
+        console.log(`Refund cascade: ${purchaseIds.length} purchases revoked for payment ${paymentIntentId}`);
+      }
+    }
+  }
+
+  // =====================================================
+  // invoice.paid — renewal des subscriptions (Easy+ monthly/yearly,
+  // Rencontre Premium monthly). Sans ce handler, l'user perd l'acces apres
+  // 30j/365j malgre que Stripe debite correctement chaque cycle.
+  // =====================================================
+  if (event.type === 'invoice.paid') {
+    const invoice = event.data.object as Stripe.Invoice;
+    const subscriptionId = (invoice as Stripe.Invoice & { subscription?: string | null }).subscription
+      ?? null;
+
+    // Skip la 1ere facture (creation), elle est geree par checkout.session.completed
+    if (subscriptionId && invoice.billing_reason !== 'subscription_create') {
+      const { data: purchase } = await supabaseAdmin
+        .from('service_purchases')
+        .select('id, user_id, service_type, status')
+        .eq('stripe_subscription_id', subscriptionId as string)
+        .maybeSingle();
+
+      if (purchase && (purchase.status === 'active' || purchase.status === 'expired')) {
+        // Re-activate / extend
+        const { activateService } = await import('@/services/activationService');
+        // Reset status to 'paid' pour permettre re-activation propre
+        await supabaseAdmin
+          .from('service_purchases')
+          .update({ status: 'paid', updated_at: new Date().toISOString() })
+          .eq('id', purchase.id);
+
+        await activateService(supabaseAdmin, purchase.id);
+        console.log(`Subscription renewed: ${purchase.service_type} for user ${purchase.user_id}`);
       }
     }
   }

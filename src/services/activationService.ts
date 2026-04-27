@@ -118,6 +118,51 @@ export async function activateService(supabase: SupabaseClient, purchaseId: stri
   }
 }
 
+/** Helper idempotent : cree les call_bookings UNE SEULE FOIS par purchase_id.
+ *  Si l'activation est rejouee (webhook retry), on ne re-cree pas les bookings. */
+async function ensureCallBookings(
+  supabase: SupabaseClient,
+  purchaseId: string,
+  userId: string,
+  totalCalls: number,
+) {
+  const { data: existing } = await supabase
+    .from('call_bookings')
+    .select('id')
+    .eq('purchase_id', purchaseId)
+    .limit(1);
+
+  if (existing && existing.length > 0) {
+    console.log(`ensureCallBookings: bookings deja crees pour purchase ${purchaseId}, skip`);
+    return;
+  }
+
+  const bookings = Array.from({ length: totalCalls }, (_, i) => ({
+    purchase_id: purchaseId,
+    user_id: userId,
+    call_number: i + 1,
+    total_calls: totalCalls,
+    status: 'scheduled',
+  }));
+  await supabase.from('call_bookings').insert(bookings);
+}
+
+/** Helper idempotent : cree la conversation CRM UNE SEULE FOIS par purchase. */
+async function ensureWelcomeConversation(
+  supabase: SupabaseClient,
+  userId: string,
+  purchaseId: string,
+  serviceName: string,
+) {
+  const { data: existing } = await supabase
+    .from('crm_conversations')
+    .select('id')
+    .eq('related_purchase_id', purchaseId)
+    .limit(1);
+  if (existing && existing.length > 0) return;
+  await createWelcomeConversation(supabase, userId, purchaseId, serviceName);
+}
+
 async function activateBuddy(
   supabase: SupabaseClient,
   purchaseId: string,
@@ -131,38 +176,18 @@ async function activateBuddy(
   };
   const totalCalls = callsMap[serviceType] || 2;
 
-  // Create empty call bookings
-  const bookings = Array.from({ length: totalCalls }, (_, i) => ({
-    purchase_id: purchaseId,
-    user_id: userId,
-    call_number: i + 1,
-    total_calls: totalCalls,
-    status: 'scheduled',
-  }));
-
-  await supabase.from('call_bookings').insert(bookings);
-
-  // Create CRM conversation
-  await createWelcomeConversation(supabase, userId, purchaseId, 'Buddy System');
+  await ensureCallBookings(supabase, purchaseId, userId, totalCalls);
+  await ensureWelcomeConversation(supabase, userId, purchaseId, 'Buddy System');
 }
 
 async function activateVoyageSerein(
   supabase: SupabaseClient,
   purchaseId: string,
   userId: string,
-  serviceType: ServiceType
+  _serviceType: ServiceType
 ) {
-  // Create 1 call booking
-  await supabase.from('call_bookings').insert({
-    purchase_id: purchaseId,
-    user_id: userId,
-    call_number: 1,
-    total_calls: 1,
-    status: 'scheduled',
-  });
-
-  // Create CRM conversation
-  await createWelcomeConversation(supabase, userId, purchaseId, 'Pack Voyage Serein');
+  await ensureCallBookings(supabase, purchaseId, userId, 1);
+  await ensureWelcomeConversation(supabase, userId, purchaseId, 'Pack Voyage Serein');
 }
 
 async function activatePackUltime(
@@ -178,15 +203,15 @@ async function activatePackUltime(
   };
   const totalCalls = callsMap[serviceType] || 3;
 
-  // Create call bookings
-  const bookings = Array.from({ length: totalCalls }, (_, i) => ({
-    purchase_id: purchaseId,
-    user_id: userId,
-    call_number: i + 1,
-    total_calls: totalCalls,
-    status: 'scheduled',
-  }));
-  await supabase.from('call_bookings').insert(bookings);
+  await ensureCallBookings(supabase, purchaseId, userId, totalCalls);
+
+  // Pack Ultime → cancel auto une eventuelle subscription Easy+ monthly du
+  // meme user (sinon double facturation : pack inclut deja 1 an + le monthly
+  // continue a debiter en background). On ignore les erreurs car ce n'est
+  // pas critique (logguer pour audit, l'admin peut intervenir).
+  await cancelExistingEasyPlusMonthlyIfAny(supabase, userId).catch((err) =>
+    console.warn(`Pack Ultime: cancel Easy+ monthly failed for ${userId}:`, err)
+  );
 
   // Activate Easy+ on profile (1 an = 365 jours, conforme a l'annonce Pack Ultime)
   await activateEasyPlus(supabase, userId, 'easy_plus_yearly');
@@ -197,10 +222,50 @@ async function activatePackUltime(
   // le client perdrait 5 mois de Premium.
   await activateRencontrePremium(supabase, userId, 180);
 
-  // Create CRM conversation
-  await createWelcomeConversation(supabase, userId, purchaseId, 'Pack Ultime');
+  await ensureWelcomeConversation(supabase, userId, purchaseId, 'Pack Ultime');
 }
 
+/** Cancel l'eventuelle subscription Easy+ monthly active du user (anti double-facturation
+ *  quand un pack qui inclut Easy+ est achete par-dessus). */
+async function cancelExistingEasyPlusMonthlyIfAny(
+  supabase: SupabaseClient,
+  userId: string,
+) {
+  const { data: rows } = await supabase
+    .from('service_purchases')
+    .select('id, stripe_subscription_id')
+    .eq('user_id', userId)
+    .eq('service_type', 'easy_plus_monthly')
+    .eq('status', 'active')
+    .not('stripe_subscription_id', 'is', null);
+
+  if (!rows || rows.length === 0) return;
+
+  const Stripe = (await import('stripe')).default;
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-08-27.basil' });
+
+  for (const row of rows) {
+    try {
+      await stripe.subscriptions.cancel(row.stripe_subscription_id as string);
+      await supabase
+        .from('service_purchases')
+        .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+        .eq('id', row.id);
+      console.log(`Cancelled Easy+ monthly subscription ${row.stripe_subscription_id} for user ${userId} (Pack Ultime takeover)`);
+    } catch (err) {
+      console.error(`Failed to cancel subscription ${row.stripe_subscription_id}:`, err);
+    }
+  }
+}
+
+/**
+ * Active Easy+ avec semantique "extension" :
+ * - Si l'user a deja un Easy+ a vie (expires_at IS NULL), NE TOUCHE A RIEN
+ *   (sinon downgrade silencieux d'un lifetime vers une duree finie).
+ * - Si l'user a un Easy+ encore actif, EXTEND depuis la date d'expiration
+ *   actuelle (pas RESET vers NOW + duree, sinon perte des jours restants).
+ * - Si l'user n'a rien ou est expire, base = NOW.
+ */
 async function activateEasyPlus(
   supabase: SupabaseClient,
   userId: string,
@@ -212,24 +277,67 @@ async function activateEasyPlus(
     easy_plus_lifetime: null,
   };
   const days = durationDays[serviceType];
-  const expiresAt = days
-    ? new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString()
-    : null;
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('easy_plus_expires_at')
+    .eq('id', userId)
+    .single();
+
+  const currentExpiry = profile?.easy_plus_expires_at as string | null | undefined;
+  const isCurrentlyLifetime = profile && currentExpiry === null;
+
+  if (days === null) {
+    // Achat lifetime : toujours promote a permanent (vire toute date)
+    await supabase
+      .from('profiles')
+      .update({ easy_plus_expires_at: null })
+      .eq('id', userId);
+    return;
+  }
+
+  if (isCurrentlyLifetime) {
+    // Deja lifetime, ne pas downgrader
+    console.log(`activateEasyPlus: user ${userId} a deja Easy+ a vie, skip`);
+    return;
+  }
+
+  // Base = MAX(NOW, expiration actuelle si dans le futur) puis ajout des jours.
+  const nowMs = Date.now();
+  const currentMs = currentExpiry ? new Date(currentExpiry).getTime() : 0;
+  const baseMs = Math.max(nowMs, currentMs);
+  const expiresAt = new Date(baseMs + days * 24 * 60 * 60 * 1000).toISOString();
 
   await supabase
     .from('profiles')
-    .update({
-      easy_plus_expires_at: expiresAt,
-    })
+    .update({ easy_plus_expires_at: expiresAt })
     .eq('id', userId);
 }
 
+/**
+ * Meme semantique d'extension pour Rencontre Premium.
+ * Default 30j (Rencontre Premium standalone), 180j pour Pack Ultime.
+ */
 async function activateRencontrePremium(
   supabase: SupabaseClient,
   userId: string,
   durationDays: number = 30,
 ) {
-  const expiresAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000).toISOString();
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('rencontre_premium_expires_at')
+    .eq('id', userId)
+    .single();
+
+  const currentExpiry = profile?.rencontre_premium_expires_at as string | null | undefined;
+
+  // Pas de notion de "lifetime" pour Rencontre Premium pour l'instant. Si un
+  // jour on l'introduit, dupliquer la logique isCurrentlyLifetime de easyPlus.
+
+  const nowMs = Date.now();
+  const currentMs = currentExpiry ? new Date(currentExpiry).getTime() : 0;
+  const baseMs = Math.max(nowMs, currentMs);
+  const expiresAt = new Date(baseMs + durationDays * 24 * 60 * 60 * 1000).toISOString();
 
   await supabase
     .from('profiles')
