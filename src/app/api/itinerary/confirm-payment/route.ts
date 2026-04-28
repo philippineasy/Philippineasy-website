@@ -37,9 +37,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 403 });
     }
 
-    // Si déjà complété, retourner succès (idempotent)
+    // Si déjà complété, retourner succès (idempotent) avec montant pour tracking
     if (generation.payment_status === 'completed') {
-      return NextResponse.json({ success: true, already_completed: true });
+      const { data: existing } = await supabase
+        .from('itinerary_generations')
+        .select('amount_paid')
+        .eq('id', generation_id)
+        .single();
+      return NextResponse.json({
+        success: true,
+        already_completed: true,
+        amount: Number(existing?.amount_paid) || 0,
+        currency: 'EUR',
+      });
     }
 
     // On ne fait JAMAIS confiance au payment_intent_id du body — on utilise
@@ -84,12 +94,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Erreur lors de la mise à jour' }, { status: 500 });
     }
 
+    const amount = paymentIntent.amount / 100;
+    const currency = (paymentIntent.currency ?? 'eur').toUpperCase();
+
     // Si rien n'a été mis à jour, c'est qu'un autre process a déjà completé entre-temps
     if (!updated || updated.length === 0) {
-      return NextResponse.json({ success: true, already_completed: true });
+      return NextResponse.json({
+        success: true,
+        already_completed: true,
+        amount,
+        currency,
+      });
     }
 
-    return NextResponse.json({ success: true, payment_confirmed: true, generation_id });
+    return NextResponse.json({
+      success: true,
+      payment_confirmed: true,
+      generation_id,
+      amount,
+      currency,
+    });
   } catch (error) {
     console.error('Confirm payment error:', error);
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });

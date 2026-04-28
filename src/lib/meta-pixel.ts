@@ -7,8 +7,14 @@
  */
 
 function fbq(...args: any[]) {
-  if (typeof window !== 'undefined' && window.fbq) {
-    window.fbq(...args)
+  if (typeof window !== 'undefined') {
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.log('[Meta fbq]', ...args, '— fbqLoaded:', Boolean((window as any).fbq))
+    }
+    if (window.fbq) {
+      window.fbq(...args)
+    }
   }
 }
 

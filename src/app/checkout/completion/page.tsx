@@ -23,8 +23,40 @@ function CompletionContent() {
       setStatus('succeeded');
       clearCart();
       const piId = searchParams.get('payment_intent') || '';
-      trackPurchase({ transaction_id: piId, value: 0, items: [{ item_id: piId, item_name: 'Marketplace', item_category: 'marketplace' }] });
-      metaTrackPurchase({ value: 0, content_name: 'Marketplace' });
+
+      // Verify amount via API (webhook needs ~1-2s to create the order row)
+      const verifyAndTrack = async () => {
+        let value = 0;
+        let currency = 'EUR';
+        if (piId) {
+          // Retry once after a short delay if the webhook is still processing
+          const tryFetch = async () => {
+            const res = await fetch('/api/orders/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ payment_intent_id: piId }),
+            });
+            return res.ok ? res.json() : null;
+          };
+          let data = await tryFetch();
+          if (!data?.success) {
+            await new Promise((r) => setTimeout(r, 1500));
+            data = await tryFetch();
+          }
+          if (data?.success) {
+            value = Number(data.amount) || 0;
+            currency = data.currency || 'EUR';
+          }
+        }
+        trackPurchase({
+          transaction_id: piId,
+          value,
+          currency,
+          items: [{ item_id: piId, item_name: 'Marketplace', item_category: 'marketplace' }],
+        });
+        metaTrackPurchase({ value, currency, content_name: 'Marketplace', content_ids: piId ? [piId] : undefined });
+      };
+      void verifyAndTrack();
     } else if (paymentStatus === 'processing') {
       hasProcessed.current = true;
       setStatus('processing');

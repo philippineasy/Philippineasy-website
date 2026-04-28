@@ -23,6 +23,11 @@ function gtag(...args: any[]) {
 }
 
 function trackEvent(eventName: string, params?: GtagEvent) {
+  if (process.env.NODE_ENV !== 'production') {
+    const hasGtag = typeof window !== 'undefined' && Boolean((window as any).gtag)
+    // eslint-disable-next-line no-console
+    console.log(`[GA4 trackEvent] ${eventName}`, { params, gtagLoaded: hasGtag })
+  }
   gtag('event', eventName, params)
 }
 

@@ -14,15 +14,45 @@ export default function ServiceCompletionPage() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
 
   useEffect(() => {
-    // Give webhook time to process, then show success
-    const timer = setTimeout(() => {
-      if (sessionId) {
-        trackServicePurchase({ transaction_id: sessionId, value: 0, service_name: 'Service' });
-        metaTrackPurchase({ value: 0, content_name: 'Service' });
+    if (!sessionId) {
+      setStatus('error');
+      return;
+    }
+
+    let cancelled = false;
+    // Give webhook time to process, then verify and track
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/services/verify-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sessionId }),
+        });
+        const data = await res.json();
+        if (cancelled) return;
+
+        if (data.success) {
+          const value = Number(data.amount) || 0;
+          const currency = data.currency || 'EUR';
+          const serviceName = data.service_type || 'Service';
+          trackServicePurchase({ transaction_id: sessionId, value, service_name: serviceName });
+          metaTrackPurchase({ value, currency, content_name: serviceName, content_ids: [sessionId] });
+          setStatus('success');
+        } else {
+          // Fallback : on confirme quand meme la reception, mais sans valeur
+          trackServicePurchase({ transaction_id: sessionId, value: 0, service_name: 'Service' });
+          metaTrackPurchase({ value: 0, content_name: 'Service' });
+          setStatus('success');
+        }
+      } catch {
+        if (!cancelled) setStatus('error');
       }
-      setStatus(sessionId ? 'success' : 'error');
     }, 2000);
-    return () => clearTimeout(timer);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [sessionId]);
 
   if (status === 'loading') {

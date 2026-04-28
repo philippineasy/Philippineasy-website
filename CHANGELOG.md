@@ -5,6 +5,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Tracking — Fix `value: 0` sur tous les events Purchase (GA4 + Meta Pixel)
+Les 3 pages de completion paiement envoyaient `value: 0` aux trackers (GA4 et Meta Pixel) — impossible de calculer ROAS / CPA sur n'importe quel canal. Fix complet :
+
+- `/api/itinerary/confirm-payment` : retourne maintenant `amount` + `currency` dans la response (early-return idempotent retourne aussi le montant depuis DB)
+- Nouveau endpoint `/api/services/verify-session` (auth + ownership check) : retourne `amount`, `currency`, `service_type` depuis `service_purchases` via `stripe_checkout_session_id`
+- Nouveau endpoint `/api/orders/verify-payment` (auth + ownership check) : retourne `total_amount` depuis `orders` via `stripe_payment_intent_id`
+- `/checkout/itinerary/completion` : utilise `data.amount` reel (avant : `?? 0` parce que l'API ne retournait pas `amount`)
+- `/checkout/services/completion` : appelle verify-session avant tracking, fallback gracieux si webhook pas encore traite
+- `/checkout/completion` (marketplace) : appelle verify-payment avec retry 1.5s pour laisser le temps au webhook Stripe de creer la ligne `orders`
+- `MetaPixel.tsx` : sanitize `META_PIXEL_ID` (strip non-digit chars) pour resister aux env values mal saisies sur Vercel (ex: trailing `\n` litteral) + switch `dangerouslySetInnerHTML` au lieu de children template literal pour eviter les erreurs `appendChild Invalid token` (probablement causees par adblockers interceptant le script)
+- `analytics.ts` + `meta-pixel.ts` : ajout `console.log` dev-only (gated derriere `NODE_ENV !== 'production'`) pour debug futur
+
+**Impact** : ROAS / CPA enfin mesurables sur Google Ads, Meta Ads, et tout autre canal qui consomme les conversions GA4. Pre-requis pour lancer les campagnes payantes prevues dans la strategie marketing.
+
 ### SEO — Phase E : decannibalisation cluster "rencontre philippines" (commits e81f6e1 + new)
 3 articles ciblaient la meme requete "rencontrer femmes philippines" -> Google ne savait pas lequel ranker, tous coulaient. Apres lecture editoriale des 3 (vraiment differents en ton, pas duplicates), strategie de differentiation par intent secondaire :
 

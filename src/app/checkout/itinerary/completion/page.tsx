@@ -56,13 +56,17 @@ function CompletionContent() {
         const data = await res.json();
         if (data.success) {
           setPaymentConfirmed(true);
+          const value = Number(data.amount) || 0;
+          const currency = data.currency || 'EUR';
           trackPurchase({
             transaction_id: paymentIntentId || generationId || '',
-            value: data.amount ?? 0,
+            value,
+            currency,
             items: [{ item_id: generationId || '', item_name: 'Itineraire IA', item_category: 'itinerary' }],
           });
           metaTrackPurchase({
-            value: data.amount ?? 0,
+            value,
+            currency,
             content_name: 'Itineraire IA',
             content_ids: generationId ? [generationId] : undefined,
           });

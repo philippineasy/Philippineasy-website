@@ -3,7 +3,10 @@
 import Script from 'next/script'
 import { useEffect } from 'react'
 
-const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID
+// Sanitize: strip whitespace/newlines and any non-digit chars to avoid breaking
+// the inline <Script> when an env value was saved with stray \n or quotes.
+const RAW_META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID
+const META_PIXEL_ID = RAW_META_PIXEL_ID?.trim().replace(/[^0-9]/g, '') || undefined
 
 declare global {
   interface Window {
@@ -42,23 +45,15 @@ export default function MetaPixel() {
 
   if (!META_PIXEL_ID) return null
 
+  const pixelScript = `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('consent','revoke');fbq('init','${META_PIXEL_ID}');fbq('track','PageView');`
+
   return (
     <>
-      <Script id="meta-pixel" strategy="afterInteractive">
-        {`
-          !function(f,b,e,v,n,t,s)
-          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-          n.queue=[];t=b.createElement(e);t.async=!0;
-          t.src=v;s=b.getElementsByTagName(e)[0];
-          s.parentNode.insertBefore(t,s)}(window, document,'script',
-          'https://connect.facebook.net/en_US/fbevents.js');
-          fbq('consent', 'revoke');
-          fbq('init', '${META_PIXEL_ID}');
-          fbq('track', 'PageView');
-        `}
-      </Script>
+      <Script
+        id="meta-pixel"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: pixelScript }}
+      />
       <noscript>
         <img
           height="1"
