@@ -5,6 +5,34 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Marketing — BLOC 3 Google Ads complet : 3 campagnes live (Search + Display + Brand)
+Lancement campagnes payantes Google Ads. **Aucun changement de code applicatif**, tout configure cote regie (compte 380-633-5752). Actions documentees dans `output/TODO.md` + audit guides `output/guides/bloc3-google-ads/`.
+
+**Setup tracking** (cf. commit 23af578 BLOC 3.7) :
+- Tag `AW-16902543219` deploye via `GoogleAdsTag.tsx`
+- 3 conversions GA4 importees : `purchase`, `generate_lead`, `newsletter_signup`
+- 2 audiences GA4 event-based crees via Admin API (`Itineraire IA Engages Sans Achat` + `Abandons Checkout Itineraire`)
+- 2 audiences URL Google Ads (`Visiteurs_Itineraire_Sans_Achat` 30j + `Abandons_Checkout` 7j)
+
+**Setup campagnes** :
+- 3 campagnes : SEARCH_Itineraire_IA (10eur/j Maximize Clics CPC max 0.80eur), DISPLAY_Remarketing (5eur/j Maximize Conversions), SEARCH_Brand (3eur/j CPC manuel 1eur/keyword)
+- 6 ad groups propres (Exact_Itineraire, Phrase_Voyage_PH, Brand_Philippineasy_Itineraire, Visiteurs_Itineraire_Sans_Achat, Abandons_Checkout, Brand_Terms)
+- 86 keywords positifs + 50 negatifs cibles par campagne (emploi, visa, typhon, concurrents, contenu sensible)
+- 5 RSA Search + 2 RDA Display (12 images itineraire + 6 abandon)
+- 10 sitelinks + 14 callouts
+- Frequency cap 3/jour, content exclusions (evenements tragiques, politique, sensationnel, below-the-fold)
+- Budget total 18eur/jour ≈ 540eur/mois (Phase 1 soft launch alignee sur guide 3.10)
+
+**Setup visuels** :
+- 33 bannieres totales dans `output/google-ads-assets/` : 18 base 1200x628/1200x1200 (3 segments x 3 variantes A/B/C x 2 formats) + 15 formats Display Network (300x250, 728x90, 970x250, 300x600, 1080x1920) sur les 3 controle A
+- Variante B "-10% FINALSTEP" gardee dans la RDA Abandons_Checkout pour activation future quand le coupon Stripe sera implemente
+
+**Activation** : 3 campagnes activees 2026-04-28 ~21h. Diffusion effective sous 24-48h (review Google des annonces) ; DISPLAY a J+7 (audiences peuplees).
+
+**Prochaines etapes** :
+- J+15 : si SEARCH_Itineraire_IA atteint 10+ conversions, switch en "Maximiser les conversions"
+- J+30 : si CPA stable < cibles (8eur Express, 15eur Premium), passer Phase 2 du guide (550 -> 950eur/mois)
+
 ### Tracking — Google Ads remarketing tag (BLOC 3.7)
 Pose du tag Google Ads (`AW-16902543219`) pour activer le remarketing Display et l'import des conversions GA4 (`purchase`, `generate_lead`, `newsletter_signup`) dans la regie Ads. Le compte Ads (380-633-5752) est lie a GA4 (520177629) avec personnalisation des annonces + auto-tagging actives.
 

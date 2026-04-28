@@ -104,9 +104,19 @@
 - [x] **3.7a-bis** `NEXT_PUBLIC_GOOGLE_ADS_ID=AW-16902543219` ajoute sur Vercel (production, preview, development)
 - [x] **3.7b** GA4 <-> Google Ads lies (personnalisation publicitaire ON, taggage automatique ON, autoriser acces Analytics depuis Ads ON)
 - [x] **3.7c** 3 conversions importees depuis GA4 : `purchase` (Achat), `generate_lead` (Lead — Envoi formulaire), `newsletter_signup` (Inscription)
-- [x] **3.7d** Visuels Display Network produits (18 bannieres : 3 segments x 3 variantes x 2 formats — controle A + B Layla + C pain hook). Brief A/B dans `output/google-ads-assets/AB_VARIANTS_BRIEF.md`
-- [ ] **3.2-3.6, 3.8-3.10** Toutes les configs campagnes (mots-cles, RSA, extensions, audiences Display, budget) — **actions manuelles Hugo via UI Google Ads**, templates et mots-cles deja prets dans `assets/templates-ads/google-ads-templates.md`
-- [ ] **3.11** Routine optimisation hebdomadaire 30 min — **process Hugo**
+- [x] **3.7d** Visuels Display Network produits (33 bannieres totales : 18 base 1200x628/1200x1200 + 15 formats Display Network 300x250/728x90/970x250/300x600/1080x1920). Brief A/B dans `output/google-ads-assets/AB_VARIANTS_BRIEF.md`
+- [x] **3.2-3.6** Campagnes integrees via Google Ads Editor 2026-04-28 (compte 380-633-5752) : 3 campagnes Paused (SEARCH_Itineraire_IA 7eur/jour, DISPLAY_Remarketing 2eur/jour, SEARCH_Brand 1eur/jour, total 10eur/jour soft launch), 9 ad groups, 84 keywords (positifs + 50 exclusions), 5 RSA, 10 sitelinks, 14 callouts. Source CSV : `output/google-ads-import/`
+- [x] **3.8** Audiences Display Remarketing (2026-04-28) : 2 segments URL Web UI (Visiteurs_Itineraire_Sans_Achat 30j + Abandons_Checkout 7j) + 2 segments GA4 event-based crees via Admin API (Itineraire IA Engages Sans Achat + Abandons Checkout Itineraire) — attachees en mode Ciblage aux 2 ad groups DISPLAY_Remarketing
+- [x] **3.8-bis** Bannieres Display uploadees (2026-04-28) : 2 RDA — 12 images itineraire (controle A + B + C, 6 paysage + 6 carre) dans Visiteurs_Itineraire_Sans_Achat + 6 images abandon (3 paysage + 3 carre) dans Abandons_Checkout. Logo paysage + carre. Note : variante B "-10% FINALSTEP" gardee pour activation future quand le coupon Stripe sera implemente
+- [x] **3.8-ter** Frequency cap 3/jour, content exclusions (evenements tragiques, politique, sensationnel, vidéos in-stream below the fold) appliquees
+- [x] **3.9** "Non-political ads" confirme sur le compte
+- [x] **3.10a** Budgets ajustes selon guide Phase 1 (cf. `output/guides/bloc3-google-ads/3.10-budget-encheres-strategies.md`) : SEARCH_Itineraire_IA 10eur/jour, DISPLAY_Remarketing 5eur/jour, SEARCH_Brand 3eur/jour. Total 18eur/jour ≈ 540eur/mois (Phase 1 guide = 550eur)
+- [x] **3.10b** Strategies d'encheres alignees sur guide : SEARCH_Itineraire_IA en "Maximiser les clics" portfolio (CPC max 0.80eur) — collecte donnees semaine 1-2 avant switch Maximize Conversions ; DISPLAY_Remarketing portfolio "Maximiser les conversions" ; SEARCH_Brand CPC manuel (1eur/keyword) pour defense brand
+- [x] **3.10c** **3 campagnes ACTIVEES 2026-04-28** : SEARCH_Brand + SEARCH_Itineraire_IA + DISPLAY_Remarketing. Statut : annonces "En cours d'examen" Google (24-48h) + DISPLAY en attente audiences peuplees (≥100 visiteurs, ~7j). Diffusion effective sous 24-48h apres approbation
+- [x] **3.11a** 50 mots-cles negatifs ajoutes (43 SEARCH_Itineraire_IA + 3 SEARCH_Brand + 4 DISPLAY_Remarketing) — bloque emploi/visa/typhon/concurrents/contenu sensible
+- [x] **3.11b** Generic_* ad groups supprimes (cleanup post-import — supprime 48 keywords doublons qui auraient cannibalise Exact/Phrase/Brand)
+- [ ] **3.11c** Routine optimisation hebdomadaire 30 min — **process Hugo** (cf. guide 3.11 — verifier CTR > 1.5% Search / 0.5% Display, Quality Score > 7, CPA < 8eur Express / 15eur Premium ; ajouter mots-cles negatifs depuis termes de recherche, exclure placements pourris)
+- [ ] **3.12** A J+15 (vers 2026-05-13) : si SEARCH_Itineraire_IA a 10+ conversions trackees, switch strategie de "Maximiser les clics" vers "Maximiser les conversions" (selon progression du guide 3.10)
 
 ---
 
