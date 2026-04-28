@@ -17,6 +17,7 @@ import ClientOverlays from '@/components/layout/ClientOverlays';
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
+import GoogleAdsTag from '@/components/analytics/GoogleAdsTag';
 import MetaPixel from '@/components/analytics/MetaPixel';
 config.autoAddCss = false;
 
@@ -209,6 +210,7 @@ export default async function RootLayout({
     <html lang="fr">
       <body className={`${poppins.className} bg-muted`}>
         <GoogleAnalytics />
+        <GoogleAdsTag />
         <MetaPixel />
         <AuthProvider
           initialUser={ssrUser}

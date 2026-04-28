@@ -47,6 +47,28 @@ export function trackPurchase(params: {
   })
 }
 
+// ─── Google Ads conversion (optional, complementary to GA4 import) ─────────
+// La methode privilegiee est l'import des conversions GA4 dans Google Ads
+// (cf. guide bloc3-google-ads/3.7) — aucun code requis.
+// Cette fonction est un fallback si tu veux fire une conversion specifique
+// cote client avec un label distinct (ex: tracker un funnel cross-domain).
+//
+// Usage:
+//   trackGoogleAdsConversion({ sendTo: 'AW-XXXXXXXXXX/abcdEFGHijkLMNop', value: 9.99 })
+export function trackGoogleAdsConversion(params: {
+  sendTo: string  // Format: AW-XXXXXXXXXX/CONVERSION_LABEL
+  value?: number
+  currency?: string
+  transaction_id?: string
+}) {
+  trackEvent('conversion', {
+    send_to: params.sendTo,
+    value: params.value,
+    currency: params.currency ?? 'EUR',
+    transaction_id: params.transaction_id,
+  })
+}
+
 export function trackBeginCheckout(params: {
   value: number
   currency?: string

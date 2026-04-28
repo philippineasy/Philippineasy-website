@@ -1,6 +1,6 @@
 # TODO — Philippineasy Guide Operationnel Complet
 # Mis a jour automatiquement par Claude Code a chaque session
-# Derniere MAJ : 2026-04-16 (P0 complete)
+# Derniere MAJ : 2026-04-28 (P0 fix value:0 + Klook live)
 
 ## Legende
 ### Guides (colonne G)
@@ -30,9 +30,9 @@
 | # | Tache | G | I | Detail |
 |---|-------|---|---|--------|
 | 1.1 | GA4 installation Next.js 15 | [v] | [x] | Consent mode v2 RGPD implemente (denied par defaut, update via CookieBanner CustomEvent). Reste: retention 14 mois, Google Signals, filtre trafic interne (config GA4 UI) |
-| 1.2 | GA4 conversions config | [v] | [x] | `src/lib/analytics.ts` cree (12 fonctions). Integre dans checkout itineraire/marketplace/services, contact, newsletter, exit intent, lead magnets |
+| 1.2 | GA4 conversions config | [v] | [x] | `src/lib/analytics.ts` cree (12 fonctions). Integre dans checkout itineraire/marketplace/services, contact, newsletter, exit intent, lead magnets. **Fix 2026-04-28 (commit f62615b)** : les 3 pages completion envoyaient `value: 0` -> nouveaux endpoints `/api/services/verify-session` et `/api/orders/verify-payment`, `/api/itinerary/confirm-payment` retourne maintenant `amount`. ROAS/CPA enfin mesurables. |
 | 1.3 | GA4 dashboard personnalise | [v] | [ ] | Config GA4 UI — maintenant possible grace aux events 1.2 |
-| 1.4 | Meta Pixel installation | [v] | [x] | Consent mode (revoke par defaut), `NEXT_PUBLIC_META_PIXEL_ID` configure sur Vercel (667078773024359). `src/lib/meta-pixel.ts` cree (9 fonctions). Events integres |
+| 1.4 | Meta Pixel installation | [v] | [x] | Consent mode (revoke par defaut), `NEXT_PUBLIC_META_PIXEL_ID` configure sur Vercel (667078773024359). `src/lib/meta-pixel.ts` cree (9 fonctions). Events integres. **Fix 2026-04-28** : sanitize ID (strip non-digit chars) pour resister aux env Vercel mal saisis (avait `\n` litteral) + switch `dangerouslySetInnerHTML` au lieu de Script children pour eviter erreurs `appendChild Invalid token` declenchees par adblockers Brave Shields |
 | 1.5 | Google Tag Manager | [v] | [-] | Intentionnellement reporte. GA4 + Meta Pixel directs suffisent pour le lancement. A reconsiderer si LinkedIn/TikTok Ads |
 | 1.6 | UTM conventions | [v] | [~] | GA4 capture automatiquement les UTM des URLs (natif). **Manque:** aucun code custom de parsing/stockage UTM, pas de forwarding vers Stripe/CRM. Acceptable pour le lancement |
 | 1.7 | Google Search Console | [v] | [x] | Propriete verifiee depuis jan 2026, GA4 associe, SA ajoute, APIs activees (Analytics Data + Search Console). robots.txt corrige (news-sitemap fantome retire). MCP GSC connecte |
@@ -47,25 +47,38 @@
 - [x] **1.7b** GSC deja verifie depuis jan 2026, pas besoin de meta tag
 - [x] **1.7c** Reference news-sitemap.xml retiree de robots.txt
 
+### Actions P0a — FIX VALUE:0 (2026-04-28, commit f62615b)
+- [x] **1.2c** Fix `/api/itinerary/confirm-payment` retourne maintenant `amount` + `currency` dans la response (avant : seulement success)
+- [x] **1.2d** Nouveau endpoint `/api/services/verify-session` (auth + ownership) lookup `service_purchases` par `stripe_checkout_session_id`
+- [x] **1.2e** Nouveau endpoint `/api/orders/verify-payment` (auth + ownership) lookup `orders` par `stripe_payment_intent_id` avec retry 1.5s pour webhook async
+- [x] **1.2f** 3 pages completion (itinerary, services, marketplace) appellent leur endpoint et envoient les vraies valeurs Purchase a GA4 + Meta
+- [x] **1.4c** `MetaPixel.tsx` sanitize l'ID + switch a `dangerouslySetInnerHTML` (resilient aux env values pollues + adblockers)
+- [x] **1.2g** `analytics.ts` + `meta-pixel.ts` console.log dev-only (gated NODE_ENV) pour debug futur
+- [x] **1.2h** Test end-to-end valide : `[GA4 trackEvent] purchase value: 9.99 currency: EUR` confirme dans devtools
+
+**Impact** : ROAS/CPA enfin mesurables sur Google Ads, Meta Ads et tout autre canal. Pre-requis BLOC 3+4 (campagnes payantes) leve.
+
 ---
 
 ## BLOC 2 — AFFILIATION (0 EUR investi, REVENU PASSIF)
 | # | Tache | G | I | Detail |
 |---|-------|---|---|--------|
-| 2.1 | Booking.com Affiliate | [v] | [ ] | ZERO lien Booking dans le codebase. Pas de composant BookingLink. Pages cibles existent (budget, hebergement, destinations) mais sans aucun lien affilie. Necessite: inscription programme, obtenir AID, creer composant, integrer dans 5+ pages |
-| 2.2 | Chapka/AVI Assurance | [v] | [ ] | ZERO lien Chapka/AVI. Page sante-securite existe mais sans recommendation affiliation. Page banque-assurance liste des assureurs (Cigna, Allianz, AXA) sans liens affilies. Necessite: inscription 2 programmes, composant InsuranceRecommendation |
-| 2.3 | Wise Affiliate | [v] | [ ] | ZERO lien Wise. Page budget existe sans mention de transfert d'argent. Page banque-assurance mentionne BDO/BPI/Metrobank mais pas Wise |
-| 2.4 | Airalo eSIM | [v] | [ ] | ZERO lien Airalo. Page communication existe mais sans eSIM/affiliate. Pas de tableau comparatif eSIM vs SIM physique vs roaming |
-| 2.5 | NordVPN Affiliate | [v] | [ ] | ZERO lien NordVPN. Pas de section VPN/securite dans communication ni sante-securite. Revenue potentiel le plus eleve (1290 EUR/6 mois selon guide) |
-| 2.6 | Klook Philippines | [v] | [ ] | ZERO lien Klook. Pages destinations (Palawan, Cebu, Siargao) existent sans boutons "Reserver sur Klook". Pas d'integration avec generateur itineraire |
-| 2.7 | Page /partenaires | [v] | [ ] | **Page inexistante.** Pas de route `/partenaires`. Pas de composant PartnerCard. Pas de donnees partenaires. Hub central pour tout le bloc 2 |
+| 2.1 | Booking.com Affiliate | [v] | [~] | URL `booking.com/country/ph.fr.html` presente sur `/partenaires` et `/voyager-aux-philippines/budget` mais **sans tag affilie** (pas de `aid=` ou `?aid=...`). Inscription programme + ajout tag = 30 min de code |
+| 2.2 | Chapka/AVI Assurance | [v] | [~] | URL `chapkadirect.fr/assurance-voyage.html` presente sur `/partenaires` et `/voyager-aux-philippines/sante-securite` mais **sans tag affilie**. Inscription programme + ajout tag = 30 min de code |
+| 2.3 | Wise Affiliate | [v] | [~] | URL `wise.com/fr/send-money/send-money-to-philippines` presente sur `/partenaires` mais **sans tag affilie**. Inscription Wise Friends + ajout tag = 30 min de code |
+| 2.4 | Airalo eSIM | [v] | [~] | URL `airalo.com/philippines-esim` presente sur `/partenaires` et `/voyager-aux-philippines/communication` mais **sans tag affilie**. Inscription programme + ajout tag = 30 min de code |
+| 2.5 | NordVPN Affiliate | [v] | [~] | URL `nordvpn.com/fr/` presente sur `/partenaires`, `/voyager-aux-philippines/sante-securite` et `/voyager-aux-philippines/communication` mais **sans tag affilie**. Inscription CJ Affiliate + ajout tag = 30 min de code |
+| 2.6 | Klook Philippines | [v] | [x] | **LIVE.** Affiliate `aid=118789` configure dans `src/components/affiliate/klook-activities-data.ts`. Composant `KlookCarousel` integre sur Palawan, Cebu-Visayas, Siargao + page `/partenaires` + `BestDealsSection` homepage |
+| 2.7 | Page /partenaires | [v] | [x] | **LIVE.** Route `src/app/partenaires/page.tsx` existe avec 6 sections (Klook live, Booking/Chapka/Wise/Airalo/NordVPN avec URLs placeholder en attente d'inscription affilie). Composants `AffiliateLink`, `AffiliateRecommendation` reutilisables crees |
 | 2.8 | Calculateur revenus | [v] | [-] | Outil de projection (spreadsheet), pas de code. Projection: 4553 EUR/6 mois si tous programmes actifs |
 
 ### Actions Bloc 2
-- [ ] **2.0** S'inscrire aux 6 programmes (Booking, Chapka, Wise, Airalo, NordVPN, Klook) — **action manuelle Hugo**
-- [ ] **2.7a** Creer page `/partenaires` avec 6 sections partenaires
-- [ ] **2.x** Creer composant generique `AffiliateLink` avec rel="sponsored" + tracking GA4 outbound_click
-- [ ] **2.x** Integrer liens dans pages existantes (budget, communication, sante-securite, destinations)
+- [x] **2.7a** ~~Creer page `/partenaires`~~ — DONE, route active avec 6 sections
+- [x] **2.x** ~~Creer composant generique `AffiliateLink`~~ — DONE (`AffiliateLink.tsx`, `AffiliateRecommendation.tsx`, `KlookCarousel.tsx`)
+- [x] **2.x** ~~Integrer liens dans pages existantes~~ — DONE (budget, communication, communication/carte-sim, sante-securite, banque-assurance, destinations Palawan/Cebu/Siargao, homepage BestDeals)
+- [x] **2.6a** Klook actif (aid=118789)
+- [ ] **2.0** S'inscrire aux 5 programmes restants (Booking, Chapka, Wise, Airalo, NordVPN) — **action manuelle Hugo**
+- [ ] **2.x** Une fois les 5 IDs obtenus, mettre a jour les URLs avec les tags affilies (les URLs placeholders sont deja en place dans le code, juste a tagguer)
 
 ---
 
@@ -78,7 +91,7 @@
 | 3.4 | Mots-cles complet | [v] | [-] | Fichier reference pret a importer dans Google Ads |
 | 3.5 | Redaction annonces RSA | [v] | [-] | Templates prets dans guide + `assets/templates-ads/google-ads-templates.md` |
 | 3.6 | Extensions annonces | [v] | [-] | Config UI uniquement (sitelinks, accroches, extraits) |
-| 3.7 | Conversion tracking GA4<->Ads | [v] | [ ] | **Necessite code:** pas de `GoogleAdsTag.tsx`, pas de `NEXT_PUBLIC_GOOGLE_ADS_ID`, pas de `gtag('config', 'AW-XXX')`. **Bloque par 1.2** (custom events) et 3.1 (compte Ads) |
+| 3.7 | Conversion tracking GA4<->Ads | [v] | [x] | **LIVE 2026-04-28** : compte Ads `380-633-5752` (EUR/Paris), GA4 `520177629` lie (personnalisation + auto-tagging ON), 3 conversions importees depuis GA4 (`purchase` Achat, `generate_lead` Lead, `newsletter_signup` Inscription), tag `AW-16902543219` (nomme "Philippineasy") deploye via `GoogleAdsTag.tsx`. `NEXT_PUBLIC_GOOGLE_ADS_ID=AW-16902543219` sur Vercel (3 envs). Apres redeploy, le remarketing tag se charge automatiquement et les audiences vont commencer a se constituer. |
 | 3.8 | Campagne Display/Remarketing | [v] | [>] | Config UI. **Bloque par** 3.7 (conversion tracking) + audiences GA4 |
 | 3.9 | Campagne rencontre compliance | [v] | [~] | Landing page `/rencontre-philippines` existe. Config campagne = UI. Certification dating Google Ads requise |
 | 3.10 | Budget et encheres | [v] | [-] | Strategie, pas de code |
@@ -86,10 +99,14 @@
 | 3.12 | Templates annonces | [v] | [-] | Templates prets dans `assets/templates-ads/google-ads-templates.md` |
 
 ### Actions Bloc 3
-- [ ] **3.1a** Creer compte Google Ads — **action manuelle Hugo**
-- [ ] **3.7a** Creer `GoogleAdsTag.tsx` + env var `NEXT_PUBLIC_GOOGLE_ADS_ID`
-- [ ] **3.7b** Lier GA4 <-> Google Ads dans les deux interfaces
-- [ ] **3.7c** Importer conversions GA4 dans Google Ads (apres 1.2)
+- [x] **3.1a** Compte Google Ads cree (380-633-5752, EUR/Paris)
+- [x] **3.7a** GoogleAdsTag.tsx cree (composant defensif + helper trackGoogleAdsConversion)
+- [x] **3.7a-bis** `NEXT_PUBLIC_GOOGLE_ADS_ID=AW-16902543219` ajoute sur Vercel (production, preview, development)
+- [x] **3.7b** GA4 <-> Google Ads lies (personnalisation publicitaire ON, taggage automatique ON, autoriser acces Analytics depuis Ads ON)
+- [x] **3.7c** 3 conversions importees depuis GA4 : `purchase` (Achat), `generate_lead` (Lead — Envoi formulaire), `newsletter_signup` (Inscription)
+- [x] **3.7d** Visuels Display Network produits (18 bannieres : 3 segments x 3 variantes x 2 formats — controle A + B Layla + C pain hook). Brief A/B dans `output/google-ads-assets/AB_VARIANTS_BRIEF.md`
+- [ ] **3.2-3.6, 3.8-3.10** Toutes les configs campagnes (mots-cles, RSA, extensions, audiences Display, budget) — **actions manuelles Hugo via UI Google Ads**, templates et mots-cles deja prets dans `assets/templates-ads/google-ads-templates.md`
+- [ ] **3.11** Routine optimisation hebdomadaire 30 min — **process Hugo**
 
 ---
 
@@ -257,3 +274,5 @@
 | 1-4 | 2026-04-16 | 77 guides rediges (tous blocs), 8 assets, 3 fichiers prompts IA |
 | 5 | 2026-04-16 | MCP GA4+GSC installes. SA Editeur GA4. Audit 77 guides. TODO restructure |
 | 6 | 2026-04-16 | **P0 COMPLETE** : consent mode RGPD, analytics.ts (12 fn), meta-pixel.ts (9 fn), tracking dans 6 pages, Meta Pixel ID sur Vercel, APIs Cloud activees, GSC confirme OK |
+| 7 | 2026-04-28 | **P0a FIX VALUE:0** (commit `f62615b`) : 3 pages completion envoyaient `value: 0` aux trackers — impossible ROAS/CPA. Fix complet : nouveaux endpoints `/api/services/verify-session` + `/api/orders/verify-payment`, `/api/itinerary/confirm-payment` retourne `amount`, sanitize Meta Pixel ID (resilient adblockers/env pollue), test e2e valide en devtools `value: 9.99 currency: EUR`. **Confirme aussi** : Klook live (`aid=118789`), 5 autres programmes affiliation en attente d'inscription mais URLs deja placees |
+| 8 | 2026-04-28 | **BLOC 3.7 prep code** : `GoogleAdsTag.tsx` cree (defensif, sanitize ID format `AW-XXX`, dangerouslySetInnerHTML), integre dans `layout.tsx` a cote de GoogleAnalytics et MetaPixel. Helper `trackGoogleAdsConversion()` ajoute dans `analytics.ts` (optionnel, pour conversion specifique cote client). **Reste actions manuelles Hugo** : creer compte Google Ads, recuperer ID AW-XXX, ajouter NEXT_PUBLIC_GOOGLE_ADS_ID dans Vercel, lier GA4<->Ads, importer conversions, configurer 4 campagnes via UI |

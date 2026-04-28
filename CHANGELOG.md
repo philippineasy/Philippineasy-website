@@ -5,6 +5,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Tracking — Google Ads remarketing tag (BLOC 3.7)
+Pose du tag Google Ads (`AW-16902543219`) pour activer le remarketing Display et l'import des conversions GA4 (`purchase`, `generate_lead`, `newsletter_signup`) dans la regie Ads. Le compte Ads (380-633-5752) est lie a GA4 (520177629) avec personnalisation des annonces + auto-tagging actives.
+
+- `src/components/analytics/GoogleAdsTag.tsx` (nouveau) : composant defensif, sanitize l'ID (resilient aux env values pollues), retourne `null` si `NEXT_PUBLIC_GOOGLE_ADS_ID` absent (aucun script charge inutilement)
+- `src/lib/analytics.ts` : nouveau helper `trackGoogleAdsConversion({ sendTo, value, currency, transaction_id })` — fallback si on veut fire une conversion ciblee cote client (l'import GA4 -> Ads couvre deja le cas standard)
+- `src/app/layout.tsx` : mount du `<GoogleAdsTag />` apres GA4 et Meta Pixel
+- `NEXT_PUBLIC_GOOGLE_ADS_ID=AW-16902543219` ajoute sur Vercel (production, preview, development)
+
+**Impact** : permet la creation des audiences remarketing (visiteurs site, abandons checkout, segments itineraire 1-7j vs 8-30j) pour les campagnes Display avec les 18 bannieres deja produites. Les conversions GA4 importees vont s'attacher automatiquement aux clics Ads via le `gclid` (auto-tagging).
+
 ### Tracking — Fix `value: 0` sur tous les events Purchase (GA4 + Meta Pixel)
 Les 3 pages de completion paiement envoyaient `value: 0` aux trackers (GA4 et Meta Pixel) — impossible de calculer ROAS / CPA sur n'importe quel canal. Fix complet :
 
