@@ -175,9 +175,10 @@
 ### Actions Bloc 6
 - [ ] **6.1a** Remplacer 5+ balises `<img>` par `next/image` (admin, dating)
 - [ ] **6.1b** Audit PageSpeed sur 5 pages cles
-- [ ] **6.2a** Creer table `destination_itineraries` dans Supabase
-- [ ] **6.2b** Creer composant template + page dynamique `/itineraire-[slug]`
-- [ ] **6.2c** Peupler 5 premieres destinations (Palawan, Cebu, Siargao, Boracay, Bohol)
+- [x] **6.2a** Migration `destination_itineraries` ecrite dans `supabase/migrations/20260429_destination_itineraries.sql` (gitignored, a appliquer via Dashboard SQL Editor : https://supabase.com/dashboard/project/byxjlsbmhixdehbisvjp/sql/new) — table avec RLS + trigger updated_at + JSONB itinerary/faq + index slug/published/category
+- [x] **6.2b** Page dynamique `/itineraire-[slug]/page.tsx` cree avec SSG (generateStaticParams) + ISR 24h + metadata dynamique + canonical absolu + OpenGraph + composants UI (Hero, ItineraryDayCard, BudgetTable, FAQSection avec schema FAQPage, RelatedItineraries, Breadcrumb avec schema BreadcrumbList). Service `destinationItinerariesService.ts` + types TypeScript complets. Hub page `/itineraires-philippines/page.tsx` (groupe par categorie destination/duration/profile). Sitemap dynamique mis a jour
+- [ ] **6.2c** Hugo : appliquer migration via Dashboard SQL Editor → appliquer seed `supabase/seeds/destination_itineraries_palawan.sql` (Palawan en `published=false`) → reecrire intro + verifier itineraire jour par jour + ajouter photos terrain → passer `published=true` quand satisfait
+- [ ] **6.2d** Peupler 4 autres destinations P1 (Cebu, Siargao, Boracay, Philippines-2-semaines) — meme pattern que Palawan
 - [ ] **6.6a** Creer table `email_sequences` dans Supabase
 - [ ] **6.6b** Completer welcome sequence (W2-W5)
 - [ ] **6.6c** Completer post-achat sequence (PA2-PA5)

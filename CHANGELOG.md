@@ -5,6 +5,30 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### SEO — BLOC 6.2 Articles programmatiques `/itineraire-[slug]` (scaffolding)
+Mise en place du pipeline SEO programmatique pour cibler 20 pages "itinéraire [destination]" avec ~5-9K visites/mois potentielles selon le guide. **Code applicatif pret en prod**, table Supabase a appliquer manuellement via Dashboard SQL Editor.
+
+**Nouveaux fichiers** :
+- `supabase/migrations/20260429_destination_itineraries.sql` (gitignored, a appliquer manuellement) : table avec RLS public read + service_role full access, trigger `updated_at`, JSONB pour `itinerary` (jour par jour) et `faq` (rich snippets), index sur slug/published/category
+- `supabase/seeds/destination_itineraries_palawan.sql` : seed Palawan complet (intro, 7 jours, 5 FAQ, budgets backpacker/midrange/luxury, related destinations) en `published=false` pour que Hugo re-ecrive l'intro avant publication
+- `src/types/destinationItineraries.ts` : types TypeScript (DestinationItinerary, ItineraryDay, ItineraryActivity, FAQEntry, DestinationCategory, DestinationItinerarySummary)
+- `src/services/destinationItinerariesService.ts` : 4 fonctions (getAllPublishedSlugs pour generateStaticParams, getItineraryBySlug, getRelatedItineraries, getAllPublishedItineraries)
+- `src/app/itineraire-[slug]/page.tsx` : page dynamique SSG avec ISR `revalidate: 86400`, generateStaticParams, generateMetadata dynamique (title/description/canonical/OG/Twitter), notFound() si slug invalide
+- `src/app/itineraires-philippines/page.tsx` : page hub avec groupBy categorie (destination/duration/profile), fallback "Les itinéraires arrivent" si table vide
+- `src/components/destinations/` : 6 composants (ItineraryHero, ItineraryDayCard, BudgetTable, FAQSection avec schema FAQPage, RelatedItineraries, Breadcrumb avec schema BreadcrumbList)
+
+**Modifie** :
+- `src/app/sitemap.ts` : ajout dynamique des `/itineraire-{slug}` (priority 0.85, changeFrequency monthly) + hub page (uniquement si ≥1 itineraire publie)
+
+**Impact** : pas de comportement runtime change tant que la table n'existe pas (la hub page affiche un fallback gracieux). Une fois migration appliquee + seed Palawan + Hugo re-ecrit l'intro et passe `published=true`, la page `/itineraire-palawan` sera live avec :
+- SSG ultra rapide (pages pre-rendered au build)
+- Schema.org FAQPage et BreadcrumbList pour rich snippets
+- Maillage interne vers 3-5 destinations liees + ressources voyager-aux-philippines
+- CTA vers `/itineraire-personnalise-pour-les-philippines` (entonnoir vers IA payante)
+- Sitemap auto-mis-a-jour (revalidate 10min)
+
+**Reste a faire (Hugo)** : appliquer migration via Dashboard SQL Editor, appliquer seed Palawan, re-ecrire intro avec tone perso terrain, ajouter photos uniques, passer `published=true`. Puis dupliquer pour 4 autres destinations P1 (Cebu, Siargao, Boracay, Philippines 2-semaines).
+
 ### Marketing — BLOC 3 Google Ads complet : 3 campagnes live (Search + Display + Brand)
 Lancement campagnes payantes Google Ads. **Aucun changement de code applicatif**, tout configure cote regie (compte 380-633-5752). Actions documentees dans `output/TODO.md` + audit guides `output/guides/bloc3-google-ads/`.
 

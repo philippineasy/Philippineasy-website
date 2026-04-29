@@ -236,6 +236,33 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   //   reste un ID numerique (SEO-hostile, faible valeur). A reactiver quand
   //   les vendeurs auront un slug texte humain.
 
+  /* ---------- Dynamic: Itineraires programmatiques (BLOC 6.2) ---------- */
+  const { data: itineraries, error: itinerariesError } = await supabase
+    .from('destination_itineraries')
+    .select('slug, hero_image, updated_at')
+    .eq('published', true);
+
+  if (itinerariesError) console.error('Sitemap: itineraries query failed', itinerariesError.message);
+
+  const itineraryPages: SitemapEntry[] =
+    (itineraries?.map(({ slug, hero_image, updated_at }) => ({
+      url: `${BASE_URL}/itineraire-${slug}`,
+      lastModified: new Date(updated_at).toISOString(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.85,
+      images: hero_image ? [toSeoImage(hero_image, 'pages')] : undefined,
+    })) || []) as SitemapEntry[];
+
+  // Hub page (uniquement si au moins 1 itineraire publie)
+  const itineraryHubPage: SitemapEntry[] = itineraryPages.length
+    ? [{
+        url: `${BASE_URL}/itineraires-philippines`,
+        lastModified: currentDate,
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+      }]
+    : [];
+
   /* ---------- Merge ---------- */
   return [
     ...staticPages,
@@ -247,5 +274,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...forumCategoryPages,
     ...productPages,
     ...productCategoryPages,
+    ...itineraryHubPage,
+    ...itineraryPages,
   ] as MetadataRoute.Sitemap;
 }
