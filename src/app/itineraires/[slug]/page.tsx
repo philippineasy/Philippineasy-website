@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { createClient } from '@/utils/supabase/server';
+import { createBuildClient } from '@/utils/supabase/build-client';
 import {
   getAllPublishedSlugs,
   getItineraryBySlug,
@@ -22,14 +22,16 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  const supabase = await createClient();
+  const supabase = createBuildClient();
+  if (!supabase) return [];
   const slugs = await getAllPublishedSlugs(supabase);
   return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = createBuildClient();
+  if (!supabase) return { title: 'Itinéraire — Philippineasy' };
   const itinerary = await getItineraryBySlug(supabase, slug);
 
   if (!itinerary) {
@@ -64,7 +66,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ItinerairePage({ params }: PageProps) {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = createBuildClient();
+  if (!supabase) notFound();
   const itinerary = await getItineraryBySlug(supabase, slug);
 
   if (!itinerary) notFound();
