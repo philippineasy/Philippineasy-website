@@ -44,6 +44,12 @@ const nextConfig: NextConfig = {
         destination:
           "https://byxjlsbmhixdehbisvjp.supabase.co/storage/v1/object/public/uploads/:path*",
       },
+      // BLOC 6.2 : URL publique /itineraire-{slug} mappee vers /itineraires/[slug]
+      // (Next.js ne supporte pas le pattern prefix-[slug] dans les folders d'app router)
+      {
+        source: "/itineraire-:slug",
+        destination: "/itineraires/:slug",
+      },
     ];
   },
   async redirects() {
