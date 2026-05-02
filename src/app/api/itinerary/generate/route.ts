@@ -24,19 +24,16 @@ export async function POST(request: Request) {
       }
     }
 
-    // Vérifier l'authentification (optionnelle — flux anonyme supporte avec email)
+    // Vérifier l'authentification (optionnelle — flux anonyme supporte avec ou sans email)
     const supabase = await createClientForRouteHandler();
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Email obligatoire si user pas authentifie (flux anonyme : recovery + magic link payment)
+    // Email OPTIONNEL — capture si fournie (PreferencesForm landing page) pour recovery
+    // mais pas bloquant pour les autres entry points (IAOverlay popup depuis Header
+    // sans champ email). Validation regex simple si presente.
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const submittedEmail = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
-    if (!user && (!submittedEmail || !emailRe.test(submittedEmail))) {
-      return NextResponse.json(
-        { success: false, error: 'Email valide requis pour les utilisateurs non connectés' },
-        { status: 400 }
-      );
-    }
+    const rawEmail = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+    const submittedEmail = rawEmail && emailRe.test(rawEmail) ? rawEmail : '';
 
     // Préparer les données pour n8n (workflow inchangé)
     const n8nPayload = {
