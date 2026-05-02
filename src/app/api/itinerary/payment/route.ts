@@ -68,9 +68,11 @@ export async function POST(request: Request) {
     // Vérifier que la génération existe ET appartient à l'utilisateur courant
     // (ou est anonyme — user_id NULL — auquel cas tout user authentifié peut la
     // récupérer, accepté pour le funnel anonyme → checkout post-inscription)
+    // delivery_email est récupéré pour l'inclure dans les métadonnées Stripe
+    // afin que le webhook puisse livrer l'itinéraire même si user_id est NULL.
     const genQuery = supabase
       .from('itinerary_generations')
-      .select('id, status, payment_status, user_id')
+      .select('id, status, payment_status, user_id, delivery_email')
       .eq('id', generation_id);
     const { data: generation, error: fetchError } = await genQuery.single();
 
@@ -149,6 +151,8 @@ export async function POST(request: Request) {
     const amountInCents = Math.round(pricing.price * 100);
 
     // Créer le PaymentIntent Stripe
+    // delivery_email est inclus dans les métadonnées pour permettre au webhook
+    // de livrer l'itinéraire et de créer un compte même si user_id est NULL.
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency: 'eur',
@@ -161,6 +165,7 @@ export async function POST(request: Request) {
         duration,
         modifications_included: pricing.modifications.toString(),
         user_id: user?.id || 'anonymous',
+        delivery_email: generation.delivery_email || '',
       },
     });
 

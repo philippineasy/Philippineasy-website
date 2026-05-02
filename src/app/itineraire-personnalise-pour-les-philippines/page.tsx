@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { HowItWorks } from '@/components/itinerary/HowItWorks';
 import { PreferencesForm } from '@/components/itinerary/PreferencesForm';
 import { ProposalCards } from '@/components/itinerary/ProposalCards';
 import { OfferSelection } from '@/components/itinerary/OfferSelection';
+import { PaymentAuthModal } from '@/components/itinerary/PaymentAuthModal';
 import { fadeInUp } from '@/components/itinerary/animations';
 import {
   PRICING_GRID,
@@ -37,8 +39,11 @@ const getRecommendedVariant = (style: string): 'relax' | 'balanced' | 'adventure
   }
 };
 
-const ItinerairePage = () => {
+// ─── Contenu principal séparé pour useSearchParams (doit être dans Suspense) ─
+
+function ItineraireContent() {
   const { user, loading: authLoading } = useAuth();
+  const searchParams = useSearchParams();
 
   const [showResult, setShowResult] = useState(false);
   const [duration, setDuration] = useState<Duration | ''>('');
@@ -50,6 +55,13 @@ const ItinerairePage = () => {
   const [selectedOffer, setSelectedOffer] = useState<OfferType>('express');
   const [error, setError] = useState<string | null>(null);
 
+  // Email capturé depuis PreferencesForm (pour pré-remplir la modal auth)
+  const [capturedEmail, setCapturedEmail] = useState('');
+
+  // État de la modal d'authentification avant paiement
+  const [paymentAuthModalOpen, setPaymentAuthModalOpen] = useState(false);
+  const [pendingOffer, setPendingOffer] = useState<OfferType | null>(null);
+
   const handleGenerate = async (data: {
     travelType: string;
     duration: Duration;
@@ -57,6 +69,7 @@ const ItinerairePage = () => {
     tripStyle: string;
     interests: string[];
     additionalInfo: string;
+    email: string;
   }) => {
     setIsLoading(true);
     setError(null);
@@ -64,6 +77,11 @@ const ItinerairePage = () => {
     setPreviews([]);
     setSelectedVariant(null);
     setDuration(data.duration);
+
+    // Mémoriser l'email pour la modal de paiement auth
+    if (data.email) {
+      setCapturedEmail(data.email);
+    }
 
     try {
       const response = await fetch('/api/itinerary/generate', {
@@ -96,24 +114,26 @@ const ItinerairePage = () => {
     }
   };
 
-  const handlePayment = async (offer: OfferType) => {
-    if (!generationId || !selectedVariant || !duration) return;
-
-    const pricing = PRICING_GRID[offer][duration as Duration];
+  // Logique de paiement extraite en callback stable pour être appelée
+  // depuis handlePayment ET depuis le useEffect de resume_payment
+  const triggerPayment = useCallback(async (offer: OfferType, genId: string, dur: Duration) => {
+    const pricing = PRICING_GRID[offer][dur];
     if (!pricing || pricing.price === 0) {
       window.location.href = '/contact?subject=conciergerie-voyage';
       return;
     }
+
+    setError(null);
 
     try {
       const response = await fetch('/api/itinerary/payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          generation_id: generationId,
+          generation_id: genId,
           selected_variant: selectedVariant,
           offer_type: offer,
-          duration,
+          duration: dur,
           price_id: pricing.priceId,
         }),
       });
@@ -124,11 +144,91 @@ const ItinerairePage = () => {
         throw new Error(data.error || 'Erreur lors du paiement');
       }
 
-      window.location.href = `/checkout/itinerary?client_secret=${data.clientSecret}&generation_id=${generationId}`;
+      window.location.href = `/checkout/itinerary?client_secret=${data.clientSecret}&generation_id=${genId}`;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur lors du paiement');
     }
+  }, [selectedVariant]);
+
+  const handlePayment = async (offer: OfferType) => {
+    if (!generationId || !selectedVariant || !duration) return;
+
+    const pricing = PRICING_GRID[offer][duration as Duration];
+    if (!pricing || pricing.price === 0) {
+      window.location.href = '/contact?subject=conciergerie-voyage';
+      return;
+    }
+
+    // Tracker GA4
+    if (typeof window !== 'undefined' && (window as { gtag?: (...a: unknown[]) => void }).gtag) {
+      (window as { gtag: (...a: unknown[]) => void }).gtag('event', 'ia_checkout_started', {
+        offer_type: offer,
+        duration,
+        value: pricing.price,
+        currency: 'EUR',
+      });
+    }
+
+    // Si l'utilisateur n'est pas authentifié, ouvrir la modal auth
+    if (!user) {
+      setPendingOffer(offer);
+      setPaymentAuthModalOpen(true);
+      return;
+    }
+
+    // Utilisateur connecté → flux Stripe direct (comportement inchangé)
+    await triggerPayment(offer, generationId, duration as Duration);
   };
+
+  // ─── Resume payment après retour du magic link ─────────────────────────────
+  // Quand l'utilisateur revient depuis le lien email avec resume_payment + offer,
+  // et qu'il est maintenant connecté, on déclenche le paiement automatiquement.
+  useEffect(() => {
+    const resumeGenerationId = searchParams.get('resume_payment');
+    const resumeOffer = searchParams.get('offer') as OfferType | null;
+
+    if (!resumeGenerationId || !resumeOffer || authLoading) return;
+
+    // Attendre que l'utilisateur soit authentifié (le magic link peut prendre
+    // quelques ms pour être reconnu par onAuthStateChange)
+    if (!user) return;
+
+    // Vérifier que l'offre est valide
+    const validOffers: OfferType[] = ['express', 'premium', 'conciergerie'];
+    if (!validOffers.includes(resumeOffer)) return;
+
+    // Charger la génération depuis l'API pour récupérer la durée si besoin
+    // (on n'a pas duration en state si la page a été rechargée)
+    const resumePayment = async () => {
+      try {
+        // Récupérer les infos de la génération pour obtenir la durée
+        const response = await fetch(`/api/itinerary/generation/${resumeGenerationId}`);
+        if (!response.ok) {
+          // Si l'API n'existe pas encore, utiliser la durée en state
+          // (cas où l'user n'a pas rechargé la page)
+          if (duration) {
+            await triggerPayment(resumeOffer, resumeGenerationId, duration as Duration);
+          } else {
+            setError('Impossible de reprendre le paiement. Veuillez réessayer depuis le début.');
+          }
+          return;
+        }
+        const data = await response.json();
+        const genDuration: Duration = data.duration || duration as Duration;
+        if (!genDuration) {
+          setError('Impossible de reprendre le paiement. Veuillez réessayer depuis le début.');
+          return;
+        }
+        setGenerationId(resumeGenerationId);
+        await triggerPayment(resumeOffer, resumeGenerationId, genDuration);
+      } catch {
+        setError('Impossible de reprendre le paiement. Veuillez réessayer depuis le début.');
+      }
+    };
+
+    resumePayment();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, authLoading, searchParams]);
 
   const currentPricing = duration ? {
     express: PRICING_GRID.express[duration as Duration],
@@ -197,7 +297,31 @@ const ItinerairePage = () => {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Modal d'authentification avant paiement (anonymes uniquement) */}
+      {pendingOffer && generationId && (
+        <PaymentAuthModal
+          isOpen={paymentAuthModalOpen}
+          onClose={() => {
+            setPaymentAuthModalOpen(false);
+            setPendingOffer(null);
+          }}
+          email={capturedEmail}
+          generationId={generationId}
+          offer={pendingOffer}
+        />
+      )}
     </main>
+  );
+}
+
+// ─── Page avec Suspense (requis par useSearchParams en Next.js 15) ────────────
+
+const ItinerairePage = () => {
+  return (
+    <Suspense fallback={null}>
+      <ItineraireContent />
+    </Suspense>
   );
 };
 

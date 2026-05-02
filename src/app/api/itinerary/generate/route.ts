@@ -24,11 +24,21 @@ export async function POST(request: Request) {
       }
     }
 
-    // Vérifier l'authentification (optionnel mais recommandé)
+    // Vérifier l'authentification (optionnelle — flux anonyme supporte avec email)
     const supabase = await createClientForRouteHandler();
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Préparer les données pour n8n
+    // Email obligatoire si user pas authentifie (flux anonyme : recovery + magic link payment)
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const submittedEmail = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
+    if (!user && (!submittedEmail || !emailRe.test(submittedEmail))) {
+      return NextResponse.json(
+        { success: false, error: 'Email valide requis pour les utilisateurs non connectés' },
+        { status: 400 }
+      );
+    }
+
+    // Préparer les données pour n8n (workflow inchangé)
     const n8nPayload = {
       userId: user?.id || null,
       travelType: body.travelType,
@@ -84,6 +94,21 @@ export async function POST(request: Request) {
         { success: false, error: result.error || 'Erreur inconnue côté IA' },
         { status: 502 }
       );
+    }
+
+    // Stocker delivery_email apres generation reussie (flux anonyme : recovery + magic link payment)
+    // n8n cree la row sans delivery_email -> on la met a jour cote Next.js pour eviter de toucher au workflow.
+    // Pour les users authentifies, on stocke aussi l'email saisi s'il differe de l'email du compte
+    // (cas oppose : user veut recevoir l'itineraire sur un email pro/perso different).
+    if (result.generation_id && submittedEmail) {
+      const { error: updateError } = await supabase
+        .from('itinerary_generations')
+        .update({ delivery_email: submittedEmail })
+        .eq('id', result.generation_id);
+      if (updateError) {
+        // Non-bloquant : l'utilisateur a son apercu, mais le recovery email ne marchera pas pour cette gen
+        console.error('[itinerary/generate] failed to store delivery_email', updateError);
+      }
     }
 
     return NextResponse.json({

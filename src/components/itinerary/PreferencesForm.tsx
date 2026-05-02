@@ -3,14 +3,16 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagic, faLock, faSpinner, faUser, faCompass } from '@fortawesome/free-solid-svg-icons';
+import { faMagic, faLock, faSpinner, faCompass, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { CustomSelect, SelectOption } from '@/components/shared/CustomSelect';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/Button';
 import { InterestSelector } from './InterestSelector';
 import { fadeInUp } from './animations';
-import Link from 'next/link';
 import type { Duration } from '@/config/itinerary-pricing';
+
+// Email validation simple (RFC 5322-ish, suffisant pour le frontend)
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const travelTypeOptions: SelectOption[] = [
   { value: 'solo', label: 'Voyage solo' },
@@ -52,25 +54,32 @@ interface PreferencesFormProps {
     tripStyle: string;
     interests: string[];
     additionalInfo: string;
+    email: string;
   }) => Promise<void>;
   isLoading: boolean;
   error: string | null;
   isAuthenticated: boolean;
   authLoading: boolean;
+  defaultEmail?: string;
 }
 
-export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated, authLoading }: PreferencesFormProps) {
+export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated, authLoading, defaultEmail }: PreferencesFormProps) {
   const [travelType, setTravelType] = useState('');
   const [duration, setDuration] = useState<Duration | ''>('');
   const [budget, setBudget] = useState('');
   const [tripStyle, setTripStyle] = useState('');
   const [interests, setInterests] = useState<string[]>([]);
   const [additionalInfo, setAdditionalInfo] = useState('');
+  const [email, setEmail] = useState(defaultEmail || '');
   const [formError, setFormError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
     if (!travelType || !duration || !budget || !tripStyle) {
       setFormError('Veuillez remplir tous les champs obligatoires.');
+      return;
+    }
+    if (!isAuthenticated && (!email || !EMAIL_RE.test(email))) {
+      setFormError('Veuillez saisir un email valide pour recevoir votre apercu.');
       return;
     }
     setFormError(null);
@@ -81,6 +90,7 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
       tripStyle,
       interests,
       additionalInfo,
+      email: email.trim(),
     });
   };
 
@@ -170,27 +180,35 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
           </motion.div>
         )}
 
+        {/* Champ email — capture necessaire pour anonymes (recovery + magic link payment) */}
+        {!authLoading && !isAuthenticated && (
+          <div>
+            <label htmlFor="itinerary-email" className="block text-foreground mb-1 font-medium">
+              Votre email <span className="text-destructive">*</span>
+            </label>
+            <div className="relative">
+              <FontAwesomeIcon icon={faEnvelope} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input
+                id="itinerary-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="votre@email.com"
+                autoComplete="email"
+                required
+                className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg bg-muted/50 hover:border-primary/50 focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              On vous envoie l&apos;apercu et on retient vos preferences si vous revenez plus tard.
+            </p>
+          </div>
+        )}
+
         <div className="border-t border-border mt-6 pt-6 text-center">
           {authLoading ? (
             <div className="py-4">
               <FontAwesomeIcon icon={faSpinner} className="animate-spin text-primary text-2xl" />
-            </div>
-          ) : !isAuthenticated ? (
-            <div className="bg-card border border-border rounded-2xl p-6 mb-4 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
-              <FontAwesomeIcon icon={faUser} className="text-primary text-3xl mb-3" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">Connectez-vous pour creer votre itineraire</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Un compte est necessaire pour generer et sauvegarder vos itineraires personnalises.
-              </p>
-              <Button asChild>
-                <Link href="/connexion?redirect=/itineraire-personnalise-pour-les-philippines">
-                  <FontAwesomeIcon icon={faUser} className="mr-2" />
-                  Se connecter
-                </Link>
-              </Button>
-              <p className="text-xs text-muted-foreground mt-3">
-                Pas encore de compte ? <Link href="/inscription" className="text-primary hover:underline">Inscrivez-vous gratuitement</Link>
-              </p>
             </div>
           ) : (
             <>
@@ -205,7 +223,7 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
                   {isLoading ? (
                     <><FontAwesomeIcon icon={faSpinner} className="mr-2 animate-spin" /> Generation en cours...</>
                   ) : (
-                    <><FontAwesomeIcon icon={faMagic} className="mr-2" /> Generer mon Itineraire (Gratuit)</>
+                    <><FontAwesomeIcon icon={faMagic} className="mr-2" /> Voir mon apercu gratuit</>
                   )}
                 </Button>
               </motion.div>
@@ -267,7 +285,7 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
               </AnimatePresence>
 
               <p className="text-sm text-muted-foreground mt-4">
-                <FontAwesomeIcon icon={faLock} className="mr-1" /> Vos donnees sont utilisees uniquement pour creer votre itineraire.
+                <FontAwesomeIcon icon={faLock} className="mr-1" /> Apercu gratuit. Aucun engagement avant validation.
               </p>
             </>
           )}

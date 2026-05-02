@@ -5,6 +5,33 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Marketing — Funnel itinéraire IA refonte UX (anonyme + email + magic link)
+
+**Diagnostic post-3-jours-de-Google-Ads** (118 clics, 41.99€, 0 conversion organique) : la landing `/itineraire-personnalise-pour-les-philippines` bloquait les visiteurs Google Ads cold avec une gate "connexion obligatoire" AVANT toute génération. Les utilisateurs payaient 0.44€/clic Search puis fuyaient face à l'écran "créez un compte". Le backend supportait déjà le flux anonyme (`payment/route.ts:84-91` accepte les générations `user_id NULL`), mais la UX bloquait tout.
+
+**Refonte du funnel** :
+
+- `src/components/itinerary/PreferencesForm.tsx` : retire la gate auth (lignes 178-194 supprimees), ajoute un champ email obligatoire pour les utilisateurs non-authentifies (validation regex `^[^\s@]+@[^\s@]+\.[^\s@]+$`), CTA "Voir mon apercu gratuit" au lieu de "Generer mon Itineraire". Champ email pre-rempli si `defaultEmail` prop fournie. Apparait uniquement si user pas auth (non-auth users only).
+
+- `src/app/api/itinerary/generate/route.ts` : accepte `email` dans le body, validation server-side, stocke `delivery_email` sur la row apres reponse n8n successful (UPDATE direct cote Next.js, n8n workflow inchange). Refuse 400 si pas auth ET email invalide.
+
+- `src/app/api/itinerary/payment/route.ts` : ajoute `delivery_email` dans le SELECT et dans les metadata Stripe du PaymentIntent (rétrocompat pour rows sans le champ).
+
+- `src/app/itineraire-personnalise-pour-les-philippines/page.tsx` : wrap dans `<Suspense>` (requis par `useSearchParams` Next 15), state `capturedEmail` alimente par `handleGenerate`, modal `PaymentAuthModal` ouverte si `!user` au clic offre, `useEffect` resume_payment apres retour magic link auto-trigger paiement quand user authentifie.
+
+- `src/components/itinerary/PaymentAuthModal.tsx` (nouveau) : modal Framer Motion avec email pre-rempli, CTA principal magic link via `supabase.auth.signInWithOtp({ emailRedirectTo: ?resume_payment=<id>&offer=<offer> })`, lien secondaire vers `/connexion`. Event GA4 `magic_link_sent` au submit.
+
+- `src/app/api/stripe/webhook/route.ts` : nouveau handler `handleAnonymousItineraryPurchase` declenche si `payment_intent.succeeded` arrive sur une generation `user_id NULL` avec `delivery_email`. Cherche compte existant via `supabase.auth.admin.listUsers`, sinon cree user via `admin.createUser({ email_confirm: true, user_metadata.created_via: 'itinerary_anonymous_purchase' })`, link `itinerary_generations.user_id = finalUserId`, envoie email itineraire + magic link bienvenue. Resout un bug silencieux pre-existant : sans cette logique, un anonyme qui payait recevait jamais son itineraire (`if (generation?.user_id)` skip dans le webhook).
+
+**Architecture** :
+- Aucune nouvelle table DB (utilise `delivery_email` existant)
+- n8n workflow inchange (UPDATE delivery_email cote Next.js)
+- Tracking GA4 prserve (`ia_checkout_started`, `purchase`) + nouveau `magic_link_sent`
+- RLS preservée
+- Idempotence webhook preservée (`.neq('payment_status', 'completed')`)
+
+**Impact attendu** : passer de 0% a 3-5% conversion sur clics qualifies Search ads. Capture email = recovery emails possibles (cron a venir, task #28). Bug silencieux delivery anonyme reglé.
+
 ### SEO — BLOC 6.2 Articles programmatiques `/itineraire-[slug]` (scaffolding)
 Mise en place du pipeline SEO programmatique pour cibler 20 pages "itinéraire [destination]" avec ~5-9K visites/mois potentielles selon le guide. **Code applicatif pret en prod**, table Supabase a appliquer manuellement via Dashboard SQL Editor.
 

@@ -388,26 +388,180 @@ async function handleItineraryPayment(
 
     console.log(`Generation ${generation_id} marked as delivered (auto-profile delivery)`);
 
+    // Récupérer user_id ET delivery_email pour gérer les achats anonymes
     const { data: generation } = await supabaseAdmin
       .from('itinerary_generations')
-      .select('user_id, destination, duration_days')
+      .select('user_id, delivery_email, destination, duration_days')
       .eq('id', generation_id)
       .single();
 
+    const amountFormatted = `${(paymentIntent.amount / 100).toFixed(2)} EUR`;
+    const destination = generation?.destination || 'Philippines';
+    const durationDays = generation?.duration_days || 7;
+
+    // delivery_email : priorité DB, fallback métadonnées Stripe (pour rows
+    // créées avant le déploiement de 1.A qui n'ont pas encore le champ DB)
+    const deliveryEmail =
+      generation?.delivery_email ||
+      paymentIntent.metadata?.delivery_email ||
+      '';
+
     if (generation?.user_id) {
+      // ── Cas normal : utilisateur authentifié au moment du paiement ──
       const user = await getUserEmail(generation.user_id);
       if (user) {
         sendItineraryPaymentConfirmation(
           user.email,
           user.name,
-          generation.destination || 'Philippines',
-          generation.duration_days || 7,
-          `${(paymentIntent.amount / 100).toFixed(2)} EUR`,
+          destination,
+          durationDays,
+          amountFormatted,
         ).catch((err) => console.error('Itinerary payment email error:', err));
       }
+    } else if (deliveryEmail) {
+      // ── Cas anonyme : paiement sans compte — créer ou lier un compte ──
+      await handleAnonymousItineraryPurchase(
+        supabaseAdmin,
+        generation_id,
+        deliveryEmail,
+        destination,
+        durationDays,
+        amountFormatted,
+      );
+    } else {
+      // ── Cas pathologique : pas de user_id ni de delivery_email ──
+      // Normalement impossible si la feature 1.A est déployée, mais possible
+      // pour des rows créées avant le déploiement.
+      console.error(
+        `Itinerary payment ${generation_id} completed but no user_id or delivery_email — cannot send confirmation.`
+      );
     }
   } catch (error) {
     console.error('Error processing itinerary payment:', error);
+  }
+}
+
+// =====================================================
+// Helper: Création/liaison compte pour achat anonyme
+// =====================================================
+
+// Regex de validation email basique (évite de créer un user avec un email malformé)
+const EMAIL_VALIDATION_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+async function handleAnonymousItineraryPurchase(
+  supabaseAdmin: ReturnType<typeof getSupabaseAdmin>,
+  generationId: string,
+  deliveryEmail: string,
+  destination: string,
+  durationDays: number,
+  amountFormatted: string,
+) {
+  // Valider le format email avant toute opération
+  if (!EMAIL_VALIDATION_RE.test(deliveryEmail)) {
+    console.error(
+      `handleAnonymousItineraryPurchase: invalid email format "${deliveryEmail}" for generation ${generationId}`
+    );
+    return;
+  }
+
+  console.log(`Handling anonymous purchase for ${deliveryEmail}, generation ${generationId}`);
+
+  try {
+    // 1. Vérifier si un compte existe déjà avec cet email
+    const { data: existingUsers, error: listError } = await supabaseAdmin.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000,
+    });
+
+    if (listError) {
+      console.error('Error listing users for anonymous purchase:', listError);
+      // Envoyer quand même l'email de confirmation pour ne pas bloquer la livraison
+      sendItineraryPaymentConfirmation(deliveryEmail, 'Voyageur', destination, durationDays, amountFormatted)
+        .catch((err) => console.error('Itinerary payment email (fallback) error:', err));
+      return;
+    }
+
+    const existingUser = existingUsers?.users?.find(
+      (u) => u.email?.toLowerCase() === deliveryEmail.toLowerCase()
+    );
+
+    let finalUserId: string;
+
+    if (existingUser) {
+      // 2a. Compte existant → lier la génération à ce compte
+      finalUserId = existingUser.id;
+      console.log(`Linking generation ${generationId} to existing user ${finalUserId}`);
+    } else {
+      // 2b. Pas de compte → créer un nouveau compte
+      // email_confirm: true → l'email est directement confirmé (pas besoin de
+      // cliquer sur un lien de vérification, le magic link d'accès suffit)
+      const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email: deliveryEmail,
+        email_confirm: true,
+        user_metadata: {
+          created_via: 'itinerary_anonymous_purchase',
+        },
+      });
+
+      if (createError || !newUser?.user) {
+        console.error('Error creating user for anonymous purchase:', createError);
+        // Envoyer quand même la confirmation email sans créer le compte
+        sendItineraryPaymentConfirmation(deliveryEmail, 'Voyageur', destination, durationDays, amountFormatted)
+          .catch((err) => console.error('Itinerary payment email (no-account) error:', err));
+        return;
+      }
+
+      finalUserId = newUser.user.id;
+      console.log(`Created new user ${finalUserId} for anonymous purchase`);
+    }
+
+    // 3. Lier la génération au compte (existant ou nouveau)
+    const { error: linkError } = await supabaseAdmin
+      .from('itinerary_generations')
+      .update({ user_id: finalUserId })
+      .eq('id', generationId);
+
+    if (linkError) {
+      console.error(`Error linking generation ${generationId} to user ${finalUserId}:`, linkError);
+    }
+
+    // 4. Envoyer la confirmation de paiement
+    const userName = existingUser
+      ? (await getUserEmail(finalUserId))?.name || 'Voyageur'
+      : 'Voyageur';
+
+    sendItineraryPaymentConfirmation(
+      deliveryEmail,
+      userName,
+      destination,
+      durationDays,
+      amountFormatted,
+    ).catch((err) => console.error('Itinerary payment email (anonymous) error:', err));
+
+    // 5. Envoyer un magic link pour permettre l'accès à l'espace personnel
+    // Ne pas await — opération non-bloquante, failure acceptable
+    supabaseAdmin.auth.admin
+      .generateLink({
+        type: 'magiclink',
+        email: deliveryEmail,
+        options: {
+          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://philippineasy.com'}/mon-espace`,
+        },
+      })
+      .then(({ data: linkData, error: linkGenError }) => {
+        if (linkGenError || !linkData?.properties?.action_link) {
+          console.error('Error generating magic link for new user:', linkGenError);
+          return;
+        }
+        // L'envoi via Supabase est automatique avec generateLink — pas besoin
+        // d'envoyer un email séparé. Supabase envoie l'email de "magic link"
+        // avec le lien d'accès inclus dans action_link.
+        console.log(`Magic link generated for ${deliveryEmail} — Supabase will send the email`);
+      })
+      .catch((err) => console.error('Magic link generation exception:', err));
+
+  } catch (err) {
+    console.error('handleAnonymousItineraryPurchase exception:', err);
   }
 }
 
