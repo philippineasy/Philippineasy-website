@@ -49,7 +49,7 @@ export default async function MonEspaceItinerairesPage() {
 
   const { data: pendingGens } = await supabase
     .from('itinerary_generations')
-    .select('id, preferences, selected_variant, payment_status, status, created_at')
+    .select('id, preferences, selected_variant, offer_type, payment_status, status, created_at')
     .eq('user_id', user.id)
     .eq('payment_status', 'pending')
     .order('created_at', { ascending: false })
@@ -213,27 +213,40 @@ export default async function MonEspaceItinerairesPage() {
       )}
 
       {/* Pending (générés non payés) */}
-      {pendingGens && pendingGens.length > 0 && (
-        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 px-5 py-4">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="shrink-0 w-5 h-5 text-amber-700 mt-0.5" aria-hidden="true" />
-            <div className="min-w-0 flex-1">
-              <strong className="block text-[14px] font-semibold text-ink mb-0.5">
-                {pendingGens.length} génération{pendingGens.length > 1 ? 's' : ''} en attente de paiement
-              </strong>
-              <p className="text-[12.5px] text-muted-foreground leading-snug mb-2">
-                Vous avez généré {pendingGens.length} itinéraire{pendingGens.length > 1 ? 's' : ''} sans le débloquer. Reprenez où vous en étiez.
-              </p>
-              <Link
-                href="/itineraire-personnalise-pour-les-philippines"
-                className="inline-flex items-center gap-1 text-[13px] font-semibold text-accent hover:text-accent/80 transition-colors"
-              >
-                Reprendre <ExternalLink className="w-3 h-3" />
-              </Link>
+      {pendingGens && pendingGens.length > 0 && (() => {
+        // On reprend la generation la plus recente. Pour declencher resumePayment
+        // dans la landing page on a besoin de id + offer + variant. Defaults
+        // utilises si la generation n'a pas atteint l'etape "Pay" (express + balanced
+        // sont les choix les plus universels).
+        const latest = pendingGens[0] as {
+          id: string;
+          offer_type: string | null;
+          selected_variant: string | null;
+        };
+        const resumeUrl = `/itineraire-personnalise-pour-les-philippines?resume_payment=${latest.id}&offer=${latest.offer_type || 'express'}&variant=${latest.selected_variant || 'balanced'}`;
+
+        return (
+          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 px-5 py-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="shrink-0 w-5 h-5 text-amber-700 mt-0.5" aria-hidden="true" />
+              <div className="min-w-0 flex-1">
+                <strong className="block text-[14px] font-semibold text-ink mb-0.5">
+                  {pendingGens.length} génération{pendingGens.length > 1 ? 's' : ''} en attente de paiement
+                </strong>
+                <p className="text-[12.5px] text-muted-foreground leading-snug mb-2">
+                  Vous avez généré {pendingGens.length} itinéraire{pendingGens.length > 1 ? 's' : ''} sans le débloquer. Reprenez où vous en étiez.
+                </p>
+                <Link
+                  href={resumeUrl}
+                  className="inline-flex items-center gap-1 text-[13px] font-semibold text-accent hover:text-accent/80 transition-colors"
+                >
+                  Reprendre <ExternalLink className="w-3 h-3" />
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
