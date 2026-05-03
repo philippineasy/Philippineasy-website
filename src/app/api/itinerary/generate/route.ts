@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClientForRouteHandler } from '@/utils/supabase/server';
+import { trackServerEvent, extractClientId } from '@/lib/ga4-server';
 
 // n8n GPT-4.1 + Supabase chain takes ~60-80s typically. Default Vercel Hobby
 // is 10s, Pro is 60s. Bump to 90s to comfortably accommodate the workflow.
@@ -107,6 +108,24 @@ export async function POST(request: Request) {
         console.error('[itinerary/generate] failed to store delivery_email', updateError);
       }
     }
+
+    // Server-side GA4 tracking (bypass adblockers) — ia_itinerary_generated
+    const clientId = extractClientId(request.headers.get('cookie'));
+    trackServerEvent(
+      clientId,
+      {
+        name: 'ia_itinerary_generated',
+        params: {
+          generation_id: result.generation_id || '',
+          travel_type: body.travelType,
+          duration: body.duration,
+          budget: body.budget,
+          trip_style: body.tripStyle,
+          authenticated: user ? 'yes' : 'no',
+        },
+      },
+      user?.id,
+    ).catch(() => { /* non-bloquant */ });
 
     return NextResponse.json({
       success: true,

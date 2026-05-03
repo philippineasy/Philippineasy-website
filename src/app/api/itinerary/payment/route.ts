@@ -4,6 +4,7 @@ import { createClientForRouteHandler } from '@/utils/supabase/server';
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
 import { PRICING_GRID, type Duration, type OfferType } from '@/config/itinerary-pricing';
 import { getClientIp, normalizeIp } from '@/utils/get-client-ip';
+import { trackServerEvent, extractClientId } from '@/lib/ga4-server';
 
 // User ID exempté de la limite (super_admin)
 const EXEMPT_USER_ID = process.env.RATE_LIMIT_EXEMPT_USER_ID;
@@ -181,6 +182,27 @@ export async function POST(request: Request) {
         modifications_remaining: pricing.modifications,
       })
       .eq('id', generation_id);
+
+    // Server-side GA4 tracking (bypass adblockers) — ia_checkout_started
+    // ET passer le client_id dans Stripe metadata pour le webhook purchase event
+    const clientId = extractClientId(request.headers.get('cookie'));
+    await stripe.paymentIntents.update(paymentIntent.id, {
+      metadata: { ...paymentIntent.metadata, client_id: clientId },
+    }).catch(() => { /* non-bloquant si stripe down */ });
+    trackServerEvent(
+      clientId,
+      {
+        name: 'ia_checkout_started',
+        params: {
+          generation_id,
+          offer_type,
+          duration,
+          value: pricing.price,
+          currency: 'EUR',
+        },
+      },
+      user?.id,
+    ).catch(() => { /* non-bloquant */ });
 
     return NextResponse.json({
       success: true,

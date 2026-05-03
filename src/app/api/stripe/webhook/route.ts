@@ -6,6 +6,7 @@ import { sendOrderConfirmation, sendVendorNewOrder } from '@/emails/senders/mark
 import { sendDatingPremiumConfirmation } from '@/emails/senders/lifecycle';
 import { sendItineraryReadyEmail } from '@/emails/senders/itinerary';
 import { getUserEmail } from '@/emails/send';
+import { trackServerPurchase } from '@/lib/ga4-server';
 
 // Helper : envoie l'email "Itineraire pret" avec lien + PDF.
 // Appele depuis le webhook pour garantir delivery meme si l'utilisateur ne
@@ -452,6 +453,31 @@ async function handleItineraryPayment(
     const amountFormatted = `${(paymentIntent.amount / 100).toFixed(2)} EUR`;
     const destination = generation?.destination || 'Philippines';
     const durationDays = generation?.duration_days || 7;
+    const amountEur = paymentIntent.amount / 100;
+
+    // Server-side GA4 tracking (bypass adblockers) — purchase event
+    // CRITIQUE pour Google Ads : sans cet event, l'algo bidding voit 0 conversion.
+    // client_id pris des metadata Stripe (passe a la creation du PaymentIntent
+    // ou fallback timestamp pour rows anonymes anciennes)
+    const clientId =
+      (paymentIntent.metadata?.client_id as string) ||
+      `${Date.now()}.${paymentIntent.id.slice(-12)}`;
+    trackServerPurchase({
+      clientId,
+      userId: generation?.user_id || undefined,
+      transactionId: paymentIntent.id,
+      value: amountEur,
+      currency: 'EUR',
+      items: [
+        {
+          item_id: `itinerary-${paymentIntent.metadata?.offer_type || 'express'}-${paymentIntent.metadata?.duration || 'unknown'}`,
+          item_name: `Itineraire IA ${paymentIntent.metadata?.offer_type || ''} ${destination}`,
+          item_category: 'itinerary',
+          price: amountEur,
+          quantity: 1,
+        },
+      ],
+    }).catch(() => { /* non-bloquant */ });
 
     // delivery_email : priorité DB, fallback métadonnées Stripe (pour rows
     // créées avant le déploiement de 1.A qui n'ont pas encore le champ DB)

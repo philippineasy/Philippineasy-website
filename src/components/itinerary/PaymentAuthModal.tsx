@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -39,6 +39,16 @@ export function PaymentAuthModal({
   const [isSending, setIsSending] = useState(false);
   const [isSent, setIsSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Cooldown anti-spam : empeche de re-cliquer le bouton avant N secondes
+  // pour ne pas declencher le rate limit Supabase ni floodder l'inbox du user
+  const [cooldownSec, setCooldownSec] = useState(0);
+
+  // Decrement cooldown timer
+  useEffect(() => {
+    if (cooldownSec <= 0) return;
+    const t = setTimeout(() => setCooldownSec((s) => Math.max(0, s - 1)), 1000);
+    return () => clearTimeout(t);
+  }, [cooldownSec]);
 
   // URL de retour après clic sur le magic link :
   // l'utilisateur revient sur la page avec les params pour déclencher le paiement
@@ -55,6 +65,7 @@ export function PaymentAuthModal({
   };
 
   const handleMagicLink = async () => {
+    if (cooldownSec > 0) return; // Anti-spam : bouton inactif pendant cooldown
     if (!email || !EMAIL_RE.test(email)) {
       setError('Veuillez saisir un email valide.');
       return;
@@ -84,9 +95,21 @@ export function PaymentAuthModal({
       }
 
       setIsSent(true);
+      setCooldownSec(60); // 60s cooldown si le user veut renvoyer
     } catch (err) {
+      // Detection du rate limit Supabase pour message user-friendly
       const message = err instanceof Error ? err.message : 'Une erreur est survenue';
-      setError(message);
+      const lowerMsg = message.toLowerCase();
+      if (lowerMsg.includes('rate limit') || lowerMsg.includes('over_email_send_rate_limit')) {
+        setError(
+          'Vous avez deja demande un lien recemment. Verifiez votre boite mail (et les spams). Si rien recu, reessayez dans quelques minutes.'
+        );
+        setCooldownSec(120); // Cooldown long apres rate limit
+      } else if (lowerMsg.includes('email') && lowerMsg.includes('invalid')) {
+        setError('Cet email n\'est pas valide. Verifiez l\'orthographe.');
+      } else {
+        setError(message);
+      }
     } finally {
       setIsSending(false);
     }
@@ -212,13 +235,18 @@ export function PaymentAuthModal({
                 <Button
                   type="button"
                   onClick={handleMagicLink}
-                  disabled={isSending}
+                  disabled={isSending || cooldownSec > 0}
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-11 font-semibold"
                 >
                   {isSending ? (
                     <>
                       <FontAwesomeIcon icon={faSpinner} className="animate-spin mr-2" />
                       Envoi en cours...
+                    </>
+                  ) : cooldownSec > 0 ? (
+                    <>
+                      <FontAwesomeIcon icon={faSpinner} className="mr-2 opacity-50" />
+                      Renvoyer dans {cooldownSec}s
                     </>
                   ) : (
                     <>
