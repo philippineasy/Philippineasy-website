@@ -9,6 +9,7 @@ import { PreferencesForm } from '@/components/itinerary/PreferencesForm';
 import { ProposalCards } from '@/components/itinerary/ProposalCards';
 import { OfferSelection } from '@/components/itinerary/OfferSelection';
 import { PaymentAuthModal } from '@/components/itinerary/PaymentAuthModal';
+import { OfferConfirmationModal } from '@/components/itinerary/OfferConfirmationModal';
 import { fadeInUp } from '@/components/itinerary/animations';
 import {
   PRICING_GRID,
@@ -61,6 +62,10 @@ function ItineraireContent() {
   // État de la modal d'authentification avant paiement
   const [paymentAuthModalOpen, setPaymentAuthModalOpen] = useState(false);
   const [pendingOffer, setPendingOffer] = useState<OfferType | null>(null);
+
+  // Modal de confirmation/consentement de l'offre — s'ouvre AVANT
+  // PaymentAuthModal pour expliquer ce que l'utilisateur achete
+  const [offerConfirmationModalOpen, setOfferConfirmationModalOpen] = useState(false);
 
   const handleGenerate = async (data: {
     travelType: string;
@@ -153,6 +158,10 @@ function ItineraireContent() {
     }
   }, []);
 
+  // Etape 1 — clic "Debloquer" : on ouvre la modal de confirmation/consentement
+  // (recap + positionnement guide vs agence + checkbox d'accord) AVANT toute
+  // capture email ou redirection Stripe. Reduit les disputes refunds dues a
+  // une mauvaise comprehension de ce qui est inclus.
   const handlePayment = async (offer: OfferType) => {
     if (!generationId || !selectedVariant || !duration) return;
 
@@ -162,29 +171,48 @@ function ItineraireContent() {
       return;
     }
 
-    // Tracker GA4
+    setPendingOffer(offer);
+    setOfferConfirmationModalOpen(true);
+
+    // GA4 tracking : on log l'ouverture de la modal recap (intent fort)
     if (typeof window !== 'undefined' && (window as { gtag?: (...a: unknown[]) => void }).gtag) {
-      (window as { gtag: (...a: unknown[]) => void }).gtag('event', 'ia_checkout_started', {
+      (window as { gtag: (...a: unknown[]) => void }).gtag('event', 'ia_offer_review_opened', {
         offer_type: offer,
         duration,
         value: pricing.price,
         currency: 'EUR',
       });
     }
+  };
 
-    // Si l'utilisateur n'est pas authentifié, ouvrir la modal auth
+  // Etape 2 — l'utilisateur a coche le consentement et clique "Continuer".
+  // On reprend le flow paiement : auth modal pour les anonymes, Stripe direct
+  // pour les utilisateurs deja connectes.
+  const handleConfirmOffer = async () => {
+    setOfferConfirmationModalOpen(false);
+    if (!pendingOffer || !generationId || !duration || !selectedVariant) return;
+
+    const pricing = PRICING_GRID[pendingOffer][duration as Duration];
+    if (!pricing || pricing.price === 0) return;
+
+    // GA4 — l'event "checkout_started" historique reste declenche ici (pas a
+    // l'ouverture de la modal recap) pour rester aligne avec la definition GA4
+    // (intention reelle de payer apres consentement)
+    if (typeof window !== 'undefined' && (window as { gtag?: (...a: unknown[]) => void }).gtag) {
+      (window as { gtag: (...a: unknown[]) => void }).gtag('event', 'ia_checkout_started', {
+        offer_type: pendingOffer,
+        duration,
+        value: pricing.price,
+        currency: 'EUR',
+      });
+    }
+
     if (!user) {
-      setPendingOffer(offer);
       setPaymentAuthModalOpen(true);
       return;
     }
 
-    // Utilisateur connecté → flux Stripe direct (comportement inchangé)
-    if (!selectedVariant) {
-      setError('Veuillez choisir une variante d\'itineraire.');
-      return;
-    }
-    await triggerPayment(offer, generationId, duration as Duration, selectedVariant);
+    await triggerPayment(pendingOffer, generationId, duration as Duration, selectedVariant);
   };
 
   // ─── Resume payment après retour du magic link ─────────────────────────────
@@ -302,7 +330,28 @@ function ItineraireContent() {
         </AnimatePresence>
       </div>
 
-      {/* Modal d'authentification avant paiement (anonymes uniquement) */}
+      {/* Modal de confirmation/consentement de l'offre — etape 1 du checkout */}
+      {pendingOffer && duration && (
+        <OfferConfirmationModal
+          isOpen={offerConfirmationModalOpen}
+          onClose={() => {
+            setOfferConfirmationModalOpen(false);
+            setPendingOffer(null);
+          }}
+          offer={pendingOffer}
+          duration={duration as Duration}
+          onConfirm={handleConfirmOffer}
+          onSelectOtherOffer={(newOffer) => {
+            // Switch d'offre depuis l'upsell : on met a jour l'offre selectionnee
+            // dans la grille ET dans pendingOffer, puis on rouvre la modal sur
+            // la nouvelle offre (le user reconfirme avec les nouveaux details)
+            setSelectedOffer(newOffer);
+            setPendingOffer(newOffer);
+          }}
+        />
+      )}
+
+      {/* Modal d'authentification avant paiement (anonymes uniquement) — etape 2 */}
       {pendingOffer && generationId && selectedVariant && (
         <PaymentAuthModal
           isOpen={paymentAuthModalOpen}

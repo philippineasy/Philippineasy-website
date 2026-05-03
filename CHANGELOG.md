@@ -5,6 +5,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### UX — Modal de confirmation/consentement de l'offre avant paiement (2026-05-04)
+
+- **Nouveau** : `src/components/itinerary/OfferConfirmationModal.tsx` s'intercale entre le clic "Debloquer" et le PaymentAuthModal (ou Stripe direct si user authentifie). Affiche :
+  - Recap clair (nom offre + duree + prix + paiement unique)
+  - **Bandeau positionnement** : "Philippin'Easy est un guide francophone des Philippines, pas une agence de voyage" (memory project_philippineasy_positionnement)
+  - Section "Ce qui est inclus" (features de l'offre + nombre de modifications gratuites)
+  - Section "Ce qui n'est PAS inclus" (variant par offre — Express : pas de modification ni de suivi, etc.)
+  - **Upsell soft** : si Express -> propose Premium avec bouton de switch ; si Premium -> propose Conciergerie. Le user peut switcher d'offre sans fermer la modal.
+  - **Checkbox de consentement obligatoire** : "J'ai compris ce que comprend l'offre X et j'accepte que Philippin'Easy soit un guide d'accompagnement, pas une agence". Bouton "Continuer vers le paiement" disabled jusqu'au check.
+  - GA4 event `ia_offer_review_opened` au mount, `ia_checkout_started` deplace au moment du consentement (vs auparavant au clic Debloquer).
+
+- **Refactor `handlePayment`** dans `src/app/itineraire-personnalise-pour-les-philippines/page.tsx` : split en 2 etapes (`handlePayment` ouvre la modal recap, `handleConfirmOffer` execute le flow paiement post-consentement). Reduit le risque de disputes refunds dues a une mauvaise comprehension de l'offre Express (IA only, pas de suivi humain).
+
 ### Fixes — Funnel resume_payment post-magic-link + suppression user Supabase (2026-05-04)
 
 - **Endpoint manquant `/api/itinerary/generation/[id]`** : la page `itineraire-personnalise-pour-les-philippines/page.tsx:205` fetchait cet endpoint apres retour du magic link pour recuperer la `duration` de la generation et auto-relancer le paiement Stripe. La route n'existait pas (seul `/api/itinerary/[id]/` existait, dedie au full itineraire post-payment) -> 404 silencieux -> fallback `if (duration)` echouait car page tout juste rechargee -> user atterri sur formulaire vide. Console : `Failed to load resource: 404 /api/itinerary/gener...8f90-5652cf0fd06d`. Cree `src/app/api/itinerary/generation/[id]/route.ts` qui :
