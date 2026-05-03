@@ -51,17 +51,17 @@ export function PaymentAuthModal({
   }, [cooldownSec]);
 
   // URL de retour après clic sur le magic link :
-  // l'utilisateur revient sur la page avec les params pour déclencher le paiement
+  // On route via /auth/callback?next=<URL encodee> pour preserver les query
+  // params (resume_payment + offer). Sinon Supabase magic link redirige direct
+  // vers emailRedirectTo et strippe nos params (bug observe en prod 2026-05-03).
   const buildRedirectUrl = (): string => {
-    const base =
-      typeof window !== 'undefined'
-        ? `${window.location.origin}/itineraire-personnalise-pour-les-philippines`
-        : '/itineraire-personnalise-pour-les-philippines';
-    const params = new URLSearchParams({
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const targetParams = new URLSearchParams({
       resume_payment: generationId,
       offer,
     });
-    return `${base}?${params.toString()}`;
+    const targetUrl = `/itineraire-personnalise-pour-les-philippines?${targetParams.toString()}`;
+    return `${origin}/auth/callback?next=${encodeURIComponent(targetUrl)}`;
   };
 
   const handleMagicLink = async () => {
