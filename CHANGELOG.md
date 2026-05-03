@@ -5,6 +5,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixes — Funnel resume_payment post-magic-link + suppression user Supabase (2026-05-04)
+
+- **Endpoint manquant `/api/itinerary/generation/[id]`** : la page `itineraire-personnalise-pour-les-philippines/page.tsx:205` fetchait cet endpoint apres retour du magic link pour recuperer la `duration` de la generation et auto-relancer le paiement Stripe. La route n'existait pas (seul `/api/itinerary/[id]/` existait, dedie au full itineraire post-payment) -> 404 silencieux -> fallback `if (duration)` echouait car page tout juste rechargee -> user atterri sur formulaire vide. Console : `Failed to load resource: 404 /api/itinerary/gener...8f90-5652cf0fd06d`. Cree `src/app/api/itinerary/generation/[id]/route.ts` qui :
+  - GET id -> renvoie `{ id, duration, offer_type, payment_status, status, preferences, selected_variant }` (duration extrait depuis `preferences.duration` jsonb, pas une colonne dediee)
+  - Ownership : `user_id = auth.uid()` OU `user_id IS NULL ET delivery_email = user.email`
+  - Auto-link la generation au user authentifie si match anonyme par email (idempotent, only if `user_id IS NULL`)
+  - Bypass RLS via service-role apres check applicatif (RLS trop restrictive pour le pattern anonyme -> proprietaire-via-email)
+
+- **Migration `20260504_cascade_user_deletion.sql`** : 11 FK du schema public vers `auth.users(id)` etaient en `ON DELETE NO ACTION`, ce qui faisait echouer le bouton "Delete user" de l'UI Supabase (erreur `Database error deleting user`). DO block PL/pgSQL qui introspecte `pg_constraint` et convertit dynamiquement chaque FK en `ON DELETE CASCADE`. Tables touchees : profiles, dating_profiles, flights, bus_routes, itinerary_modifications, message_reactions, messages (x2), notifications (x2), orders. 4 FK conservees en SET NULL (forum_posts, forum_topics, delivery_preferences, users_restricted) — comportement RGPD-friendly preservant l'historique forum/preferences. Applique en prod via Supabase Management API.
+
 ### Marketing — Funnel itinéraire IA refonte UX (anonyme + email + magic link)
 
 **Diagnostic post-3-jours-de-Google-Ads** (118 clics, 41.99€, 0 conversion organique) : la landing `/itineraire-personnalise-pour-les-philippines` bloquait les visiteurs Google Ads cold avec une gate "connexion obligatoire" AVANT toute génération. Les utilisateurs payaient 0.44€/clic Search puis fuyaient face à l'écran "créez un compte". Le backend supportait déjà le flux anonyme (`payment/route.ts:84-91` accepte les générations `user_id NULL`), mais la UX bloquait tout.
