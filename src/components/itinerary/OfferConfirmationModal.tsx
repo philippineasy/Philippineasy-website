@@ -5,13 +5,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTimes,
-  faCheckCircle,
-  faTimesCircle,
   faArrowRight,
-  faInfoCircle,
   faCrown,
-  faRobot,
-  faHeadset,
+  faRocket,
+  faStar,
+  faLock,
+  faShieldHalved,
 } from '@fortawesome/free-solid-svg-icons';
 import { Button } from '@/components/ui/Button';
 import { modalOverlay, modalContent } from './animations';
@@ -40,25 +39,60 @@ interface OfferConfirmationModalProps {
 // Philippineasy est un guide, pas une agence. Pas de booking, pas de SAV agence.
 const NOT_INCLUDED: Record<OfferType, string[]> = {
   express: [
-    'Aucune modification apres livraison',
-    'Aucun suivi personnalise',
-    'Pas d\'echange prealable avec un humain',
-    'Aucune reservation faite a votre place',
+    'Aucune modification après livraison',
+    'Aucun suivi personnalisé',
+    'Pas d’échange préalable avec un humain',
+    'Aucune réservation faite à votre place',
   ],
   premium: [
-    'Aucune reservation faite a votre place',
-    'Pas d\'appel telephonique inclus',
+    'Aucune réservation faite à votre place',
+    'Pas d’appel téléphonique inclus',
   ],
   conciergerie: [
-    'Aucune reservation faite a votre place (mais nous vous accompagnons pour les choix)',
+    'Aucune réservation faite à votre place (mais nous vous accompagnons pour les choix)',
   ],
 };
 
-const OFFER_ICONS: Record<OfferType, typeof faRobot> = {
-  express: faRobot,
-  premium: faHeadset,
+const OFFER_ICONS: Record<OfferType, typeof faRocket> = {
+  express: faRocket,
+  premium: faStar,
   conciergerie: faCrown,
 };
+
+// Mini icone check inline (style ItineraireIABlock — coherent avec la home)
+const CheckIcon = ({ className = '' }: { className?: string }) => (
+  <svg
+    width="11"
+    height="11"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="3.2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    className={className}
+  >
+    <path d="M20 6L9 17l-5-5" />
+  </svg>
+);
+
+// Mini icone croix inline pour "non inclus" — moins agressif que faTimesCircle
+const MinusIcon = ({ className = '' }: { className?: string }) => (
+  <svg
+    width="10"
+    height="10"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="3.5"
+    strokeLinecap="round"
+    aria-hidden="true"
+    className={className}
+  >
+    <path d="M5 12h14" />
+  </svg>
+);
 
 export function OfferConfirmationModal({
   isOpen,
@@ -79,7 +113,6 @@ export function OfferConfirmationModal({
   const handleConfirm = () => {
     if (!consentChecked) return;
     onConfirm();
-    // reset pour reouverture propre
     setConsentChecked(false);
   };
 
@@ -95,13 +128,13 @@ export function OfferConfirmationModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 overflow-y-auto">
           <motion.div
             variants={modalOverlay}
             initial="initial"
             animate="animate"
             exit="exit"
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-ink/70 backdrop-blur-md"
             onClick={handleClose}
           />
 
@@ -113,152 +146,480 @@ export function OfferConfirmationModal({
             role="dialog"
             aria-modal="true"
             aria-labelledby="offer-confirmation-title"
-            className="relative bg-card rounded-2xl shadow-2xl max-w-lg w-full border border-border/50 overflow-hidden my-8"
+            className="relative bg-card w-full sm:max-w-xl rounded-t-3xl sm:rounded-3xl overflow-hidden my-0 sm:my-8 flex flex-col max-h-[95vh] sm:max-h-[92vh]"
+            style={{
+              boxShadow:
+                '0 24px 60px -12px rgba(15, 23, 42, 0.35), 0 0 0 0.5px rgba(15, 23, 42, 0.08)',
+            }}
           >
-            <button
-              onClick={handleClose}
-              aria-label="Fermer"
-              className="absolute top-4 right-4 p-2 hover:bg-muted rounded-xl transition-colors z-10"
+            {/* ============ HEADER GRADIENT (style ItineraireIABlock) ============ */}
+            <div
+              className="relative overflow-hidden text-white px-6 sm:px-8 pt-7 pb-6"
+              style={{
+                background:
+                  'linear-gradient(135deg, #3B5BDB 0%, #1e40af 100%)',
+              }}
             >
-              <FontAwesomeIcon icon={faTimes} className="w-4 h-4 text-muted-foreground" />
-            </button>
+              {/* Cercles decoratifs dashed — exact pattern home */}
+              <span
+                className="absolute pointer-events-none rounded-full"
+                style={{
+                  width: '260px',
+                  height: '260px',
+                  top: '-110px',
+                  right: '-90px',
+                  border: '2px dashed rgba(255, 255, 255, 0.13)',
+                }}
+                aria-hidden="true"
+              />
+              <span
+                className="absolute pointer-events-none rounded-full"
+                style={{
+                  width: '160px',
+                  height: '160px',
+                  bottom: '-70px',
+                  left: '-50px',
+                  border: '2px dashed rgba(255, 255, 255, 0.13)',
+                }}
+                aria-hidden="true"
+              />
 
-            {/* Header avec gradient + icone */}
-            <div className="bg-gradient-to-br from-primary/10 to-orange-500/10 px-6 pt-6 pb-5 border-b border-border/50">
-              <div className="flex items-start gap-3 pr-8">
-                <div className="w-11 h-11 bg-primary/15 rounded-xl flex items-center justify-center shrink-0">
-                  <FontAwesomeIcon icon={OFFER_ICONS[offer]} className="text-primary text-lg" />
+              {/* Bouton fermer */}
+              <button
+                onClick={handleClose}
+                aria-label="Fermer"
+                className="absolute top-4 right-4 w-9 h-9 inline-flex items-center justify-center rounded-full transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 z-10"
+              >
+                <FontAwesomeIcon icon={faTimes} className="text-white/85 text-sm" />
+              </button>
+
+              {/* Eyebrow */}
+              <div className="relative">
+                <span
+                  className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase mb-3"
+                  style={{
+                    letterSpacing: '0.08em',
+                    color: 'rgba(255, 255, 255, 0.78)',
+                  }}
+                >
+                  <span className="text-accent" aria-hidden="true">✦</span>
+                  Récapitulatif de votre commande
+                </span>
+
+                {/* Titre offre */}
+                <div className="flex items-start gap-3.5 pr-10">
+                  <span
+                    className="inline-flex items-center justify-center rounded-2xl shrink-0"
+                    style={{
+                      width: '46px',
+                      height: '46px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.13)',
+                      border: '1px solid rgba(255, 255, 255, 0.18)',
+                    }}
+                    aria-hidden="true"
+                  >
+                    <FontAwesomeIcon
+                      icon={OFFER_ICONS[offer]}
+                      className="text-accent"
+                      style={{ fontSize: '17px' }}
+                    />
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <h2
+                      id="offer-confirmation-title"
+                      className="text-white font-semibold mb-0.5"
+                      style={{
+                        fontSize: 'clamp(1.375rem, 3vw, 1.625rem)',
+                        letterSpacing: '-0.02em',
+                        lineHeight: 1.1,
+                      }}
+                    >
+                      Offre {offerLabel.name}
+                    </h2>
+                    <p
+                      className="text-[13.5px]"
+                      style={{ color: 'rgba(255, 255, 255, 0.78)' }}
+                    >
+                      Séjour de {durationLabel} · {offerLabel.description}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-1">
-                    Recapitulatif de votre commande
-                  </p>
-                  <h2 id="offer-confirmation-title" className="text-xl font-bold text-foreground">
-                    {offerLabel.name} &middot; {durationLabel}
-                  </h2>
-                  <p className="text-2xl font-bold text-primary mt-2">
-                    {formatPrice(pricing.price)}
-                    <span className="text-sm font-normal text-muted-foreground ml-2">paiement unique</span>
-                  </p>
+
+                {/* Prix - bandeau separe pour focus visuel */}
+                <div
+                  className="mt-5 flex items-baseline justify-between gap-3 pt-4"
+                  style={{ borderTop: '1px dashed rgba(255, 255, 255, 0.18)' }}
+                >
+                  <span
+                    className="text-[11px] font-bold uppercase"
+                    style={{
+                      letterSpacing: '0.08em',
+                      color: 'rgba(255, 255, 255, 0.78)',
+                    }}
+                  >
+                    Total à régler
+                  </span>
+                  <span className="flex items-baseline gap-2">
+                    <span
+                      className="text-accent font-bold tabular-nums"
+                      style={{
+                        fontSize: 'clamp(1.875rem, 4vw, 2.25rem)',
+                        letterSpacing: '-0.02em',
+                        lineHeight: 1,
+                      }}
+                    >
+                      {formatPrice(pricing.price)}
+                    </span>
+                    <span
+                      className="text-[12px]"
+                      style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                    >
+                      paiement unique
+                    </span>
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Body scrollable */}
-            <div className="px-6 py-5 space-y-5 max-h-[60vh] overflow-y-auto">
-              {/* Positionnement Philippineasy */}
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-900 leading-relaxed">
-                <div className="flex items-start gap-2">
-                  <FontAwesomeIcon icon={faInfoCircle} className="text-blue-600 mt-0.5 shrink-0" />
-                  <p>
-                    <strong>Philippin&apos;Easy est un guide francophone des Philippines, pas une agence de voyage.</strong>{' '}
-                    Nous vous accompagnons pour preparer votre voyage en toute autonomie : nous ne reservons
-                    rien a votre place et ne sommes pas responsables des disponibilites des hebergements, vols
-                    ou activites suggeres.
-                  </p>
-                </div>
+            {/* ============ BODY SCROLLABLE ============ */}
+            <div className="flex-1 overflow-y-auto px-6 sm:px-8 py-6 space-y-6">
+              {/* Bandeau positionnement — design subtil, integre, pas un encart bleu agressif */}
+              <div
+                className="relative rounded-2xl px-4 py-3.5 flex items-start gap-3"
+                style={{
+                  background: 'linear-gradient(135deg, #FFF8EC 0%, #FFFBF2 100%)',
+                  border: '0.5px solid rgba(245, 158, 11, 0.25)',
+                }}
+              >
+                <span
+                  className="inline-flex items-center justify-center rounded-full shrink-0 mt-0.5"
+                  style={{
+                    width: '26px',
+                    height: '26px',
+                    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                    color: '#B45309',
+                  }}
+                  aria-hidden="true"
+                >
+                  <FontAwesomeIcon icon={faShieldHalved} style={{ fontSize: '11px' }} />
+                </span>
+                <p
+                  className="text-[13px] leading-[1.55]"
+                  style={{ color: '#78350F' }}
+                >
+                  <strong className="font-semibold text-ink">
+                    Philippin&apos;Easy est un guide francophone, pas une agence de voyage.
+                  </strong>{' '}
+                  Nous vous accompagnons pour préparer votre voyage en toute autonomie : nous ne
+                  réservons rien à votre place et ne sommes pas responsables des disponibilités
+                  des hébergements, vols ou activités suggérés.
+                </p>
               </div>
 
-              {/* Ce qui est inclus */}
-              <div>
-                <h3 className="text-sm font-semibold text-foreground mb-2 uppercase tracking-wide">
-                  Ce qui est inclus
-                </h3>
-                <ul className="space-y-2">
-                  {offerLabel.features.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                      <FontAwesomeIcon
-                        icon={faCheckCircle}
-                        className="text-green-600 mt-0.5 shrink-0"
-                      />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                  {pricing.modifications > 0 && (
-                    <li className="flex items-start gap-2 text-sm text-foreground">
-                      <FontAwesomeIcon
-                        icon={faCheckCircle}
-                        className="text-green-600 mt-0.5 shrink-0"
-                      />
-                      <span>
-                        <strong>{pricing.modifications} modification{pricing.modifications > 1 ? 's' : ''} gratuite{pricing.modifications > 1 ? 's' : ''}</strong> incluse{pricing.modifications > 1 ? 's' : ''}
-                      </span>
-                    </li>
-                  )}
-                </ul>
-              </div>
-
-              {/* Ce qui n'est PAS inclus */}
-              <div>
-                <h3 className="text-sm font-semibold text-foreground mb-2 uppercase tracking-wide">
-                  Ce qui n&apos;est pas inclus
-                </h3>
-                <ul className="space-y-2">
-                  {NOT_INCLUDED[offer].map((item, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <FontAwesomeIcon
-                        icon={faTimesCircle}
-                        className="text-orange-500 mt-0.5 shrink-0"
-                      />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Upsell soft si Express ou Premium */}
-              {upsellOffer && onSelectOtherOffer && (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                  <p className="text-sm text-amber-900 mb-3">
-                    <strong>Vous voulez plus d&apos;accompagnement ?</strong> L&apos;offre{' '}
-                    <strong>{OFFER_LABELS[upsellOffer].name}</strong> inclut{' '}
-                    {upsellOffer === 'premium' ? 'des modifications gratuites et un support email personnalise' : 'un appel d\'echange prealable + WhatsApp direct + suivi humain'}{' '}
-                    a partir de {formatPrice(PRICING_GRID[upsellOffer][duration].price)}.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => onSelectOtherOffer(upsellOffer)}
-                    className="text-sm font-semibold text-amber-900 hover:text-amber-700 underline underline-offset-2 transition-colors"
+              {/* Sections inclus / non inclus en grid 2 cols sur desktop */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Ce qui est inclus */}
+                <section>
+                  <h3
+                    className="flex items-center gap-2 mb-3"
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      color: '#0F172A',
+                    }}
                   >
-                    Voir l&apos;offre {OFFER_LABELS[upsellOffer].name} &rarr;
-                  </button>
-                </div>
+                    <span
+                      className="inline-flex items-center justify-center rounded-full"
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        backgroundColor: '#F4F7FE',
+                        color: '#3B5BDB',
+                      }}
+                      aria-hidden="true"
+                    >
+                      <CheckIcon />
+                    </span>
+                    Ce qui est inclus
+                  </h3>
+                  <ul className="space-y-2">
+                    {offerLabel.features.map((feature, i) => (
+                      <li
+                        key={i}
+                        className="flex items-start gap-2.5"
+                        style={{
+                          fontSize: '13.5px',
+                          color: '#334155',
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        <span
+                          className="flex-shrink-0 inline-flex items-center justify-center rounded-full mt-[3px]"
+                          style={{
+                            width: '16px',
+                            height: '16px',
+                            backgroundColor: '#F4F7FE',
+                            color: '#3B5BDB',
+                          }}
+                          aria-hidden="true"
+                        >
+                          <CheckIcon />
+                        </span>
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                    {pricing.modifications > 0 && (
+                      <li
+                        className="flex items-start gap-2.5"
+                        style={{
+                          fontSize: '13.5px',
+                          color: '#334155',
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        <span
+                          className="flex-shrink-0 inline-flex items-center justify-center rounded-full mt-[3px]"
+                          style={{
+                            width: '16px',
+                            height: '16px',
+                            backgroundColor: '#F4F7FE',
+                            color: '#3B5BDB',
+                          }}
+                          aria-hidden="true"
+                        >
+                          <CheckIcon />
+                        </span>
+                        <span>
+                          <strong className="font-semibold text-ink">
+                            {pricing.modifications} modification
+                            {pricing.modifications > 1 ? 's' : ''} gratuite
+                            {pricing.modifications > 1 ? 's' : ''}
+                          </strong>{' '}
+                          incluse{pricing.modifications > 1 ? 's' : ''}
+                        </span>
+                      </li>
+                    )}
+                  </ul>
+                </section>
+
+                {/* Ce qui n'est PAS inclus */}
+                <section>
+                  <h3
+                    className="flex items-center gap-2 mb-3"
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      color: '#64748b',
+                    }}
+                  >
+                    <span
+                      className="inline-flex items-center justify-center rounded-full"
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        backgroundColor: '#F1F5F9',
+                        color: '#94a3b8',
+                      }}
+                      aria-hidden="true"
+                    >
+                      <MinusIcon />
+                    </span>
+                    Non inclus
+                  </h3>
+                  <ul className="space-y-2">
+                    {NOT_INCLUDED[offer].map((item, i) => (
+                      <li
+                        key={i}
+                        className="flex items-start gap-2.5"
+                        style={{
+                          fontSize: '13.5px',
+                          color: '#64748b',
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        <span
+                          className="flex-shrink-0 inline-flex items-center justify-center rounded-full mt-[3px]"
+                          style={{
+                            width: '16px',
+                            height: '16px',
+                            backgroundColor: '#F1F5F9',
+                            color: '#94a3b8',
+                          }}
+                          aria-hidden="true"
+                        >
+                          <MinusIcon />
+                        </span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              </div>
+
+              {/* Upsell soft — design jaune doux coherent avec accent home */}
+              {upsellOffer && onSelectOtherOffer && (
+                <motion.button
+                  type="button"
+                  onClick={() => onSelectOtherOffer(upsellOffer)}
+                  whileHover={{ y: -1 }}
+                  whileTap={{ scale: 0.99 }}
+                  className="w-full text-left rounded-2xl p-4 group transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2"
+                  style={{
+                    background: 'linear-gradient(135deg, #FEF9E7 0%, #FFFCEF 100%)',
+                    border: '0.5px solid rgba(245, 158, 11, 0.3)',
+                  }}
+                >
+                  <div className="flex items-start gap-3">
+                    <span
+                      className="inline-flex items-center justify-center rounded-xl shrink-0"
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        backgroundColor: '#F59E0B',
+                        color: '#1a1a00',
+                      }}
+                      aria-hidden="true"
+                    >
+                      <FontAwesomeIcon
+                        icon={OFFER_ICONS[upsellOffer]}
+                        style={{ fontSize: '14px' }}
+                      />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className="font-semibold mb-0.5 text-ink flex items-center gap-2 flex-wrap"
+                        style={{ fontSize: '14px', letterSpacing: '-0.01em' }}
+                      >
+                        Passer en {OFFER_LABELS[upsellOffer].name}
+                        <span
+                          className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tabular-nums"
+                          style={{
+                            letterSpacing: '0.05em',
+                            backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                            color: '#92400E',
+                          }}
+                        >
+                          dès {formatPrice(PRICING_GRID[upsellOffer][duration].price)}
+                        </span>
+                      </p>
+                      <p
+                        className="text-[13px]"
+                        style={{ color: '#78350F', lineHeight: 1.5 }}
+                      >
+                        {upsellOffer === 'premium'
+                          ? 'Modifications gratuites incluses + support email personnalisé sous 48h.'
+                          : 'Échange préalable + WhatsApp direct + suivi humain personnalisé.'}
+                      </p>
+                    </div>
+                    <span
+                      className="text-accent text-sm shrink-0 mt-1 transition-transform duration-200 group-hover:translate-x-0.5"
+                      aria-hidden="true"
+                    >
+                      →
+                    </span>
+                  </div>
+                </motion.button>
               )}
 
-              {/* Consentement */}
-              <label className="flex items-start gap-3 cursor-pointer p-3 -mx-1 rounded-xl hover:bg-muted/50 transition-colors">
-                <input
-                  type="checkbox"
-                  checked={consentChecked}
-                  onChange={(e) => setConsentChecked(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 rounded border-2 border-border text-primary focus:ring-2 focus:ring-primary/30 cursor-pointer shrink-0"
-                />
-                <span className="text-sm text-foreground leading-relaxed">
-                  J&apos;ai bien compris ce que comprend l&apos;offre <strong>{offerLabel.name}</strong> et
-                  j&apos;accepte que Philippin&apos;Easy soit un guide d&apos;accompagnement, pas une agence de voyage.
+              {/* Consentement — checkbox custom */}
+              <label
+                className="flex items-start gap-3 cursor-pointer rounded-2xl p-4 transition-colors group"
+                style={{
+                  backgroundColor: consentChecked
+                    ? 'rgba(59, 91, 219, 0.04)'
+                    : '#F8FAFC',
+                  border: consentChecked
+                    ? '0.5px solid rgba(59, 91, 219, 0.35)'
+                    : '0.5px solid #e5e7eb',
+                }}
+              >
+                <span className="relative flex items-center justify-center mt-[2px] shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={consentChecked}
+                    onChange={(e) => setConsentChecked(e.target.checked)}
+                    className="peer sr-only"
+                    aria-describedby="consent-text"
+                  />
+                  <span
+                    className="inline-flex items-center justify-center w-[18px] h-[18px] rounded-md transition-all duration-150 peer-focus-visible:ring-2 peer-focus-visible:ring-primary/40 peer-focus-visible:ring-offset-2"
+                    style={{
+                      backgroundColor: consentChecked ? '#3B5BDB' : '#ffffff',
+                      border: consentChecked
+                        ? '1px solid #3B5BDB'
+                        : '1.5px solid #cbd5e1',
+                    }}
+                  >
+                    {consentChecked && <CheckIcon className="text-white" />}
+                  </span>
+                </span>
+                <span
+                  id="consent-text"
+                  className="text-[13.5px] leading-[1.55]"
+                  style={{ color: '#334155' }}
+                >
+                  J&apos;ai bien compris ce que comprend l&apos;offre{' '}
+                  <strong className="font-semibold text-ink">
+                    {offerLabel.name}
+                  </strong>{' '}
+                  et j&apos;accepte que Philippin&apos;Easy soit un guide
+                  d&apos;accompagnement, pas une agence de voyage.
                 </span>
               </label>
             </div>
 
-            {/* Footer CTA */}
-            <div className="px-6 py-4 bg-muted/30 border-t border-border/50 flex flex-col sm:flex-row gap-2">
-              <Button
+            {/* ============ FOOTER CTA — sticky bas, style home (orange brand) ============ */}
+            <div
+              className="px-6 sm:px-8 py-4 bg-card flex flex-col-reverse sm:flex-row gap-2.5 sm:items-center sm:justify-between"
+              style={{ borderTop: '0.5px solid #e5e7eb' }}
+            >
+              <button
                 type="button"
-                variant="outline"
                 onClick={handleClose}
-                className="flex-1 sm:flex-none"
+                className="text-[13.5px] font-medium text-muted-foreground hover:text-ink transition-colors py-2 sm:py-0 sm:px-2 focus-visible:outline-none focus-visible:underline"
               >
                 Annuler
-              </Button>
-              <Button
-                type="button"
-                onClick={handleConfirm}
-                disabled={!consentChecked}
-                className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-11 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Continuer vers le paiement
-                <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
-              </Button>
+              </button>
+
+              <div className="flex flex-col gap-2 sm:items-end">
+                <motion.div
+                  whileHover={consentChecked ? { scale: 1.01 } : undefined}
+                  whileTap={consentChecked ? { scale: 0.99 } : undefined}
+                  className="w-full sm:w-auto"
+                >
+                  <Button
+                    type="button"
+                    onClick={handleConfirm}
+                    disabled={!consentChecked}
+                    className="w-full sm:w-auto h-12 px-6 inline-flex items-center justify-center gap-2 rounded-xl font-semibold text-[15px] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+                    style={{
+                      backgroundColor: consentChecked ? '#F59E0B' : '#E2E8F0',
+                      color: consentChecked ? '#1a1a00' : '#94a3b8',
+                      boxShadow: consentChecked
+                        ? '0 10px 30px rgba(245, 158, 11, 0.35)'
+                        : 'none',
+                      letterSpacing: '-0.005em',
+                    }}
+                  >
+                    Continuer vers le paiement
+                    <FontAwesomeIcon
+                      icon={faArrowRight}
+                      style={{ fontSize: '13px' }}
+                    />
+                  </Button>
+                </motion.div>
+                <p
+                  className="text-[11.5px] flex items-center gap-1.5 sm:justify-end"
+                  style={{ color: '#94a3b8' }}
+                >
+                  <FontAwesomeIcon icon={faLock} style={{ fontSize: '9px' }} />
+                  Paiement sécurisé par Stripe
+                </p>
+              </div>
             </div>
           </motion.div>
         </div>
