@@ -4,7 +4,61 @@ import { createClient } from '@supabase/supabase-js';
 import { sendItineraryPaymentConfirmation, sendPaymentFailedEmail, sendSubscriptionCancelledEmail } from '@/emails/senders/payment';
 import { sendOrderConfirmation, sendVendorNewOrder } from '@/emails/senders/marketplace';
 import { sendDatingPremiumConfirmation } from '@/emails/senders/lifecycle';
+import { sendItineraryReadyEmail } from '@/emails/senders/itinerary';
 import { getUserEmail } from '@/emails/send';
+
+// Helper : envoie l'email "Itineraire pret" avec lien + PDF.
+// Appele depuis le webhook pour garantir delivery meme si l'utilisateur ne
+// revient pas sur /checkout/completion (ex: ferme browser apres paiement Stripe).
+// Idempotent au niveau Resend (le sender ne re-envoie pas si meme template+to+24h).
+async function dispatchItineraryReadyEmail(
+  supabaseAdmin: ReturnType<typeof getSupabaseAdmin>,
+  generationId: string,
+  to: string,
+  userName?: string,
+) {
+  try {
+    const { data: gen, error } = await supabaseAdmin
+      .from('itinerary_generations')
+      .select('id, selected_variant, itineraries')
+      .eq('id', generationId)
+      .single();
+
+    if (error || !gen) {
+      console.error(`[webhook] dispatchItineraryReadyEmail: gen ${generationId} not found`, error);
+      return;
+    }
+
+    const itineraries = typeof gen.itineraries === 'string' ? JSON.parse(gen.itineraries) : gen.itineraries;
+    if (!Array.isArray(itineraries) || itineraries.length === 0) {
+      console.error(`[webhook] dispatchItineraryReadyEmail: gen ${generationId} has no itineraries`);
+      return;
+    }
+
+    const selectedVariant = itineraries.find(
+      (it: { variant: string }) => it.variant === gen.selected_variant
+    ) || itineraries[0];
+
+    const days = selectedVariant?.full?.days || [];
+    const destinations = [...new Set(
+      days.map((d: { location?: string }) => d.location).filter(Boolean)
+    )].join(', ') || 'Philippines';
+
+    await sendItineraryReadyEmail({
+      to,
+      userName,
+      itineraryTitle: selectedVariant?.preview?.title || selectedVariant?.full?.title || 'Votre itineraire',
+      destination: destinations,
+      days: days.length || 1,
+      variant: gen.selected_variant || 'balanced',
+      generationId,
+    });
+
+    console.log(`[webhook] Itinerary ready email dispatched for gen ${generationId} to ${to}`);
+  } catch (err) {
+    console.error(`[webhook] Failed to dispatch itinerary ready email for gen ${generationId}:`, err);
+  }
+}
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -417,6 +471,12 @@ async function handleItineraryPayment(
           durationDays,
           amountFormatted,
         ).catch((err) => console.error('Itinerary payment email error:', err));
+
+        // Envoie aussi l'email "Itineraire pret" (avec lien + PDF) directement
+        // depuis le webhook pour garantir delivery meme si l'user ne revient
+        // pas sur /checkout/completion (cas: ferme browser apres Stripe).
+        dispatchItineraryReadyEmail(supabaseAdmin, generation_id, user.email, user.name)
+          .catch((err) => console.error('Itinerary ready email error:', err));
       }
     } else if (deliveryEmail) {
       // ── Cas anonyme : paiement sans compte — créer ou lier un compte ──
@@ -537,6 +597,12 @@ async function handleAnonymousItineraryPurchase(
       durationDays,
       amountFormatted,
     ).catch((err) => console.error('Itinerary payment email (anonymous) error:', err));
+
+    // Envoie aussi l'email "Itineraire pret" (avec lien + PDF) pour livrer
+    // immediatement le contenu (cas anonyme : sans cet envoi, l'user ne
+    // saurait jamais ou recuperer son itineraire avant de cliquer le magic link)
+    dispatchItineraryReadyEmail(supabaseAdmin, generationId, deliveryEmail, userName)
+      .catch((err) => console.error('Itinerary ready email (anonymous) error:', err));
 
     // 5. Envoyer un magic link pour permettre l'accès à l'espace personnel
     // Ne pas await — opération non-bloquante, failure acceptable
