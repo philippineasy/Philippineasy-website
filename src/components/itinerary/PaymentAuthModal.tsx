@@ -23,6 +23,8 @@ interface PaymentAuthModalProps {
   email: string;
   generationId: string;
   offer: OfferType;
+  /** Variant choisi (relax/balanced/adventure) — sera transmis au resume_payment */
+  variant: string;
 }
 
 // Regex simple pour valider un email côté client
@@ -34,6 +36,7 @@ export function PaymentAuthModal({
   email: initialEmail,
   generationId,
   offer,
+  variant,
 }: PaymentAuthModalProps) {
   const [email, setEmail] = useState(initialEmail);
   const [isSending, setIsSending] = useState(false);
@@ -59,6 +62,7 @@ export function PaymentAuthModal({
     const targetParams = new URLSearchParams({
       resume_payment: generationId,
       offer,
+      variant,
     });
     const targetUrl = `/itineraire-personnalise-pour-les-philippines?${targetParams.toString()}`;
     return `${origin}/auth/callback?next=${encodeURIComponent(targetUrl)}`;
@@ -117,7 +121,7 @@ export function PaymentAuthModal({
 
   // URL de redirection vers la page de connexion classique
   const loginUrl = `/connexion?redirect=${encodeURIComponent(
-    `/itineraire-personnalise-pour-les-philippines?resume_payment=${generationId}&offer=${offer}`
+    `/itineraire-personnalise-pour-les-philippines?resume_payment=${generationId}&offer=${offer}&variant=${variant}`
   )}`;
 
   return (

@@ -115,8 +115,11 @@ function ItineraireContent() {
   };
 
   // Logique de paiement extraite en callback stable pour être appelée
-  // depuis handlePayment ET depuis le useEffect de resume_payment
-  const triggerPayment = useCallback(async (offer: OfferType, genId: string, dur: Duration) => {
+  // depuis handlePayment ET depuis le useEffect de resume_payment.
+  // variant passe en argument explicite : au resume post-magic-link, le
+  // state selectedVariant est null (page rechargee) donc on le reconstruit
+  // depuis l'URL ou la generation DB et on le passe ici.
+  const triggerPayment = useCallback(async (offer: OfferType, genId: string, dur: Duration, variant: string) => {
     const pricing = PRICING_GRID[offer][dur];
     if (!pricing || pricing.price === 0) {
       window.location.href = '/contact?subject=conciergerie-voyage';
@@ -131,7 +134,7 @@ function ItineraireContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           generation_id: genId,
-          selected_variant: selectedVariant,
+          selected_variant: variant,
           offer_type: offer,
           duration: dur,
           price_id: pricing.priceId,
@@ -148,7 +151,7 @@ function ItineraireContent() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur lors du paiement');
     }
-  }, [selectedVariant]);
+  }, []);
 
   const handlePayment = async (offer: OfferType) => {
     if (!generationId || !selectedVariant || !duration) return;
@@ -177,7 +180,11 @@ function ItineraireContent() {
     }
 
     // Utilisateur connecté → flux Stripe direct (comportement inchangé)
-    await triggerPayment(offer, generationId, duration as Duration);
+    if (!selectedVariant) {
+      setError('Veuillez choisir une variante d\'itineraire.');
+      return;
+    }
+    await triggerPayment(offer, generationId, duration as Duration, selectedVariant);
   };
 
   // ─── Resume payment après retour du magic link ─────────────────────────────
@@ -186,6 +193,8 @@ function ItineraireContent() {
   useEffect(() => {
     const resumeGenerationId = searchParams.get('resume_payment');
     const resumeOffer = searchParams.get('offer') as OfferType | null;
+    // variant transmis dans l'URL par PaymentAuthModal (state perdu au reload post-magic-link)
+    const resumeVariant = searchParams.get('variant');
 
     if (!resumeGenerationId || !resumeOffer || authLoading) return;
 
@@ -197,30 +206,25 @@ function ItineraireContent() {
     const validOffers: OfferType[] = ['express', 'premium', 'conciergerie'];
     if (!validOffers.includes(resumeOffer)) return;
 
-    // Charger la génération depuis l'API pour récupérer la durée si besoin
-    // (on n'a pas duration en state si la page a été rechargée)
+    // Charger la génération depuis l'API pour récupérer la durée + variant si besoin
     const resumePayment = async () => {
       try {
-        // Récupérer les infos de la génération pour obtenir la durée
         const response = await fetch(`/api/itinerary/generation/${resumeGenerationId}`);
         if (!response.ok) {
-          // Si l'API n'existe pas encore, utiliser la durée en state
-          // (cas où l'user n'a pas rechargé la page)
-          if (duration) {
-            await triggerPayment(resumeOffer, resumeGenerationId, duration as Duration);
-          } else {
-            setError('Impossible de reprendre le paiement. Veuillez réessayer depuis le début.');
-          }
+          setError('Impossible de reprendre le paiement. Veuillez réessayer depuis le début.');
           return;
         }
         const data = await response.json();
-        const genDuration: Duration = data.duration || duration as Duration;
+        const genDuration: Duration = data.duration || (duration as Duration);
+        // Priorite : URL > DB > fallback 'balanced' (variant le plus universel)
+        const finalVariant: string = resumeVariant || data.selected_variant || 'balanced';
         if (!genDuration) {
           setError('Impossible de reprendre le paiement. Veuillez réessayer depuis le début.');
           return;
         }
         setGenerationId(resumeGenerationId);
-        await triggerPayment(resumeOffer, resumeGenerationId, genDuration);
+        setSelectedVariant(finalVariant);
+        await triggerPayment(resumeOffer, resumeGenerationId, genDuration, finalVariant);
       } catch {
         setError('Impossible de reprendre le paiement. Veuillez réessayer depuis le début.');
       }
@@ -299,7 +303,7 @@ function ItineraireContent() {
       </div>
 
       {/* Modal d'authentification avant paiement (anonymes uniquement) */}
-      {pendingOffer && generationId && (
+      {pendingOffer && generationId && selectedVariant && (
         <PaymentAuthModal
           isOpen={paymentAuthModalOpen}
           onClose={() => {
@@ -309,6 +313,7 @@ function ItineraireContent() {
           email={capturedEmail}
           generationId={generationId}
           offer={pendingOffer}
+          variant={selectedVariant}
         />
       )}
     </main>
