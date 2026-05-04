@@ -149,6 +149,14 @@ function ItineraireContent() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
+        // Distingue le rate limit IP des autres erreurs pour un message clair
+        // (etait perdu dans 'Erreur lors du paiement' generique).
+        if (response.status === 429 || data.code === 'RATE_LIMIT_EXCEEDED') {
+          throw new Error(
+            data.message ||
+              'Vous avez atteint la limite de tentatives de paiement (2 par semaine). Reessayez plus tard ou contactez-nous.'
+          );
+        }
         throw new Error(data.error || 'Erreur lors du paiement');
       }
 
@@ -268,8 +276,47 @@ function ItineraireContent() {
     conciergerie: PRICING_GRID.conciergerie[duration as Duration],
   } : null;
 
+  // Auto-scroll vers la banniere d'erreur quand elle apparait. Sinon les
+  // erreurs (notamment rate limit 429 du resumePayment) sont enterrees sous le
+  // formulaire et l'utilisateur ne les voit pas — on l'a vu en prod.
+  useEffect(() => {
+    if (error && typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [error]);
+
   return (
     <main className="min-h-screen bg-[hsl(var(--warm-bg))]">
+      {/* Banniere d'erreur sticky en haut — visible immediatement, dismissible */}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.25 }}
+            className="sticky top-0 z-40 bg-destructive/95 text-destructive-foreground backdrop-blur-sm shadow-lg"
+            role="alert"
+            aria-live="assertive"
+          >
+            <div className="container mx-auto px-4 py-3 flex items-start sm:items-center justify-between gap-3">
+              <div className="flex items-start sm:items-center gap-2.5 text-sm font-medium">
+                <span className="text-base shrink-0 mt-0.5 sm:mt-0" aria-hidden="true">⚠️</span>
+                <span>{error}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setError(null)}
+                className="shrink-0 text-destructive-foreground/80 hover:text-destructive-foreground text-xl leading-none px-2 -mr-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive-foreground/40 rounded"
+                aria-label="Fermer le message d'erreur"
+              >
+                ×
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="container mx-auto px-4 py-16">
         {/* Header */}
         <motion.div
