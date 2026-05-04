@@ -5,6 +5,64 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Infra — Migration tunnel n8n vers `n8n.adascanpro.com` (2026-05-04)
+
+- Le domaine `hugogotophilippines.com` (qui ne servait QUE de hostname pour le tunnel Cloudflare exposant le n8n local sur port 5678) a expire et CF demandait un renouvellement annuel a ~12$/an. Migre vers un sous-domaine d'un autre domaine deja possede et inutilise (`adascanpro.com`, abandonne suite a echec d'un autre projet) -> economie perpetuelle.
+- Tunnel CF recree sur le compte CF qui possede `adascanpro.com` (compte V4724408). Le routage cross-account d'un tunnel n'est pas autorise sans Cloudflare for SaaS, donc impossible de garder l'ancien tunnel et juste pointer un nouveau CNAME : recreation complete necessaire.
+- Etapes effectuees (script `~/.cloudflared/`) : backup ancien `cert.pem` + creds + `config.yml` (suffix `.bak.20260504`), `cloudflared tunnel logout` + `tunnel login` interactif sur le bon compte, `cloudflared tunnel create n8n-hugo` (nouveau UUID `47a957ea-794c-4d7a-b6bb-ba2dff612794`), `tunnel route dns` (record DNS edite manuellement car le CLI n'ecrasait pas le CNAME pre-existant), `config.yml` reecrit avec nouveau tunnel + ingress unique sur `n8n.adascanpro.com`, launchagent macOS `homebrew.mxcl.cloudflared.plist` corrige avec les bons args (le brew service par defaut lancait `cloudflared` sans arguments -> exit immediat, pas de restart au reboot).
+- Code Philippineasy : 2 fallback URLs `N8N_ITINERARY_GENERATE_URL` + `N8N_ITINERARY_DELIVER_URL` mises a jour vers `https://n8n.adascanpro.com/webhook/...`. Aucune env var `N8N_*` cote Vercel (verifie via `vercel env ls`), donc pas d'edit Vercel necessaire.
+- A faire manuellement plus tard : ne pas renouveler `hugogotophilippines.com` (laisser expirer), supprimer l'ancien tunnel sur le compte hugosthaijourney apres validation du flow, supprimer 2 CNAME bidons `n8n.philippineasy.com.hugogotophilippines.com` + `n8n.adascanpro.com.hugogotophilippines.com` que le CLI a crees lors des essais (cosmetique).
+
+### UX — Polish funnel resume_payment post-magic-link (2026-05-04)
+
+- **Splash plein ecran pendant le resume_payment** : l'ancien comportement faisait flasher le formulaire vide pendant 200-500ms (le temps de la propagation auth + appel API), avec une banniere d'erreur rouge transitoire avant que le second render reussisse et redirige vers Stripe. Refactor dans `page.tsx` : si `searchParams.get('resume_payment')` ET pas d'erreur definitive, on remplace tout le rendu par un loading splash centre avec spinner + "Préparation de votre paiement — On vérifie votre commande et on vous redirige vers Stripe". L'utilisateur voit un loader propre puis Stripe.
+- **Retry silencieux sur 401/403 dans `resumePayment`** : la session auth post-magic-link prend ~200-500ms a se propager cote API. La 1ere tentative de fetch `/api/itinerary/generation/[id]` etait souvent un 401 transitoire qui setait l'erreur avant que le re-render reussisse. Ajout d'un retry silencieux jusqu'a 3 tentatives (backoff 300ms puis 700ms) avant d'afficher la moindre erreur. Cancellation flag dans la cleanup de l'effect pour eviter setState apres unmount. Message d'erreur final pour 401 definitif change en "Session expirée" (plus actionnable que "réessayez depuis le début").
+- **Banniere d'erreur sticky en haut de page** + auto-scroll : le rate limit 429 (limite IP 2 paiements/semaine) etait affiche dans `PreferencesForm` tout en bas, invisible sans scroll. Cout ~1h de "le magic link marche pas" alors que tout fonctionnait, juste l'erreur etait cachee. Banniere `role="alert" aria-live="assertive"` rouge sticky dismissible (×) + `useEffect` qui scrolle au top quand `error` change. `triggerPayment` distingue maintenant 429/`RATE_LIMIT_EXCEEDED` avec message explicite ("Vous avez atteint la limite de tentatives de paiement (2 par semaine). Reessayez plus tard ou contactez-nous.") au lieu du generique "Erreur lors du paiement".
+
+### Marketing — P0 + P1 CRO (3 agents marketing reviewed) (2026-05-04)
+
+Synthese de 3 agents (copywriting, funnel/CRO, pricing-strategy) qui ont audite la modal de confirmation. Convergence sur 3 axes : copy trop transactionnel ("Continuer vers le paiement" alors que l'etape suivante est un email), 2 modales sequentielles trop friction pour un ticket impulse a 9.99€, Express framing punitif (5 inclus / 4 non-inclus + bandeau + checkbox = 4 signaux de doute consecutifs).
+
+P0 (impact estime cumule +30-40%) :
+
+- **CTA principal** : "Continuer vers le paiement" -> **"Recevoir mon itinéraire par email"** (`OfferConfirmationModal.tsx`). Match l'action reelle de l'etape suivante (magic link email, pas Stripe). Elimine l'expectation mismatch.
+- **Micro-copy explicatif** sous le CTA : *"On vous envoie un email pour confirmer votre adresse, puis vous finalisez en quelques secondes."* Anti-anxiete : transparence du flow en 2 etapes (email puis paiement) pour que Stripe soit pas une surprise hostile.
+- **Auto-send magic link** dans `PaymentAuthModal.tsx` : useEffect qui declenche `signInWithOtp` au mount si `initialEmail` est valide. La modal s'ouvre directement sur l'ecran "Vérifiez votre boîte mail" au lieu de re-demander la saisie email + clic bouton (l'email est deja capture dans `PreferencesForm`). Bouton "Pas le bon email ?" pour reedition en cas de typo.
+- **NOT_INCLUDED.express** reduit de 4 a 2 items, reformule en positif : `"Modifications en option (à partir de 4,99€)"` + `"Pas de suivi humain personnalisé"`. Suppression doublons avec bandeau positionnement et checkbox consentement.
+
+P1 (polish structurel) :
+
+- Section header `"Non inclus"` -> **"Bon à savoir"** pour Express uniquement (vocabulaire neutre, moins loss-aversion).
+- Bandeau positionnement reformule en positif : `"On vous donne le plan, vous gardez les clés."` + reformulation conciliante. Vire le ton legaliste "non responsables des disponibilites".
+- Upsell desature (slate-50 au lieu de gradient jaune dore) + reframe en add-on (`"Ajouter modifications + support 48h +19€"`) au lieu d'alternative concurrente (`"dès 29€"`). Stop la concurrence visuelle avec le CTA principal.
+- "Annuler" -> **"Plus tard"** (respect-the-no, garde la porte ouverte).
+- Trust signal : "SSL chiffré" -> "Sans engagement" (moins generique, plus rassurant).
+
+### Offers — PDF gating Premium+ uniquement (2026-05-04)
+
+Per `OFFER_LABELS` dans `src/config/itinerary-pricing.ts`, le PDF est une feature **Premium+** (Express recoit email + vue web seulement). 7 fichiers touches pour appliquer la regle de bout en bout :
+
+- `src/emails/senders/itinerary.ts` : nouveau parametre optionnel `offerType` sur `sendItineraryReadyEmail`. Si `'express'`, le CTA secondaire "Telecharger PDF" est omis du mail ET la ligne de conseil "Vous pouvez telecharger le PDF a tout moment" est retiree. Default `'premium'` pour back-compat avec generations sans `offer_type` renseigne.
+- `src/services/emailService.ts` : wrapper backward-compat propage `offerType`.
+- `src/app/api/stripe/webhook/route.ts` : `dispatchItineraryReadyEmail` SELECT `offer_type` depuis la generation et le forward au sender.
+- `src/app/api/itinerary/deliver/route.ts` : meme propagation pour le re-send manuel depuis la completion page.
+- `src/app/api/itinerary/pdf/[id]/route.tsx` : gate server-side, retourne 403 `{ upgradeRequired: true }` si `generation.offer_type === 'express'`. Default conservatif sur `'express'` si null. Defense in depth : meme si UI bypass, l'API refuse.
+- `src/app/api/itinerary/confirm-payment/route.ts` : retourne `offer_type` au front pour adaptation UI.
+- `src/app/checkout/itinerary/completion/page.tsx` : masque la checkbox PDF pour Express, affiche un placeholder discret "PDF professionnel — Disponible avec les offres Premium et Conciergerie". Email + Telegram restent disponibles pour tous.
+
+### UI — Redesign + corrections OfferConfirmationModal (2026-05-04)
+
+3 iterations successives via l'agent ui-ux-designer pour aligner sur le design language home + corriger les regressions visuelles trouvees en test reel :
+
+1. **Redesign initial** : header gradient bleu profond `#3B5BDB → #1e40af` (match `ItineraireIABlock` + `FinalCtaSection`), cercles dashed decoratifs (signature pattern home), eyebrow uppercase + etoile accent jaune, `rounded-3xl` + shadow custom 24px/60px ink + bordure 0.5px, mobile-first bottom-sheet (`items-end` + `rounded-t-3xl`), grid 2-cols inclus/non-inclus desktop, custom checkbox sr-only + span style, CTA orange brand `#F59E0B` + shadow-cta, accents francais corriges partout.
+2. **Fix alignement bandeau prix + footer** : refactor du bloc prix (3 alignements concurrents -> stack vertical eyebrow / prix / sub-label, sub-label enrichi "paiement unique · sans engagement"), footer symetrique 2 rangs (Annuler | CTA puis trust signal centre pleine largeur au lieu de sublabel colle au bouton droit), upsell card padding-right augmente, contraste bandeau positionnement bumpe a 11.2:1 AAA.
+3. **Fix clipping prix sur viewport etroit** : `9.99€` qui touchait le bord du gradient bleu sur mobile. Combo `pb-6 -> pb-8 sm:pb-9` (header), stack `flex-col` au lieu de `flex baseline` (sub-label sous le prix sert de tampon), `clamp` min reduit a `1.75rem` + `lineHeight 1.05` + `paddingBottom 2px` sur le glyphe (descenders ne touchent jamais leur conteneur).
+
+### Fixes — Resume payment params + Reprendre button (2026-05-04)
+
+- **`selected_variant` perdu au reload post-magic-link** -> `/api/itinerary/payment` retournait 400 (variant null requis). Fix dans `PaymentAuthModal.tsx` : `buildRedirectUrl` inclut maintenant `&variant=<balanced|relax|adventure>` dans l'URL. `page.tsx` `resumePayment` lit `?variant` depuis searchParams, fallback sur `data.selected_variant` de la DB, puis 'balanced' en dernier recours. `triggerPayment` accepte le variant en arg explicite (au lieu de capture closure depuis `selectedVariant` state) pour eliminer le footgun stale-closure.
+- **Bouton "Reprendre" depuis `/mon-espace/itineraires`** ne passait aucun query param -> page chargeait sans declencher `resumePayment`. Fix : URL construite avec `?resume_payment=<id>&offer=<offer_type|express>&variant=<selected_variant|balanced>` depuis la generation pending la plus recente, defaults safe pour generations qui n'ont jamais atteint l'etape Pay (`offer_type` + `selected_variant` null). Ajout de `offer_type` au SELECT de la query `pendingGens`.
+
 ### UX — Modal de confirmation/consentement de l'offre avant paiement (2026-05-04)
 
 - **Nouveau** : `src/components/itinerary/OfferConfirmationModal.tsx` s'intercale entre le clic "Debloquer" et le PaymentAuthModal (ou Stripe direct si user authentifie). Affiche :
