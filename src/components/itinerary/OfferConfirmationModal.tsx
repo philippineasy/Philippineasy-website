@@ -245,38 +245,40 @@ export function OfferConfirmationModal({
                   </div>
                 </div>
 
-                {/* Prix - bandeau separe pour focus visuel */}
+                {/* Prix - bandeau separe pour focus visuel.
+                    Stack vertical : eyebrow -> prix (avec sub-label inline en baseline).
+                    Evite les 3 alignements concurrents qui cassaient la hierarchie. */}
                 <div
-                  className="mt-5 flex items-baseline justify-between gap-3 pt-4"
+                  className="mt-5 pt-4"
                   style={{ borderTop: '1px dashed rgba(255, 255, 255, 0.18)' }}
                 >
-                  <span
-                    className="text-[11px] font-bold uppercase"
+                  <div
+                    className="text-[10.5px] font-bold uppercase mb-1.5"
                     style={{
-                      letterSpacing: '0.08em',
-                      color: 'rgba(255, 255, 255, 0.78)',
+                      letterSpacing: '0.1em',
+                      color: 'rgba(255, 255, 255, 0.65)',
                     }}
                   >
                     Total à régler
-                  </span>
-                  <span className="flex items-baseline gap-2">
+                  </div>
+                  <div className="flex items-baseline gap-2.5 flex-wrap">
                     <span
                       className="text-accent font-bold tabular-nums"
                       style={{
-                        fontSize: 'clamp(1.875rem, 4vw, 2.25rem)',
-                        letterSpacing: '-0.02em',
+                        fontSize: 'clamp(2rem, 5.5vw, 2.5rem)',
+                        letterSpacing: '-0.025em',
                         lineHeight: 1,
                       }}
                     >
                       {formatPrice(pricing.price)}
                     </span>
                     <span
-                      className="text-[12px]"
+                      className="text-[12.5px]"
                       style={{ color: 'rgba(255, 255, 255, 0.7)' }}
                     >
-                      paiement unique
+                      paiement unique · sans engagement
                     </span>
-                  </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -305,7 +307,7 @@ export function OfferConfirmationModal({
                 </span>
                 <p
                   className="text-[13px] leading-[1.55]"
-                  style={{ color: '#78350F' }}
+                  style={{ color: '#5C2D0C' }}
                 >
                   <strong className="font-semibold text-ink">
                     Philippin&apos;Easy est un guide francophone, pas une agence de voyage.
@@ -467,7 +469,7 @@ export function OfferConfirmationModal({
                   onClick={() => onSelectOtherOffer(upsellOffer)}
                   whileHover={{ y: -1 }}
                   whileTap={{ scale: 0.99 }}
-                  className="w-full text-left rounded-2xl p-4 group transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2"
+                  className="w-full text-left rounded-2xl pl-4 pr-5 py-4 group transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2"
                   style={{
                     background: 'linear-gradient(135deg, #FEF9E7 0%, #FFFCEF 100%)',
                     border: '0.5px solid rgba(245, 158, 11, 0.3)',
@@ -516,7 +518,7 @@ export function OfferConfirmationModal({
                       </p>
                     </div>
                     <span
-                      className="text-accent text-sm shrink-0 mt-1 transition-transform duration-200 group-hover:translate-x-0.5"
+                      className="text-accent text-base shrink-0 mt-2 ml-1 transition-transform duration-200 group-hover:translate-x-1"
                       aria-hidden="true"
                     >
                       →
@@ -572,20 +574,24 @@ export function OfferConfirmationModal({
               </label>
             </div>
 
-            {/* ============ FOOTER CTA — sticky bas, style home (orange brand) ============ */}
+            {/* ============ FOOTER CTA — sticky bas, style home (orange brand)
+                Structure :
+                - Row 1 : Annuler (gauche) | Bouton CTA (droite) — symetrique
+                - Row 2 : trust signal centre, pleine largeur, sous tout le footer
+                Evite l'asymetrie precedente ou le sub-label etait colle au bouton droit. */}
             <div
-              className="px-6 sm:px-8 py-4 bg-card flex flex-col-reverse sm:flex-row gap-2.5 sm:items-center sm:justify-between"
+              className="px-6 sm:px-8 pt-4 pb-3.5 bg-card"
               style={{ borderTop: '0.5px solid #e5e7eb' }}
             >
-              <button
-                type="button"
-                onClick={handleClose}
-                className="text-[13.5px] font-medium text-muted-foreground hover:text-ink transition-colors py-2 sm:py-0 sm:px-2 focus-visible:outline-none focus-visible:underline"
-              >
-                Annuler
-              </button>
+              <div className="flex flex-col-reverse sm:flex-row gap-2.5 sm:items-center sm:justify-between">
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="text-[13.5px] font-medium text-muted-foreground hover:text-ink transition-colors py-2 sm:py-0 sm:px-2 focus-visible:outline-none focus-visible:underline self-center sm:self-auto"
+                >
+                  Annuler
+                </button>
 
-              <div className="flex flex-col gap-2 sm:items-end">
                 <motion.div
                   whileHover={consentChecked ? { scale: 1.01 } : undefined}
                   whileTap={consentChecked ? { scale: 0.99 } : undefined}
@@ -612,14 +618,16 @@ export function OfferConfirmationModal({
                     />
                   </Button>
                 </motion.div>
-                <p
-                  className="text-[11.5px] flex items-center gap-1.5 sm:justify-end"
-                  style={{ color: '#94a3b8' }}
-                >
-                  <FontAwesomeIcon icon={faLock} style={{ fontSize: '9px' }} />
-                  Paiement sécurisé par Stripe
-                </p>
               </div>
+
+              {/* Trust signal — pleine largeur centre, sous les boutons */}
+              <p
+                className="text-[11.5px] flex items-center justify-center gap-1.5 mt-3"
+                style={{ color: '#94a3b8' }}
+              >
+                <FontAwesomeIcon icon={faLock} style={{ fontSize: '9px' }} />
+                Paiement sécurisé par Stripe · SSL chiffré
+              </p>
             </div>
           </motion.div>
         </div>
