@@ -5,6 +5,28 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### SEO — 4 articles programmatiques destinations en attente de relecture (2026-05-05)
+
+Pour exploiter le volume SEO francais (estime 6-15k recherches mensuelles) sur les destinations Philippines, 4 articles long-form rediges en style backpacker authentique et inseres en `published=false` (invisible publiquement, le service `destinationItinerariesService` filtre `published=true` partout).
+
+**Fichiers seed crees** dans `supabase/seeds/` (~14 600 mots cumules) :
+- `destination_itineraries_cebu.sql` (~3460 mots, 8 jours, hub Visayas + plongee Malapascua + sardines Moalboal + Bohol)
+- `destination_itineraries_siargao.sql` (~3250 mots, 7 jours, surf capital + digital nomad scene)
+- `destination_itineraries_boracay.sql` (~2850 mots, 5 jours, hook contrarian "comment faire backpacker dans une ile resort")
+- `destination_itineraries_philippines-2-semaines.sql` (~5070 mots, 14 jours, multi-iles le plus gros volume SEO ~2-5k recherches/mois)
+
+**Style editorial** (Hugo : "style backpacker authentique, pas court") : voix terrain "j'y etais", prix exacts PHP + EUR conversion, noms d'hostels / guesthouses (Spin Designer, Harana, Mad Monkey, etc.), conseils pratiques sur scams, cash, GCash, ferries reservation, eau filtree, scooter negociation. Honnete sur les challenges (typhon Odette Siargao, ethique whale sharks Oslob avec alternative Donsol, fermeture Boracay 2018). FAQ riche (8-12 questions par article au lieu de 5 sur Palawan), 10-15 practical_tips par destination.
+
+**Skills appliques** (lus avant redaction) : `programmatic-seo` (structure + meta titles), `content-research-writer` (depth), `copywriting` (voice), `seo-audit` (keywords).
+
+**Application en prod** : 4 INSERT via Supabase Management API, table `destination_itineraries` contient maintenant 5 rows (palawan published + 4 nouveaux unpublished). Sitemap dynamique exclut automatiquement les unpublished.
+
+**Workflow Hugo restant** :
+1. Relire les seeds en local pour fact-check (prix vols domestiques 2026, environmental fees El Nido, ferry Atienza/Montenegro, hostels nommes encore actifs)
+2. Eventuellement ajouter ses anecdotes terrain personnelles (l'agent a respecte la consigne "ne pas inventer")
+3. Remplacer les hero_image placeholder (`/imagesHero/{slug}.webp`) par vraies photos terrain quand dispo
+4. Flip `published = true` quand satisfait : `UPDATE destination_itineraries SET published = true WHERE slug = '...'` via Dashboard SQL Editor
+
 ### Payment — Auto-apply RELANCE10 coupon via URL (PaymentIntent + email J+3) (2026-05-04)
 
 Stripe PaymentIntents ne supportent pas les promo codes nativement (vs Checkout Sessions). Pour faire fonctionner `RELANCE10` dans l'email recovery J+3 sans refactor du flow, le coupon est applique **automatiquement via parametre d'URL** plutot que par saisie manuelle. Zero friction, zero risque de typo cote user.
