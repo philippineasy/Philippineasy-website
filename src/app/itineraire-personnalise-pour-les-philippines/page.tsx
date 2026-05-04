@@ -223,50 +223,76 @@ function ItineraireContent() {
     await triggerPayment(pendingOffer, generationId, duration as Duration, selectedVariant);
   };
 
+  // Vrai si on est dans un flow "resume_payment" (post-magic-link).
+  // Sert a (1) afficher un splash plein ecran a la place du formulaire vide
+  // pendant qu'on prepare le paiement, et (2) supprimer les erreurs transitoires
+  // (ex: 401 auth pas encore propage cote serveur) qui flashent avant le retry.
+  const isResuming = !!searchParams.get('resume_payment');
+
   // ─── Resume payment après retour du magic link ─────────────────────────────
   // Quand l'utilisateur revient depuis le lien email avec resume_payment + offer,
   // et qu'il est maintenant connecté, on déclenche le paiement automatiquement.
+  // Retry silencieux jusqu'a 3 tentatives (avec backoff) car la session auth
+  // post-magic-link peut prendre 200-500ms a se propager cote API. Sans retry,
+  // un 401 transitoire affichait l'erreur rouge avant que le 2e render reussisse.
   useEffect(() => {
     const resumeGenerationId = searchParams.get('resume_payment');
     const resumeOffer = searchParams.get('offer') as OfferType | null;
-    // variant transmis dans l'URL par PaymentAuthModal (state perdu au reload post-magic-link)
     const resumeVariant = searchParams.get('variant');
 
     if (!resumeGenerationId || !resumeOffer || authLoading) return;
-
-    // Attendre que l'utilisateur soit authentifié (le magic link peut prendre
-    // quelques ms pour être reconnu par onAuthStateChange)
     if (!user) return;
 
-    // Vérifier que l'offre est valide
     const validOffers: OfferType[] = ['express', 'premium', 'conciergerie'];
     if (!validOffers.includes(resumeOffer)) return;
 
-    // Charger la génération depuis l'API pour récupérer la durée + variant si besoin
-    const resumePayment = async () => {
+    let cancelled = false;
+
+    const resumePayment = async (attempt = 1) => {
+      const MAX_ATTEMPTS = 3;
       try {
         const response = await fetch(`/api/itinerary/generation/${resumeGenerationId}`);
-        if (!response.ok) {
-          setError('Impossible de reprendre le paiement. Veuillez réessayer depuis le début.');
+
+        // 401/403 = session pas encore propagee cote serveur (juste apres magic link).
+        // On retry silencieusement avec backoff exponentiel (300ms, 700ms).
+        if (response.status === 401 || response.status === 403) {
+          if (attempt < MAX_ATTEMPTS && !cancelled) {
+            const delay = attempt === 1 ? 300 : 700;
+            setTimeout(() => { if (!cancelled) resumePayment(attempt + 1); }, delay);
+            return;
+          }
+          if (!cancelled) setError('Session expirée. Veuillez vous reconnecter.');
           return;
         }
+
+        if (!response.ok) {
+          if (!cancelled) setError('Impossible de reprendre le paiement. Veuillez réessayer depuis le début.');
+          return;
+        }
+
         const data = await response.json();
         const genDuration: Duration = data.duration || (duration as Duration);
-        // Priorite : URL > DB > fallback 'balanced' (variant le plus universel)
         const finalVariant: string = resumeVariant || data.selected_variant || 'balanced';
         if (!genDuration) {
-          setError('Impossible de reprendre le paiement. Veuillez réessayer depuis le début.');
+          if (!cancelled) setError('Impossible de reprendre le paiement. Veuillez réessayer depuis le début.');
           return;
         }
+        if (cancelled) return;
         setGenerationId(resumeGenerationId);
         setSelectedVariant(finalVariant);
         await triggerPayment(resumeOffer, resumeGenerationId, genDuration, finalVariant);
       } catch {
-        setError('Impossible de reprendre le paiement. Veuillez réessayer depuis le début.');
+        if (attempt < MAX_ATTEMPTS && !cancelled) {
+          const delay = attempt === 1 ? 300 : 700;
+          setTimeout(() => { if (!cancelled) resumePayment(attempt + 1); }, delay);
+          return;
+        }
+        if (!cancelled) setError('Impossible de reprendre le paiement. Veuillez réessayer depuis le début.');
       }
     };
 
     resumePayment();
+    return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, authLoading, searchParams]);
 
@@ -284,6 +310,39 @@ function ItineraireContent() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [error]);
+
+  // Splash plein ecran pendant le resume_payment post-magic-link.
+  // Evite que l'utilisateur voit le formulaire de generation vide pendant
+  // que la session auth se propage et que l'API est appelee. Reste affiche
+  // jusqu'au redirect Stripe (ou jusqu'a une vraie erreur affichee).
+  if (isResuming && !error) {
+    return (
+      <main className="min-h-screen bg-[hsl(var(--warm-bg))] flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="text-center max-w-md"
+        >
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 mb-5">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+              className="w-7 h-7 border-[3px] border-primary border-t-transparent rounded-full"
+              aria-hidden="true"
+            />
+          </div>
+          <h1 className="text-xl font-semibold text-ink mb-2">
+            Préparation de votre paiement
+          </h1>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            On vérifie votre commande et on vous redirige vers le paiement sécurisé Stripe.
+            Cela prend quelques secondes…
+          </p>
+        </motion.div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[hsl(var(--warm-bg))]">
