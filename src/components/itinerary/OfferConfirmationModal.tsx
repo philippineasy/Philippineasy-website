@@ -154,7 +154,7 @@ export function OfferConfirmationModal({
           >
             {/* ============ HEADER GRADIENT (style ItineraireIABlock) ============ */}
             <div
-              className="relative overflow-hidden text-white px-6 sm:px-8 pt-7 pb-6"
+              className="relative overflow-hidden text-white px-6 sm:px-8 pt-7 pb-8 sm:pb-9"
               style={{
                 background:
                   'linear-gradient(135deg, #3B5BDB 0%, #1e40af 100%)',
@@ -246,8 +246,9 @@ export function OfferConfirmationModal({
                 </div>
 
                 {/* Prix - bandeau separe pour focus visuel.
-                    Stack vertical : eyebrow -> prix (avec sub-label inline en baseline).
-                    Evite les 3 alignements concurrents qui cassaient la hierarchie. */}
+                    Stack vertical strict : eyebrow -> prix -> sub-label dessous.
+                    Sub-label sous le prix (pas en baseline) evite que les descenders
+                    du chiffre touchent le bord du gradient sur mobile portrait. */}
                 <div
                   className="mt-5 pt-4"
                   style={{ borderTop: '1px dashed rgba(255, 255, 255, 0.18)' }}
@@ -261,20 +262,21 @@ export function OfferConfirmationModal({
                   >
                     Total à régler
                   </div>
-                  <div className="flex items-baseline gap-2.5 flex-wrap">
+                  <div className="flex flex-col gap-1.5">
                     <span
-                      className="text-accent font-bold tabular-nums"
+                      className="text-accent font-bold tabular-nums block"
                       style={{
-                        fontSize: 'clamp(2rem, 5.5vw, 2.5rem)',
+                        fontSize: 'clamp(1.75rem, 5.5vw, 2.5rem)',
                         letterSpacing: '-0.025em',
-                        lineHeight: 1,
+                        lineHeight: 1.05,
+                        paddingBottom: '2px',
                       }}
                     >
                       {formatPrice(pricing.price)}
                     </span>
                     <span
                       className="text-[12.5px]"
-                      style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+                      style={{ color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.3 }}
                     >
                       paiement unique · sans engagement
                     </span>
