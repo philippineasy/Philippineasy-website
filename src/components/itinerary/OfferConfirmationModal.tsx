@@ -37,12 +37,15 @@ interface OfferConfirmationModalProps {
 // Ce que chaque offre N'INCLUT PAS — important pour la transparence et eviter
 // les disputes refunds. Hugo (memory project_philippineasy_positionnement) :
 // Philippineasy est un guide, pas une agence. Pas de booking, pas de SAV agence.
+//
+// Pour Express : reformule en positif (option modification disponible) + on
+// retire les doublons (la mention "pas d'agence" est deja dans le bandeau
+// positionnement et dans la phrase de consentement). Reduit le ratio
+// "non inclus / inclus" qui faisait paraitre Express comme un produit ampute.
 const NOT_INCLUDED: Record<OfferType, string[]> = {
   express: [
-    'Aucune modification après livraison',
-    'Aucun suivi personnalisé',
-    'Pas d’échange préalable avec un humain',
-    'Aucune réservation faite à votre place',
+    'Modifications en option (à partir de 4,99€)',
+    'Pas de suivi humain personnalisé',
   ],
   premium: [
     'Aucune réservation faite à votre place',
@@ -312,11 +315,11 @@ export function OfferConfirmationModal({
                   style={{ color: '#5C2D0C' }}
                 >
                   <strong className="font-semibold text-ink">
-                    Philippin&apos;Easy est un guide francophone, pas une agence de voyage.
+                    On vous donne le plan, vous gardez les clés.
                   </strong>{' '}
-                  Nous vous accompagnons pour préparer votre voyage en toute autonomie : nous ne
-                  réservons rien à votre place et ne sommes pas responsables des disponibilités
-                  des hébergements, vols ou activités suggérés.
+                  Philippin&apos;Easy est un guide francophone qui vous prépare votre itinéraire —
+                  vous restez libre de réserver vos vols, hébergements et activités où vous voulez,
+                  au meilleur prix.
                 </p>
               </div>
 
@@ -432,7 +435,7 @@ export function OfferConfirmationModal({
                     >
                       <MinusIcon />
                     </span>
-                    Non inclus
+                    {offer === 'express' ? 'Bon à savoir' : 'Non inclus'}
                   </h3>
                   <ul className="space-y-2">
                     {NOT_INCLUDED[offer].map((item, i) => (
@@ -464,70 +467,74 @@ export function OfferConfirmationModal({
                 </section>
               </div>
 
-              {/* Upsell soft — design jaune doux coherent avec accent home */}
-              {upsellOffer && onSelectOtherOffer && (
-                <motion.button
-                  type="button"
-                  onClick={() => onSelectOtherOffer(upsellOffer)}
-                  whileHover={{ y: -1 }}
-                  whileTap={{ scale: 0.99 }}
-                  className="w-full text-left rounded-2xl pl-4 pr-5 py-4 group transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2"
-                  style={{
-                    background: 'linear-gradient(135deg, #FEF9E7 0%, #FFFCEF 100%)',
-                    border: '0.5px solid rgba(245, 158, 11, 0.3)',
-                  }}
-                >
-                  <div className="flex items-start gap-3">
-                    <span
-                      className="inline-flex items-center justify-center rounded-xl shrink-0"
-                      style={{
-                        width: '36px',
-                        height: '36px',
-                        backgroundColor: '#F59E0B',
-                        color: '#1a1a00',
-                      }}
-                      aria-hidden="true"
-                    >
-                      <FontAwesomeIcon
-                        icon={OFFER_ICONS[upsellOffer]}
-                        style={{ fontSize: '14px' }}
-                      />
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className="font-semibold mb-0.5 text-ink flex items-center gap-2 flex-wrap"
-                        style={{ fontSize: '14px', letterSpacing: '-0.01em' }}
+              {/* Upsell soft — desature pour ne pas concurrencer le CTA principal.
+                  Fond neutre slate + reformule en delta de prix (add-on framing :
+                  loss-aversion neutre) plutot qu'en alternative concurrente
+                  ("dès 29€" creait un anchoring inverse decourageant). */}
+              {upsellOffer && onSelectOtherOffer && (() => {
+                const upsellPrice = PRICING_GRID[upsellOffer][duration].price;
+                const delta = upsellPrice - pricing.price;
+                return (
+                  <motion.button
+                    type="button"
+                    onClick={() => onSelectOtherOffer(upsellOffer)}
+                    whileHover={{ y: -1 }}
+                    whileTap={{ scale: 0.99 }}
+                    className="w-full text-left rounded-2xl pl-4 pr-5 py-3.5 group transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2"
+                    style={{
+                      backgroundColor: '#F8FAFC',
+                      border: '0.5px solid #E2E8F0',
+                    }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <span
+                        className="inline-flex items-center justify-center rounded-xl shrink-0"
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          backgroundColor: '#EEF2FF',
+                          color: '#3B5BDB',
+                        }}
+                        aria-hidden="true"
                       >
-                        Passer en {OFFER_LABELS[upsellOffer].name}
-                        <span
-                          className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tabular-nums"
-                          style={{
-                            letterSpacing: '0.05em',
-                            backgroundColor: 'rgba(245, 158, 11, 0.2)',
-                            color: '#92400E',
-                          }}
+                        <FontAwesomeIcon
+                          icon={OFFER_ICONS[upsellOffer]}
+                          style={{ fontSize: '13px' }}
+                        />
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className="font-semibold mb-0.5 text-ink flex items-center gap-2 flex-wrap"
+                          style={{ fontSize: '13.5px', letterSpacing: '-0.005em' }}
                         >
-                          dès {formatPrice(PRICING_GRID[upsellOffer][duration].price)}
-                        </span>
-                      </p>
-                      <p
-                        className="text-[13px]"
-                        style={{ color: '#78350F', lineHeight: 1.5 }}
+                          Ajouter {upsellOffer === 'premium' ? 'modifications + support 48h' : 'appel + suivi WhatsApp'}
+                          <span
+                            className="inline-flex items-center px-1.5 py-0.5 rounded text-[10.5px] font-bold tabular-nums"
+                            style={{
+                              backgroundColor: '#EEF2FF',
+                              color: '#3B5BDB',
+                            }}
+                          >
+                            +{formatPrice(delta)}
+                          </span>
+                        </p>
+                        <p
+                          className="text-[12.5px]"
+                          style={{ color: '#64748B', lineHeight: 1.5 }}
+                        >
+                          Passer à l&apos;offre {OFFER_LABELS[upsellOffer].name} pour plus d&apos;accompagnement.
+                        </p>
+                      </div>
+                      <span
+                        className="text-muted-foreground text-sm shrink-0 mt-1.5 ml-1 transition-transform duration-200 group-hover:translate-x-1"
+                        aria-hidden="true"
                       >
-                        {upsellOffer === 'premium'
-                          ? 'Modifications gratuites incluses + support email personnalisé sous 48h.'
-                          : 'Échange préalable + WhatsApp direct + suivi humain personnalisé.'}
-                      </p>
+                        →
+                      </span>
                     </div>
-                    <span
-                      className="text-accent text-base shrink-0 mt-2 ml-1 transition-transform duration-200 group-hover:translate-x-1"
-                      aria-hidden="true"
-                    >
-                      →
-                    </span>
-                  </div>
-                </motion.button>
-              )}
+                  </motion.button>
+                );
+              })()}
 
               {/* Consentement — checkbox custom */}
               <label
@@ -591,7 +598,7 @@ export function OfferConfirmationModal({
                   onClick={handleClose}
                   className="text-[13.5px] font-medium text-muted-foreground hover:text-ink transition-colors py-2 sm:py-0 sm:px-2 focus-visible:outline-none focus-visible:underline self-center sm:self-auto"
                 >
-                  Annuler
+                  Plus tard
                 </button>
 
                 <motion.div
@@ -613,7 +620,7 @@ export function OfferConfirmationModal({
                       letterSpacing: '-0.005em',
                     }}
                   >
-                    Continuer vers le paiement
+                    Recevoir mon itinéraire par email
                     <FontAwesomeIcon
                       icon={faArrowRight}
                       style={{ fontSize: '13px' }}
@@ -622,13 +629,23 @@ export function OfferConfirmationModal({
                 </motion.div>
               </div>
 
-              {/* Trust signal — pleine largeur centre, sous les boutons */}
+              {/* Micro-copy explicatif du flow — anti-anxiete : on annonce les 2 etapes
+                  (email puis paiement 30s) pour eliminer l'effet "tunnel surprise"
+                  qui tue les conversions a l'etape 3. */}
               <p
-                className="text-[11.5px] flex items-center justify-center gap-1.5 mt-3"
+                className="text-[12px] text-center mt-3 leading-relaxed"
+                style={{ color: '#64748B' }}
+              >
+                On vous envoie un email pour confirmer votre adresse, puis vous finalisez en quelques secondes.
+              </p>
+
+              {/* Trust signal — pleine largeur centre, sous le micro-copy */}
+              <p
+                className="text-[11.5px] flex items-center justify-center gap-1.5 mt-2"
                 style={{ color: '#94a3b8' }}
               >
                 <FontAwesomeIcon icon={faLock} style={{ fontSize: '9px' }} />
-                Paiement sécurisé par Stripe · SSL chiffré
+                Paiement sécurisé Stripe · Sans engagement
               </p>
             </div>
           </motion.div>

@@ -53,6 +53,32 @@ export function PaymentAuthModal({
     return () => clearTimeout(t);
   }, [cooldownSec]);
 
+  // Permet a l'utilisateur de "modifier l'email" depuis l'ecran de succes
+  // (toggle qui revient au formulaire). Sans ca, l'auto-send re-declenche
+  // immediatement et l'user ne peut jamais corriger une typo.
+  const [emailEditMode, setEmailEditMode] = useState(false);
+
+  // P0 CRO — Auto-send du magic link au mount si email pre-rempli et valide.
+  // Reduit la friction "ressaisir email + cliquer bouton" alors que l'email
+  // a deja ete capture dans PreferencesForm. L'utilisateur voit directement
+  // l'ecran de succes "Lien envoye a hugo@..." sans etape intermediaire.
+  // Si l'email est invalide ou vide, le formulaire reste affiche normalement.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (
+      isOpen &&
+      !isSent &&
+      !isSending &&
+      !emailEditMode &&
+      initialEmail &&
+      EMAIL_RE.test(initialEmail)
+    ) {
+      handleMagicLink();
+    }
+    // On ne re-trigger que si la modal s'ouvre/ferme — pas a chaque changement d'email
+    // (sinon boucle infinie). handleMagicLink omis volontairement (stable via useState).
+  }, [isOpen, initialEmail, emailEditMode]);
+
   // URL de retour après clic sur le magic link :
   // On route via /auth/callback?next=<URL encodee> pour preserver les query
   // params (resume_payment + offer). Sinon Supabase magic link redirige direct
@@ -170,16 +196,27 @@ export function PaymentAuthModal({
                   <FontAwesomeIcon icon={faCheckCircle} className="text-green-500 text-3xl" />
                 </motion.div>
                 <h3 id="payment-auth-title" className="text-lg font-semibold text-foreground mb-2">
-                  Vérifiez votre email !
+                  Vérifiez votre boîte mail
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Nous avons envoyé un lien de connexion à{' '}
+                  On vient d&apos;envoyer un lien à{' '}
                   <strong className="text-foreground">{email}</strong>.<br />
-                  Cliquez dessus pour finaliser votre paiement.
+                  Cliquez dessus pour accéder au paiement et recevoir votre itinéraire.
                 </p>
                 <p className="text-xs text-muted-foreground mt-4">
-                  Vérifiez également vos spams si vous ne le voyez pas.
+                  Pensez à vérifier vos spams si vous ne le voyez pas.
                 </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsSent(false);
+                    setEmailEditMode(true);
+                    setError(null);
+                  }}
+                  className="text-xs text-primary hover:text-primary/80 underline mt-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded px-1"
+                >
+                  Pas le bon email ?
+                </button>
               </div>
             ) : (
               /* --- Formulaire --- */
