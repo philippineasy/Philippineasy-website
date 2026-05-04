@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { trackBeginCheckout } from '@/lib/analytics';
 import { metaTrackInitiateCheckout } from '@/lib/meta-pixel';
+import { TrustBadgeShield } from '@/components/shared/TrustBadge';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -174,6 +175,12 @@ function CheckoutContent() {
           <p className="text-sm text-muted-foreground mt-2">
             Programme complet jour par jour, hebergements recommandes, liens Google Maps, budget detaille.
           </p>
+        </div>
+
+        {/* Trust shield — derniere reassurance avant saisie carte.
+            Stripe + SSL + garantie 7j en pill compact. */}
+        <div className="mb-6">
+          <TrustBadgeShield />
         </div>
 
         {/* Formulaire de paiement Stripe */}

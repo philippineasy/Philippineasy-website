@@ -17,6 +17,7 @@ import { ItineraireIABlock } from '@/components/homepage/ItineraireIABlock';
 import { TestimonialsSection } from '@/components/homepage/TestimonialsSection';
 import { FinalCtaSection } from '@/components/homepage/FinalCtaSection';
 import { BlogSection } from '@/components/homepage/BlogSection';
+import { TrustBadgeBar, HOMEPAGE_TRUST_BADGES } from '@/components/shared/TrustBadge';
 
 const homepageFAQs = [
   {
@@ -59,6 +60,20 @@ export default async function HomePage() {
       <FAQSchema faqs={homepageFAQs} />
       {/* Hero Section */}
       <HeroSection />
+
+      {/* Trust signals — sous le hero, avant la decouverte du contenu.
+          4 badges : autorite (depuis 2020) + preuve sociale (10k voyageurs)
+          + reduction du risque (paiement securise) + support reactif.
+          On evite "Satisfait ou remboursé" ici : la home n'est pas transactionnelle. */}
+      <section className="bg-background pt-8 pb-2 md:pt-12 md:pb-4">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <TrustBadgeBar
+            badges={HOMEPAGE_TRUST_BADGES}
+            surface="card"
+            badgeVariant="default"
+          />
+        </div>
+      </section>
 
       {/* S'installer aux Philippines (4 cartes Vivre) */}
       <InstallerCards />

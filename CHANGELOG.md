@@ -5,6 +5,33 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Marketing — Cron de relance pour itineraires abandonnes (2026-05-04)
+
+Sequence de 3 emails de relance pour les utilisateurs qui ont genere un itineraire IA
+(formulaire rempli + 3 propositions vues) mais n'ont pas finalise le paiement
+(payment_status = 'pending', delivery_email presente).
+
+**Pourquoi** : les paniers abandonnes e-commerce convertissent typiquement a 15-30% avec une sequence email bien congue. Ici l'intention est forte (l'utilisateur a rempli le formulaire ET vu les 3 propositions), la friction principale est le passage a l'acte paiement. La sequence adresse les 3 moments psychologiques cles : rappel de valeur (endowment effect), levier prix (reciprocite + regle des 100), et urgence douce (loss aversion tempere).
+
+**Fichiers crees** :
+- `supabase/migrations/20260504_recovery_email_columns.sql` : 3 colonnes `recovery_email_*_sent_at` + index partiel sur `(payment_status, created_at) WHERE pending AND delivery_email IS NOT NULL`
+- `src/emails/senders/itinerary-recovery.ts` : 3 fonctions `sendRecoveryEmail24h/72h/7d` avec copy francophone soignee
+- `src/app/api/cron/recover-itineraries/route.ts` : cron idempotent avec pattern claim-before-send (UPDATE ... IS NULL ... RETURNING pour eviter les doublons si le cron tourne en parallele)
+
+**Fichiers modifies** :
+- `vercel.json` : ajout du cron `recover-itineraries` a 09:00 UTC (11:00 Paris)
+- `CHANGELOG.md` : ce bloc
+
+**Sequence** :
+- Email #1 (J+1 a J+3) : "Votre itineraire Philippines vous attend" — rappel valeur, zero pression
+- Email #2 (J+3 a J+7) : "Un petit cadeau pour finaliser votre voyage" — coupon RELANCE10 (-10%, 24h)
+- Email #3 (J+7 a J+14) : "Derniere chance pour votre itineraire Philippines" — urgence douce (suppression donnees), touche personnelle Hugo
+
+**Action manuelle requise avant mise en prod** :
+1. Appliquer la migration SQL via Supabase Dashboard SQL Editor
+2. Creer le coupon Stripe `RELANCE10` : type percentage, value 10%, duration once, no expiry date (la limite de 24h est communicationnelle, pas technique — Stripe ne supporte pas les coupons auto-expirables a la minute pres sans webhook supplementaire)
+3. Verifier que `CRON_SECRET` est bien defini dans les env vars Vercel
+
 ### Operational — Optimisations Google Ads (hors code, 2026-05-04 PM)
 
 Actions appliquees dans Google Ads UI suite a l'audit des 3 fichiers `Recommandations concernant la campagne+2026-05-04-*.xlsx` :

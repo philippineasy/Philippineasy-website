@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRocket, faStar, faCrown, faArrowRight, faLock } from '@fortawesome/free-solid-svg-icons';
 import { Check, AlertTriangle, Infinity, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { TrustBadgeBar, PRICING_TRUST_BADGES } from '@/components/shared/TrustBadge';
 import { fadeInUp, staggerContainer } from './animations';
 import {
   DURATION_LABELS,
@@ -186,6 +187,16 @@ export function OfferSelection({ selectedOffer, onSelectOffer, currentPricing, d
             </span>
           ))}
         </p>
+      </div>
+
+      {/* Trust signals — last-mile anxiety reducer juste avant le CTA paiement.
+          3 badges : Stripe + garantie 7j + support 48h. */}
+      <div className="mt-6">
+        <TrustBadgeBar
+          badges={PRICING_TRUST_BADGES}
+          surface="soft"
+          badgeVariant="default"
+        />
       </div>
 
       {/* Bouton de paiement */}
