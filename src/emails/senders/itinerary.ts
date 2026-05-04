@@ -14,11 +14,25 @@ interface ItineraryEmailData {
   days: number;
   variant: string;
   generationId: string;
+  /** Type d'offre achetee — conditionne l'inclusion du CTA PDF.
+   * Express n'a PAS le PDF (cf. OFFER_LABELS dans itinerary-pricing.ts).
+   * Default 'premium' pour retro-compat avec les anciens appels (avant offre Express). */
+  offerType?: 'express' | 'premium' | 'conciergerie';
 }
+
+// Le PDF professionnel est une feature Premium+ (cf. OFFER_LABELS.premium).
+// Express ne donne acces qu'a la version web de l'itineraire.
+const HAS_PDF: Record<string, boolean> = {
+  express: false,
+  premium: true,
+  conciergerie: true,
+};
 
 export async function sendItineraryReadyEmail(data: ItineraryEmailData) {
   const itineraryUrl = `${BRAND.siteUrl}/itineraire/${data.generationId}`;
   const pdfUrl = `${BRAND.siteUrl}/api/itinerary/pdf/${data.generationId}`;
+  const offerType = data.offerType || 'premium';
+  const includePdfCta = HAS_PDF[offerType] ?? true;
 
   const bodyHtml = `
     <p style="font-size:14px;line-height:1.7;margin:0 0 16px;">
@@ -45,7 +59,7 @@ export async function sendItineraryReadyEmail(data: ItineraryEmailData) {
 
     ${emailMutedText(`<strong>Conseils :</strong><br>
     - Votre itineraire est aussi accessible dans votre profil sur philippineasy.com<br>
-    - Vous pouvez telecharger le PDF a tout moment<br>
+    ${includePdfCta ? '- Vous pouvez telecharger le PDF a tout moment<br>' : ''}
     - Pour toute question, repondez a cet email`)}
   `;
 
@@ -56,8 +70,9 @@ export async function sendItineraryReadyEmail(data: ItineraryEmailData) {
     bodyHtml,
     ctaText: 'Voir mon itineraire',
     ctaUrl: itineraryUrl,
-    secondaryCtaText: 'Telecharger en PDF',
-    secondaryCtaUrl: pdfUrl,
+    // PDF reserve aux offres Premium+ (cf. OFFER_LABELS dans itinerary-pricing.ts)
+    secondaryCtaText: includePdfCta ? 'Telecharger en PDF' : undefined,
+    secondaryCtaUrl: includePdfCta ? pdfUrl : undefined,
   });
 
   return sendEmail({

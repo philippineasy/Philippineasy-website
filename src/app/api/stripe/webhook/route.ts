@@ -21,7 +21,7 @@ async function dispatchItineraryReadyEmail(
   try {
     const { data: gen, error } = await supabaseAdmin
       .from('itinerary_generations')
-      .select('id, selected_variant, itineraries')
+      .select('id, selected_variant, itineraries, offer_type')
       .eq('id', generationId)
       .single();
 
@@ -53,6 +53,10 @@ async function dispatchItineraryReadyEmail(
       days: days.length || 1,
       variant: gen.selected_variant || 'balanced',
       generationId,
+      // Conditionne l'inclusion du CTA "Telecharger en PDF" :
+      // Express n'a PAS le PDF (feature Premium+). Default 'premium' pour les
+      // anciennes generations sans offer_type renseigne (retro-compat).
+      offerType: (gen.offer_type as 'express' | 'premium' | 'conciergerie') || 'premium',
     });
 
     console.log(`[webhook] Itinerary ready email dispatched for gen ${generationId} to ${to}`);

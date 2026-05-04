@@ -68,6 +68,20 @@ export async function GET(
       return NextResponse.json({ error: 'Paiement requis' }, { status: 403 });
     }
 
+    // Le PDF est une feature Premium+ — Express n'y a pas droit
+    // (cf. OFFER_LABELS dans src/config/itinerary-pricing.ts).
+    // Default sur 'express' si offer_type null pour etre conservateur.
+    const generationOfferType = (generation.offer_type as string) || 'express';
+    if (generationOfferType === 'express') {
+      return NextResponse.json(
+        {
+          error: 'PDF reserve aux offres Premium et Conciergerie',
+          upgradeRequired: true,
+        },
+        { status: 403 }
+      );
+    }
+
     // Parse itineraries
     let itineraries = generation.itineraries;
     if (typeof itineraries === 'string') itineraries = JSON.parse(itineraries);

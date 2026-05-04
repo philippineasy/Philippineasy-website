@@ -37,6 +37,10 @@ function CompletionContent() {
   const [error, setError] = useState<string | null>(null);
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
+  // offer_type recupere du backend (api/itinerary/confirm-payment) pour adapter
+  // les options de delivery — PDF reserve a Premium/Conciergerie (cf. OFFER_LABELS)
+  const [offerType, setOfferType] = useState<'express' | 'premium' | 'conciergerie' | null>(null);
+  const hasPdfAccess = offerType === 'premium' || offerType === 'conciergerie';
 
   useEffect(() => {
     if (user?.email) setEmail(user.email);
@@ -56,6 +60,7 @@ function CompletionContent() {
         const data = await res.json();
         if (data.success) {
           setPaymentConfirmed(true);
+          if (data.offer_type) setOfferType(data.offer_type);
           const value = Number(data.amount) || 0;
           const currency = data.currency || 'EUR';
           trackPurchase({
@@ -243,16 +248,28 @@ function CompletionContent() {
               </div>
             </label>
 
-            {/* PDF */}
-            <label className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${deliveryPdf ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'}`}>
-              <input type="checkbox" checked={deliveryPdf} onChange={() => setDeliveryPdf(!deliveryPdf)} className="mt-1 w-4 h-4 accent-primary" />
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <FontAwesomeIcon icon={faFilePdf} className="text-red-500 w-4 h-4" />
-                  <span className="font-medium text-sm">Telecharger en PDF</span>
+            {/* PDF — reserve aux offres Premium et Conciergerie */}
+            {hasPdfAccess ? (
+              <label className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${deliveryPdf ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'}`}>
+                <input type="checkbox" checked={deliveryPdf} onChange={() => setDeliveryPdf(!deliveryPdf)} className="mt-1 w-4 h-4 accent-primary" />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <FontAwesomeIcon icon={faFilePdf} className="text-red-500 w-4 h-4" />
+                    <span className="font-medium text-sm">Telecharger en PDF</span>
+                  </div>
+                </div>
+              </label>
+            ) : offerType === 'express' ? (
+              <div className="flex items-start gap-3 p-3 rounded-xl border border-dashed border-border bg-muted/30">
+                <FontAwesomeIcon icon={faFilePdf} className="text-muted-foreground w-4 h-4 mt-1" />
+                <div className="flex-1">
+                  <p className="font-medium text-sm text-muted-foreground">PDF professionnel</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Disponible avec les offres Premium et Conciergerie
+                  </p>
                 </div>
               </div>
-            </label>
+            ) : null}
           </div>
 
           {error && (

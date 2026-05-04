@@ -21,10 +21,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Authentification requise' }, { status: 401 });
     }
 
-    // Récupérer la génération + ownership
+    // Récupérer la génération + ownership (offer_type renvoye au client pour
+    // adapter la page completion : checkbox PDF visible uniquement Premium+)
     const { data: generation, error: fetchError } = await supabase
       .from('itinerary_generations')
-      .select('id, payment_intent_id, payment_status, user_id')
+      .select('id, payment_intent_id, payment_status, user_id, offer_type')
       .eq('id', generation_id)
       .single();
 
@@ -49,6 +50,7 @@ export async function POST(request: Request) {
         already_completed: true,
         amount: Number(existing?.amount_paid) || 0,
         currency: 'EUR',
+        offer_type: generation.offer_type || null,
       });
     }
 
@@ -104,6 +106,7 @@ export async function POST(request: Request) {
         already_completed: true,
         amount,
         currency,
+        offer_type: generation.offer_type || null,
       });
     }
 
@@ -113,6 +116,7 @@ export async function POST(request: Request) {
       generation_id,
       amount,
       currency,
+      offer_type: generation.offer_type || null,
     });
   } catch (error) {
     console.error('Confirm payment error:', error);

@@ -13,6 +13,7 @@ interface ItineraryEmailData {
   variant: string;
   generationId: string;
   telegramMessage?: string;
+  offerType?: 'express' | 'premium' | 'conciergerie';
 }
 
 export async function sendItineraryEmail(data: ItineraryEmailData) {

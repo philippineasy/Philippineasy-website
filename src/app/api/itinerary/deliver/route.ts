@@ -76,6 +76,8 @@ export async function POST(request: Request) {
           days: days.length,
           variant: generation.selected_variant || 'balanced',
           generationId: generation_id,
+          // CTA "Telecharger PDF" uniquement Premium+ (cf. OFFER_LABELS)
+          offerType: (generation.offer_type as 'express' | 'premium' | 'conciergerie') || 'premium',
         });
       } catch (emailError) {
         console.error('Email send error:', emailError);
