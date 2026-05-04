@@ -5,6 +5,36 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Operational — Optimisations Google Ads (hors code, 2026-05-04 PM)
+
+Actions appliquees dans Google Ads UI suite a l'audit des 3 fichiers `Recommandations concernant la campagne+2026-05-04-*.xlsx` :
+
+**SEARCH_Brand** (score 76.4% -> ~85% attendu) :
+- Suppression sitelink "Rencontre" (refuse par Google : Services de rencontres et de compagnie sans certif)
+- Annonce reformulee pour retirer le mot "rencontre" trigger (description #2 : "Itineraires IA rencontre services et marketplace" -> "Itinéraires IA, communauté expat, bons plans")
+- Ajout extraits structures Destinations (Palawan, Cebu, Bohol, Siargao, Manille, Boracay, El Nido, Coron, Davao)
+- Ajout extensions de prix Services (Express 9,99€ / Premium 29€ / Conciergerie 79€ — qualificateur "À partir de")
+- Ajout images photos Philippines aux annonces
+
+**SEARCH_Itineraire_IA** (score 83.6% -> ~88% attendu) :
+- Suppression sitelink "Rencontre Philippines" refuse
+- AI Max for Search **desactive** (toggle Paramètres -> AI Max OFF). Eliminait des 84 clics / 12,49€ par semaine de "Correspondances etendues automatiques" sur des recherches sans rapport.
+- **Reseau Display desactive** dans les Reseaux de la campagne (n'etait pas que Search malgre le nom — diffusait aussi en banniere sur sites random). Economise ~12€/semaine de trafic poubelle.
+- Pause des 2 mots-cles les plus couteux sans conversion : `"guide philippines"` (3,12€ / 6 clics) + `"vacances philippines"` (2,26€ / 3 clics)
+- Ajout 17 nouveaux mots-cles (14 phrase + 3 exact), reparti dans `Phrase_Voyage_PH` et `Exact_Itineraire`, listes complètes dans `~/Desktop/keywords-bulk-import-2026-05-04.csv`
+- Ajout 18 mots-cles negatifs niveau campagne (`gratuit`, `escort`, `agence voyage`, `visa`, `casino`, etc.) — `~/Desktop/keywords-negatives-bulk-2026-05-04.csv`
+- Ajout extraits structures Destinations (idem SEARCH_Brand)
+- Ajout images aux annonces
+
+**DISPLAY_Remarketing** (score 90.2%, presque rien a faire) :
+- Reactivee
+- Recommandation pendante : exclusions placements (Sujets : Jeux, Religion, Loteries — cf. memory `project_google_ads_pending_actions.md`). A faire dans 7-14 jours quand on aura plus de data.
+
+**Suivi conversions** :
+- Conversion `Site web Philippines (web) purchase` deja correctement importee depuis GA4 (verifie : Source = Google Analytics (GA4), Optimisation = Achats / Action principale, Attribution = Basee sur les donnees, Periode 90j). Le warning "suivi non termine" persiste tant qu'aucune vraie conversion n'a ete enregistree post-fix funnel.
+
+**A surveiller** : si SEARCH_Itineraire_IA continue a depenser ~5-10€/jour sans conversion sous 7 jours, baisser le budget de 10€ a 5€/jour et analyser les nouveaux search terms dans le rapport pour ajouter d'autres negatifs.
+
 ### Infra — Migration tunnel n8n vers `n8n.adascanpro.com` (2026-05-04)
 
 - Le domaine `hugogotophilippines.com` (qui ne servait QUE de hostname pour le tunnel Cloudflare exposant le n8n local sur port 5678) a expire et CF demandait un renouvellement annuel a ~12$/an. Migre vers un sous-domaine d'un autre domaine deja possede et inutilise (`adascanpro.com`, abandonne suite a echec d'un autre projet) -> economie perpetuelle.
