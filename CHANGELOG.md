@@ -5,6 +5,30 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Payment — Auto-apply RELANCE10 coupon via URL (PaymentIntent + email J+3) (2026-05-04)
+
+Stripe PaymentIntents ne supportent pas les promo codes nativement (vs Checkout Sessions). Pour faire fonctionner `RELANCE10` dans l'email recovery J+3 sans refactor du flow, le coupon est applique **automatiquement via parametre d'URL** plutot que par saisie manuelle. Zero friction, zero risque de typo cote user.
+
+**`/api/itinerary/payment/route.ts`** :
+- Accepte un nouveau champ `coupon` optionnel dans le body
+- Si present : `stripe.coupons.retrieve(coupon)` + validation (`valid`, `percent_off > 0 && < 100`, montant final >= 50c minimum Stripe)
+- Applique le discount manuellement : `amountInCents = Math.round(originalAmountCents * (1 - percent_off / 100))`
+- Audit metadata sur le PaymentIntent : `coupon_applied`, `discount_percent`, `original_amount_cents`
+- **Strategie LENIENT critique** : tout echec de validation (coupon inexistant, expire, malformé, montant trop bas, Stripe API down) -> log warning + paiement plein prix sans erreur user. **L'utilisateur n'est jamais bloque par un coupon foireux** -- la livraison de l'itineraire post-paiement reste prioritaire (cf. webhook delivery chain).
+- Response inclut `coupon_applied` + `discount_percent` + `original_amount` pour transparence cote frontend.
+
+**`src/emails/senders/itinerary-recovery.ts`** (email J+3) :
+- `buildResumeUrl` accepte un parametre `coupon` optionnel (ajoute `&coupon=<code>` a l'URL si present)
+- Email J+3 reformule : plus de "saisissez RELANCE10 manuellement", remplace par badge "-10% inclus" + CTA "Profiter de l'offre" qui contient le param coupon dans son URL. Preheader mis a jour.
+
+**`page.tsx`** : `triggerPayment` accepte coupon arg et le passe dans le POST body. `resumePayment` useEffect lit `?coupon` depuis searchParams et le propage.
+
+**Stripe state** :
+- Coupon `RELANCE10` cree sur compte live `acct_1RgU2WRxqcfmHXQY` (10% off, duration `once`, no max redemptions, metadata purpose/stage trackees)
+- Promotion code `RELANCE10` cree (lie au coupon, actif). Garde en reserve si Hugo migre vers Checkout Sessions plus tard ou pour cas support client.
+
+**Garantie 0 regression delivery** : le webhook `payment_intent.succeeded` chain (dispatchItineraryReadyEmail + handleAnonymousItineraryPurchase) ne depend pas du coupon — il fonctionne identiquement quel que soit le montant paye. L'email itineraire, le profil, le PDF (Premium+), et Telegram sont tous livres aussi bien avec qu'avant le coupon.
+
 ### Marketing — Cron de relance pour itineraires abandonnes (2026-05-04)
 
 Sequence de 3 emails de relance pour les utilisateurs qui ont genere un itineraire IA
