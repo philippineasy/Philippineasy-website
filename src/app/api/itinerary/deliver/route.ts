@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClientForRouteHandler } from '@/utils/supabase/server';
 import { sendItineraryEmail } from '@/services/emailService';
 
-const N8N_DELIVER_URL = process.env.N8N_ITINERARY_DELIVER_URL || 'https://n8n.hugogotophilippines.com/webhook/itinerary-deliver';
+const N8N_DELIVER_URL = process.env.N8N_ITINERARY_DELIVER_URL || 'https://n8n.adascanpro.com/webhook/itinerary-deliver';
 const N8N_API_KEY = process.env.N8N_API_KEY;
 
 export async function POST(request: Request) {

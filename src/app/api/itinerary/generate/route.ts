@@ -7,7 +7,7 @@ import { trackServerEvent, extractClientId } from '@/lib/ga4-server';
 export const maxDuration = 90;
 export const dynamic = 'force-dynamic';
 
-const N8N_WEBHOOK_URL = process.env.N8N_ITINERARY_GENERATE_URL || 'https://n8n.hugogotophilippines.com/webhook/itinerary-generate';
+const N8N_WEBHOOK_URL = process.env.N8N_ITINERARY_GENERATE_URL || 'https://n8n.adascanpro.com/webhook/itinerary-generate';
 const N8N_API_KEY = process.env.N8N_API_KEY;
 
 export async function POST(request: Request) {
