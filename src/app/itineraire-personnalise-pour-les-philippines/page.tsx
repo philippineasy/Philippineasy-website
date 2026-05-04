@@ -124,7 +124,10 @@ function ItineraireContent() {
   // variant passe en argument explicite : au resume post-magic-link, le
   // state selectedVariant est null (page rechargee) donc on le reconstruit
   // depuis l'URL ou la generation DB et on le passe ici.
-  const triggerPayment = useCallback(async (offer: OfferType, genId: string, dur: Duration, variant: string) => {
+  // coupon optionnel : transmis via l'URL post-magic-link depuis l'email J+3
+  // recovery (ex: `?coupon=RELANCE10`). Validation cote serveur, lenient
+  // (echec coupon = paie plein prix sans bloquer l'utilisateur).
+  const triggerPayment = useCallback(async (offer: OfferType, genId: string, dur: Duration, variant: string, coupon?: string | null) => {
     const pricing = PRICING_GRID[offer][dur];
     if (!pricing || pricing.price === 0) {
       window.location.href = '/contact?subject=conciergerie-voyage';
@@ -143,6 +146,7 @@ function ItineraireContent() {
           offer_type: offer,
           duration: dur,
           price_id: pricing.priceId,
+          ...(coupon ? { coupon } : {}),
         }),
       });
 
@@ -239,6 +243,8 @@ function ItineraireContent() {
     const resumeGenerationId = searchParams.get('resume_payment');
     const resumeOffer = searchParams.get('offer') as OfferType | null;
     const resumeVariant = searchParams.get('variant');
+    // Coupon optionnel transmis par l'email J+3 recovery — auto-applique au resume
+    const resumeCoupon = searchParams.get('coupon');
 
     if (!resumeGenerationId || !resumeOffer || authLoading) return;
     if (!user) return;
@@ -280,7 +286,7 @@ function ItineraireContent() {
         if (cancelled) return;
         setGenerationId(resumeGenerationId);
         setSelectedVariant(finalVariant);
-        await triggerPayment(resumeOffer, resumeGenerationId, genDuration, finalVariant);
+        await triggerPayment(resumeOffer, resumeGenerationId, genDuration, finalVariant, resumeCoupon);
       } catch {
         if (attempt < MAX_ATTEMPTS && !cancelled) {
           const delay = attempt === 1 ? 300 : 700;

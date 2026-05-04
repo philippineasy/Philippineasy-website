@@ -63,7 +63,8 @@ function buildResumeUrl(
   generationId: string,
   offerType: string,
   variant: string,
-  utmCampaign: string
+  utmCampaign: string,
+  coupon?: string
 ): string {
   const base = `${BRAND.siteUrl}/itineraire-personnalise-pour-les-philippines`;
   const params = new URLSearchParams({
@@ -74,6 +75,14 @@ function buildResumeUrl(
     utm_medium: 'recovery',
     utm_campaign: utmCampaign,
   });
+  // Coupon optionnel — si present, le param sera consomme par /api/itinerary/payment
+  // qui valide via Stripe et applique automatiquement la reduction au PaymentIntent.
+  // Stripe PaymentIntents ne supporte pas les promo codes nativement (vs Checkout
+  // Session) donc on ne peut pas demander a l'user de saisir le code — on l'applique
+  // tout seul via l'URL pour 0 friction.
+  if (coupon) {
+    params.set('coupon', coupon);
+  }
   return `${base}?${params.toString()}`;
 }
 
@@ -157,7 +166,9 @@ export async function sendRecoveryEmail72h(
     to, userName, generationId, destination, durationLabel, offerType, variant, couponCode,
   } = params;
 
-  const resumeUrl = buildResumeUrl(generationId, offerType, variant, 'relance_72h');
+  // Coupon transmis dans l'URL (auto-apply server-side via /api/itinerary/payment).
+  // L'utilisateur n'a rien a saisir : il clique le bouton, le -10% est applique tout seul.
+  const resumeUrl = buildResumeUrl(generationId, offerType, variant, 'relance_72h', couponCode);
   const offerName = OFFER_DISPLAY_NAMES[offerType] ?? 'Express';
 
   const bodyHtml = [
@@ -168,12 +179,14 @@ export async function sendRecoveryEmail72h(
     `</p>`,
     ``,
     `<p style="font-size:14px;line-height:1.7;margin:0 0 16px;color:${BRAND.text};">`,
-    `  Pour vous donner un coup de pouce, voici un code de reduction de 10% valable 24h :`,
+    `  Pour vous donner un coup de pouce, on vous offre <strong>&minus;10%</strong> sur votre itineraire,`,
+    `  valable 24h. La reduction est <strong>deja incluse</strong> dans le bouton ci-dessous &mdash;`,
+    `  rien a saisir, juste a cliquer.`,
     `</p>`,
     ``,
     emailHighlightBox(
-      `<strong style="font-size:18px;letter-spacing:2px;">${couponCode}</strong><br>` +
-      `<span style="font-size:13px;margin-top:4px;display:block;">&minus;10% sur votre itineraire ${offerName} &mdash; valable jusqu&apos;a demain.</span>`,
+      `<strong style="font-size:20px;">&minus;10% inclus</strong><br>` +
+      `<span style="font-size:13px;margin-top:6px;display:block;">Sur votre itineraire ${offerName} &mdash; offre valable jusqu&apos;a demain.</span>`,
       'success'
     ),
     ``,
@@ -182,11 +195,6 @@ export async function sendRecoveryEmail72h(
       { label: 'Duree', value: durationLabel },
       { label: 'Formule', value: offerName },
     ]),
-    ``,
-    `<p style="font-size:14px;line-height:1.7;margin:16px 0 0;color:${BRAND.text};">`,
-    `  Le code est applique automatiquement lors de votre paiement Stripe &mdash;`,
-    `  pas besoin de le recopier manuellement.`,
-    `</p>`,
     ``,
     emailDivider(),
     ``,
@@ -198,7 +206,7 @@ export async function sendRecoveryEmail72h(
 
   const html = buildEmailHtml({
     title: 'Un petit cadeau pour finaliser votre voyage',
-    preheader: `Code ${couponCode} : -10% sur votre itineraire ${destination}, valable 24h.`,
+    preheader: `-10% inclus sur votre itineraire ${destination}, offre valable 24h.`,
     userName,
     bodyHtml,
     ctaText: "Profiter de l'offre",

@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     });
 
     const body = await request.json();
-    const { generation_id, selected_variant, offer_type, duration, price_id } = body;
+    const { generation_id, selected_variant, offer_type, duration, price_id, coupon } = body;
 
     // Validation des champs requis
     if (!generation_id || !selected_variant || !offer_type || !duration) {
@@ -149,7 +149,42 @@ export async function POST(request: Request) {
     }
 
     // Convertir le prix en centimes
-    const amountInCents = Math.round(pricing.price * 100);
+    const originalAmountCents = Math.round(pricing.price * 100);
+    let amountInCents = originalAmountCents;
+    let appliedCoupon: { id: string; percentOff: number } | null = null;
+
+    // ─── Coupon recovery (J+3 cart abandonment) ─────────────────────────────
+    // Auto-apply via URL param plutot que saisie manuelle (Stripe PaymentIntents
+    // ne supporte pas les promo codes nativement, contrairement a Checkout Session).
+    // Strategie LENIENT : tout echec de validation = ignore + paie plein prix.
+    // L'utilisateur ne doit JAMAIS etre bloque par un coupon foireux — la livraison
+    // de l'itineraire post-paiement reste prioritaire (cf. webhook chain).
+    if (coupon && typeof coupon === 'string' && coupon.length <= 50) {
+      try {
+        const couponObj = await stripe.coupons.retrieve(coupon);
+        if (
+          couponObj.valid &&
+          typeof couponObj.percent_off === 'number' &&
+          couponObj.percent_off > 0 &&
+          couponObj.percent_off < 100
+        ) {
+          const discountedCents = Math.round(originalAmountCents * (1 - couponObj.percent_off / 100));
+          // Stripe minimum charge = 0,50 EUR. Garde-fou.
+          if (discountedCents >= 50) {
+            amountInCents = discountedCents;
+            appliedCoupon = { id: couponObj.id, percentOff: couponObj.percent_off };
+            console.log(`[payment] Coupon ${couponObj.id} applied (-${couponObj.percent_off}%) on generation ${generation_id}: ${originalAmountCents}c -> ${amountInCents}c`);
+          } else {
+            console.warn(`[payment] Coupon ${couponObj.id} would discount below Stripe minimum (50c), skipping`);
+          }
+        } else {
+          console.warn(`[payment] Coupon ${coupon} not valid or not percent-based, skipping`);
+        }
+      } catch (couponErr) {
+        // Coupon inexistant ou autre erreur Stripe — non-bloquant
+        console.warn(`[payment] Coupon ${coupon} retrieval failed:`, couponErr instanceof Error ? couponErr.message : 'unknown');
+      }
+    }
 
     // Créer le PaymentIntent Stripe
     // delivery_email est inclus dans les métadonnées pour permettre au webhook
@@ -167,6 +202,12 @@ export async function POST(request: Request) {
         modifications_included: pricing.modifications.toString(),
         user_id: user?.id || 'anonymous',
         delivery_email: generation.delivery_email || '',
+        // Audit du coupon (utilise plus tard pour reporting / fraud detection)
+        ...(appliedCoupon ? {
+          coupon_applied: appliedCoupon.id,
+          discount_percent: appliedCoupon.percentOff.toString(),
+          original_amount_cents: originalAmountCents.toString(),
+        } : {}),
       },
     });
 
@@ -207,9 +248,12 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       clientSecret: paymentIntent.client_secret,
-      amount: pricing.price,
+      amount: amountInCents / 100,
+      original_amount: pricing.price,
       offer: offer_type,
       modifications: pricing.modifications,
+      coupon_applied: appliedCoupon?.id || null,
+      discount_percent: appliedCoupon?.percentOff || null,
     });
 
   } catch (error) {
