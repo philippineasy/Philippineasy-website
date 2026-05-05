@@ -5,6 +5,36 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### SEO — Audit GSC + suppression news-sitemap.xml fantome (2026-05-05)
+
+Audit complet via API Google Search Console (read-only sauf cleanup news-sitemap). Findings :
+
+**A — news-sitemap.xml fantome supprime** :
+- La route `src/app/news-sitemap.xml/route.ts` existait encore et generait dynamiquement un sitemap depuis `articles WHERE published_at > now() - 48h` (fallback 7j)
+- Tous les fallbacks retournaient 0 articles -> sitemap repondait HTTP 200 avec `<urlset></urlset>` vide
+- GSC le tracait depuis oct 2025 avec "4 URLs submitted, 0 indexed" (URLs fantomes)
+- Memory disait "retire du robots.txt" mais le fichier physique etait toujours servi
+- **Action** : `rm -rf src/app/news-sitemap.xml/` + `mcp__google-search-console__delete_sitemap` cote GSC
+
+**B — Audit canonical sur 2 pages potentiellement diluees (RAS, deja OK)** :
+- `investir-aux-philippines-guide-francais-2025` apparaissait 15+ fois dans GSC search analytics
+- `guide-rencontrer-femmes-philippines-conseils-et-astuces` apparaissait 7 fois
+- Verifications effectuees :
+  - DB Supabase : un seul article par slug (pas de doublon DB)
+  - HTML rendu : `<link rel="canonical">` correctement defini sur clean URL
+  - Test avec `?utm_source=test` : canonical reste pointe sur clean URL ✅
+  - Trailing slash `/url/` : redirect 308 vers `/url` ✅
+  - GSC URL inspection : `Google Canonical` = clean URL ✅, `Indexing Status: PASS`, `Submitted and indexed`, Rich Results Breadcrumbs
+- **Verdict** : pas de bug actuel. Les 15+ variantes diluees sont des **artefacts historiques** d'un bug canonical resolu (memory `feedback_seo_canonical_bug.md`). Google consolidera naturellement vers le canonical (peut prendre des mois). Aucun fix code requis.
+
+**Etat global indexation** :
+- 119 URLs dans sitemap.xml, 0 errors
+- 81 pages "non indexees" dans GSC : 56 "Detectee" + 25 "Exploree"
+- Pages cle indexees : home (Rich Results FAQ), `/itineraire-personnalise...` (position 3.9), `/rencontre-philippines`, `/marketplace-aux-philippines`
+- Top SEO asset : `/vivre-aux-philippines/travail-entreprise/investir-aux-philippines-guide-francais-2025` (24 clics, 841 impressions, 2.85% CTR, position 6.9 sur 28 jours)
+- Pages anormalement UNKNOWN (a investiguer plus tard) : `/partenaires`, `/voyager-aux-philippines/budget`, `/voyager-aux-philippines/destinations/{palawan,cebu-visayas,siargao}`
+- Nouvelles destinations crees hier `/itineraire-{slug}` : DISCOVERED ou UNKNOWN, `Last Crawl: Never` — sera indexe sous 24h-2sem (sitemap soumis)
+
 ### UI/UX — Refonte complete des pages articles destinations (2026-05-05)
 
 Suite a la critique Hugo : *"très IA, on voit tout de suite que c'est de l'IA génération... ça fait des blocs à lire"*. Refonte complete des 7 fichiers (page + 6 composants) pour aligner sur le langage visuel home : gradient `#3B5BDB → #1e40af`, cercles dashed decoratifs (signature pattern), eyebrow uppercase + accent `✦`, typo `letterSpacing: -0.02em`. Plus aucun `bg-blue-500` Tailwind par defaut.
