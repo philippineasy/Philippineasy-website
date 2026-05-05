@@ -5,6 +5,25 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### SEO — Ajout de 10 pages hubs au sitemap (2026-05-05)
+
+Suite a l'audit GSC qui montrait `/partenaires` + 9 hubs `/voyager-aux-philippines/{categorie}` comme **UNKNOWN to Google**, fix dans `src/app/sitemap.ts` apres verification :
+- Toutes les 10 URLs verifiees HTTP 200 + meta robots `index, follow`
+- DB Supabase confirmee (table `pages` ne contenait pas ces sections)
+- Format des entries coherent avec l'existant (lastModified `2026-04-15`, changeFrequency `monthly`, priority 0.6-0.7)
+- Type-check pass
+
+**Nouvelles entries** (11 lignes ajoutees) :
+- `staticPages` : `/partenaires` (priority 0.7)
+- `subPages` voyager-aux-philippines :
+  - Destinations principales (priority 0.7) : `/palawan`, `/cebu-visayas`, `/siargao`
+  - Guides pratiques (priority 0.7) : `/budget`, `/conseils-voyage`
+  - Guides pratiques (priority 0.6) : `/transport`, `/sante-securite`, `/communication`, `/quand-partir`
+
+**Pourquoi c'est important** : ces hubs portent le **internal linking** vers les articles enfants (38 articles voyager-aux-philippines deja dans le sitemap). Sans hubs dans le sitemap, Google decouvre lentement via menu/breadcrumb. Ajouter accelère significativement l'indexation des hubs ET renforce le jus SEO transmis aux articles enfants.
+
+**Bonus** : `rm -rf .next/types/` pour nettoyer le cache de build qui referencait encore l'ex-news-sitemap.xml supprime au commit precedent.
+
 ### SEO — Audit GSC + suppression news-sitemap.xml fantome (2026-05-05)
 
 Audit complet via API Google Search Console (read-only sauf cleanup news-sitemap). Findings :

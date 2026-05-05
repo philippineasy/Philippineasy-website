@@ -75,6 +75,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/confidentialite`,                 lastModified: '2026-01-01', changeFrequency: 'yearly', priority: 0.3 },
     { url: `${BASE_URL}/mentions-legales`,                lastModified: '2026-01-01', changeFrequency: 'yearly', priority: 0.3 },
     { url: `${BASE_URL}/itineraire-personnalise-pour-les-philippines`, lastModified: '2026-04-15', changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/partenaires`,                     lastModified: '2026-04-15', changeFrequency: 'monthly', priority: 0.7 },
   ];
 
   /* ---------- Static: Sous-pages (non couvertes par la table `pages`) ---------- */
@@ -94,6 +95,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/vivre-aux-philippines/investir/bourse-et-entreprises`,  lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
     // Vivre — Famille
     { url: `${BASE_URL}/vivre-aux-philippines/famille`,  lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
+
+    // Voyager — Destinations principales (hubs catégorie, parents des articles)
+    { url: `${BASE_URL}/voyager-aux-philippines/palawan`,         lastModified: '2026-04-15', changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/voyager-aux-philippines/cebu-visayas`,    lastModified: '2026-04-15', changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/voyager-aux-philippines/siargao`,         lastModified: '2026-04-15', changeFrequency: 'monthly', priority: 0.7 },
+    // Voyager — Guides pratiques (hubs catégorie, parents des articles)
+    { url: `${BASE_URL}/voyager-aux-philippines/budget`,          lastModified: '2026-04-15', changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/voyager-aux-philippines/conseils-voyage`, lastModified: '2026-04-15', changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${BASE_URL}/voyager-aux-philippines/transport`,       lastModified: '2026-04-15', changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/voyager-aux-philippines/sante-securite`,  lastModified: '2026-04-15', changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/voyager-aux-philippines/communication`,   lastModified: '2026-04-15', changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/voyager-aux-philippines/quand-partir`,    lastModified: '2026-04-15', changeFrequency: 'monthly', priority: 0.6 },
   ];
 
   /* ---------- Dynamic: Articles ---------- */
