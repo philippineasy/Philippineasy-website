@@ -163,6 +163,25 @@ const nextConfig: NextConfig = {
         destination: '/vivre-aux-philippines/culture-integration/codes-culturels-philippins-couple-famille-religion',
         permanent: true,
       },
+      // Cannibalisation Bohol (Phase F SEO 2026-05-05)
+      // Article #45 'bohol-chocolate-hills-tarsiers-plages-panglao' (7K chars) doublon
+      // de l'article winner #105 (33K chars, refondu en 'Bohol Philippines :
+      // itineraire 5 jours teste'). #45 passe en status=draft, redirect 301
+      // pour preserver le jus SEO + eviter les 404 sur backlinks externes.
+      {
+        source: '/voyager-aux-philippines/cebu-visayas/bohol-chocolate-hills-tarsiers-plages-panglao',
+        destination: '/voyager-aux-philippines/cebu-visayas/visiter-bohol-philippines-guide-complet-2026',
+        permanent: true,
+      },
+      // Cannibalisation Siquijor (Phase F SEO 2026-05-05)
+      // Article #115 'guide-ultime-explorer-siquijor-philippines-logement' (10K chars)
+      // doublon du winner #46 (24K chars, refondu en 'Siquijor Philippines :
+      // guide pratique 2026'). #115 passe en status=draft, redirect 301.
+      {
+        source: '/voyager-aux-philippines/cebu-visayas/guide-ultime-explorer-siquijor-philippines-logement',
+        destination: '/voyager-aux-philippines/cebu-visayas/siquijor-mystique',
+        permanent: true,
+      },
       // Redirections pour les articles recategorises (anciennement dans Actualites)
       {
         source: '/actualites-sur-les-philippines/actualites/guide-ultime-visita-iglesia-manille-eglises-historiques',
@@ -170,8 +189,11 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        // Cannibalisation Siquijor : passe directement vers le winner
+        // (article #46 'siquijor-mystique', refondu 2026-05-05).
+        // Avant pointait sur #115 qui est aussi devenu doublon -> court-circuite
         source: '/actualites-sur-les-philippines/actualites/guide-ultime-explorer-siquijor-philippines-logement',
-        destination: '/voyager-aux-philippines/cebu-visayas/guide-ultime-explorer-siquijor-philippines-logement',
+        destination: '/voyager-aux-philippines/cebu-visayas/siquijor-mystique',
         permanent: true,
       },
       {

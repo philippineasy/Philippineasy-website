@@ -5,6 +5,33 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### SEO — Cannibalisation : 301 redirects + status draft sur 2 articles doublons (2026-05-05)
+
+L'agent SEO de la session precedente avait detecte 2 doublons qui cannibalisaient les articles refondus aujourd'hui. Resolus avec le pattern habituel (cf. precedent "Phase E SEO 2026-04-27" rencontre).
+
+**Articles passes en `status='draft'`** (UPDATE Supabase) :
+- `#45` `bohol-chocolate-hills-tarsiers-plages-panglao` (7K chars) -> doublon de #105 winner (33K chars)
+- `#115` `guide-ultime-explorer-siquijor-philippines-logement` (10K chars) -> doublon de #46 winner (24K chars)
+
+Effet du status=draft :
+- `articleService.ts` filtre `.eq('status', 'published')` -> ces 2 ne sont plus servis (404 par la route normale)
+- `sitemap.ts` filtre pareil -> retires automatiquement du sitemap au prochain build
+- DB conserve l'historique (rollback toujours possible via UPDATE status='published')
+
+**Redirects 301 ajoutes dans `next.config.ts`** (zone "Cannibalisation Bohol/Siquijor Phase F SEO 2026-05-05") :
+- `/voyager-aux-philippines/cebu-visayas/bohol-chocolate-hills-tarsiers-plages-panglao` -> `/voyager-aux-philippines/cebu-visayas/visiter-bohol-philippines-guide-complet-2026`
+- `/voyager-aux-philippines/cebu-visayas/guide-ultime-explorer-siquijor-philippines-logement` -> `/voyager-aux-philippines/cebu-visayas/siquijor-mystique`
+
+**Court-circuit chain detecte et corrige** : un redirect existant (ligne 173) pointait `/actualites-sur-les-philippines/actualites/guide-ultime-explorer-siquijor-philippines-logement` -> `/voyager-aux-philippines/cebu-visayas/guide-ultime-explorer-siquijor-philippines-logement` (notre nouveau doublon). Risque de chain 301 -> 301 que Google penalise. **Fix** : destination de ce redirect mise a jour pour pointer directement sur `/siquijor-mystique` (winner final).
+
+Resultat :
+- Toute requete sur les anciennes URLs doublons -> 301 vers le bon article
+- Jus SEO des backlinks externes preserve
+- Aucune chain redirect (1 hop max)
+- Sitemap nettoye automatiquement
+
+Type-check pass. Vercel rebuild applique les redirects au niveau edge.
+
 ### SEO — Refonte de 3 articles "Crawled - currently not indexed" (2026-05-05)
 
 3 articles Philippineasy avaient ete crawles par Google mais **rejetes a l'indexation** (memory project Hugo : ils avaient ete generes par ChatGPT via workflow n8n -> contenu trop similaire a d'autres articles existants ailleurs sur le web).
