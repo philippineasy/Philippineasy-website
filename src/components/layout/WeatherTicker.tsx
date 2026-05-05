@@ -108,7 +108,7 @@ export default async function WeatherTicker() {
             </span>
             <b className="text-white font-semibold tracking-tight">{w.city}</b>
             <span className="tabular-nums">{w.temp}°</span>
-            <span className="text-white/45 text-[11px] font-normal hidden md:inline">
+            <span className="text-white/75 text-[11px] font-normal hidden md:inline">
               {w.meta}
             </span>
           </span>

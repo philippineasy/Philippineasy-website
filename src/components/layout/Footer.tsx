@@ -128,7 +128,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook Philippin'Easy"
-                className="inline-flex w-[38px] h-[38px] items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-ink transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="inline-flex w-11 h-11 items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-ink transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <FontAwesomeIcon icon={faFacebookF} className="text-[15px]" />
               </a>
@@ -137,7 +137,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram Philippin'Easy"
-                className="inline-flex w-[38px] h-[38px] items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-ink transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="inline-flex w-11 h-11 items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-ink transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <FontAwesomeIcon icon={faInstagram} className="text-[15px]" />
               </a>
@@ -146,7 +146,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Telegram Philippin'Easy"
-                className="inline-flex w-[38px] h-[38px] items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-ink transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="inline-flex w-11 h-11 items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-ink transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <FontAwesomeIcon icon={faTelegram} className="text-[15px]" />
               </a>
@@ -155,7 +155,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="YouTube Philippin'Easy"
-                className="inline-flex w-[38px] h-[38px] items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-ink transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="inline-flex w-11 h-11 items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-ink transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <FontAwesomeIcon icon={faYoutube} className="text-[15px]" />
               </a>
@@ -175,7 +175,7 @@ const Footer = () => {
                     setNewsletterEmail(e.target.value);
                     if (newsletterStatus !== 'idle') setNewsletterStatus('idle');
                   }}
-                  className="flex-1 px-3 py-2 bg-white/[0.06] text-white placeholder-slate-500 rounded-l-md border border-white/10 border-r-0 text-[13px] focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                  className="flex-1 px-3 min-h-[44px] bg-white/[0.06] text-white placeholder-slate-500 rounded-l-md border border-white/10 border-r-0 text-[13px] focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                   placeholder="votre@email.com"
                   required
                   disabled={newsletterStatus === 'loading'}
@@ -183,7 +183,7 @@ const Footer = () => {
                 <button
                   type="submit"
                   aria-label="S'inscrire à la newsletter"
-                  className="px-3 py-2 bg-accent text-ink rounded-r-md hover:bg-accent/90 transition-colors duration-200 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+                  className="px-4 min-h-[44px] bg-accent text-ink rounded-r-md hover:bg-accent/90 transition-colors duration-200 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
                   disabled={newsletterStatus === 'loading'}
                 >
                   <FontAwesomeIcon
@@ -216,9 +216,9 @@ const Footer = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {footerCols.map((col) => (
                 <div key={col.title}>
-                  <h4 className="text-white text-[14px] font-bold mb-3.5">
+                  <h3 className="text-white text-[14px] font-bold mb-3.5">
                     {col.title}
-                  </h4>
+                  </h3>
                   <ul className="flex flex-col gap-2.5">
                     {col.links.map((link) => (
                       <li key={link.label}>

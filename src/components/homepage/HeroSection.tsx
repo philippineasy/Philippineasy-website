@@ -25,9 +25,9 @@ export const HeroSection = () => {
       <div className="relative z-20 max-w-3xl mx-auto">
         <span
           className="inline-flex items-center gap-2 mb-7 text-[13px] font-medium tracking-wide uppercase"
-          style={{ color: 'rgba(255,255,255,0.75)', letterSpacing: '0.08em' }}
+          style={{ color: 'rgba(255,255,255,0.95)', letterSpacing: '0.08em' }}
         >
-          <span className="text-accent" aria-hidden="true">★</span>
+          <span className="text-warm-yellow" aria-hidden="true">★</span>
           +10 000 voyageurs accompagnés depuis 2020
         </span>
         <h1
@@ -44,7 +44,7 @@ export const HeroSection = () => {
         <p
           className="text-base md:text-lg mb-10 mx-auto font-normal"
           style={{
-            color: 'rgba(255,255,255,0.82)',
+            color: 'rgba(255,255,255,0.94)',
             letterSpacing: '0.005em',
             lineHeight: 1.6,
             maxWidth: '34rem',
@@ -84,7 +84,7 @@ export const HeroSection = () => {
 
         <div
           className="mt-7 inline-flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[13px]"
-          style={{ color: 'rgba(255,255,255,0.78)' }}
+          style={{ color: 'rgba(255,255,255,0.94)' }}
         >
           <span>
             <strong className="text-white">4,9/5</strong> · 1 200+ avis

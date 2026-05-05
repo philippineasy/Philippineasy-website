@@ -13,10 +13,14 @@ export const Cart = () => {
 
   return (
     <>
-      <button onClick={() => setIsOpen(true)} className="relative text-foreground hover:text-primary">
+      <button
+        onClick={() => setIsOpen(true)}
+        aria-label={itemCount > 0 ? `Panier (${itemCount} ${itemCount === 1 ? 'article' : 'articles'})` : 'Panier'}
+        className="relative w-11 h-11 inline-flex items-center justify-center rounded-full text-foreground hover:text-primary hover:bg-primary/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      >
         <FontAwesomeIcon icon={faShoppingCart} className="text-xl" />
         {itemCount > 0 && (
-          <span className="absolute -top-2 -right-2 w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">
+          <span className="absolute top-0.5 right-0.5 w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">
             {itemCount}
           </span>
         )}
@@ -30,7 +34,13 @@ export const Cart = () => {
           >
             <div className="flex justify-between items-center p-4 border-b">
               <h2 className="text-xl font-bold">Votre Panier</h2>
-              <button onClick={() => setIsOpen(false)} className="text-2xl hover:text-destructive">&times;</button>
+              <button
+                onClick={() => setIsOpen(false)}
+                aria-label="Fermer le panier"
+                className="w-11 h-11 inline-flex items-center justify-center rounded-full text-2xl text-muted-foreground hover:text-destructive hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                &times;
+              </button>
             </div>
 
             <div className="flex-grow overflow-y-auto p-4">
@@ -56,7 +66,11 @@ export const Cart = () => {
                           />
                         </div>
                       </div>
-                      <button onClick={() => removeFromCart(item.product.id)} className="text-muted-foreground hover:text-destructive">
+                      <button
+                        onClick={() => removeFromCart(item.product.id)}
+                        aria-label={`Retirer ${item.product.name} du panier`}
+                        className="w-11 h-11 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
                         <FontAwesomeIcon icon={faTrash} />
                       </button>
                     </li>

@@ -196,7 +196,7 @@ export const BlogSection = async () => {
             className="text-[clamp(1.875rem,3.5vw,2.5rem)] font-bold text-foreground mt-3 mb-4"
             style={{ letterSpacing: '-0.02em', lineHeight: 1.1 }}
           >
-            Les <span className="text-accent">derniers articles</span> du blog
+            Les <span className="text-accent-strong">derniers articles</span> du blog
           </h2>
           <p className="text-[17px] text-muted-foreground leading-[1.6]">
             Guides pratiques, retours d&apos;expérience et analyses rédigés par
@@ -272,7 +272,7 @@ export const BlogSection = async () => {
                   <strong className="block text-[13px] font-semibold">
                     {FEATURED_AUTHOR.name}
                   </strong>
-                  <span className="text-[12px]" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                  <span className="text-[12px]" style={{ color: 'rgba(255,255,255,0.92)' }}>
                     {featured.longDate}
                   </span>
                 </div>
@@ -312,12 +312,12 @@ export const BlogSection = async () => {
                     categoryClass={post.slot.badgeClass}
                     size="sm"
                   />
-                  <h4
+                  <h3
                     className="text-[15px] font-semibold text-foreground leading-[1.35]"
                     style={{ letterSpacing: '-0.005em', textWrap: 'balance' }}
                   >
                     {post.title}
-                  </h4>
+                  </h3>
                   <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground uppercase tracking-[0.04em]">
                     <span>{post.shortDate}</span>
                     <span aria-hidden="true">·</span>
@@ -354,12 +354,12 @@ export const BlogSection = async () => {
                 </div>
               </div>
               <div className="px-4 py-4">
-                <h4
+                <h3
                   className="text-[15px] font-semibold text-foreground leading-[1.35] mb-2"
                   style={{ letterSpacing: '-0.005em', textWrap: 'balance' }}
                 >
                   {post.title}
-                </h4>
+                </h3>
                 <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground uppercase tracking-[0.04em]">
                   <span>{post.shortDate}</span>
                   <span aria-hidden="true">·</span>

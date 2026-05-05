@@ -348,7 +348,7 @@ export const LeadMagnetSection = () => {
             className="text-3xl md:text-4xl font-bold text-foreground mb-3"
             style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
           >
-            Guides <span className="text-accent">gratuits</span>
+            Guides <span className="text-accent-strong">gratuits</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg">
             Préparez votre voyage avec nos guides pratiques. Téléchargez-les

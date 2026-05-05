@@ -148,7 +148,7 @@ export const RencontresTeaser = () => {
             <div>
               <span
                 className="inline-block text-[13px] font-medium uppercase tracking-[0.08em] mb-2.5"
-                style={{ color: '#EC4899' }}
+                style={{ color: '#BE185D' }}
               >
                 <span className="mr-1.5" aria-hidden="true">✦</span>
                 Rencontres · +40 000 membres
@@ -315,7 +315,7 @@ const ProfileCard = ({ profile }: { profile: Profile }) => {
         {/* Distance/online pill bottom-right */}
         <span
           className="relative z-10 inline-flex items-center gap-1.5 backdrop-blur-md text-white text-[10px] font-semibold px-2 py-1 rounded-full"
-          style={{ background: 'rgba(0, 0, 0, 0.55)' }}
+          style={{ background: 'rgba(0, 0, 0, 0.78)' }}
         >
           {isOnline && (
             <span

@@ -132,7 +132,7 @@ export const BestDealsSection = (_props: BestDealsSectionProps) => {
             className="text-[clamp(1.875rem,3.5vw,2.5rem)] font-bold text-foreground mt-3 mb-4"
             style={{ letterSpacing: '-0.02em', lineHeight: 1.1 }}
           >
-            Nos meilleurs <span className="text-accent">bons plans</span>
+            Nos meilleurs <span className="text-accent-strong">bons plans</span>
           </h2>
           <p className="text-[17px] text-muted-foreground leading-[1.6]">
             Les activités et expériences sélectionnées par notre équipe locale.
@@ -175,7 +175,7 @@ export const BestDealsSection = (_props: BestDealsSectionProps) => {
                         {deal.tag}
                       </span>
                       {/* Price overlay bottom-right */}
-                      <span className="absolute bottom-3 right-3 inline-flex items-center px-3 py-1.5 rounded bg-card text-accent text-[13px] font-bold shadow-md">
+                      <span className="absolute bottom-3 right-3 inline-flex items-center px-3 py-1.5 rounded bg-card text-accent-strong text-[13px] font-bold shadow-md">
                         dès&nbsp;{source.priceFrom}&nbsp;€
                       </span>
                     </div>
@@ -193,7 +193,7 @@ export const BestDealsSection = (_props: BestDealsSectionProps) => {
                       </h3>
                       <div className="flex items-baseline gap-2 mb-4">
                         <span
-                          className="text-accent font-bold text-[14px]"
+                          className="text-accent-strong font-bold text-[14px]"
                           aria-label={`Note ${source.rating} sur 5`}
                         >
                           ★ {source.rating}
@@ -230,12 +230,12 @@ export const BestDealsSection = (_props: BestDealsSectionProps) => {
           <button
             onClick={scrollPrev}
             aria-label="Activité précédente"
-            className="w-10 h-10 rounded-full border-[0.5px] border-border bg-card hover:bg-muted hover:border-primary/40 transition-colors duration-200 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex-shrink-0"
+            className="w-11 h-11 rounded-full border-[0.5px] border-border bg-card hover:bg-muted hover:border-primary/40 transition-colors duration-200 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex-shrink-0"
           >
             <FontAwesomeIcon icon={faChevronLeft} className="text-foreground text-[13px]" />
           </button>
 
-          <div className="flex gap-2" role="tablist" aria-label="Pagination du carrousel">
+          <div className="flex gap-1" role="tablist" aria-label="Pagination du carrousel">
             {scrollSnaps.map((_, i) => (
               <button
                 key={i}
@@ -243,19 +243,24 @@ export const BestDealsSection = (_props: BestDealsSectionProps) => {
                 aria-label={`Aller à l'activité ${i + 1}`}
                 role="tab"
                 aria-selected={i === selectedIndex}
-                className={`h-2 rounded-full transition-all duration-200 ${
-                  i === selectedIndex
-                    ? 'w-8 bg-primary'
-                    : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
-                } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`}
-              />
+                className="group h-11 inline-flex items-center justify-center px-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full"
+              >
+                <span
+                  aria-hidden="true"
+                  className={`h-2 rounded-full transition-all duration-200 ${
+                    i === selectedIndex
+                      ? 'w-8 bg-primary'
+                      : 'w-2 bg-muted-foreground/40 group-hover:bg-muted-foreground/60'
+                  }`}
+                />
+              </button>
             ))}
           </div>
 
           <button
             onClick={scrollNext}
             aria-label="Activité suivante"
-            className="w-10 h-10 rounded-full border-[0.5px] border-border bg-card hover:bg-muted hover:border-primary/40 transition-colors duration-200 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex-shrink-0"
+            className="w-11 h-11 rounded-full border-[0.5px] border-border bg-card hover:bg-muted hover:border-primary/40 transition-colors duration-200 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex-shrink-0"
           >
             <FontAwesomeIcon icon={faChevronRight} className="text-foreground text-[13px]" />
           </button>

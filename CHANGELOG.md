@@ -5,6 +5,44 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### A11y — 45 violations corrigees suite audit Lighthouse mobile (2026-05-05)
+
+PageSpeed Insights mobile (score 53/100) signalait 4 categories de violations Accessibilite : ARIA invalides, contraste insuffisant, zones tactiles trop petites, headers mal sequences. Audit + fix complet via agent ui-ux-designer (skill `web-design-guidelines`) sans toucher au design existant.
+
+**Score A11y attendu** : 53 → estime 90+ au prochain run Lighthouse.
+
+**Strategy contraste — nouveau token `--accent-strong`** :
+Le token `--accent` (orange brand `#F59E0B`) etait utilise pour du **texte** sur fond clair = ratio 2.17:1 (FAIL AA). Probleme historique car ce orange est la signature visuelle Philippineasy.
+
+Solution : ajout d'un token sister `--accent-strong: 28 90% 35%` (≈ `#A85F0A`) — meme famille de teinte, ratio 5.7:1 vs blanc + 5.3:1 vs `#F4F7FE` (AA pass). Le `accent` original reste pour les backgrounds, scrims, decoratifs (ou le contraste vient du `accent-foreground` dark place dessus = 12:1).
+
+`src/app/globals.css` : ajout token `--accent-strong` + utility `.text-accent-strong`.
+
+**Fichiers modifies (17 total) avec compteur par categorie** :
+
+| Categorie | Count |
+|---|---|
+| Contraste (text-accent → text-accent-strong, low-opacity whites bumped, low-contrast pills darkened) | **18** |
+| Zones tactiles (w-9/w-10/w-[38px] → w-11 + min-h-[44px] partout, conformite 44×44px Apple HIG) | **19** |
+| Headers (h4 → h3 dans Footer + BlogSection cards + Header notifications dropdown — fixes la sequence h1→h2→h3 sur la home) | **4** |
+| ARIA labels (Cart trigger, Cart close, trash buttons — manquaient totalement) | **3** |
+| Page outline (TestimonialsSection : kicker "Ils ont choisi les" duplique avec h2) | **1** |
+
+**Composants impactes** :
+- Homepage : HeroSection (3 white-opacity bumps + star color), InstallerCards / RegionCards / ItineraireIABlock / TestimonialsSection / BestDealsSection / BlogSection / LeadMagnetSection / RencontresTeaser / FinalCtaSection (text-accent → text-accent-strong sur les h2 spans)
+- Layout : Header (icon buttons 36→44px), Footer (social links 38→44px, newsletter input/btn min-h-[44px], h4→h3), Cart (aria-label sur 3 boutons), WeatherTicker (text-white/45 → /75 = 8:1), CookieBanner (5 btns py-2 → min-h-[44px])
+- IAOverlay : modal close 36→44px
+
+**Volontairement non-modifie** (justifie dans le rapport agent) :
+- Le brand token `--accent` reste intact (Hugo : "pas de redesign")
+- Breadcrumb `aria-current="page"` sur `<li>` (valide WAI-ARIA 1.2)
+- Footer bottom legal links a 12px (pattern accepte si focus-visible OK)
+- `role="radio"` + `aria-checked` dans IAOverlay step 2 (pattern valide)
+
+**Bonus performance** : la simplification de TestimonialsSection (1 kicker au lieu de 2) economise ~50 lignes de markup repete.
+
+Type-check + ESLint pass.
+
 ### SEO — Filtres qualite forum + marketplace dans le sitemap (2026-05-05)
 
 Suite a l'audit "Discovered, currently not indexed" sur GSC (~56 pages flaggees), diagnostic DB :

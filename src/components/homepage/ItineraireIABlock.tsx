@@ -94,7 +94,7 @@ export const ItineraireIABlock = () => {
                 className="inline-block text-[13px] font-medium uppercase mb-4"
                 style={{
                   letterSpacing: '0.08em',
-                  color: 'rgba(255, 255, 255, 0.78)',
+                  color: 'rgba(255, 255, 255, 0.95)',
                 }}
               >
                 <span className="text-accent mr-1.5" aria-hidden="true">✦</span>
@@ -116,7 +116,7 @@ export const ItineraireIABlock = () => {
               <p
                 className="mb-6 text-[16px]"
                 style={{
-                  color: 'rgba(255, 255, 255, 0.85)',
+                  color: 'rgba(255, 255, 255, 0.95)',
                   lineHeight: 1.6,
                 }}
               >
@@ -194,7 +194,7 @@ export const ItineraireIABlock = () => {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline gap-2 mb-1 flex-wrap">
                         <span
-                          className="text-[11px] font-bold uppercase tracking-[0.08em] text-accent"
+                          className="text-[11px] font-bold uppercase tracking-[0.08em] text-accent-strong"
                         >
                           {day.city}
                         </span>
@@ -216,7 +216,7 @@ export const ItineraireIABlock = () => {
                   <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                     Budget estimé
                   </span>
-                  <span className="text-[16px] font-bold text-accent tabular-nums">
+                  <span className="text-[16px] font-bold text-accent-strong tabular-nums">
                     1&nbsp;900&nbsp;€ – 2&nbsp;400&nbsp;€
                   </span>
                 </div>

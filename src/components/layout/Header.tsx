@@ -217,13 +217,13 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
               <button
                 onClick={() => setIsSearchModalOpen(true)}
                 aria-label="Rechercher sur le site"
-                className="hidden md:inline-flex w-9 h-9 items-center justify-center rounded-full text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="hidden md:inline-flex w-11 h-11 items-center justify-center rounded-full text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <FontAwesomeIcon icon={faSearch} className="text-[16px]" />
               </button>
 
               {loading ? (
-                <div className="w-9 h-9 bg-muted rounded-full animate-pulse motion-reduce:animate-none" />
+                <div className="w-11 h-11 bg-muted rounded-full animate-pulse motion-reduce:animate-none" />
               ) : user ? (
                 <>
                   <div className="relative" ref={notificationRef}>
@@ -232,7 +232,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
                       aria-label={unreadCount > 0 ? `Notifications (${unreadCount} non lues)` : 'Notifications'}
                       aria-haspopup="true"
                       aria-expanded={isNotificationsOpen}
-                      className={`relative w-9 h-9 inline-flex items-center justify-center rounded-full text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${unreadCount > 0 ? 'animate-pulse motion-reduce:animate-none' : ''}`}
+                      className={`relative w-11 h-11 inline-flex items-center justify-center rounded-full text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${unreadCount > 0 ? 'animate-pulse motion-reduce:animate-none' : ''}`}
                     >
                       <FontAwesomeIcon icon={faBell} className="text-[16px]" />
                       {unreadCount > 0 && (
@@ -244,7 +244,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
                     {isNotificationsOpen && (
                       <div className="absolute right-0 mt-2 w-80 bg-card rounded-lg shadow-xl border border-border z-10">
                         <div className="p-3 flex justify-between items-center border-b border-border">
-                          <h4 className="font-semibold">Notifications</h4>
+                          <h3 className="font-semibold">Notifications</h3>
                           <button onClick={async () => {
                             if (user) {
                               await markAllAsRead(supabase, user.id);
@@ -295,7 +295,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
               )}
 
               <button
-                className="md:hidden inline-flex w-9 h-9 items-center justify-center rounded-full hover:bg-primary/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="md:hidden inline-flex w-11 h-11 items-center justify-center rounded-full hover:bg-primary/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 aria-label={isMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
                 aria-expanded={isMenuOpen}
@@ -358,7 +358,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
             <button
               onClick={() => setIsSearchModalOpen(false)}
               aria-label="Fermer la recherche"
-              className="absolute top-3 right-3 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded text-2xl leading-none"
+              className="absolute top-2 right-2 w-11 h-11 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-2xl leading-none"
             >
               &times;
             </button>

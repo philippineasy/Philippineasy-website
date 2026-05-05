@@ -77,7 +77,7 @@ export const FinalCtaSection = ({
             <p
               className="mx-auto mb-8"
               style={{
-                color: 'rgba(255,255,255,0.85)',
+                color: 'rgba(255,255,255,0.95)',
                 fontSize: '16px',
                 lineHeight: 1.55,
                 maxWidth: '36rem',

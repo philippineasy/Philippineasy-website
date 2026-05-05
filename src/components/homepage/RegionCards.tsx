@@ -146,7 +146,7 @@ export const RegionCards = async () => {
             className="text-[clamp(1.875rem,3.5vw,2.5rem)] font-bold text-foreground mt-3 mb-4"
             style={{ letterSpacing: '-0.02em', lineHeight: 1.1 }}
           >
-            Un archipel aux <span className="text-accent">mille visages</span>
+            Un archipel aux <span className="text-accent-strong">mille visages</span>
           </h2>
           <p className="text-[17px] text-muted-foreground leading-[1.6]">
             Des lagons de Palawan aux rizières de Banaue, en passant par le surf
@@ -192,7 +192,7 @@ export const RegionCards = async () => {
                       <span
                         key={tag}
                         className="inline-flex items-center px-2.5 py-1 rounded-full text-white text-[11px] font-semibold backdrop-blur-md shadow-sm"
-                        style={{ backgroundColor: 'rgba(15, 23, 42, 0.72)' }}
+                        style={{ backgroundColor: 'rgba(15, 23, 42, 0.88)' }}
                       >
                         {tag}
                       </span>

@@ -98,13 +98,13 @@ const CookieBanner = () => {
               <Link href="/confidentialite" className="underline hover:text-white ml-1">En savoir plus</Link>
             </p>
             <div className="flex items-center gap-2 flex-shrink-0">
-              <button onClick={acceptAllCookies} className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+              <button onClick={acceptAllCookies} className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 min-h-[44px] rounded-md text-sm font-medium transition-colors">
                 Tout accepter
               </button>
-              <button onClick={rejectAllCookies} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+              <button onClick={rejectAllCookies} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 px-4 min-h-[44px] rounded-md text-sm font-medium transition-colors">
                 Tout refuser
               </button>
-              <button onClick={customizeCookies} className="bg-transparent border border-accent-foreground hover:bg-accent-foreground/10 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+              <button onClick={customizeCookies} className="bg-transparent border border-accent-foreground hover:bg-accent-foreground/10 px-4 min-h-[44px] rounded-md text-sm font-medium transition-colors">
                 Personnaliser
               </button>
             </div>
@@ -137,10 +137,10 @@ const CookieBanner = () => {
                     </label>
                 </div>
                 <div className="mt-6 flex justify-end gap-3">
-                    <button onClick={saveCustomCookies} className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                    <button onClick={saveCustomCookies} className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 min-h-[44px] rounded-md text-sm font-medium transition-colors">
                         Valider mes choix
                     </button>
-                     <button onClick={closeBanner} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                     <button onClick={closeBanner} className="bg-secondary text-secondary-foreground hover:bg-secondary/90 px-4 min-h-[44px] rounded-md text-sm font-medium transition-colors">
                         Fermer
                     </button>
                 </div>
