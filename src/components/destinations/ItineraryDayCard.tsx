@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import type { ItineraryDay } from '@/types/destinationItineraries';
+import { ExpandableText } from './ExpandableText';
 
 interface ItineraryDayCardProps {
   day: ItineraryDay;
@@ -186,12 +187,12 @@ export function ItineraryDayCard({ day, isLast = false }: ItineraryDayCardProps)
                     >
                       {activity.name}
                     </h4>
-                    <p
+                    <ExpandableText
+                      text={activity.description}
+                      lines={3}
                       className="text-[13.5px] text-muted-foreground"
                       style={{ lineHeight: 1.55 }}
-                    >
-                      {activity.description}
-                    </p>
+                    />
                     {(activity.duration || activity.cost) && (
                       <div className="flex flex-wrap items-center gap-2 mt-2.5">
                         {activity.duration && (
@@ -245,7 +246,12 @@ export function ItineraryDayCard({ day, isLast = false }: ItineraryDayCardProps)
                   >
                     Transport
                   </span>
-                  <p className="text-[13px] text-ink leading-[1.45]">{day.transport}</p>
+                  <ExpandableText
+                    text={day.transport}
+                    lines={3}
+                    className="text-[13px] text-ink"
+                    style={{ lineHeight: 1.45 }}
+                  />
                 </div>
               </div>
             )}
@@ -265,7 +271,12 @@ export function ItineraryDayCard({ day, isLast = false }: ItineraryDayCardProps)
                   >
                     Hébergement
                   </span>
-                  <p className="text-[13px] text-ink leading-[1.45]">{day.accommodation}</p>
+                  <ExpandableText
+                    text={day.accommodation}
+                    lines={3}
+                    className="text-[13px] text-ink"
+                    style={{ lineHeight: 1.45 }}
+                  />
                 </div>
               </div>
             )}
@@ -285,7 +296,12 @@ export function ItineraryDayCard({ day, isLast = false }: ItineraryDayCardProps)
                   >
                     Repas
                   </span>
-                  <p className="text-[13px] text-ink leading-[1.45]">{day.meals}</p>
+                  <ExpandableText
+                    text={day.meals}
+                    lines={3}
+                    className="text-[13px] text-ink"
+                    style={{ lineHeight: 1.45 }}
+                  />
                 </div>
               </div>
             )}

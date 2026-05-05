@@ -226,16 +226,40 @@ export default async function ItinerairePage({ params }: PageProps) {
           >
             ✦ L&apos;essentiel
           </span>
-          <p
-            className="text-ink"
-            style={{
-              fontSize: 'clamp(1.0625rem, 2vw, 1.25rem)',
-              lineHeight: 1.65,
-              letterSpacing: '-0.005em',
-            }}
-          >
-            {itinerary.intro_text}
-          </p>
+          {/* Split intelligent en paragraphes pour eviter le mur de texte :
+              prefere les double-newlines explicites, sinon decoupe naturellement
+              tous les ~2 phrases (split sur ". " avec gestion des abreviations). */}
+          {(() => {
+            const text = itinerary.intro_text || '';
+            // Si l'auteur a mis des \n\n explicites, on les respecte.
+            const explicitParas = text.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+            let paragraphs: string[];
+            if (explicitParas.length > 1) {
+              paragraphs = explicitParas;
+            } else {
+              // Auto-split en regroupant 2 phrases par paragraphe (vise 3 paragraphes au total)
+              const sentences = text.match(/[^.!?]+[.!?]+["»]?\s*/g) || [text];
+              const targetParas = Math.min(4, Math.max(2, Math.ceil(sentences.length / 2)));
+              const perPara = Math.ceil(sentences.length / targetParas);
+              paragraphs = [];
+              for (let i = 0; i < sentences.length; i += perPara) {
+                paragraphs.push(sentences.slice(i, i + perPara).join('').trim());
+              }
+            }
+            return paragraphs.map((para, i) => (
+              <p
+                key={i}
+                className={`text-ink ${i > 0 ? 'mt-5' : ''}`}
+                style={{
+                  fontSize: 'clamp(1.0625rem, 2vw, 1.25rem)',
+                  lineHeight: 1.65,
+                  letterSpacing: '-0.005em',
+                }}
+              >
+                {para}
+              </p>
+            ));
+          })()}
         </div>
       </section>
 
