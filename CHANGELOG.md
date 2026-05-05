@@ -5,6 +5,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Branding — Restauration de l'orange brand sur tous les titres home (2026-05-05)
+
+Suite a l'audit A11y du 2026-05-05, l'agent ui-ux-designer avait introduit `text-accent-strong` (#A85F0A, AA-compliant 5.7:1) sur tous les `<span>` orange des titres home pour passer le test contraste Lighthouse. Hugo : "wouah cette quoi cette couleur caca... je veux retrouver mon orange dans tout les titres".
+
+Decision : **branding > AA strict**. L'orange brand `#F59E0B` (token `--accent`) est restaure sur tous les titres et elements de prix/rating de la home. Lighthouse va re-flagger 18 contrastes mais c'est un trade-off accepte.
+
+`text-accent-strong` token gardé dans `globals.css` pour usage futur si besoin (cas où AA est imperatif). Les autres fixes A11y (zones tactiles 44px, headers h4→h3, ARIA labels Cart, opacity blanches sur scrims sombres) restent en place — ils n'avaient aucun cout visuel.
+
+7 fichiers reverts via sed (text-accent-strong → text-accent) : `BestDealsSection`, `BlogSection`, `InstallerCards`, `ItineraireIABlock`, `LeadMagnetSection`, `RegionCards`, `TestimonialsSection`.
+
 ### A11y — 45 violations corrigees suite audit Lighthouse mobile (2026-05-05)
 
 PageSpeed Insights mobile (score 53/100) signalait 4 categories de violations Accessibilite : ARIA invalides, contraste insuffisant, zones tactiles trop petites, headers mal sequences. Audit + fix complet via agent ui-ux-designer (skill `web-design-guidelines`) sans toucher au design existant.

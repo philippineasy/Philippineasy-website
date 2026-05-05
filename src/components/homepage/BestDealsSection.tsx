@@ -132,7 +132,7 @@ export const BestDealsSection = (_props: BestDealsSectionProps) => {
             className="text-[clamp(1.875rem,3.5vw,2.5rem)] font-bold text-foreground mt-3 mb-4"
             style={{ letterSpacing: '-0.02em', lineHeight: 1.1 }}
           >
-            Nos meilleurs <span className="text-accent-strong">bons plans</span>
+            Nos meilleurs <span className="text-accent">bons plans</span>
           </h2>
           <p className="text-[17px] text-muted-foreground leading-[1.6]">
             Les activités et expériences sélectionnées par notre équipe locale.
@@ -175,7 +175,7 @@ export const BestDealsSection = (_props: BestDealsSectionProps) => {
                         {deal.tag}
                       </span>
                       {/* Price overlay bottom-right */}
-                      <span className="absolute bottom-3 right-3 inline-flex items-center px-3 py-1.5 rounded bg-card text-accent-strong text-[13px] font-bold shadow-md">
+                      <span className="absolute bottom-3 right-3 inline-flex items-center px-3 py-1.5 rounded bg-card text-accent text-[13px] font-bold shadow-md">
                         dès&nbsp;{source.priceFrom}&nbsp;€
                       </span>
                     </div>
@@ -193,7 +193,7 @@ export const BestDealsSection = (_props: BestDealsSectionProps) => {
                       </h3>
                       <div className="flex items-baseline gap-2 mb-4">
                         <span
-                          className="text-accent-strong font-bold text-[14px]"
+                          className="text-accent font-bold text-[14px]"
                           aria-label={`Note ${source.rating} sur 5`}
                         >
                           ★ {source.rating}

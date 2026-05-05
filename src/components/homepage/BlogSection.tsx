@@ -196,7 +196,7 @@ export const BlogSection = async () => {
             className="text-[clamp(1.875rem,3.5vw,2.5rem)] font-bold text-foreground mt-3 mb-4"
             style={{ letterSpacing: '-0.02em', lineHeight: 1.1 }}
           >
-            Les <span className="text-accent-strong">derniers articles</span> du blog
+            Les <span className="text-accent">derniers articles</span> du blog
           </h2>
           <p className="text-[17px] text-muted-foreground leading-[1.6]">
             Guides pratiques, retours d&apos;expérience et analyses rédigés par

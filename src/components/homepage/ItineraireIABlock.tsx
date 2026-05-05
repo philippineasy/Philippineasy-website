@@ -194,7 +194,7 @@ export const ItineraireIABlock = () => {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline gap-2 mb-1 flex-wrap">
                         <span
-                          className="text-[11px] font-bold uppercase tracking-[0.08em] text-accent-strong"
+                          className="text-[11px] font-bold uppercase tracking-[0.08em] text-accent"
                         >
                           {day.city}
                         </span>
@@ -216,7 +216,7 @@ export const ItineraireIABlock = () => {
                   <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                     Budget estimé
                   </span>
-                  <span className="text-[16px] font-bold text-accent-strong tabular-nums">
+                  <span className="text-[16px] font-bold text-accent tabular-nums">
                     1&nbsp;900&nbsp;€ – 2&nbsp;400&nbsp;€
                   </span>
                 </div>

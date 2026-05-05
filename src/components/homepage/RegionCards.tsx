@@ -146,7 +146,7 @@ export const RegionCards = async () => {
             className="text-[clamp(1.875rem,3.5vw,2.5rem)] font-bold text-foreground mt-3 mb-4"
             style={{ letterSpacing: '-0.02em', lineHeight: 1.1 }}
           >
-            Un archipel aux <span className="text-accent-strong">mille visages</span>
+            Un archipel aux <span className="text-accent">mille visages</span>
           </h2>
           <p className="text-[17px] text-muted-foreground leading-[1.6]">
             Des lagons de Palawan aux rizières de Banaue, en passant par le surf

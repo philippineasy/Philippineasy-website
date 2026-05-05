@@ -58,7 +58,7 @@ const QuoteGlyph = () => (
 
 const StarRow = ({ count }: { count: number }) => (
   <div
-    className="flex items-center gap-0.5 text-accent-strong text-[15px] mb-3.5"
+    className="flex items-center gap-0.5 text-accent text-[15px] mb-3.5"
     aria-label={`Note ${count} sur 5`}
   >
     {Array.from({ length: count }).map((_, i) => (
@@ -81,7 +81,7 @@ export const TestimonialsSection = () => {
             className="text-[clamp(1.875rem,3.5vw,2.5rem)] font-bold text-foreground mt-3"
             style={{ letterSpacing: '-0.02em', lineHeight: 1.1 }}
           >
-            Ils ont choisi les <span className="text-accent-strong">Philippines</span>
+            Ils ont choisi les <span className="text-accent">Philippines</span>
           </h2>
         </div>
 

@@ -129,7 +129,7 @@ export const InstallerCards = () => {
             className="text-[clamp(1.875rem,3.5vw,2.5rem)] font-bold text-foreground mt-3 mb-4"
             style={{ letterSpacing: '-0.02em', lineHeight: 1.1 }}
           >
-            S&apos;installer aux <span className="text-accent-strong">Philippines</span>
+            S&apos;installer aux <span className="text-accent">Philippines</span>
           </h2>
           <p className="text-[17px] text-muted-foreground leading-[1.6]">
             Quatre chemins pour faire des Philippines votre nouvelle maison.
