@@ -197,8 +197,8 @@ Cet itinéraire de 8 jours est calibré pour un voyageur backpacker ou flashpack
           "cost": "700-900 PHP"
         },
         {
-          "name": "Plongée thresher sharks Monad Shoal (PADI/SSI requis)",
-          "description": "C''est LE site mondial pour voir des requins-renards (thresher sharks). Plongée à 5h du matin (oui, 5h) à Monad Shoal, 30 min en bateau de Malapascua. Profondeur 25-30m, certif Open Water minimum, AOW recommandé. Les threshers viennent au cleaning station se faire nettoyer par les poissons-pilotes. Tu les vois à 5-10m de toi, immobiles, ces queues immenses qui les rendent uniques. 4500-6000 PHP la plongée + 2 plongées matinales. Évangelista Dive Center et Sea Explorers sont les deux références.",
+          "name": "Plongée thresher sharks Kimud Shoal (PADI/SSI requis)",
+          "description": "C''est LE site mondial pour voir des requins-renards (thresher sharks). Depuis 2022 les threshers ont migré de Monad Shoal vers Kimud Shoal — la plongée est devenue plus accessible : profondeur 15-20m au cleaning station (parfois plus haut), Open Water suffit avec un instructeur. Pour les plongées traditionnelles à Monad Shoal (25-30m, threshers plus rares maintenant + tiger/bull sharks occasionnels), Advanced Open Water requis. Plongée à 5h du matin (oui, 5h), 30 min en bateau de Malapascua. Les threshers viennent se faire nettoyer par les poissons-pilotes — tu les vois à 5-10m de toi, immobiles, ces queues immenses qui les rendent uniques. 4500-6000 PHP la plongée. Thresher Shark Divers et Évangelista Dive Center sont les deux références.",
           "duration": "Matinée 4h-10h",
           "cost": "5500 PHP environ"
         },
@@ -297,7 +297,7 @@ Cet itinéraire de 8 jours est calibré pour un voyageur backpacker ou flashpack
     'Climatisation des bus surdimensionnée — un sweat ou un sarong est obligatoire',
     'Saison des typhons août-octobre : assurance voyage avec couverture annulation indispensable',
     'Lechon de Cebu (cochon grillé) : la spécialité. House of Lechon ou Rico''s Lechon. Réserve à l''avance',
-    'Plongée Malapascua : certif Open Water minimum pour les threshers. Plongée à 5h du matin, prévois ton sommeil',
+    'Plongée Malapascua threshers : à Kimud Shoal depuis 2022 (Open Water suffit avec instructeur). Pour Monad Shoal traditionnel 25-30m, Advanced Open Water requis. Plongée à 5h du matin, prévois ton sommeil',
     'Bantayan Island : retire ton cash AVANT d''y aller, peu d''ATM et souvent vides',
     'Tricycles : négocie le prix AVANT de monter. ''How much to X?'' puis confirme. Sinon facture x3 à l''arrivée',
     'San Miguel Light en grande bouteille : 80-100 PHP en sari-sari, 150-200 PHP en bar. Bois en sari-sari quand possible',

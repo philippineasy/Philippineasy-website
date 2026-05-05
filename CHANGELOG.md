@@ -5,6 +5,27 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### SEO — Fact-checks corrections sur 4 articles destinations (2026-05-05)
+
+Suite a un audit complet via WebSearch + WebFetch sur 7 claims des 4 articles. **3 erreurs critiques + 3 corrections moyennes** appliquees aux seed files locaux ET en prod (DELETE + INSERT, articles toujours `published=false`). Le seul article `published=true` reste Palawan (intact).
+
+**Erreurs critiques corrigees** :
+- ❌ **Caticlan-Boracay fees** : article disait "terminal 100 + env 75 + ferry 50 = 225 PHP" mais reality 2026 = **150 + 300 (touriste etranger) + 50-100 = ~500 PHP**. Aurait induit en erreur les voyageurs au point de cash de ~250 PHP/personne. Corrige dans `boracay.sql` (description Day 1) et `philippines-2-semaines.sql` (Day 13). Cost ranges adaptes : "350-500 PHP" -> "500-650 PHP".
+- ❌ **Mad Monkey Boracay** : ferme depuis 2022. Le hostel etait recommande dans le seed. Remplace par Frendz Resort Station 1 + Boracay Backpackers Station 3 + mention que Mad Monkey a ferme + alternative MNL Beach Hostel / Stoke Travel Station 2. Source : hostelgeeks.com.
+- ❌ **Malapascua threshers Monad Shoal** : depuis 2022 les threshers ont migre a **Kimud Shoal** (plus accessible, 15-20m, Open Water suffit avec instructeur). Monad Shoal reste plonge mais plus pour threshers + Advanced Open Water requis (25-30m). Article clamait "Open Water minimum a Monad" — incorrect. Corrige dans `cebu.sql`. Sources : thresher-shark-divers.com, zubludiving.com.
+
+**Corrections moyennes** :
+- ⚠️ **El Nido ETDF** : ordonnance municipale 2024 a fixe le tarif a **400 PHP** (vs 200 PHP historique) mais application varie selon operateurs. Article mentionnait juste 200 PHP — mis a jour avec range "200-400 PHP" et explication de l'incertitude. Source : elnido.gov.ph (ordonnance 01 Series of 2024).
+- ⚠️ **Ferry El Nido-Coron** : prix corrige de "1800 PHP" a "1500-3000 PHP selon operateur" (Montenegro 1500-2000 PHP @3h30 vs Atienza ~3000 PHP @4-5h). Horaires precises (Montenegro 6h, Atienza 12h). Sources : atienzainterislandferriesinc.com, bookaway.com.
+- ⚠️ **Cebu→Siargao** : "~50€ A/R" -> "60-80€ A/R" (KAYAK / Cebu Pacific 2026 actual data).
+
+**Verifications validees sans changement** :
+- ✅ Visa extension fee BoI ~3000 PHP (reality PHP 3,030 confirmee)
+- ✅ Hostels actifs verifies : Mad Monkey Cebu City (note : Adults Only depuis), Harana Surf Resort Siargao, Spin Designer Hostel El Nido, Casa Kalaw, Frendz Resort Boracay, Z Hostel Manille
+- ✅ Prix vols domestiques 2026 : Manille-Cebu, Manille-Caticlan, Manille-PPS dans la fourchette correcte de l'article
+
+**Hostels non verifies explicitement** (Hugo doit confirmer terrain) : Chief Mau Backpackers (Moalboal), Bohol Beach House Hostel Alona, Hop Hostel Coron.
+
 ### SEO — 4 articles programmatiques destinations en attente de relecture (2026-05-05)
 
 Pour exploiter le volume SEO francais (estime 6-15k recherches mensuelles) sur les destinations Philippines, 4 articles long-form rediges en style backpacker authentique et inseres en `published=false` (invisible publiquement, le service `destinationItinerariesService` filtre `published=true` partout).

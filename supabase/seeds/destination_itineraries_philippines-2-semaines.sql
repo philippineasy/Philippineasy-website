@@ -221,7 +221,7 @@ Tu restes libre de réserver tes vols et hébergements où tu veux — on te don
       "activities": [
         {
           "name": "Tour A — Big Lagoon, Small Lagoon, Secret Lagoon",
-          "description": "Le tour le plus iconique des Philippines. Tu pars en bangka 8h depuis la plage de Corong-Corong, retour 16h. Big Lagoon : tu rentres en kayak dans une lagune turquoise encerclée de falaises karstiques verticales. Small Lagoon : encore plus encaissé, tu nages à travers un trou pour entrer. Secret Lagoon : grotte cachée. 7 Commandos Beach pour le déjeuner BBQ. Snorkeling à Shimizu Island. 1400-1500 PHP/personne avec déjeuner inclus + 200 PHP environmental fee + 200 PHP location kayak Big Lagoon. Réserve la veille.",
+          "description": "Le tour le plus iconique des Philippines. Tu pars en bangka 8h depuis la plage de Corong-Corong, retour 16h. Big Lagoon : tu rentres en kayak dans une lagune turquoise encerclée de falaises karstiques verticales. Small Lagoon : encore plus encaissé, tu nages à travers un trou pour entrer. Secret Lagoon : grotte cachée. 7 Commandos Beach pour le déjeuner BBQ. Snorkeling à Shimizu Island. 1400-1500 PHP/personne avec déjeuner inclus + ETDF (Eco-Tourism Development Fee) 200-400 PHP selon application locale (l''ordonnance municipale 2024 a fixé le tarif à 400 PHP mais beaucoup d''opérateurs appliquent encore 200 PHP — paye cash à ton arrivée à El Nido, valable 10 jours pour tous les tours) + 200 PHP location kayak Big Lagoon. Réserve la veille.",
           "duration": "Journée complète 8h-16h",
           "cost": "1800 PHP tout inclus"
         },
@@ -269,9 +269,9 @@ Tu restes libre de réserver tes vols et hébergements où tu veux — on te don
       "activities": [
         {
           "name": "Ferry rapide El Nido → Coron",
-          "description": "Réserve à l''avance via 12go.asia. Atienza Shipping Lines ou Montenegro Lines. Départ matin 6h-7h, traversée 4h en mer ouverte. 1800 PHP. Pas pour les estomacs fragiles si la mer est agitée (oct-nov). Ils servent un snack à bord. Apporte cachet anti-mal de mer si tu doutes. Arrivée Coron Town vers 11h-12h.",
-          "duration": "4h",
-          "cost": "1800 PHP"
+          "description": "Réserve à l''avance via 12go.asia. Les 2 opérateurs principaux opèrent quotidiennement en 2026 : Montenegro Shipping Lines (départ El Nido 6h, arrivée Coron 9h30, ~3h30, 1500-2000 PHP one-way) ou Atienza Shipping Lines (départ El Nido midi, arrivée 16h-17h, ~4-5h, ~3000 PHP one-way). Pas pour les estomacs fragiles si la mer est agitée (oct-nov). Apporte cachet anti-mal de mer si tu doutes.",
+          "duration": "3h30-5h selon opérateur",
+          "cost": "1500-3000 PHP selon opérateur"
         },
         {
           "name": "Mont Tapyas viewpoint (700 marches, sunset)",

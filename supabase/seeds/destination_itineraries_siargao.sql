@@ -237,7 +237,7 @@ Cet itinéraire 7 jours est pensé pour un voyageur jeune (mais pas que), curieu
     },
     {
       "question": "Peut-on aller à Siargao depuis Cebu ?",
-      "answer": "Oui, vols directs Cebu → Sayak (Siargao) avec Cebu Pacific et Philippine Airlines, 1h, ~50€ A/R réservé tôt. Vols quotidiens. C''est même plus pratique que de passer par Manille pour beaucoup d''itinéraires. Alternative : ferry Cebu → Surigao (12h, 1200 PHP) puis ferry court Surigao → Dapa (Siargao, 2h30, 500 PHP) — long et lent, à éviter sauf budget extrême."
+      "answer": "Oui, vols directs Cebu → Sayak (Siargao) avec Cebu Pacific et Philippine Airlines, 1h, ~60-80€ A/R réservé tôt (parfois plus bas en promo flash). Vols quotidiens. C''est même plus pratique que de passer par Manille pour beaucoup d''itinéraires. Alternative : ferry Cebu → Surigao (12h, 1200 PHP) puis ferry court Surigao → Dapa (Siargao, 2h30, 500 PHP) — long et lent, à éviter sauf budget extrême."
     },
     {
       "question": "Quels scams éviter à Siargao ?",

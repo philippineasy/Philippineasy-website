@@ -38,9 +38,9 @@ Cet itinéraire 5 jours te donne le mélange : White Beach iconique, parasailing
       "activities": [
         {
           "name": "Vol + ferry vers Boracay",
-          "description": "Atterrissage Caticlan (CRK ou MPH selon la compagnie). Compte 5 min en tricycle jusqu''au Caticlan Jetty Port (50 PHP). Là, tu paies un combo : terminal fee 100 PHP + environmental fee 75 PHP + ferry 50 PHP = 225 PHP environ. Ferry 15 min jusqu''à Cagban Jetty sur Boracay. De Cagban, e-trike (le tricycle électrique imposé sur l''île) jusqu''à ton hostel — 100-200 PHP selon la station. Total porte à porte depuis Caticlan : 1h.",
+          "description": "Atterrissage Caticlan (CRK ou MPH selon la compagnie). Compte 5 min en tricycle jusqu''au Caticlan Jetty Port (50 PHP). Là, tu paies un combo aux 3 guichets séparés : terminal fee 150 PHP + environmental fee 300 PHP (touriste étranger, 150 PHP pour locaux) + ferry pump boat 50-100 PHP = ~500 PHP au total pour un foreigner. Cash uniquement, pas de carte. Ferry 15 min jusqu''à Cagban Jetty sur Boracay. De Cagban, e-trike (le tricycle électrique imposé sur l''île) jusqu''à ton hostel — 100-200 PHP selon la station. Total porte à porte depuis Caticlan : 1h.",
           "duration": "1h",
-          "cost": "350-500 PHP"
+          "cost": "500-650 PHP"
         },
         {
           "name": "Choix de Station — où loger",
@@ -56,7 +56,7 @@ Cet itinéraire 5 jours te donne le mélange : White Beach iconique, parasailing
         }
       ],
       "transport": "Vol + ferry + e-trike",
-      "accommodation": "Frendz Resort & Hostel (Station 1, dortoir 800 PHP) ou Mad Monkey Boracay (Station 2, dortoir 900 PHP, fête garantie) ou Boracay Backpackers (Station 3, 700 PHP)",
+      "accommodation": "Frendz Resort & Hostel (Station 1, dortoir 800 PHP, ambiance backpacker iconique) ou Boracay Backpackers (Station 3, 700 PHP, plus calme et local). Note : Mad Monkey Boracay a fermé en 2022, il existe d''autres dortoirs Station 2 type MNL Beach Hostel ou Stoke Travel.",
       "meals": "Snack en transit, dîner D''Talipapa"
     },
     {
@@ -222,7 +222,7 @@ Cet itinéraire 5 jours te donne le mélange : White Beach iconique, parasailing
   ARRAY[
     'Loge à Station 3 pour le mode backpacker — même plage, prix divisés par 2-3',
     'Vol direct Manille → Caticlan (MPH) plus pratique que Kalibo (KLO, 2h de bus en plus)',
-    'Frais combinés ferry Caticlan-Boracay : 350-450 PHP. Garde du cash, pas de carte',
+    'Frais combinés ferry Caticlan-Boracay : ~500 PHP par touriste étranger (terminal 150 + environmental 300 + ferry 50). Cash uniquement, pas de carte. Le combo "package" via certains hostels peut tout inclure pour 950-1050 PHP avec transport au sol',
     'Tatouages au henné : refuse le ''black henna'' (PPD cancérigène), accepte seulement le brun naturel',
     'Cocktails plage 350 PHP, en sari-sari San Mig 90 PHP — choisis ton mode',
     'Crème solaire reef-safe obligatoire — les autres détruisent les coraux et l''île a serré le contrôle',
