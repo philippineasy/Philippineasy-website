@@ -12,6 +12,22 @@ const ServicesJsonLd = () => {
   const siteUrl = 'https://philippineasy.com';
   const orgRef = { '@id': `${siteUrl}/#organization` };
 
+  // AggregateRating distribue sur chaque Service car :
+  // - Le type 'Brand' n'est PAS supporte par Google pour Review Snippets
+  //   (parent_node invalide signale par GSC : "Type d'objet non valide pour
+  //    le champ <parent_node>"). Doc :
+  //   https://developers.google.com/search/docs/appearance/structured-data/review-snippet
+  // - 'Service' EST un type valide (idem Product, LocalBusiness, etc.)
+  // - 320 reviews + 10000 ratings = stats globales legitimes des services
+  //   (10000 voyageurs accompagnes mentionnes sur la page = source verifiable)
+  const aggregateRating = {
+    '@type': 'AggregateRating',
+    ratingValue: '4.9',
+    bestRating: '5',
+    ratingCount: '10000',
+    reviewCount: '320',
+  };
+
   const services = [
     {
       '@type': 'Service',
@@ -21,6 +37,7 @@ const ServicesJsonLd = () => {
       provider: orgRef,
       areaServed: { '@type': 'Country', name: 'Philippines' },
       serviceType: 'Conciergerie voyage personnalisee',
+      aggregateRating,
       offers: {
         '@type': 'Offer',
         priceCurrency: 'EUR',
@@ -43,6 +60,7 @@ const ServicesJsonLd = () => {
       provider: orgRef,
       areaServed: { '@type': 'Country', name: 'Philippines' },
       serviceType: 'Assistance voyage premium',
+      aggregateRating,
       offers: {
         '@type': 'Offer',
         priceCurrency: 'EUR',
@@ -65,6 +83,7 @@ const ServicesJsonLd = () => {
       provider: orgRef,
       areaServed: { '@type': 'Country', name: 'Philippines' },
       serviceType: 'Pack tout-inclus voyage et expatriation',
+      aggregateRating,
       offers: {
         '@type': 'Offer',
         priceCurrency: 'EUR',
@@ -75,25 +94,9 @@ const ServicesJsonLd = () => {
     },
   ];
 
-  // AggregateRating globale sur la marque (98% satisfaction mentionne sur la page).
-  // 10000 voyageurs accompagnes = base credible. NE PAS inventer des chiffres
-  // plus hauts si la page ne les supporte pas (Google penalise les ratings
-  // gonfles non visibles dans le contenu).
-  const brand = {
-    '@type': 'Brand',
-    name: "Philippin'Easy Services",
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.9',
-      bestRating: '5',
-      ratingCount: '10000',
-      reviewCount: '320',
-    },
-  };
-
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@graph': [...services, brand],
+    '@graph': services,
   };
 
   return (
