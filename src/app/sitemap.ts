@@ -197,8 +197,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const forumTopicPages: SitemapEntry[] =
     (forumTopics?.filter(({ reply_count, view_count }: { reply_count: number; view_count: number }) =>
-      // Seuil : >=1 reponse OU >=20 vues = sujet potentiellement utile
-      (reply_count ?? 0) >= 1 || (view_count ?? 0) >= 20
+      // Seuil : >=2 posts (1 initial + 1 reponse minimum) OU >=20 vues
+      // Note : la vue forum_topics_with_stats compte le post initial dans
+      // reply_count, donc reply_count=1 = sujet seed sans aucune reponse.
+      (reply_count ?? 0) >= 2 || (view_count ?? 0) >= 20
     ).map(({ slug, last_activity_at }) => ({
       url: `${BASE_URL}/forum-sur-les-philippines/sujet/${slug}`,
       lastModified: new Date(last_activity_at).toISOString(),
