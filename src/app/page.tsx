@@ -56,6 +56,30 @@ export default async function HomePage() {
 
   return (
     <div>
+      {/* Preload du LCP image — bypass de Next/Image (delai cold cache 3.15s
+          mesure le 2026-05-05). Cache-Control immutable cote Vercel via
+          next.config.ts /imagesHero/* headers. React 19 hoist auto vers <head>. */}
+      <link
+        rel="preload"
+        as="image"
+        href="/imagesHero/hero-home-640.webp"
+        media="(max-width: 640px)"
+        fetchPriority="high"
+      />
+      <link
+        rel="preload"
+        as="image"
+        href="/imagesHero/hero-home-1024.webp"
+        media="(min-width: 641px) and (max-width: 1024px)"
+        fetchPriority="high"
+      />
+      <link
+        rel="preload"
+        as="image"
+        href="/imagesHero/hero-home-1600.webp"
+        media="(min-width: 1025px)"
+        fetchPriority="high"
+      />
       <HomepageJsonLd />
       <FAQSchema faqs={homepageFAQs} />
       {/* Hero Section */}

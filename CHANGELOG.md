@@ -5,6 +5,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Perf — LCP image + Google Ads lazy (2026-05-05)
+
+PageSpeed perf score 72 → 85 apres bundle split (cf. ci-dessous). Reste 2 pains points : LCP image et Google Ads.
+
+**1. LCP image — delai 3.15s avant load** : le hero `/_next/image?url=...&w=640&q=75` etait optimise on-demand par Vercel Image API (cold cache = 1-3s par variante). Fix : pre-bake de 3 variants statiques (`hero-home-640.webp` 48 KB, `hero-home-1024.webp` 118 KB, `hero-home-1600.webp` 257 KB) servis directement depuis `/imagesHero/` (Cache-Control `immutable` deja en place via `next.config.ts`). HeroSection passe de `next/image` -> `<picture>` + `<source>` + `<img fetchpriority="high">`. Plus 3 `<link rel="preload">` media-queried dans `src/app/page.tsx` pour declencher le download des l'HTML parse, avant meme l'hydration React. Estimation : LCP 3.1s -> ~1.5s.
+
+**2. Google Ads tag charge en first-interaction** : `gtag('config','AW-...')` declenchait un download de `gtag/js?id=AW-...` (133 KB, flag PageSpeed unused JS). Refacto `GoogleAdsTag.tsx` : la commande est maintenant differee jusqu'au premier `scroll/click/touch` ou un fallback idle 8s. Pour le remarketing Google Ads c'est sans cout (les bouncers sans interaction ne sont pas une audience valable de toute facon), mais ca sort completement le payload de la fenetre LCP de Lighthouse.
+
 ### Perf — Bundle splitting massif (2026-05-05)
 
 Audit `@next/bundle-analyzer` post-PageSpeed (perf 72/100). Deux coupables identifies :

@@ -1,19 +1,34 @@
 import Link from 'next/link';
-import Image from 'next/image';
 
 export const HeroSection = () => {
   return (
     <section className="relative flex items-center justify-center text-center px-4 h-[90vh] overflow-hidden">
-      <Image
-        src="/imagesHero/hero-home.webp"
-        alt="Vue aérienne d'une plage de sable blanc aux Philippines avec des bateaux traditionnels bangka"
-        fill
-        priority
-        fetchPriority="high"
-        className="object-cover z-0"
-        sizes="100vw"
-        quality={75}
-      />
+      {/* Hero LCP optimise (audit PageSpeed 2026-05-05) :
+          - Images statiques pre-resizees (640/1024/1600w) servies via /imagesHero/
+            avec Cache-Control immutable -> bypass Vercel Image API et son delai
+            d'optimization on-demand (3.15s mesure cold cache).
+          - Le <link rel="preload"> dans <head> est gere par le composant homepage
+            via un <link> inline (cf. src/app/page.tsx). */}
+      <picture>
+        <source
+          media="(max-width: 640px)"
+          srcSet="/imagesHero/hero-home-640.webp"
+          type="image/webp"
+        />
+        <source
+          media="(max-width: 1024px)"
+          srcSet="/imagesHero/hero-home-1024.webp"
+          type="image/webp"
+        />
+        <source srcSet="/imagesHero/hero-home-1600.webp" type="image/webp" />
+        <img
+          src="/imagesHero/hero-home-1024.webp"
+          alt="Vue aérienne d'une plage de sable blanc aux Philippines avec des bateaux traditionnels bangka"
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        />
+      </picture>
       <div
         className="absolute inset-0 z-10"
         style={{
