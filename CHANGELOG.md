@@ -5,6 +5,36 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### SEO — Filtres qualite forum + marketplace dans le sitemap (2026-05-05)
+
+Suite a l'audit "Discovered, currently not indexed" sur GSC (~56 pages flaggees), diagnostic DB :
+- 7 forum sujets : tous avec **0 view + 1 post (initial)** = thin content
+- 7 forum categories : toutes avec 1 topic seulement (le seed initial) = thin
+- 1 produit marketplace + 1 categorie marketplace
+- => 16 pages thin pollutent le sitemap, plombent la qualite percue du domaine par Google.
+
+**Pattern existant** (deja applique aux categories articles via `publishedCategoryIds`) etendu aux 4 types :
+
+`src/app/sitemap.ts` — 4 filtres qualite ajoutes :
+
+1. **Forum sujets** : switch `forum_topics` -> `forum_topics_with_stats` (vue avec reply_count + view_count). Filtre : `reply_count >= 1 OR view_count >= 20`. Sujet seed sans engagement -> exclu jusqu'a activite reelle.
+
+2. **Forum categories** : switch `forum_categories` -> `forum_categories_with_stats`. Filtre : `topic_count >= 2`. Une categorie ne mediant qu'un seul topic (le seed) reste hors sitemap. lastModified ameliore avec `last_post_timestamp` (vraie fraicheur).
+
+3. **Produits marketplace** : ajout `.eq('status', 'published')`. Skip drafts/pending/sold. Selectionne aussi `category_id` pour le filtre suivant.
+
+4. **Categories marketplace** : pattern `publishedProductCategoryIds` (Set des category_ids ayant au moins 1 produit publie). Categorie vide -> exclue.
+
+**Comportement self-managing** : quand un sujet recoit sa 1ere reponse / une categorie son 2eme sujet / un produit publie / une categorie marketplace son 1er produit, le prochain Vercel ISR rebuild (10 min) les inclut automatiquement dans le sitemap. Aucun follow-up manuel.
+
+**Impact attendu** :
+- ~14-16 URLs thin retirees du sitemap (sur 130 -> ~115 entries)
+- Signal qualite domaine ameliore : Google voit moins de "Discovered not indexed" stat
+- Crawl budget mieux alloue aux pages qui meritent indexation
+- Pages exclues du sitemap restent **accessibles via menu/internal linking** (juste pas crawlees prioritairement)
+
+Type-check pass.
+
 ### SEO — Cannibalisation : 301 redirects + status draft sur 2 articles doublons (2026-05-05)
 
 L'agent SEO de la session precedente avait detecte 2 doublons qui cannibalisaient les articles refondus aujourd'hui. Resolus avec le pattern habituel (cf. precedent "Phase E SEO 2026-04-27" rencontre).

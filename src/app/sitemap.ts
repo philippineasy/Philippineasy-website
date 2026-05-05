@@ -184,14 +184,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .filter(Boolean) as SitemapEntry[];
 
   /* ---------- Dynamic: Forum ---------- */
+  // Filtres qualite : on n'envoie a Google que les pages avec un signal
+  // d'engagement minimum. Sujet vide / categorie au seed initial = thin
+  // content -> Google les rejette en "Discovered, not indexed" et plombe
+  // la qualite percue du domaine. On les retient jusqu'a engagement reel,
+  // puis Vercel rebuild auto les inclut au prochain ISR (10 min).
   const { data: forumTopics, error: forumTopicsError } = await supabase
-    .from('forum_topics')
-    .select('slug, last_activity_at');
+    .from('forum_topics_with_stats')
+    .select('slug, last_activity_at, reply_count, view_count');
 
   if (forumTopicsError) console.error('Sitemap: forum_topics query failed', forumTopicsError.message);
 
   const forumTopicPages: SitemapEntry[] =
-    (forumTopics?.map(({ slug, last_activity_at }) => ({
+    (forumTopics?.filter(({ reply_count, view_count }: { reply_count: number; view_count: number }) =>
+      // Seuil : >=1 reponse OU >=20 vues = sujet potentiellement utile
+      (reply_count ?? 0) >= 1 || (view_count ?? 0) >= 20
+    ).map(({ slug, last_activity_at }) => ({
       url: `${BASE_URL}/forum-sur-les-philippines/sujet/${slug}`,
       lastModified: new Date(last_activity_at).toISOString(),
       changeFrequency: 'daily' as const,
@@ -199,23 +207,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })) || []);
 
   const { data: forumCategories, error: forumCategoriesError } = await supabase
-    .from('forum_categories')
-    .select('slug, created_at');
+    .from('forum_categories_with_stats')
+    .select('slug, topic_count, last_post_timestamp');
 
   if (forumCategoriesError) console.error('Sitemap: forum_categories query failed', forumCategoriesError.message);
 
   const forumCategoryPages: SitemapEntry[] =
-    (forumCategories?.map(({ slug, created_at }) => ({
+    (forumCategories?.filter(({ topic_count }: { topic_count: number }) =>
+      // Seuil : >=2 sujets = categorie pas juste au seed initial
+      (topic_count ?? 0) >= 2
+    ).map(({ slug, last_post_timestamp }) => ({
       url: `${BASE_URL}/forum-sur-les-philippines/${slug}`,
-      lastModified: new Date(created_at).toISOString(),
+      lastModified: last_post_timestamp ? new Date(last_post_timestamp).toISOString() : currentDate,
       changeFrequency: 'weekly' as const,
       priority: 0.7,
     })) || []);
 
   /* ---------- Dynamic: Produits ---------- */
+  // Seulement les produits 'published' (pas drafts/pending/sold)
   const { data: products } = await supabase
     .from('products')
-    .select('slug, updated_at, image_urls');
+    .select('slug, updated_at, image_urls, category_id')
+    .eq('status', 'published');
 
   const productPages: SitemapEntry[] =
     (products?.map(({ slug, updated_at, image_urls }) => ({
@@ -226,19 +239,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       images: Array.isArray(image_urls) ? image_urls.map((u: string) => toSeoImage(u, 'products')) : undefined,
     })) || []);
 
+  // Set des category_ids ayant au moins un produit publie (pour filtrer les
+  // categories vides — meme pattern que `publishedCategoryIds` pour articles)
+  const publishedProductCategoryIds = new Set(
+    (products ?? []).map((p: { category_id?: number }) => p.category_id).filter(Boolean)
+  );
+
   const { data: productCategories, error: productCategoriesError } = await supabase
     .from('product_categories')
-    .select('slug, created_at');
+    .select('id, slug, created_at');
 
   if (productCategoriesError) console.error('Sitemap: product_categories query failed', productCategoriesError.message);
 
   const productCategoryPages: SitemapEntry[] =
-    (productCategories?.map(({ slug, created_at }) => ({
-      url: `${BASE_URL}/marketplace-aux-philippines/categorie/${slug}`,
-      lastModified: new Date(created_at).toISOString(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.7,
-    })) || []);
+    (productCategories?.map(({ id, slug, created_at }) => {
+      // skip categories sans aucun produit publie
+      if (!publishedProductCategoryIds.has(id)) return null;
+      return {
+        url: `${BASE_URL}/marketplace-aux-philippines/categorie/${slug}`,
+        lastModified: new Date(created_at).toISOString(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.7,
+      };
+    }) || [])
+      .filter(Boolean) as SitemapEntry[];
 
   // VOLONTAIREMENT EXCLUS DU SITEMAP :
   // - Profils dating (`/rencontre-philippines/profil/UUID`) : contenu UTILISATEUR
