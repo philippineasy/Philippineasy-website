@@ -96,13 +96,18 @@ module.exports = {
   			'pulse-dot': {
   				'0%, 100%': { opacity: '1' },
   				'50%': { opacity: '0.35' }
+  			},
+  			'fade-in-up': {
+  				from: { opacity: '0', transform: 'translateY(8px)' },
+  				to: { opacity: '1', transform: 'translateY(0)' }
   			}
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out',
   			scroll: 'scroll-left 40s linear infinite',
-  			'pulse-dot': 'pulse-dot 1.6s ease-in-out infinite'
+  			'pulse-dot': 'pulse-dot 1.6s ease-in-out infinite',
+  			'fade-in-up': 'fade-in-up 0.4s cubic-bezier(0.16,1,0.3,1) both'
   		}
   	}
   },

@@ -19,7 +19,6 @@
  *   - 'shield'   : carte single grande (post-CTA, checkout) — emphase forte
  */
 
-import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faShieldHalved,
@@ -243,18 +242,13 @@ export function TrustBadgeBar({
   const desktopColsClass =
     cols === 2 ? 'sm:grid-cols-2' : cols === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-4';
 
-  const Wrapper: React.ElementType = animate ? motion.div : 'div';
-  const motionProps = animate
-    ? {
-        initial: { opacity: 0, y: 8 },
-        whileInView: { opacity: 1, y: 0 },
-        viewport: { once: true, margin: '-40px' },
-        transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
-      }
-    : {};
+  // Animation : on a vire framer-motion (40 KB gzip economises sur homepage —
+  // audit bundle 2026-05-05). Le fade-in est realise via CSS keyframes + le
+  // helper Tailwind `animate-fade-in-up` (defini dans tailwind.config.js).
+  const animationClass = animate ? 'animate-fade-in-up' : '';
 
   return (
-    <Wrapper className={`${padding} ${className}`} style={surfaceStyle} {...motionProps}>
+    <div className={`${padding} ${animationClass} ${className}`} style={surfaceStyle}>
       {(eyebrow || title) && (
         <div className="text-center mb-5">
           {eyebrow && (
@@ -290,7 +284,7 @@ export function TrustBadgeBar({
           />
         ))}
       </div>
-    </Wrapper>
+    </div>
   );
 }
 

@@ -5,6 +5,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Perf — Bundle splitting massif (2026-05-05)
+
+Audit `@next/bundle-analyzer` post-PageSpeed (perf 72/100). Deux coupables identifies :
+
+**1. `country-state-city` (8 MB JSON cities/states)** — embarque dans le First Load de toutes les pages utilisant `CitySelector` (5 pages : `/rencontre/swipe`, `/rencontre/profil/modifier`, `/rencontre/inscription`, `/transport/bus`, `/admin/dating/profiles/add`). Fix : wrapper `next/dynamic({ ssr: false })` autour du composant. Le chunk villes est charge async uniquement quand le selector est rendu, plus dans le bundle initial.
+
+| Page | Avant | Apres | Gain |
+|---|---|---|---|
+| `/rencontre/swipe` | 2.66 MB | **352 kB** | **−87%** |
+| `/rencontre/profil/modifier` | 2.66 MB | **351 kB** | **−87%** |
+| `/transport/bus` | 2.6 MB | **278 kB** | **−89%** |
+
+**2. `framer-motion` sur homepage (~40 KB gzip)** — `TrustBadge.tsx` importait `framer-motion` uniquement pour un `motion.div` decoratif (fade-in du `TrustBadgeBar`). Remplacement par une animation CSS pure (`animate-fade-in-up` keyframe Tailwind). Resultat : homepage `/` passe de **282 kB → 243 kB First Load (-14%)**.
+
+Type-check + build OK. Aucune regression visuelle (le fade-in CSS reproduit l'effet framer a l'identique : opacity 0 → 1, translateY 8px → 0, duree 0.4s, ease cubic-bezier).
+
 ### Branding — Restauration de l'orange brand sur tous les titres home (2026-05-05)
 
 Suite a l'audit A11y du 2026-05-05, l'agent ui-ux-designer avait introduit `text-accent-strong` (#A85F0A, AA-compliant 5.7:1) sur tous les `<span>` orange des titres home pour passer le test contraste Lighthouse. Hugo : "wouah cette quoi cette couleur caca... je veux retrouver mon orange dans tout les titres".
