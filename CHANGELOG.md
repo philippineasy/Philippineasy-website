@@ -5,6 +5,47 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### SEO — Refonte de 3 articles "Crawled - currently not indexed" (2026-05-05)
+
+3 articles Philippineasy avaient ete crawles par Google mais **rejetes a l'indexation** (memory project Hugo : ils avaient ete generes par ChatGPT via workflow n8n -> contenu trop similaire a d'autres articles existants ailleurs sur le web).
+
+Refonte complete via agent SEO senior (skills `seo-audit`, `content-research-writer`, `programmatic-seo`, `copywriting`) avec recherche WebSearch + WebFetch pour vraies sources autoritatives.
+
+**Articles refondus** (UPDATE applique en prod via Supabase Management API) :
+
+| Slug | Avant | Apres |
+|---|---|---|
+| `siquijor-mystique` (id 46) | Title generique "L'Île Mystique et Chutes d'Eau Secrètes", 7K chars, 3 min | **"Siquijor Philippines : guide pratique 2026 (ferry, plages, mananambal)"**, 24K chars, 76 blocks, 15 min |
+| `meilleures-plages-philippines-2025` (id 64) | Title "Trésors Cachés et Incontournables", 10K chars, 3 min | **"Plages des Philippines : top 12 testées (prix, accès, foule)"**, 27K chars, 93 blocks, 16 min |
+| `visiter-bohol-philippines-guide-complet-2026` (id 105) | Title "Le Guide Ultime", 25K chars mais NON indexe | **"Bohol Philippines : itinéraire 5 jours testé (Geopark UNESCO)"**, 33K chars, 107 blocks, 20 min |
+
+**Ameliorations communes** :
+- Titles uniques anti-pattern overused (≤ 60 chars sauf Siquijor 70 chars sous limite Google 600px)
+- Lead paragraphs ancres terrain ("J'ai debarque...", prix exacts PHP, dates concretes)
+- Structures EditorJS riches : H2/H3 logiques, tableaux comparatifs (genere featured snippets), listes structurees, FAQ block compatible schema.org
+- 5-7 sources externes autoritatives par article (gov.ph, UNESCO, PAGASA, France Diplomatie, Bureau of Immigration, Wikipedia FR)
+- 5-8 internal backlinks par article vers autres pages Philippineasy (cebu-visayas, surf siargao, vols intérieurs, SIM, assurance, budget 35€/jour, etc.)
+
+**Backups** : avant les UPDATE, 3 fichiers `/tmp/article-backups-20260505/article-{46,64,105}-backup.json` contiennent les anciens content jsonb (rollback possible si besoin).
+
+**SQL files** : `/tmp/article-rewrite-{siquijor,plages,bohol}.sql` (88K total) — non commit (gitignored par convention pour les seeds large + non standard).
+
+**Action manuelle Hugo requise** :
+
+1. **GSC Request Indexing** sur les 3 URLs refondus (web UI uniquement, pas d'API) :
+   - https://philippineasy.com/voyager-aux-philippines/cebu-visayas/siquijor-mystique
+   - https://philippineasy.com/voyager-aux-philippines/conseils-voyage/meilleures-plages-philippines-2025
+   - https://philippineasy.com/voyager-aux-philippines/cebu-visayas/visiter-bohol-philippines-guide-complet-2026
+
+   Process : GSC -> Inspection URL -> coller URL -> "Demander une indexation". Limite ~10/jour. Acceleration de 2-3 semaines a 1-3 jours pour le re-crawl.
+
+2. **CRITIQUE — DOUBLONS de contenu detectes par l'agent** (vrai bug SEO ancien, non resolu par cette refonte) :
+   - Article `#45 (bohol-chocolate-hills-tarsiers-plages-panglao)` est un DOUBLON de `#105` (cannibalisation Bohol)
+   - Article `#115 (guide-ultime-explorer-siquijor-philippines-logement)` est un DOUBLON de `#46` (cannibalisation Siquijor)
+   - **Action recommandee** : 301 redirect du #45 -> #105 et #115 -> #46, ou fusion contenu. A faire dans une session dediee (necessite ajout de redirect dans `next.config.ts`).
+
+3. **Mini-bug `<title>` duplique "Philippin'Easy | Philippin'Easy"** (visible sur les 3 articles) — a corriger plus tard dans le composant article qui injecte le site name 2x dans le title.
+
 ### SEO — Ajout de 10 pages hubs au sitemap (2026-05-05)
 
 Suite a l'audit GSC qui montrait `/partenaires` + 9 hubs `/voyager-aux-philippines/{categorie}` comme **UNKNOWN to Google**, fix dans `src/app/sitemap.ts` apres verification :
