@@ -5,6 +5,37 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### SEO — Publication des 4 articles destinations + heroes WebP (2026-05-05)
+
+Apres fact-check + corrections + traitement images, **4 articles passes en `published=true`** via Supabase Management API. Le sitemap dynamique inclut maintenant 5 articles destinations (palawan + cebu + siargao + boracay + philippines-2-semaines) + le hub `/itineraires-philippines`.
+
+**URLs publiques live (HTTP 200 verifies)** :
+- https://philippineasy.com/itineraire-palawan (deja live)
+- https://philippineasy.com/itineraire-cebu (NOUVEAU)
+- https://philippineasy.com/itineraire-siargao (NOUVEAU)
+- https://philippineasy.com/itineraire-boracay (NOUVEAU)
+- https://philippineasy.com/itineraire-philippines-2-semaines (NOUVEAU)
+- https://philippineasy.com/itineraires-philippines (hub avec les 5 cards)
+
+**Heroes WebP** ajoutes dans `public/imagesHero/` :
+- `siargao-surf-philippines.webp` (266K, 1448x1036, coucher de soleil + bangka + surfeurs)
+- `cebu-island-philippines.webp` (331K, 1717x866, lagune turquoise karst calcaire)
+- `boracay-white-beach.webp` (244K, 1408x718, scene nocturne D-Mall)
+- `philippines-itineraire-multi-iles.webp` (89K, 1408x718, trekking dans les nuages)
+
+Pipeline traitement : crop bottom 50px (watermark Gemini) -> cwebp q82 m=6 mt -> ~85-95% reduction taille vs PNG source.
+
+**SEO ouverture** :
+- Sitemap.xml inclut maintenant les 5 itineraires + hub (priority 0.85, changeFrequency monthly)
+- Vercel rebuild automatique au prochain git push (le commit CHANGELOG declenche un deploy qui regenere sitemap.ts)
+- Volume de recherche FR cible cumule : ~6-15k/mois (palawan ~1-3k + cebu ~500-1.5k + siargao ~300-800 + boracay ~200-600 + philippines-2-semaines ~2-5k)
+- A faire manuellement plus tard : soumettre le sitemap a Google Search Console (gsc.google.com -> Sitemaps -> Submit) pour acceleration indexation.
+
+**Hugo manual followup** :
+- Verifier rendu mobile/desktop sur les 5 pages
+- Spot-check les claims terrain (3 hostels non verifies par fact-check : Chief Mau Backpackers Moalboal, Bohol Beach House Hostel Alona, Hop Hostel Coron)
+- Si une image hero ne plait pas (Boracay AI a genere du texte sur les enseignes), regenerer + reprocessing
+
 ### SEO — Fact-checks corrections sur 4 articles destinations (2026-05-05)
 
 Suite a un audit complet via WebSearch + WebFetch sur 7 claims des 4 articles. **3 erreurs critiques + 3 corrections moyennes** appliquees aux seed files locaux ET en prod (DELETE + INSERT, articles toujours `published=false`). Le seul article `published=true` reste Palawan (intact).
