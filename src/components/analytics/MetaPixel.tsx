@@ -49,9 +49,12 @@ export default function MetaPixel() {
 
   return (
     <>
+      {/* lazyOnload : la library connect.facebook.net (135 KiB) charge apres
+          le load event pour ne pas bloquer le LCP. fbq() queue les events
+          en attendant. Audit PageSpeed 2026-05-05 a flagge 47 KiB unused. */}
       <Script
         id="meta-pixel"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
         dangerouslySetInnerHTML={{ __html: pixelScript }}
       />
       <noscript>

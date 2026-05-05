@@ -49,10 +49,16 @@ export default function GoogleAnalytics() {
 
   return (
     <>
+      {/* gtag.js library : lazyOnload pour ne pas bloquer le LCP (audit
+          PageSpeed 2026-05-05 : 132 KiB unused JS sur GTM au LCP).
+          Le tracking continue de fonctionner — gtag() queue les events
+          dans dataLayer en attendant que la library charge. */}
       <Script
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-        strategy="afterInteractive"
+        strategy="lazyOnload"
       />
+      {/* Inline config en afterInteractive : queue les events tot meme si
+          la library externe n'est pas encore chargee (lazy). */}
       <Script id="google-analytics" strategy="afterInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
