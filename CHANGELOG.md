@@ -5,6 +5,34 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### UI/UX — Refonte complete des pages articles destinations (2026-05-05)
+
+Suite a la critique Hugo : *"très IA, on voit tout de suite que c'est de l'IA génération... ça fait des blocs à lire"*. Refonte complete des 7 fichiers (page + 6 composants) pour aligner sur le langage visuel home : gradient `#3B5BDB → #1e40af`, cercles dashed decoratifs (signature pattern), eyebrow uppercase + accent `✦`, typo `letterSpacing: -0.02em`. Plus aucun `bg-blue-500` Tailwind par defaut.
+
+**5 decisions cles** :
+
+1. **DayCard reimagine avec timeline verticale dashed bleue** entre jours + chiffre `J{n}` en pill orange cerclee (style HowItWorks home). Chaque activite = sous-card distincte avec numero circule, image WebP 80-96px arrondie, pills duree/cout aux tons primary/accent. Footer transport/hebergement/repas en grid 3 cols. Plus de "mur de texte par jour" critique par Hugo.
+
+2. **Budget reinvente en 3 cards horizontales** (Backpacker/Mid-range/Luxe) avec mid-range highlighted gradient bleu + badge orange "Recommande" + barres CSS pures proportionnelles. Le table generique est mort.
+
+3. **Rythme de sections alternees** `bg-background` ↔ `bg-soft-blue` avec `py-14 md:py-18`, eyebrow `✦` systematique avant chaque H2, max-width contextuelles (3xl intro, 4xl itineraire, 5xl budget, 6xl related).
+
+4. **Hero plein ecran 78vh** avec photo dominante + overlay gradient sombre + cercles dashed signature + eyebrow + H1 accent jaune sur "jour par jour" + 3 pills horizontaux (duree/budget/saison) + CTA orange brand.
+
+5. **CRO baked-in** : CTA inline mid-itineraire (insertion auto entre J{n/2} et J{n/2+1} si ≥5 jours), CTA hero avec ancre #itineraire-jour-par-jour, related cards avec photo dominante 4/3 + nom en overlay (style RegionCards), final CTA full block reprenant `ItineraireIABlock`.
+
+**Mobile-first** : hero 78vh photo plein ecran, day cards stack vertical, budget 3 cards stack, FAQ accordion (premier item ouvert), related grid 1 col photo 4/3 dominante.
+
+**Desktop ≥1024px** : hero max-w-6xl avec cercles dashed visibles, day cards max-w-4xl avec timeline dashed verticale, budget grid 3 cols horizontal, related grid 3 cols.
+
+7 fichiers (595 → 1372 lignes) : `src/app/itineraires/[slug]/page.tsx`, `src/components/destinations/{ItineraryHero, ItineraryDayCard, BudgetTable, FAQSection, RelatedItineraries, Breadcrumb}.tsx`.
+
+Type-check + ESLint pass.
+
+### SEO — Sitemap soumis a Google Search Console (2026-05-05)
+
+Apres publication des 4 nouveaux articles destinations, sitemap `https://philippineasy.com/sitemap.xml` re-soumis a GSC via API (`mcp__google-search-console__submit_sitemap`). Status : Pending processing. Les 5 URLs `/itineraire-{slug}` + le hub `/itineraires-philippines` seront indexees Google sous 24h-2 semaines (suivant priorite GSC).
+
 ### SEO — Publication des 4 articles destinations + heroes WebP (2026-05-05)
 
 Apres fact-check + corrections + traitement images, **4 articles passes en `published=true`** via Supabase Management API. Le sitemap dynamique inclut maintenant 5 articles destinations (palawan + cebu + siargao + boracay + philippines-2-semaines) + le hub `/itineraires-philippines`.

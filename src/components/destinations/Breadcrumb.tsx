@@ -30,26 +30,39 @@ export function Breadcrumb({ destinationName }: BreadcrumbProps) {
   };
 
   return (
-    <nav aria-label="Fil d'Ariane" className="text-sm text-slate-500">
+    <nav
+      aria-label="Fil d'Ariane"
+      className="text-[13px] text-muted-foreground"
+    >
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
-      <ol className="flex flex-wrap items-center gap-1">
+      <ol className="flex flex-wrap items-center gap-1.5">
         <li>
-          <Link href="/" className="hover:text-blue-600">
+          <Link
+            href="/"
+            className="hover:text-primary transition-colors focus-visible:outline-none focus-visible:underline"
+          >
             Accueil
           </Link>
         </li>
-        <li className="text-slate-400">/</li>
+        <li className="text-muted-foreground/50" aria-hidden="true">
+          ›
+        </li>
         <li>
-          <Link href="/itineraires-philippines" className="hover:text-blue-600">
+          <Link
+            href="/itineraires-philippines"
+            className="hover:text-primary transition-colors focus-visible:outline-none focus-visible:underline"
+          >
             Itinéraires Philippines
           </Link>
         </li>
-        <li className="text-slate-400">/</li>
-        <li className="text-slate-700" aria-current="page">
-          Itinéraire {destinationName}
+        <li className="text-muted-foreground/50" aria-hidden="true">
+          ›
+        </li>
+        <li className="font-medium text-ink" aria-current="page">
+          {destinationName}
         </li>
       </ol>
     </nav>
