@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useIAOverlay } from '@/contexts/IAOverlayContext';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   PRICING_GRID,
   DURATION_LABELS,
@@ -10,6 +11,9 @@ import {
   type Duration,
   type OfferType,
 } from '@/config/itinerary-pricing';
+
+// Validation email (alignee sur PreferencesForm.tsx — meme regex)
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // =============================================================
 // Mapping helpers — must match n8n workflow "Valider les Entrees" exactly
@@ -108,6 +112,10 @@ type Step = 0 | 1 | 2;
 
 export function IAOverlay() {
   const { isOpen, close } = useIAOverlay();
+  // Email obligatoire pour anonymes : sans email, generation perdue (recovery
+  // impossible, magic link checkout impossible). Audit 2026-05-09 — 3/4 leads
+  // recents IAOverlay etaient anonymes sans email. Aligne sur PreferencesForm.
+  const { user, loading: authLoading } = useAuth();
 
   const [step, setStep] = useState<Step>(0);
   const [style, setStyle] = useState<StyleKey>('Détente');
@@ -116,6 +124,7 @@ export function IAOverlay() {
   const [budget, setBudget] = useState(2000);
   const [interests, setInterests] = useState<Interest[]>(['beaches', 'culture']);
   const [additionalInfo, setAdditionalInfo] = useState('');
+  const [email, setEmail] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -137,6 +146,8 @@ export function IAOverlay() {
       setLoading(false);
       setPaymentLoading(false);
       setSelectedVariant(null);
+      // Email NON reset au setEmail() volontairement : si l'utilisateur ouvre
+      // l'overlay 2x, on garde sa saisie precedente pour reduire la friction.
       const t = setTimeout(() => closeButtonRef.current?.focus(), 50);
       return () => clearTimeout(t);
     }
@@ -191,6 +202,14 @@ export function IAOverlay() {
   };
 
   const generate = useCallback(async () => {
+    // Validation email pour les anonymes — bloque la generation sans email
+    // pour eviter les leads fantomes irrecuperables (cf. audit 2026-05-09).
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!user && !EMAIL_RE.test(trimmedEmail)) {
+      setError('Veuillez saisir un email valide pour recevoir votre apercu.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     if (typeof window !== 'undefined' && (window as any).gtag) {
@@ -205,6 +224,9 @@ export function IAOverlay() {
         tripStyle,
         interests: interests.length > 0 ? interests : ['beaches'],
         additionalInfo: additionalInfo.trim().slice(0, 500),
+        // Email persiste cote API (delivery_email) -> recovery cron + magic
+        // link payment fonctionnent meme si l'utilisateur ferme l'overlay.
+        ...(trimmedEmail ? { email: trimmedEmail } : {}),
       };
       const res = await fetch('/api/itinerary/generate', {
         method: 'POST',
@@ -235,7 +257,7 @@ export function IAOverlay() {
     } finally {
       setLoading(false);
     }
-  }, [additionalInfo, budget, duration, interests, style, travelType]);
+  }, [additionalInfo, budget, duration, interests, style, travelType, email, user]);
 
   const handlePayment = useCallback(async () => {
     if (!generationId || !selectedVariant) return;
@@ -458,6 +480,31 @@ export function IAOverlay() {
                   })}
                 </div>
               </div>
+
+              {/* Email — obligatoire pour anonymes (recovery + magic link checkout).
+                  Sans ce champ, audit 2026-05-09 : 75% des leads IAOverlay perdus
+                  car generation sans contact = recovery impossible. */}
+              {!authLoading && !user && (
+                <div>
+                  <label htmlFor="ia-email" className="block text-[14px] font-medium text-foreground mb-2">
+                    Votre email <span className="text-destructive">*</span>
+                  </label>
+                  <input
+                    id="ia-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="votre@email.com"
+                    autoComplete="email"
+                    inputMode="email"
+                    required
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-[14px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent placeholder:text-muted-foreground/60"
+                  />
+                  <span className="block text-[11px] text-muted-foreground mt-1">
+                    On vous envoie l&apos;aperçu et on retient vos préférences si vous revenez plus tard.
+                  </span>
+                </div>
+              )}
 
               {/* Additional info */}
               <div>

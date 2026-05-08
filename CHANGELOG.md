@@ -5,6 +5,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Funnel — IAOverlay capture email obligatoire (2026-05-09)
+
+Audit Google Ads + Supabase 2026-05-09 : sur 4 vraies générations issues de la campagne Search/Display, **3 étaient anonymes sans email** (75%) — toutes irrécupérables. Coût : 80€ pour 4 leads dont 3 fantômes.
+
+Cause : `IAOverlay.tsx` (popup déclenchée par le bouton "Créer Itinéraire" du Header) appelait `/api/itinerary/generate` **sans champ email** dans le payload, contrairement à `PreferencesForm.tsx` (landing page) qui l'exigeait. Deux entry points, deux comportements — fix #25 ne couvrait que le second.
+
+Fix : ajout d'un champ email obligatoire dans le step 1 de `IAOverlay.tsx` (entre "Centres d'intérêt" et "Note libre"), aligné sur `PreferencesForm` (même regex `EMAIL_RE`, même copy). Validation bloquante avant l'appel à `/api/itinerary/generate`. Email persisté en `delivery_email` -> recovery cron J+1/J+3/J+7 + magic link checkout fonctionnent désormais pour TOUTES les générations.
+
+L'email saisi n'est pas reset à la fermeture/réouverture de l'overlay (réduction de la friction si l'utilisateur ouvre 2 fois).
+
 ### Perf — LCP image + Google Ads lazy (2026-05-05)
 
 PageSpeed perf score 72 → 85 apres bundle split (cf. ci-dessous). Reste 2 pains points : LCP image et Google Ads.
