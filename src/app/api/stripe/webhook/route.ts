@@ -111,6 +111,34 @@ export async function POST(req: NextRequest) {
     if (session.metadata?.service_type) {
       await handleServiceCheckout(supabaseAdmin, session);
     }
+    // --- Itinerary payment via Checkout Session (recovery perso, Stripe direct) ---
+    // Audit 2026-05-09 : avant ce branch, les Checkout Sessions itineraires
+    // n'etaient pas processees (webhook ne traitait que payment_intent.succeeded
+    // + le PaymentIntent flow via /api/itinerary/payment). Stripe webhook config
+    // n'envoie pas `payment_intent.succeeded` (pas dans enabled_events), donc
+    // les paiements via Checkout Session direct passaient inaperçus -> generation
+    // restait status=selected, payment_status=pending, email "Itineraire pret"
+    // jamais envoye. Hugo a paye 0.50 EUR en test -> rien n'est arrive en DB.
+    else if (session.metadata?.generation_id && session.payment_intent) {
+      try {
+        const stripeForRetrieve = getStripe();
+        const pi = await stripeForRetrieve.paymentIntents.retrieve(
+          session.payment_intent as string
+        );
+        // Inject metadata depuis session si manquantes sur PI (cas ou
+        // payment_intent_data.metadata non duplique tous les champs).
+        const mergedMetadata = { ...session.metadata, ...pi.metadata };
+        await handleItineraryPayment(
+          supabaseAdmin,
+          { ...pi, metadata: mergedMetadata } as Stripe.PaymentIntent
+        );
+      } catch (err) {
+        console.error(
+          `[webhook] checkout.session.completed itinerary fail for session ${session.id}:`,
+          err instanceof Error ? err.message : err
+        );
+      }
+    }
     // --- Dating subscription (legacy) ---
     else if (session.metadata?.userId && session.customer && session.subscription) {
       const userId = session.metadata.userId;
