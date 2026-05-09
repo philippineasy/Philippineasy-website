@@ -5,6 +5,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Funnel — Fix recovery flow non-auth (loader infini) + coupon preserve (2026-05-09)
+
+Audit GA4 + reproduction live 2026-05-09 : un user non-connecte qui clique sur un lien recovery email (URL `?resume_payment=...&coupon=...`) voyait le splash "Préparation de votre paiement" tourner en boucle. Cause : le `useEffect` resume_payment retournait silencieusement a `if (!user) return` mais le splash plein-ecran (`if (isResuming && !error) return ...`) restait affiche, masquant la modal magic-link et empechant le user de s'authentifier. **4 leads `ia_checkout_started` perdus en 28j** (GA4 confirme : 0 user non-Hugo n'a atteint `/checkout/itinerary`).
+
+Fixes :
+1. **Auto-ouverture de `PaymentAuthModal`** quand `isResuming && !user && !authLoading`. Set automatique de `generationId/selectedVariant/pendingOffer` depuis URL params puis `setPaymentAuthModalOpen(true)`. User saisit son email -> magic link -> click email -> revient auth -> useEffect existant declenche `triggerPayment`.
+2. **Splash conditionnel a l'auth** : la garde devient `if (isResuming && user && !error)` au lieu de `if (isResuming && !error)`. Sinon le loader masquait la modal.
+3. **Coupon preserve dans `buildRedirectUrl`** de `PaymentAuthModal` : sans ce fix, un user revenant du magic link perdait le coupon URL -> payait plein prix malgre le -X% promis dans l'email recovery. Bug identifie en testant le mailing perso Maryse Lafleuriere (recovery -50%). Ajout d'une prop `coupon?: string` a `PaymentAuthModal` + propagation dans `loginUrl` et `buildRedirectUrl`.
+
+Impact attendu : tous les futurs leads recovery (cron J+3 + perso) peuvent desormais finaliser leur paiement, alors qu'avant 100% etaient bloques au loader. Equivalent business : recuperer ~16€/lead × 4 abandons/mois.
+
 ### Funnel — IAOverlay capture email obligatoire (2026-05-09)
 
 Audit Google Ads + Supabase 2026-05-09 : sur 4 vraies générations issues de la campagne Search/Display, **3 étaient anonymes sans email** (75%) — toutes irrécupérables. Coût : 80€ pour 4 leads dont 3 fantômes.

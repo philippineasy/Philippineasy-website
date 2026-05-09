@@ -25,6 +25,12 @@ interface PaymentAuthModalProps {
   offer: OfferType;
   /** Variant choisi (relax/balanced/adventure) — sera transmis au resume_payment */
   variant: string;
+  /**
+   * Coupon Stripe optionnel a preserver dans l'URL post-magic-link.
+   * Sans ce passage, user revient sans coupon -> paie plein prix
+   * (bug observe 2026-05-09 sur recovery perso). Cf. buildRedirectUrl.
+   */
+  coupon?: string;
 }
 
 // Regex simple pour valider un email côté client
@@ -37,6 +43,7 @@ export function PaymentAuthModal({
   generationId,
   offer,
   variant,
+  coupon,
 }: PaymentAuthModalProps) {
   const [email, setEmail] = useState(initialEmail);
   const [isSending, setIsSending] = useState(false);
@@ -90,6 +97,11 @@ export function PaymentAuthModal({
       offer,
       variant,
     });
+    // Coupon preserve si present (cas recovery email avec promo perso) — sinon
+    // user paie plein prix apres magic link malgre le -X% promis dans l'email.
+    if (coupon) {
+      targetParams.set('coupon', coupon);
+    }
     const targetUrl = `/itineraire-personnalise-pour-les-philippines?${targetParams.toString()}`;
     return `${origin}/auth/callback?next=${encodeURIComponent(targetUrl)}`;
   };
@@ -145,9 +157,9 @@ export function PaymentAuthModal({
     }
   };
 
-  // URL de redirection vers la page de connexion classique
+  // URL de redirection vers la page de connexion classique (preserve coupon)
   const loginUrl = `/connexion?redirect=${encodeURIComponent(
-    `/itineraire-personnalise-pour-les-philippines?resume_payment=${generationId}&offer=${offer}&variant=${variant}`
+    `/itineraire-personnalise-pour-les-philippines?resume_payment=${generationId}&offer=${offer}&variant=${variant}${coupon ? `&coupon=${encodeURIComponent(coupon)}` : ''}`
   )}`;
 
   return (

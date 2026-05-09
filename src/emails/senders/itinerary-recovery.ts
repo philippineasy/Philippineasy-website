@@ -47,6 +47,29 @@ interface RecoveryEmailBase {
 interface RecoveryEmail72hParams extends RecoveryEmailBase {
   /** Stripe coupon code to display in email #2 */
   couponCode: string;
+  /**
+   * Discount percentage (1-100). Default = 10 (cron auto J+3 RELANCE10).
+   * Override pour relances perso ultra-ciblees (ex: -50% pour leads chauds
+   * avec preferences detaillees, audit 2026-05-09).
+   */
+  discountPercent?: number;
+  /**
+   * HTML paragraph optional inserted after l'intro et avant le block reduction.
+   * Pour personnaliser la copy avec des references aux preferences saisies
+   * (ex: "Vous avez mentionne Palawan et Coron en plongee couple..."). Doit
+   * etre du HTML safe deja escape, le sender ne fait pas de sanitization.
+   */
+  personalNote?: string;
+  /**
+   * Override du subject (default = "Un petit cadeau pour finaliser votre voyage").
+   * Pour matcher la copy ultra-perso quand discountPercent > 10.
+   */
+  subjectOverride?: string;
+  /**
+   * Override de la deadline affichee dans le highlightBox (default = "demain").
+   * Ex: "48h" pour souligner l'urgence.
+   */
+  deadlineLabel?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -164,10 +187,14 @@ export async function sendRecoveryEmail72h(
 ): Promise<{ success: boolean; error?: string }> {
   const {
     to, userName, generationId, destination, durationLabel, offerType, variant, couponCode,
+    discountPercent = 10,
+    personalNote,
+    subjectOverride,
+    deadlineLabel = 'demain',
   } = params;
 
   // Coupon transmis dans l'URL (auto-apply server-side via /api/itinerary/payment).
-  // L'utilisateur n'a rien a saisir : il clique le bouton, le -10% est applique tout seul.
+  // L'utilisateur n'a rien a saisir : il clique le bouton, le -X% est applique tout seul.
   const resumeUrl = buildResumeUrl(generationId, offerType, variant, 'relance_72h', couponCode);
   const offerName = OFFER_DISPLAY_NAMES[offerType] ?? 'Express';
 
@@ -178,15 +205,17 @@ export async function sendRecoveryEmail72h(
     `  surtout quand on n&apos;est pas encore sur a 100% de son voyage.`,
     `</p>`,
     ``,
+    // Note perso optionnelle — inseree apres l'intro et avant le bloc reduction
+    ...(personalNote ? [personalNote, ``] : []),
     `<p style="font-size:14px;line-height:1.7;margin:0 0 16px;color:${BRAND.text};">`,
-    `  Pour vous donner un coup de pouce, on vous offre <strong>&minus;10%</strong> sur votre itineraire,`,
-    `  valable 24h. La reduction est <strong>deja incluse</strong> dans le bouton ci-dessous &mdash;`,
+    `  Pour vous donner un coup de pouce, on vous offre <strong>&minus;${discountPercent}%</strong> sur votre itineraire,`,
+    `  valable ${deadlineLabel === 'demain' ? '24h' : deadlineLabel}. La reduction est <strong>deja incluse</strong> dans le bouton ci-dessous &mdash;`,
     `  rien a saisir, juste a cliquer.`,
     `</p>`,
     ``,
     emailHighlightBox(
-      `<strong style="font-size:20px;">&minus;10% inclus</strong><br>` +
-      `<span style="font-size:13px;margin-top:6px;display:block;">Sur votre itineraire ${offerName} &mdash; offre valable jusqu&apos;a demain.</span>`,
+      `<strong style="font-size:20px;">&minus;${discountPercent}% inclus</strong><br>` +
+      `<span style="font-size:13px;margin-top:6px;display:block;">Sur votre itineraire ${offerName} &mdash; offre valable jusqu&apos;a ${deadlineLabel}.</span>`,
       'success'
     ),
     ``,
@@ -204,9 +233,11 @@ export async function sendRecoveryEmail72h(
     ),
   ].join('\n');
 
+  const subject = subjectOverride ?? 'Un petit cadeau pour finaliser votre voyage';
+
   const html = buildEmailHtml({
-    title: 'Un petit cadeau pour finaliser votre voyage',
-    preheader: `-10% inclus sur votre itineraire ${destination}, offre valable 24h.`,
+    title: subject,
+    preheader: `-${discountPercent}% inclus sur votre itineraire ${destination}, offre valable ${deadlineLabel === 'demain' ? '24h' : deadlineLabel}.`,
     userName,
     bodyHtml,
     ctaText: "Profiter de l'offre",
@@ -216,7 +247,7 @@ export async function sendRecoveryEmail72h(
   return sendEmail({
     to,
     from: 'itineraire',
-    subject: 'Un petit cadeau pour finaliser votre voyage',
+    subject,
     html,
     category: 'transactional',
   });

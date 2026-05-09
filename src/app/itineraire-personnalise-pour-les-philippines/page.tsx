@@ -233,6 +233,31 @@ function ItineraireContent() {
   // (ex: 401 auth pas encore propage cote serveur) qui flashent avant le retry.
   const isResuming = !!searchParams.get('resume_payment');
 
+  // ─── Resume payment : ouvrir la modal magic-link si non-auth ───────────────
+  // Audit 2026-05-09 : avant ce useEffect, un user non-auth qui cliquait le lien
+  // recovery email voyait le splash "Preparation de votre paiement" tourner en
+  // boucle (le useEffect ci-dessous return tot a `if (!user) return`). 4 leads
+  // perdus en 28j. Fix : on auto-ouvre la modal magic-link avec les params URL,
+  // user saisit son email, magic link, click, revient auth -> useEffect suivant
+  // declenche triggerPayment.
+  useEffect(() => {
+    if (!isResuming || authLoading || user) return;
+
+    const resumeGenerationId = searchParams.get('resume_payment');
+    const resumeOffer = searchParams.get('offer') as OfferType | null;
+    const resumeVariant = searchParams.get('variant');
+
+    if (!resumeGenerationId || !resumeOffer) return;
+    const validOffers: OfferType[] = ['express', 'premium', 'conciergerie'];
+    if (!validOffers.includes(resumeOffer)) return;
+
+    setGenerationId(resumeGenerationId);
+    setSelectedVariant(resumeVariant || 'balanced');
+    setPendingOffer(resumeOffer);
+    setPaymentAuthModalOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isResuming, user, authLoading]);
+
   // ─── Resume payment après retour du magic link ─────────────────────────────
   // Quand l'utilisateur revient depuis le lien email avec resume_payment + offer,
   // et qu'il est maintenant connecté, on déclenche le paiement automatiquement.
@@ -321,7 +346,10 @@ function ItineraireContent() {
   // Evite que l'utilisateur voit le formulaire de generation vide pendant
   // que la session auth se propage et que l'API est appelee. Reste affiche
   // jusqu'au redirect Stripe (ou jusqu'a une vraie erreur affichee).
-  if (isResuming && !error) {
+  // CONDITION `user` : si non-auth on n'affiche PAS le splash (sinon il tournait
+  // en boucle car triggerPayment ne se lance que quand auth — fix 2026-05-09).
+  // L'auto-open du PaymentAuthModal prend le relais pour les non-auth.
+  if (isResuming && user && !error) {
     return (
       <main className="min-h-screen bg-[hsl(var(--warm-bg))] flex items-center justify-center px-4">
         <motion.div
@@ -475,6 +503,7 @@ function ItineraireContent() {
           generationId={generationId}
           offer={pendingOffer}
           variant={selectedVariant}
+          coupon={searchParams.get('coupon') || undefined}
         />
       )}
     </main>
