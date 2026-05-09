@@ -70,6 +70,20 @@ interface RecoveryEmail72hParams extends RecoveryEmailBase {
    * Ex: "48h" pour souligner l'urgence.
    */
   deadlineLabel?: string;
+  /**
+   * Si true, genere un magic-link Supabase via admin.generateLink (1 clic =
+   * auth + redirect direct vers Stripe checkout). Sans ce flag, le user
+   * non-auth doit saisir son email manuellement dans le PaymentAuthModal et
+   * attendre un autre email magic-link (2 actions, beaucoup de friction).
+   *
+   * Use case 2026-05-09 : recovery perso ultra-ciblee, on veut le moins
+   * de friction possible pour convertir le seul lead chaud externe (Maryse).
+   *
+   * Le magic-link expire 24h et est usage unique (Supabase default).
+   * Si la generation echoue (config manquante, rate limit), on fallback
+   * sur l'URL standard non-auth pour ne pas bloquer l'envoi.
+   */
+  useMagicLinkAuth?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -191,12 +205,45 @@ export async function sendRecoveryEmail72h(
     personalNote,
     subjectOverride,
     deadlineLabel = 'demain',
+    useMagicLinkAuth = false,
   } = params;
 
-  // Coupon transmis dans l'URL (auto-apply server-side via /api/itinerary/payment).
-  // L'utilisateur n'a rien a saisir : il clique le bouton, le -X% est applique tout seul.
-  const resumeUrl = buildResumeUrl(generationId, offerType, variant, 'relance_72h', couponCode);
+  // URL standard (resume_payment + coupon) — appel direct landing page.
+  // Si user pas auth, le PaymentAuthModal s'ouvre pour saisie email + magic link.
+  const standardUrl = buildResumeUrl(generationId, offerType, variant, 'relance_72h', couponCode);
   const offerName = OFFER_DISPLAY_NAMES[offerType] ?? 'Express';
+
+  // Si useMagicLinkAuth=true, on genere un magic-link via Supabase admin qui
+  // redirige vers la standardUrl APRES auth. Resultat : 1 clic = auth + redirect
+  // direct vers Stripe (au lieu de saisir email + attendre un 2e email).
+  let resumeUrl = standardUrl;
+  if (useMagicLinkAuth) {
+    try {
+      const { createServiceRoleClient } = await import('@/utils/supabase/service-role');
+      const supabaseAdmin = createServiceRoleClient();
+      const callbackUrl = `${BRAND.siteUrl}/auth/callback?next=${encodeURIComponent(
+        standardUrl.replace(BRAND.siteUrl, '')
+      )}`;
+      const { data: linkData, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({
+        type: 'magiclink',
+        email: to,
+        options: { redirectTo: callbackUrl },
+      });
+      if (linkErr || !linkData?.properties?.action_link) {
+        console.warn(
+          '[recovery72h] generateLink failed, falling back to standard URL:',
+          linkErr?.message
+        );
+      } else {
+        resumeUrl = linkData.properties.action_link;
+      }
+    } catch (e) {
+      console.warn(
+        '[recovery72h] generateLink threw, falling back to standard URL:',
+        e instanceof Error ? e.message : String(e)
+      );
+    }
+  }
 
   const bodyHtml = [
     `<p style="font-size:15px;line-height:1.7;margin:0 0 20px;color:${BRAND.text};">`,
