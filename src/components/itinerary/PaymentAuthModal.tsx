@@ -87,9 +87,16 @@ export function PaymentAuthModal({
   }, [isOpen, initialEmail, emailEditMode]);
 
   // URL de retour après clic sur le magic link :
-  // On route via /auth/callback?next=<URL encodee> pour preserver les query
-  // params (resume_payment + offer). Sinon Supabase magic link redirige direct
-  // vers emailRedirectTo et strippe nos params (bug observe en prod 2026-05-03).
+  // En flow implicit (cf. client.ts auth.flowType = 'implicit'), Supabase met
+  // le token dans le HASH (#access_token=...) et redirige direct vers
+  // emailRedirectTo. Le client browser auto-traite le hash via
+  // detectSessionInUrl=true, set la session, et le AuthContext propage user.
+  //
+  // Important : on ne passe PAS par /auth/callback en implicit (cette route
+  // utilise exchangeCodeForSession qui est PKCE-only). On va direct vers la
+  // landing avec resume_payment + coupon. Le hash s'ajoute apres la query.
+  // Audit 2026-05-09 : le bug PKCE precedent (otp_expired cross-browser) est
+  // resolu par le flow implicit + redirect direct.
   const buildRedirectUrl = (): string => {
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const targetParams = new URLSearchParams({
@@ -97,13 +104,11 @@ export function PaymentAuthModal({
       offer,
       variant,
     });
-    // Coupon preserve si present (cas recovery email avec promo perso) — sinon
-    // user paie plein prix apres magic link malgre le -X% promis dans l'email.
+    // Coupon preserve si present (cas recovery email avec promo perso).
     if (coupon) {
       targetParams.set('coupon', coupon);
     }
-    const targetUrl = `/itineraire-personnalise-pour-les-philippines?${targetParams.toString()}`;
-    return `${origin}/auth/callback?next=${encodeURIComponent(targetUrl)}`;
+    return `${origin}/itineraire-personnalise-pour-les-philippines?${targetParams.toString()}`;
   };
 
   const handleMagicLink = async () => {

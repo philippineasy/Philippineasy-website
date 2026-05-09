@@ -343,13 +343,13 @@ function ItineraireContent() {
   }, [error]);
 
   // Splash plein ecran pendant le resume_payment post-magic-link.
-  // Evite que l'utilisateur voit le formulaire de generation vide pendant
-  // que la session auth se propage et que l'API est appelee. Reste affiche
-  // jusqu'au redirect Stripe (ou jusqu'a une vraie erreur affichee).
-  // CONDITION `user` : si non-auth on n'affiche PAS le splash (sinon il tournait
-  // en boucle car triggerPayment ne se lance que quand auth — fix 2026-05-09).
-  // L'auto-open du PaymentAuthModal prend le relais pour les non-auth.
-  if (isResuming && user && !error) {
+  // Affiche aussi pendant authLoading=true (flow implicit : Supabase processe
+  // le hash #access_token et set session, ~100-500ms apres redirect). Sans
+  // ce cas, l'user verrait brievement le formulaire vide entre le redirect
+  // magic-link et le moment ou user devient defini.
+  // Si non-auth ET authLoading=false ET isResuming -> l'auto-open du
+  // PaymentAuthModal prend le relais (cf. useEffect ci-dessus).
+  if (isResuming && (user || authLoading) && !error) {
     return (
       <main className="min-h-screen bg-[hsl(var(--warm-bg))] flex items-center justify-center px-4">
         <motion.div

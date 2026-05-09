@@ -20,6 +20,22 @@ const getClient = (): SupabaseClient => {
     globalThis.__supabase_browser__ = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        auth: {
+          // flowType 'implicit' au lieu de 'pkce' (default depuis ssr@0.4+).
+          // Audit 2026-05-09 : test recovery email Maryse a echoue avec
+          // `otp_expired / Email link is invalid or has expired` apres
+          // copy-paste du lien magic-link entre fenetres. Cause = PKCE
+          // exige le `code_verifier` localStorage du browser qui a INITIE
+          // signInWithOtp (perdu en cross-window/incognito + Gmail anti-
+          // phishing pre-click). Implicit flow met le token dans le hash
+          // URL : pas de code_verifier, marche cross-browser, robuste aux
+          // pre-clicks. Trade-off : token theoriquement exposable via
+          // history mais OK pour notre use-case (paiement itineraire 14€,
+          // pas data sensible). Cf. https://github.com/supabase/auth/issues/1041
+          flowType: 'implicit',
+        },
+      },
     );
   }
   return globalThis.__supabase_browser__;
