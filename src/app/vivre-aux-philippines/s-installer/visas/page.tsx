@@ -4,7 +4,7 @@ import { HeroThematic } from '@/components/ui/HeroThematic';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: "Visas Philippines 2026 : Guide Complet pour s'installer | Philippineasy",
+  title: "Visas Philippines 2026 : Guide Complet pour s'installer",
   description: "Guide complet et à jour sur les visas pour vivre aux Philippines en 2026 : visa touriste 9A, visa retraite SRRV (nouvelles règles), visa travail 9G et AEP. Conditions, coûts et démarches.",
   alternates: {
     canonical: 'https://philippineasy.com/vivre-aux-philippines/s-installer/visas',

@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faMap, faBook, faComments, faShoppingBag, faHeart } from '@fortawesome/free-solid-svg-icons';
 
 export const metadata: Metadata = {
-  title: 'Page non trouvée - 404 | Philippin\'Easy',
+  title: 'Page non trouvée - 404',
   description: 'La page que vous cherchez n\'existe pas ou a été déplacée. Découvrez nos guides sur les Philippines, le forum, la marketplace et plus.',
   robots: {
     index: false,

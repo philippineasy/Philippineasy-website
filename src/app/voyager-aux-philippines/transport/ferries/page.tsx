@@ -5,7 +5,7 @@ import { HeroThematic } from '@/components/ui/HeroThematic';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: "Guide des Ferries aux Philippines | Philippineasy",
+  title: "Guide des Ferries aux Philippines",
   description: "Naviguez entre les îles des Philippines en ferry. Découvrez les principales compagnies, les types de bateaux, et nos conseils pour un voyage sûr et agréable.",
 };
 

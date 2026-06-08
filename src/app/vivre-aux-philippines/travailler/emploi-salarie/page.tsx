@@ -4,7 +4,7 @@ import { HeroThematic } from '@/components/ui/HeroThematic';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: "Trouver un Emploi Salarié aux Philippines en 2025 | Philippineasy",
+  title: "Trouver un Emploi Salarié aux Philippines en 2025",
   description: "Guide complet pour trouver un emploi aux Philippines en tant qu'expatrié : secteurs qui recrutent, plateformes d'emploi (JobStreet, LinkedIn), salaires, visa de travail 9G et permis AEP.",
   alternates: {
     canonical: 'https://philippineasy.com/vivre-aux-philippines/travailler/emploi-salarie',

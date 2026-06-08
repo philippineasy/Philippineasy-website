@@ -6,7 +6,7 @@ import { faMoneyBillTransfer } from '@fortawesome/free-solid-svg-icons';
 import { AffiliateRecommendation } from '@/components/affiliate/AffiliateRecommendation';
 
 export const metadata: Metadata = {
-  title: "Banque et Assurance aux Philippines 2026 : Guide Expatrié | Philippineasy",
+  title: "Banque et Assurance aux Philippines 2026 : Guide Expatrié",
   description: "Guide complet pour ouvrir un compte bancaire aux Philippines (BDO, BPI, Metrobank) et choisir une assurance santé adaptée. Documents requis, PhilHealth, assurances privées et HMO locales.",
   alternates: {
     canonical: 'https://philippineasy.com/vivre-aux-philippines/s-installer/banque-assurance',

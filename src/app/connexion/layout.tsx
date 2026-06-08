@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Connexion | Philippin\'Easy',
+  title: 'Connexion',
   description: 'Connectez-vous ou créez votre compte Philippin\'Easy pour accéder aux fonctionnalités exclusives.',
   robots: {
     index: false,

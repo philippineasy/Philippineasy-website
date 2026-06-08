@@ -4,7 +4,7 @@ import ArticleList from '@/components/shared/ArticleList';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Actualités Philippines : Dernières Infos & Nouveautés | Philippin\'Easy',
+  title: 'Actualités Philippines : Dernières Infos & Nouveautés',
   description: 'Suivez l\'actualité des Philippines en français : dernières news, événements, politique, économie, tourisme et culture philippine.',
   keywords: [
     'actualités Philippines',

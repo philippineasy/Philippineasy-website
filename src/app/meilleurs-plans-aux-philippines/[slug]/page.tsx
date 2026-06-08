@@ -19,7 +19,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${category.name} | Philippin'Easy`,
+    title: `${category.name}`,
     description: category.description || `Articles et informations sur ${category.name}.`,
     alternates: {
       canonical: `/meilleurs-plans-aux-philippines/${slug}`,

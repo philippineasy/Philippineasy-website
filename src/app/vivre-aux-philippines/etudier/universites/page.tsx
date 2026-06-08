@@ -4,7 +4,7 @@ import { HeroThematic } from '@/components/ui/HeroThematic';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: "Étudier aux Philippines en 2026 : Universités, Programmes et Visa 9F | Philippineasy",
+  title: "Étudier aux Philippines en 2026 : Universités, Programmes et Visa 9F",
   description: "Guide complet pour étudier aux Philippines : meilleures universités (UP, Ateneo, DLSU), frais de scolarité, visa étudiant 9F, programmes en anglais 2026.",
   alternates: {
     canonical: 'https://philippineasy.com/vivre-aux-philippines/etudier/universites',

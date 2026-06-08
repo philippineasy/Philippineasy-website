@@ -4,7 +4,7 @@ import VendorApplicationClientPage from './VendorApplicationClientPage';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Devenir Vendeur sur Marketplace Philippines | Philippin\'Easy',
+  title: 'Devenir Vendeur sur Marketplace Philippines',
   description: 'Vendez vos produits sur la marketplace Philippines leader en France. Inscription gratuite, commission équitable, accès à une communauté de passionnés des Philippines.',
   keywords: [
     'devenir vendeur Philippines',

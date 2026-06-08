@@ -8,7 +8,7 @@ import type { DestinationItinerarySummary } from '@/types/destinationItineraries
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: 'Itinéraires Philippines : Tous nos guides jour par jour — Philippineasy',
+  title: 'Itinéraires Philippines : Tous nos guides jour par jour',
   description:
     'Découvrez tous nos itinéraires Philippines : Palawan, Cebu, Siargao, Boracay, Bohol. Guides complets jour par jour, budgets, conseils d\'expat français.',
   alternates: { canonical: 'https://philippineasy.com/itineraires-philippines' },

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: "Contact - Philippin'Easy",
+  title: "Contact",
   description: "Contactez l'équipe Philippin'Easy pour toute question sur votre voyage, expatriation ou nos services premium aux Philippines.",
   alternates: { canonical: 'https://philippineasy.com/contact' },
   openGraph: {

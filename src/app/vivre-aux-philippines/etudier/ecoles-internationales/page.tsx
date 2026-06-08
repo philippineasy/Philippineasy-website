@@ -4,7 +4,7 @@ import { HeroThematic } from '@/components/ui/HeroThematic';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: "Écoles Internationales aux Philippines en 2026 : Guide Complet | Philippineasy",
+  title: "Écoles Internationales aux Philippines en 2026 : Guide Complet",
   description: "Guide complet des écoles internationales aux Philippines en 2026 : ISM, BSM, Brent, Nord Anglia. Frais de scolarité, curricula IB et britannique, admission et visas pour enfants d'expatriés.",
   alternates: {
     canonical: 'https://philippineasy.com/vivre-aux-philippines/etudier/ecoles-internationales',

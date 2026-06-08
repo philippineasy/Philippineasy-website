@@ -70,7 +70,10 @@ export async function generateMetadata({
   const canonicalUrl = `https://philippineasy.com/${main_category}/${category_slug}/${article_slug}`;
 
   return {
-    title: `${stripTitleAccent(article.title)} | Philippin'Easy`,
+    // Pas de suffixe " | Philippin'Easy" manuel : le template du root layout
+    // (`%s | Philippin'Easy`) l'ajoute deja. Avant ce fix le suffixe etait
+    // double sur 100% des pages (audit SEO 2026-06-08, tueur de CTR).
+    title: stripTitleAccent(article.title),
     description,
     authors: [
       {

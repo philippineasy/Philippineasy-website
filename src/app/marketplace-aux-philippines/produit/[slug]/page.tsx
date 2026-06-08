@@ -65,7 +65,7 @@ export async function generateMetadata({
   const canonicalUrl = `https://philippineasy.com/marketplace-aux-philippines/produit/${slug}`;
 
   return {
-    title: `${product.name} | Marketplace Philippin'Easy`,
+    title: `${product.name} - Marketplace`,
     description,
     keywords: ['marketplace Philippines', product.name, categoryName || '', 'acheter Philippines', 'produits philippins'],
     alternates: {

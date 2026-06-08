@@ -3,7 +3,7 @@ import { MarketplaceClientPage } from './MarketplaceClientPage';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Marketplace Philippines : Achat & Vente de Produits | Philippin\'Easy',
+  title: 'Marketplace Philippines : Achat & Vente de Produits',
   description: 'Marketplace française pour les Philippines : achetez et vendez des produits, services, souvenirs et articles pour votre voyage ou expatriation. Livraison internationale.',
   keywords: [
     'marketplace Philippines',

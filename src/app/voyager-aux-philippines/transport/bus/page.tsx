@@ -5,7 +5,7 @@ import { getBusRoutes } from '@/app/actions/busActions';
 import BusClientPage from './BusClientPage';
 
 export const metadata: Metadata = {
-  title: 'Bus et Vans aux Philippines | Philippin\'Easy',
+  title: 'Bus et Vans aux Philippines',
   description: 'Découvrez comment voyager en bus et en van à travers les Philippines, et partagez vos propres trajets avec la communauté.',
 };
 

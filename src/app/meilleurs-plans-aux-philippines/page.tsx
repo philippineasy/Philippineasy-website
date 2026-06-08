@@ -6,7 +6,7 @@ import { MeilleursPlansClientPage } from './MeilleursPlansClientPage';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Meilleurs Plans Philippines : Hébergements, Activités & Bons Plans | Philippin\'Easy',
+  title: 'Meilleurs Plans Philippines : Hébergements, Activités & Bons Plans',
   description: 'Les meilleurs bons plans pour les Philippines : hébergements pas chers, activités incontournables, excursions, transports et services pour expatriés.',
   keywords: [
     'bons plans Philippines',

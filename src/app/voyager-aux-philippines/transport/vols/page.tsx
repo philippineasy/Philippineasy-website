@@ -5,7 +5,7 @@ import { getFlightRoutes } from '@/app/actions/flightActions';
 import VolsClientPage from './VolsClientPage';
 
 export const metadata: Metadata = {
-  title: 'Vols Intérieurs aux Philippines | Philippin\'Easy',
+  title: 'Vols Intérieurs aux Philippines',
   description: 'Trouvez et comparez les vols intérieurs aux Philippines pour voyager rapidement et efficacement entre les îles.',
 };
 

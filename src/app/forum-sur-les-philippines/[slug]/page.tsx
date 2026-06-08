@@ -43,7 +43,7 @@ export async function generateMetadata({
   const description = category.description || `Discussions et sujets sur ${category.name} : posez vos questions, partagez vos expériences avec la communauté francophone des Philippines.`;
 
   return {
-    title: `${category.name} - Forum Philippines | Philippin'Easy`,
+    title: `${category.name} - Forum Philippines`,
     description,
     keywords: ['forum Philippines', category.name, 'discussion Philippines', 'communauté', 'questions Philippines'],
     alternates: {

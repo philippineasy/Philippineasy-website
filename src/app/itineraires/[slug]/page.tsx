@@ -31,11 +31,11 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const supabase = createBuildClient();
-  if (!supabase) return { title: 'Itinéraire — Philippineasy' };
+  if (!supabase) return { title: 'Itinéraire' };
   const itinerary = await getItineraryBySlug(supabase, slug);
 
   if (!itinerary) {
-    return { title: 'Itinéraire non trouvé — Philippineasy' };
+    return { title: 'Itinéraire non trouvé' };
   }
 
   const url = `https://philippineasy.com/itineraire-${itinerary.slug}`;

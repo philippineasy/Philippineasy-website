@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import WebPageJsonLd from '@/components/shared/WebPageJsonLd';
 
 export const metadata: Metadata = {
-  title: "Mentions Légales - Philippin'Easy",
+  title: "Mentions Légales",
   description: "Consultez les mentions légales de Philippin'Easy.",
   alternates: { canonical: 'https://philippineasy.com/mentions-legales' },
 };

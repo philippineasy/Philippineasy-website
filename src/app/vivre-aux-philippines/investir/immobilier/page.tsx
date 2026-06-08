@@ -4,7 +4,7 @@ import { HeroThematic } from '@/components/ui/HeroThematic';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: "Investir dans l'Immobilier aux Philippines en 2026 : Guide Complet | Philippineasy",
+  title: "Investir dans l'Immobilier aux Philippines en 2026 : Guide Complet",
   description: "Guide complet pour acheter un bien immobilier aux Philippines en tant qu'étranger : condos, règle des 40%, prix par zone, fiscalité et démarches 2026.",
   alternates: {
     canonical: 'https://philippineasy.com/vivre-aux-philippines/investir/immobilier',

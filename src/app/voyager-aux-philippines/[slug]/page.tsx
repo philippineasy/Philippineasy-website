@@ -40,7 +40,7 @@ export async function generateMetadata({
   const description = category.description || `Découvrez nos articles et conseils sur ${category.name} pour voyager aux Philippines.`;
 
   return {
-    title: `${category.name} | Voyager aux Philippines | Philippin'Easy`,
+    title: `${category.name} | Voyager aux Philippines`,
     description,
     keywords: ['Philippines', 'voyage Philippines', category.name, 'guide voyage', 'tourisme Philippines'],
     alternates: {

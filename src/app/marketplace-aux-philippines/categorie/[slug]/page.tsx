@@ -44,7 +44,7 @@ export async function generateMetadata({
   const description = category.description || `Découvrez tous les produits ${category.name} disponibles sur notre marketplace Philippines : achat sécurisé, livraison rapide.`;
 
   return {
-    title: `${category.name} - Marketplace Philippines | Philippin'Easy`,
+    title: `${category.name} - Marketplace Philippines`,
     description,
     keywords: ['marketplace Philippines', category.name, 'acheter Philippines', 'produits philippins', 'e-commerce'],
     alternates: {

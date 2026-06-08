@@ -9,7 +9,7 @@ export async function generateMetadata({
   const { id } = await params;
   // In a real scenario, you'd fetch minimal data for title/description.
   return {
-    title: `Profil de rencontre philippines sur Philippineasy`,
+    title: `Profil de rencontre Philippines`,
     description: `Découvrez le profil, les photos et les centres d'intérêt de ce membre.`,
     robots: {
       index: false,

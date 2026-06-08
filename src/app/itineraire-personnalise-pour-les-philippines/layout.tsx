@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Créer un Itinéraire Personnalisé Philippines avec IA | Philippin\'Easy',
+  title: 'Créer un Itinéraire Personnalisé Philippines avec IA',
   description: 'Créez votre itinéraire de voyage personnalisé pour les Philippines en quelques clics grâce à notre assistant IA. Budget, durée, style de voyage - nous planifions tout pour vous.',
   keywords: [
     'itinéraire Philippines',

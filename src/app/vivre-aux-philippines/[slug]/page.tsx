@@ -40,7 +40,7 @@ export async function generateMetadata({
   const description = category.description || `Articles et informations sur ${category.name} pour vivre aux Philippines.`;
 
   return {
-    title: `${category.name} | Vivre aux Philippines | Philippin'Easy`,
+    title: `${category.name} | Vivre aux Philippines`,
     description,
     keywords: ['Philippines', 'vivre aux Philippines', category.name, 'expatriation', 's\'installer Philippines'],
     alternates: {

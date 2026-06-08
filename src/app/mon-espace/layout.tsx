@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server';
 import MonEspaceShell from './MonEspaceShell';
 
 export const metadata: Metadata = {
-  title: 'Mon Espace · Philippineasy',
+  title: 'Mon Espace',
   robots: { index: false, follow: false },
 };
 

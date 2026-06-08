@@ -5,7 +5,7 @@ import { VoyagerClientPage } from './VoyagerClientPage';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Voyager aux Philippines : Guide Complet & Destinations | Philippin\'Easy',
+  title: 'Voyager aux Philippines : Guide Complet & Destinations',
   description: 'Découvrez nos guides de voyage complets pour les Philippines : destinations incontournables, conseils pratiques, budget, transport, et itinéraires personnalisés.',
   keywords: [
     'voyage Philippines',

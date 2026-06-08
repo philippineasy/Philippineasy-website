@@ -247,8 +247,15 @@ export function EditorialRenderer({ content }: Props) {
               return <H2 key={idx} id={slug} html={text} />;
             }
             if (block.data.level === 3) return <H3 key={idx} id={slug} html={text} />;
-            // h1/h4/h5/h6 fallback
-            const Tag = `h${block.data.level || 4}` as 'h4' | 'h5' | 'h6';
+            // Defensive : level 1 = H1 parasite (le seul H1 de la page doit etre
+            // le titre de l'article via ArticleHero). On clamp tout level<=1 vers
+            // H2 pour ne jamais emettre un 2e <h1> (audit SEO 2026-06-08 : article
+            // investir avait 8 <h1> internes -> dilution topique + TOC casse).
+            if (!block.data.level || block.data.level <= 1) {
+              return <H2 key={idx} id={slug} html={text} />;
+            }
+            // h4/h5/h6 fallback
+            const Tag = `h${block.data.level}` as 'h4' | 'h5' | 'h6';
             return (
               <Tag
                 key={idx}

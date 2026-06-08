@@ -4,7 +4,7 @@ import { HeroThematic } from '@/components/ui/HeroThematic';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: "Trouver un Logement aux Philippines en 2026 : Prix et Conseils | Philippineasy",
+  title: "Trouver un Logement aux Philippines en 2026 : Prix et Conseils",
   description: "Guide complet pour trouver un logement aux Philippines : prix des loyers à Manila, Cebu et BGC en 2026, meilleures plateformes (Lamudi, Carousell), conseils pour la location et pièges à éviter.",
   alternates: {
     canonical: 'https://philippineasy.com/vivre-aux-philippines/s-installer/logement',

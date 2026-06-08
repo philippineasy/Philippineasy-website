@@ -4,7 +4,7 @@ import { HeroThematic } from '@/components/ui/HeroThematic';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: "Créer son Entreprise aux Philippines en 2026 : Guide Complet | Philippineasy",
+  title: "Créer son Entreprise aux Philippines en 2026 : Guide Complet",
   description: "Guide complet pour créer une entreprise aux Philippines en tant qu'étranger : SEC, structures juridiques, capital minimum, PEZA, FINL, coûts et démarches 2026.",
   alternates: {
     canonical: 'https://philippineasy.com/vivre-aux-philippines/travailler/creer-entreprise',

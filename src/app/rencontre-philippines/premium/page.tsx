@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Passez Premium | Avantages exclusifs sur Philippineasy Rencontre Philippines',
+  title: 'Passez Premium - Rencontre Philippines',
   description: 'Découvrez les avantages de l\'abonnement Premium : Super Likes, mode incognito, et voyez qui vous a liké. Multipliez vos chances de rencontre.',
 };
 

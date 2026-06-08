@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Application Mobile Philippin\'Easy : Voyage Hors Ligne | iOS & Android',
+  title: 'Application Mobile : Voyage Hors Ligne, iOS & Android',
   description: 'Téléchargez l\'app mobile Philippin\'Easy : cartes hors ligne, traducteur tagalog, itinéraires personnalisés, accès forum. Disponible sur App Store et Google Play.',
   keywords: [
     'application Philippines',

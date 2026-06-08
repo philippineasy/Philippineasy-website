@@ -4,7 +4,7 @@ import { ForumListClient } from '@/app/forum-sur-les-philippines/ForumListClient
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Forum Philippines : Communauté & Entraide | Philippin\'Easy',
+  title: 'Forum Philippines : Communauté & Entraide',
   description: 'Rejoignez la communauté francophone des Philippines : posez vos questions, partagez vos expériences, trouvez des conseils sur le voyage, l\'expatriation et la vie aux Philippines.',
   keywords: [
     'forum Philippines',

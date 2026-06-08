@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import RencontreClientPage from './RencontreClientPage';
 
 export const metadata: Metadata = {
-  title: 'Rencontre Philippines : Trouvez l\'Amour | Philippin\'Easy',
+  title: 'Rencontre Philippines : Trouvez l\'Amour',
   description: 'Site de rencontre pour célibataires aux Philippines. Rencontrez des Philippins et expatriés, créez des connexions authentiques. Inscription gratuite.',
   keywords: [
     'rencontre Philippines',

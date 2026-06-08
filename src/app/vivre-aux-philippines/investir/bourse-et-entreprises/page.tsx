@@ -4,7 +4,7 @@ import { HeroThematic } from '@/components/ui/HeroThematic';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: "Investir en Bourse aux Philippines en 2026 : PSE, Actions, Entreprises | Philippineasy",
+  title: "Investir en Bourse aux Philippines en 2026 : PSE, Actions, Entreprises",
   description: "Guide complet pour investir à la bourse philippine (PSE) et dans les entreprises locales : ouverture de compte, fiscalité, secteurs porteurs, SIRV 2026.",
   alternates: {
     canonical: 'https://philippineasy.com/vivre-aux-philippines/investir/bourse-et-entreprises',

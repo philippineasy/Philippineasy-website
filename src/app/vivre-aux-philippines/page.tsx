@@ -4,7 +4,7 @@ import { VivreClientPage } from './VivreClientPage';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Vivre aux Philippines : S\'installer, Travailler & Expatriation | Philippin\'Easy',
+  title: 'Vivre aux Philippines : S\'installer, Travailler & Expatriation',
   description: 'Tout savoir pour vivre et s\'installer aux Philippines : visas, travail, immobilier, coût de la vie, expatriation, retraite. Guide complet pour expatriés.',
   keywords: [
     'vivre aux Philippines',

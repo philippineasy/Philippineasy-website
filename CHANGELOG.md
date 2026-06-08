@@ -5,6 +5,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### SEO — Fix titre `<title>` dédoublé site-wide (2026-06-08)
+
+Audit SEO post-1-mois (GSC : CTR 4,49% → 3,18% malgré +40% impressions). Cause majeure identifiée : le suffixe ` | Philippin'Easy` était ajouté **deux fois** sur 100% des pages — une fois manuellement dans chaque `generateMetadata`/`metadata`, une fois par le `template: '%s | Philippin'Easy'` du root layout. Résultat : `<title>Sugba Lagoon... | Philippin'Easy | Philippin'Easy</title>`. Gaspillage de ~15 caractères de pixels titre (Google tronque à ~60), rendu spammy → CTR dégradé partout.
+
+Fix : retrait du suffixe brand manuel dans ~40 fichiers (`title:` principaux uniquement, les `openGraph.title`/`twitter.title` non affectés par le template restent inchangés). Le template root ajoute désormais le brand une seule fois. Les qualifieurs de section (Forum, Marketplace, Rencontre) deviennent des descripteurs (`X - Forum` → template → `X - Forum | Philippin'Easy`). `siteConfig.title` (homepage `default`) inchangé.
+
+Aussi corrigé : le renderer d'articles (`EditorialRenderer.tsx`) émettait un vrai `<h1>` pour les blocs header `level: 1` du contenu EditorJS. Clamp défensif `level <= 1 → H2` pour ne jamais avoir un 2e `<h1>` sur la page (le seul H1 doit être le titre via ArticleHero). Cf. fix data articles #67/#51 ci-dessous.
+
 ### Funnel — Fix recovery flow non-auth (loader infini) + coupon preserve (2026-05-09)
 
 Audit GA4 + reproduction live 2026-05-09 : un user non-connecte qui clique sur un lien recovery email (URL `?resume_payment=...&coupon=...`) voyait le splash "Préparation de votre paiement" tourner en boucle. Cause : le `useEffect` resume_payment retournait silencieusement a `if (!user) return` mais le splash plein-ecran (`if (isResuming && !error) return ...`) restait affiche, masquant la modal magic-link et empechant le user de s'authentifier. **4 leads `ia_checkout_started` perdus en 28j** (GA4 confirme : 0 user non-Hugo n'a atteint `/checkout/itinerary`).

@@ -30,7 +30,7 @@ export async function generateMetadata({
   const description = vendor.description || `Découvrez tous les produits de ${vendor.name} sur notre marketplace Philippines.`;
 
   return {
-    title: `${vendor.name} - Vendeur Philippines | Philippin'Easy`,
+    title: `${vendor.name} - Vendeur Philippines`,
     description,
     keywords: ['vendeur Philippines', vendor.name, 'marketplace Philippines', 'acheter Philippines'],
     alternates: {

@@ -62,7 +62,7 @@ export async function generateMetadata({
   const canonicalUrl = `https://philippineasy.com/forum-sur-les-philippines/sujet/${slug}`;
 
   return {
-    title: `${topic.title} | Forum Philippin'Easy`,
+    title: `${topic.title} - Forum`,
     description,
     keywords: ['forum Philippines', topic.title, topic.category?.name || '', 'discussion', 'communauté Philippines'],
     alternates: {

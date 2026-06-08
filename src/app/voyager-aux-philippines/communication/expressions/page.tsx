@@ -5,7 +5,7 @@ import { HeroThematic } from '@/components/ui/HeroThematic';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: "Expressions Utiles en Tagalog | Philippineasy",
+  title: "Expressions Utiles en Tagalog",
   description: "Apprenez les bases du Tagalog pour votre voyage aux Philippines. Salutations, formules de politesse, chiffres et expressions pratiques.",
 };
 
