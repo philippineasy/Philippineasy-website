@@ -22,7 +22,7 @@ export const MeilleursPlansClientPage = ({ initialCategories, icons }: { initial
       initialCategories={initialCategories}
       renderCard={(cat) => (
         <Link
-          href={`/meilleurs-plans/${cat.slug}`}
+          href={`/meilleurs-plans-aux-philippines/${cat.slug}`}
           className="group bg-card rounded-2xl overflow-hidden flex flex-col h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
           style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
         >

@@ -5,6 +5,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### SEO — Indexation : méga-menu crawlable + liens internes vers URLs canoniques (2026-06-09)
+
+Audit du rapport GSC "Pourquoi des pages ne sont pas indexées" : **53 pages non indexées** (30 "Explorée, actuellement non indexée" + 23 "Détectée, actuellement non indexée"). Diagnostic via l'API URL Inspection : ce n'est **ni le contenu** (47 articles publiés, médiane 12 000 caractères, 0 thin) **ni le canonical** (les pages crawlées montrent `googleCanonical == userCanonical == self` — le bug de propagation canonical historique ne sévit plus). Cause réelle = **crawl budget / maillage interne** : plusieurs pages du sitemap sont "unknown to Google" ou "Discovered, never crawled" malgré une soumission datant d'un mois. Deux bugs de code amplifiaient le problème.
+
+**1. Méga-menu de navigation invisible au crawl** (`DropdownMenu.tsx`) : les `<Link>` du sous-menu étaient rendus avec `{isOpen && (...)}` → présents dans le DOM uniquement après un clic utilisateur. Googlebot ne clique pas → il ne voyait **aucun** lien de catégorie/destination/section du menu principal. Toute la navigation primaire ne transmettait donc pas de jus de lien (les pages n'étaient découvertes que via footer + cartes homepage + sitemap). Fix : les liens sont désormais **toujours rendus dans le DOM** et masqués visuellement via CSS (`opacity`/`invisible`/`pointer-events`), avec `aria-hidden` et `tabIndex={-1}` quand le menu est fermé. UX identique (clic pour ouvrir, click-outside pour fermer), liens crawlables.
+
+**2. Liens internes pointant vers des sources de redirection 301** (5 fichiers) : `MeilleursPlansClientPage.tsx` générait `href={/meilleurs-plans/${slug}}` au lieu de `/meilleurs-plans-aux-philippines/${slug}` → les seuls liens internes vers les 3 catégories meilleurs-plans passaient par un 301 (next.config), d'où leur statut "Détectée non indexée". Corrigé. Idem pour `/rencontre/premium`, `/rencontre/likes`, `/marketplace/vendeur/connexion` (`connexion/page.tsx`, `ProfileViewers.tsx`, `UserLimits.tsx`, `UserMenu.tsx`) → suffixes canoniques (impact SEO faible car pages sous auth, mais nettoyage du graphe de liens).
+
+Vérifications : 0/113 URLs du sitemap en erreur HTTP (sitemap propre), pages hub toutes en `index:true` (pas de conflit noindex/sitemap), sitemap resoumis à Google via l'API (HTTP 204, recrawl déclenché). Leviers restants hors code : autorité de domaine (backlinks) et "Demander l'indexation" manuel sur les URLs prioritaires dans la console GSC.
+
 ### SEO — Fix titre `<title>` dédoublé site-wide (2026-06-08)
 
 Audit SEO post-1-mois (GSC : CTR 4,49% → 3,18% malgré +40% impressions). Cause majeure identifiée : le suffixe ` | Philippin'Easy` était ajouté **deux fois** sur 100% des pages — une fois manuellement dans chaque `generateMetadata`/`metadata`, une fois par le `template: '%s | Philippin'Easy'` du root layout. Résultat : `<title>Sugba Lagoon... | Philippin'Easy | Philippin'Easy</title>`. Gaspillage de ~15 caractères de pixels titre (Google tronque à ~60), rendu spammy → CTR dégradé partout.

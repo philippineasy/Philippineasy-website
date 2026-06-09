@@ -56,7 +56,7 @@ export const UserMenu = () => {
             <Link href="/profil" className="block px-4 py-2 text-sm text-foreground hover:bg-muted">
               <FontAwesomeIcon icon={faUser} className="mr-2" /> Profil
             </Link>
-            <Link href="/rencontre/likes" className="block px-4 py-2 text-sm text-foreground hover:bg-muted">
+            <Link href="/rencontre-philippines/likes" className="block px-4 py-2 text-sm text-foreground hover:bg-muted">
                 <FontAwesomeIcon icon={faHeart} className="mr-2" /> Qui m'a liké ?
             </Link>
             {isVendor && (

@@ -118,7 +118,7 @@ const ConnexionPage = () => {
                   Mettez en avant votre savoir-faire, vos produits ou vos services auprès de notre communauté de passionnés.
                 </p>
                 <Link 
-                  href="/marketplace/vendeur/connexion" 
+                  href="/marketplace-aux-philippines/vendeur/connexion"
                   className="inline-block px-6 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition duration-300 font-semibold"
                 >
                   Devenir Partenaire

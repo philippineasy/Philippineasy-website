@@ -89,7 +89,7 @@ const ProfileViewers = () => {
       {!isPremium && (
         <div className="mt-4 pt-4 border-t border-border text-center">
            <p className="text-sm text-muted-foreground mb-3">Passez Premium pour voir qui s'intéresse à vous !</p>
-          <Link href="/rencontre/premium" className="w-full inline-block bg-accent text-accent-foreground font-bold py-3 px-6 rounded-lg hover:bg-accent/90 transition-colors shadow-md">
+          <Link href="/rencontre-philippines/premium" className="w-full inline-block bg-accent text-accent-foreground font-bold py-3 px-6 rounded-lg hover:bg-accent/90 transition-colors shadow-md">
             <FontAwesomeIcon icon={faCrown} className="mr-2" />
             Découvrir qui vous a vu
           </Link>

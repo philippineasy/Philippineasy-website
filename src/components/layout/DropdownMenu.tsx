@@ -49,22 +49,33 @@ export const DropdownMenu = ({ label, items, isActive }: DropdownMenuProps) => {
         <FontAwesomeIcon icon={faChevronDown} className="w-2.5 h-2.5 text-accent/80" />
       </button>
 
-      {isOpen && (
-        <div className="absolute left-0 mt-2 w-56 bg-card rounded-md shadow-lg border z-20">
-          <div className="py-1">
-            {items.map((item) => (
-              <Link 
-                key={item.href} 
-                href={item.href} 
-                className={`block px-4 py-2 text-sm hover:bg-muted ${item.highlight ? 'text-red-500 font-bold' : 'text-foreground'}`}
-                onClick={() => setIsOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
+      {/* Toujours rendu dans le DOM (liens crawlables par Googlebot), masqué
+          visuellement via CSS tant que le menu n'est pas ouvert. Le démontage
+          conditionnel précédent ({isOpen && ...}) rendait toute la navigation
+          invisible au crawl → pages "Détectée, jamais crawlée" dans GSC. */}
+      <div
+        role="menu"
+        aria-hidden={!isOpen}
+        className={`absolute left-0 mt-2 w-56 bg-card rounded-md shadow-lg border z-20 transition-all duration-150 motion-reduce:transition-none ${
+          isOpen
+            ? 'opacity-100 visible translate-y-0 pointer-events-auto'
+            : 'opacity-0 invisible -translate-y-1 pointer-events-none'
+        }`}
+      >
+        <div className="py-1">
+          {items.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              tabIndex={isOpen ? undefined : -1}
+              className={`block px-4 py-2 text-sm hover:bg-muted ${item.highlight ? 'text-red-500 font-bold' : 'text-foreground'}`}
+              onClick={() => setIsOpen(false)}
+            >
+              {item.label}
+            </Link>
+          ))}
         </div>
-      )}
+      </div>
     </div>
   );
 };

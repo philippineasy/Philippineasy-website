@@ -78,7 +78,7 @@ const UserLimits = () => {
       {limits.plan === 'free' && (
         <div className="mt-6 text-center">
           <p className="text-sm text-muted-foreground mb-3">Passez à la vitesse supérieure pour des conversations sans limites !</p>
-          <Link href="/rencontre/premium" className="w-full inline-block bg-accent text-accent-foreground font-bold py-3 px-6 rounded-lg hover:bg-accent/90 transition-colors shadow-md">
+          <Link href="/rencontre-philippines/premium" className="w-full inline-block bg-accent text-accent-foreground font-bold py-3 px-6 rounded-lg hover:bg-accent/90 transition-colors shadow-md">
             <FontAwesomeIcon icon={faCrown} className="mr-2" />
             Passer Premium
           </Link>
