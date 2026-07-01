@@ -89,6 +89,22 @@ const BourseEntreprisesPage = () => {
           </div>
         </section>
 
+        {/* Callout - panorama général investissement */}
+        <section className="mb-16 max-w-4xl mx-auto">
+          <div className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground">
+              Pour un panorama complet de l'investissement aux Philippines (immobilier, bourse, création d'entreprise), consultez notre guide général.
+            </p>
+            <Link
+              href="/vivre-aux-philippines/travail-entreprise/investir-aux-philippines-guide-francais-2025"
+              className="inline-flex items-center gap-2 text-primary font-semibold hover:underline whitespace-nowrap"
+            >
+              Lire le guide complet
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </section>
+
         {/* Actions A et B - Info box coloré */}
         <section className="mb-16 max-w-4xl mx-auto">
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-2xl p-6 shadow-sm">

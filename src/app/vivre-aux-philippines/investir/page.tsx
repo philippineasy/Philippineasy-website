@@ -3,6 +3,7 @@ import { HeroThematic } from '@/components/ui/HeroThematic';
 import { AlternatingContent } from '@/components/ui/AlternatingContent';
 import { KeyStatCard } from '@/components/ui/KeyStatCard';
 import { faChartLine, faBuilding, faStore } from '@fortawesome/free-solid-svg-icons';
+import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 import { getPageBySlug } from '@/services/pageService';
@@ -114,6 +115,24 @@ const InvestirPage = async () => {
           <Link href="/vivre-aux-philippines/investir/bourse-et-entreprises" className="text-primary font-bold hover:underline mt-4 inline-block">Investir dans les entreprises locales →</Link>
         </AlternatingContent>
       </div>
+
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto bg-white border border-gray-200 rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold mb-1">Le guide complet de l'investissement</h2>
+              <p className="text-muted-foreground text-sm">Retrouvez notre guide général de l'investissement et tous les articles Travail & Entreprise.</p>
+            </div>
+            <Link
+              href="/vivre-aux-philippines/travail-entreprise"
+              className="inline-flex items-center gap-2 text-primary font-semibold hover:underline whitespace-nowrap"
+            >
+              Voir tous les articles
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
 
     </div>
   );

@@ -273,6 +273,20 @@ const VisasPage = () => {
             </div>
           </div>
 
+          {/* Callout - comparatif SRRV vs 13(a) */}
+          <div className="max-w-4xl mx-auto mb-8 bg-white border border-purple-200 rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground">
+              Vous hésitez entre le SRRV et le visa 13(a) pour votre projet de retraite aux Philippines ?
+            </p>
+            <Link
+              href="/vivre-aux-philippines/visas-et-formalites/visa-longue-duree-srrv-13a-comparatif"
+              className="inline-flex items-center gap-2 text-purple-700 hover:text-purple-800 font-semibold whitespace-nowrap"
+            >
+              Voir le comparatif détaillé SRRV vs 13(a)
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
           <div className="grid lg:grid-cols-2 gap-6 max-w-5xl mx-auto mb-8">
             {/* SRRV Classic */}
             <div className="bg-white border-l-4 border-l-purple-500 rounded-xl shadow-sm overflow-hidden">

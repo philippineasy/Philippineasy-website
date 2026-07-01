@@ -4,8 +4,8 @@ import { HeroThematic } from '@/components/ui/HeroThematic';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: "Investir dans l'Immobilier aux Philippines en 2026 : Guide Complet",
-  description: "Guide complet pour acheter un bien immobilier aux Philippines en tant qu'étranger : condos, règle des 40%, prix par zone, fiscalité et démarches 2026.",
+  title: "Investissement Locatif aux Philippines en 2026 : Rendement et Fiscalité",
+  description: "Guide de l'investissement locatif aux Philippines : rendement par zone, fiscalité des loyers, règle des 40% pour les étrangers et stratégie d'achat en 2026.",
   alternates: {
     canonical: 'https://philippineasy.com/vivre-aux-philippines/investir/immobilier',
   },
@@ -21,8 +21,8 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Investir dans l'Immobilier aux Philippines en 2026 : Guide Complet",
-    description: "Guide complet pour acheter un bien immobilier aux Philippines en tant qu'étranger : condos, règle des 40%, prix par zone, fiscalité et démarches 2026.",
+    title: "Investissement Locatif aux Philippines en 2026 : Rendement et Fiscalité",
+    description: "Guide de l'investissement locatif aux Philippines : rendement par zone, fiscalité des loyers, règle des 40% pour les étrangers et stratégie d'achat en 2026.",
     url: 'https://philippineasy.com/vivre-aux-philippines/investir/immobilier',
     siteName: "Philippin'Easy",
     locale: 'fr_FR',
@@ -30,8 +30,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Investir dans l'Immobilier aux Philippines en 2026",
-    description: "Guide pour acheter un bien immobilier aux Philippines : condos, prix, fiscalité.",
+    title: "Investissement Locatif aux Philippines en 2026",
+    description: "Guide de l'investissement locatif aux Philippines : rendement, fiscalité, stratégie d'achat.",
     site: '@philippineasy',
   },
 };
@@ -42,7 +42,7 @@ const ImmobilierPage = () => {
       <HeroThematic
         titlePart1="Investir dans"
         titlePart2="l'Immobilier"
-        subtitle="Guide complet pour investir dans le marché immobilier philippin : réglementation, prix, fiscalité et opportunités pour les étrangers."
+        subtitle="Rendement locatif, fiscalité des loyers et stratégie d'achat : le guide pour investir dans l'immobilier locatif aux Philippines, distinct de l'achat d'une résidence principale."
         imageUrl="/images/investir/vue-condominium-philippines.webp"
       />
 
@@ -77,6 +77,22 @@ const ImmobilierPage = () => {
             les Philippines attirent de nombreux investisseurs étrangers. Cependant, la législation impose des
             restrictions importantes qu'il est essentiel de comprendre avant d'investir.
           </p>
+        </section>
+
+        {/* Callout - redirection résidence principale */}
+        <section className="mb-16">
+          <div className="max-w-4xl mx-auto bg-white border border-gray-200 rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground">
+              Vous cherchez avant tout à acheter votre résidence principale aux Philippines, sans objectif de rendement locatif ?
+            </p>
+            <Link
+              href="/vivre-aux-philippines/logement/acheter-immobilier-philippines"
+              className="inline-flex items-center gap-2 text-primary font-semibold hover:underline whitespace-nowrap"
+            >
+              Voir le guide d'achat pour y vivre
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
         </section>
 
         {/* Règle d'or */}
@@ -777,6 +793,22 @@ const ImmobilierPage = () => {
                 Le marché secondaire permet plus de négociation.
               </p>
             </div>
+          </div>
+        </section>
+
+        {/* Callout - panorama général investissement */}
+        <section className="mb-16">
+          <div className="max-w-4xl mx-auto bg-white border border-gray-200 rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground">
+              Pour une vue d'ensemble de l'investissement aux Philippines (immobilier, bourse, création d'entreprise), consultez notre guide général.
+            </p>
+            <Link
+              href="/vivre-aux-philippines/travail-entreprise/investir-aux-philippines-guide-francais-2025"
+              className="inline-flex items-center gap-2 text-primary font-semibold hover:underline whitespace-nowrap"
+            >
+              Lire le guide complet
+              <ChevronRight className="h-4 w-4" />
+            </Link>
           </div>
         </section>
 

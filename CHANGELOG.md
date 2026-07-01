@@ -5,6 +5,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### SEO — Refocus anti-cannibalisation + maillage interne section "Vivre" (2026-07-01)
+
+Suite de l'audit d'indexation : investigation de la redondance de taxonomie dans `/vivre-aux-philippines`. Le constat (données GSC par requête) : deux systèmes parallèles coexistent — des pages "thèmes" éditoriales statiques (`s-installer`, `travailler`, `investir`, `etudier`) et des catégories DB (`logement`, `visas-et-formalites`, `banque-finances`, `travail-entreprise`, etc., où vivent les articles). La cannibalisation réelle s'est révélée limitée (2 requêtes contestées : "visa retraite" et "investir aux philippines", où l'article gagne déjà) plutôt que systémique — donc refocus chirurgical, pas de migration ni de suppression de contenu.
+
+Changements :
+1. **`investir/immobilier`** recentré sur l'**investissement locatif / rendement** (title, description, OG/Twitter, sous-titre hero) pour se distinguer de l'article "acheter sa résidence" (`logement/acheter-immobilier-philippines`) et du guide général. Liens croisés ajoutés vers ces deux pages.
+2. **`investir/bourse-et-entreprises`** : callout ajouté vers le guide général "investir aux philippines" (défère la requête large au gagnant). Titre PSE/bourse conservé (déjà niché).
+3. **`s-installer/visas`** : callout vers l'article comparatif SRRV vs 13(a) pour déférer "visa retraite" à l'article gagnant ; le hub reste sur l'intent large (types de visas).
+4. **Maillage thèmes → catégories DB** : les pages hub `s-installer` (nouvelle section 4 liens), `travailler` et `investir` linkent désormais vers les catégories DB où vivent les articles (flux de jus de lien vers les pages jusque-là faiblement liées). Server Components → liens crawlables.
+
+Aucun slug d'article ni canonical modifié. `tsc` + eslint OK, aucun pattern AI-writing.
+
 ### SEO — Indexation : méga-menu crawlable + liens internes vers URLs canoniques (2026-06-09)
 
 Audit du rapport GSC "Pourquoi des pages ne sont pas indexées" : **53 pages non indexées** (30 "Explorée, actuellement non indexée" + 23 "Détectée, actuellement non indexée"). Diagnostic via l'API URL Inspection : ce n'est **ni le contenu** (47 articles publiés, médiane 12 000 caractères, 0 thin) **ni le canonical** (les pages crawlées montrent `googleCanonical == userCanonical == self` — le bug de propagation canonical historique ne sévit plus). Cause réelle = **crawl budget / maillage interne** : plusieurs pages du sitemap sont "unknown to Google" ou "Discovered, never crawled" malgré une soumission datant d'un mois. Deux bugs de code amplifiaient le problème.

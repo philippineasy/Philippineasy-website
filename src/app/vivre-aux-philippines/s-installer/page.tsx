@@ -3,6 +3,7 @@ import { HeroThematic } from '@/components/ui/HeroThematic';
 import { AlternatingContent } from '@/components/ui/AlternatingContent';
 import { KeyStatCard } from '@/components/ui/KeyStatCard';
 import { faPassport, faHome, faCoins } from '@fortawesome/free-solid-svg-icons';
+import { FileText, Home, Landmark, HeartPulse, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 import { getPageBySlug } from '@/services/pageService';
@@ -128,6 +129,54 @@ const InstallerPage = async () => {
         </ul>
         <Link href="/vivre-aux-philippines/s-installer/banque-assurance" className="text-primary font-bold hover:underline mt-4 inline-block">Plus d'infos sur les banques et assurances →</Link>
       </AlternatingContent>
+
+      <div className="bg-muted py-16">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-10">Tous nos guides pour s'installer</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+            <Link
+              href="/vivre-aux-philippines/visas-et-formalites"
+              className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 hover:border-primary hover:shadow-md transition-all group"
+            >
+              <div className="flex items-center gap-3">
+                <FileText className="h-5 w-5 text-primary" />
+                <span className="font-medium">Visas et formalités</span>
+              </div>
+              <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            </Link>
+            <Link
+              href="/vivre-aux-philippines/logement"
+              className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 hover:border-primary hover:shadow-md transition-all group"
+            >
+              <div className="flex items-center gap-3">
+                <Home className="h-5 w-5 text-primary" />
+                <span className="font-medium">Logement</span>
+              </div>
+              <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            </Link>
+            <Link
+              href="/vivre-aux-philippines/banque-finances"
+              className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 hover:border-primary hover:shadow-md transition-all group"
+            >
+              <div className="flex items-center gap-3">
+                <Landmark className="h-5 w-5 text-primary" />
+                <span className="font-medium">Banque et finances</span>
+              </div>
+              <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            </Link>
+            <Link
+              href="/vivre-aux-philippines/sante-assurances"
+              className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 hover:border-primary hover:shadow-md transition-all group"
+            >
+              <div className="flex items-center gap-3">
+                <HeartPulse className="h-5 w-5 text-primary" />
+                <span className="font-medium">Santé et assurances</span>
+              </div>
+              <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            </Link>
+          </div>
+        </div>
+      </div>
 
       <div className="bg-primary/90 text-white py-20">
         <div className="container mx-auto px-4 text-center">

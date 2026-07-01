@@ -3,6 +3,7 @@ import { HeroThematic } from '@/components/ui/HeroThematic';
 import { AlternatingContent } from '@/components/ui/AlternatingContent';
 import { KeyStatCard } from '@/components/ui/KeyStatCard';
 import { faBriefcase, faBuilding, faLightbulb } from '@fortawesome/free-solid-svg-icons';
+import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 import { getPageBySlug } from '@/services/pageService';
@@ -114,6 +115,24 @@ const TravaillerPage = async () => {
           <Link href="/vivre-aux-philippines/travailler/creer-entreprise" className="text-primary font-bold hover:underline mt-4 inline-block">Le guide de l'entrepreneur →</Link>
         </AlternatingContent>
       </div>
+
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto bg-white border border-gray-200 rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-bold mb-1">Tous nos articles Travail & Entreprise</h2>
+              <p className="text-muted-foreground text-sm">Contrats de travail, création d'entreprise, fiscalité professionnelle : retrouvez l'ensemble de nos guides.</p>
+            </div>
+            <Link
+              href="/vivre-aux-philippines/travail-entreprise"
+              className="inline-flex items-center gap-2 text-primary font-semibold hover:underline whitespace-nowrap"
+            >
+              Voir tous les articles
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
 
     </div>
   );
