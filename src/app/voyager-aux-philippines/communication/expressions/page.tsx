@@ -1,8 +1,7 @@
 import { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { MessageCircle, Smile, ShoppingCart, HelpCircle } from 'lucide-react';
-import { HeroThematic } from '@/components/ui/HeroThematic';
-import Link from 'next/link';
+import { Smile, ShoppingCart, HelpCircle } from 'lucide-react';
+import { PageHero } from '@/components/sections';
 
 export const metadata: Metadata = {
   title: "Expressions Utiles en Tagalog",
@@ -12,11 +11,13 @@ export const metadata: Metadata = {
 const ExpressionsPage = () => {
   return (
     <div>
-      <HeroThematic
-        titlePart1="Expressions"
-        titlePart2="Utiles"
+      <PageHero
+        eyebrow="Guide pratique"
+        title="Expressions"
+        titleAccent="Utiles"
         subtitle="Quelques mots de Tagalog pour briser la glace et enrichir votre expérience."
         imageUrl="/images/communication/dialogue-interculturel.webp"
+        imageAlt="Expressions Utiles"
       />
       <div className="container mx-auto px-4 py-12">
         <p className="text-lg text-center mb-12 max-w-3xl mx-auto">L'anglais est parlé quasi partout, mais connaître quelques mots de Tagalog vous ouvrira bien des portes et des sourires. Voici les bases pour bien commencer.</p>

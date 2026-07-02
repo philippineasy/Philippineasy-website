@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
-import { HeroThematic } from '@/components/ui/HeroThematic';
-import { AlternatingContent } from '@/components/ui/AlternatingContent';
-import { KeyStatCard } from '@/components/ui/KeyStatCard';
+import { PageHero, StatRow, SplitSection } from '@/components/sections';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSun, faCloudShowersHeavy, faTemperatureHigh } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
@@ -65,30 +64,47 @@ const QuandPartirPage = async () => {
 
   return (
     <div>
-      <HeroThematic
-        titlePart1="Quand Partir aux"
-        titlePart2="Philippines"
-        titlePart2Color="accent"
+      <PageHero
+        eyebrow="Voyager aux Philippines"
+        title="Quand Partir aux"
+        titleAccent="Philippines"
         subtitle={page.subtitle || "Le guide ultime pour choisir la période idéale en fonction de la météo, de l'affluence et de vos envies."}
         imageUrl={page.hero_image_url || "/imagesHero/meteo-contrastee-aux-philippines.webp"}
+        imageAlt="Quand Partir aux Philippines"
       />
 
-      <div className="bg-muted py-20 -mt-20 relative z-20 rounded-t-2xl">
+      <div className="bg-muted py-20">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">Les Saisons en un Clin d'Œil</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <KeyStatCard icon={faSun} value="Nov - Mai" label="Saison Sèche (High Season)" color="accent" />
-            <KeyStatCard icon={faCloudShowersHeavy} value="Juin - Oct" label="Saison des Pluies (Low Season)" color="primary" />
-            <KeyStatCard icon={faTemperatureHigh} value="28°C" label="Température moyenne annuelle" color="accent" />
-          </div>
+          <StatRow
+            tone="default"
+            stats={[
+              {
+                icon: <FontAwesomeIcon icon={faSun} className="text-[18px]" />,
+                value: 'Nov - Mai',
+                label: 'Saison Sèche (High Season)',
+              },
+              {
+                icon: <FontAwesomeIcon icon={faCloudShowersHeavy} className="text-[18px]" />,
+                value: 'Juin - Oct',
+                label: 'Saison des Pluies (Low Season)',
+              },
+              {
+                icon: <FontAwesomeIcon icon={faTemperatureHigh} className="text-[18px]" />,
+                value: '28°C',
+                label: 'Température moyenne annuelle',
+              },
+            ]}
+          />
         </div>
       </div>
 
-      <AlternatingContent
+      <SplitSection
         imageUrl="/images/meteo/plage-tropicale-philippines.webp"
         imageAlt="Plage de sable blanc avec des palmiers"
+        title="La Saison Sèche :"
+        titleAccent="Le Moment Idéal"
       >
-        <h2>La Saison Sèche : <span className="text-accent">Le Moment Idéal</span></h2>
         <p>De novembre à mai, c'est la période parfaite pour profiter des plages, de la plongée et des activités en plein air. Le ciel est généralement dégagé et les risques de typhons sont faibles.</p>
         <ul className="list-disc list-inside space-y-2 mt-4">
           <li><b>Avantages :</b> Météo idéale, toutes les îles accessibles.</li>
@@ -96,24 +112,24 @@ const QuandPartirPage = async () => {
           <li><b>Idéal pour :</b> Plages, island hopping, festivals.</li>
         </ul>
         <Link href="/voyager-aux-philippines/palawan" className="text-accent font-bold hover:underline mt-4 inline-block">Découvrir Palawan en saison sèche →</Link>
-      </AlternatingContent>
+      </SplitSection>
 
-      <div className="bg-muted">
-        <AlternatingContent
-          imageUrl="/images/meteo/rizieres-philippines-nuageuses.webp"
-          imageAlt="Rizières en terrasses verdoyantes sous un ciel nuageux"
-          reverse
-        >
-          <h2>La Saison des Pluies : <span className="text-accent">Une Autre Facette</span></h2>
-          <p>De juin à octobre, les pluies sont plus fréquentes, souvent sous forme d'averses intenses mais courtes. C'est une période où la nature est luxuriante et les paysages d'un vert éclatant.</p>
-          <ul className="list-disc list-inside space-y-2 mt-4">
-            <li><b>Avantages :</b> Moins de monde, prix plus bas, paysages verdoyants.</li>
-            <li><b>Inconvénients :</b> Risque de typhons, certaines liaisons maritimes peuvent être annulées.</li>
-            <li><b>Idéal pour :</b> Rizières de Banaue, surf à Siargao, cascades.</li>
+      <SplitSection
+        imageUrl="/images/meteo/rizieres-philippines-nuageuses.webp"
+        imageAlt="Rizières en terrasses verdoyantes sous un ciel nuageux"
+        reverse
+        tone="muted"
+        title="La Saison des Pluies :"
+        titleAccent="Une Autre Facette"
+      >
+        <p>De juin à octobre, les pluies sont plus fréquentes, souvent sous forme d'averses intenses mais courtes. C'est une période où la nature est luxuriante et les paysages d'un vert éclatant.</p>
+        <ul className="list-disc list-inside space-y-2 mt-4">
+          <li><b>Avantages :</b> Moins de monde, prix plus bas, paysages verdoyants.</li>
+          <li><b>Inconvénients :</b> Risque de typhons, certaines liaisons maritimes peuvent être annulées.</li>
+          <li><b>Idéal pour :</b> Rizières de Banaue, surf à Siargao, cascades.</li>
         </ul>
-          <Link href="/voyager-aux-philippines/siargao" className="text-accent font-bold hover:underline mt-4 inline-block">Explorer Siargao pendant la saison verte →</Link>
-        </AlternatingContent>
-      </div>
+        <Link href="/voyager-aux-philippines/siargao" className="text-accent font-bold hover:underline mt-4 inline-block">Explorer Siargao pendant la saison verte →</Link>
+      </SplitSection>
 
     </div>
   );

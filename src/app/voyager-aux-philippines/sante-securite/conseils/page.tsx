@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { ShieldCheck, MapPin, Wifi, Phone, UserCheck, AlertTriangle } from 'lucide-react';
-import { HeroThematic } from '@/components/ui/HeroThematic';
+import { PageHero } from '@/components/sections';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -12,20 +12,22 @@ export const metadata: Metadata = {
 const ConseilsSecuritePage = () => {
   return (
     <div>
-      <HeroThematic
-        titlePart1="Sécurité aux"
-        titlePart2="Philippines"
+      <PageHero
+        eyebrow="Guide pratique"
+        title="Sécurité aux"
+        titleAccent="Philippines"
         subtitle="Nos conseils pour un voyage serein et inoubliable."
         imageUrl="/images/sante/controle-police-philippines.webp"
+        imageAlt="Sécurité aux Philippines"
       />
       <div className="container mx-auto px-4 py-12">
         <p className="text-lg text-center mb-12 max-w-3xl mx-auto">Les Philippines sont une destination de rêve et globalement sûre. Chaque année, des millions de visiteurs profitent de ses merveilles sans aucun souci. Cependant, comme partout, la prudence est de mise. Voici tout ce que vous devez savoir pour voyager en toute tranquillité.</p>
 
         <h2 className="text-3xl font-bold text-center mb-8">Zones Sûres et à Éviter</h2>
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          <Card className="border-green-200 bg-green-50">
+          <Card className="border-[hsl(var(--success)/0.3)] bg-[hsl(var(--success)/0.1)]">
             <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-2xl text-green-800"><ShieldCheck />Zones les plus sûres</CardTitle>
+              <CardTitle className="flex items-center gap-3 text-2xl text-[hsl(var(--success))]"><ShieldCheck />Zones les plus sûres</CardTitle>
             </CardHeader>
             <CardContent>
               <p>Les lieux les plus fréquentés par les touristes sont aussi les plus sécurisés :</p>
@@ -39,9 +41,9 @@ const ConseilsSecuritePage = () => {
               <p className="mt-4 text-sm"><strong>Police touristique :</strong> Présente dans ces zones pour vous assister.</p>
             </CardContent>
           </Card>
-          <Card className="border-red-200 bg-red-50">
+          <Card className="border-destructive/30 bg-destructive/10">
             <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-2xl text-red-800"><AlertTriangle />Zones à éviter</CardTitle>
+              <CardTitle className="flex items-center gap-3 text-2xl text-destructive"><AlertTriangle />Zones à éviter</CardTitle>
             </CardHeader>
             <CardContent>
               <p>Certaines régions sont formellement déconseillées (niveau 4/4 selon France Diplomatie) :</p>
@@ -90,10 +92,10 @@ const ConseilsSecuritePage = () => {
         <Card className="max-w-2xl mx-auto">
           <CardContent className="p-6">
             <ul className="space-y-2">
-              <li className="flex items-center"><UserCheck className="text-green-500 mr-3" />Photocopies ou scans de vos documents importants.</li>
-              <li className="flex items-center"><UserCheck className="text-green-500 mr-3" />Adresse de votre hôtel sur vous.</li>
-              <li className="flex items-center"><UserCheck className="text-green-500 mr-3" />Applis utiles : Grab, Google Maps, Maps.me.</li>
-              <li className="flex items-center"><UserCheck className="text-green-500 mr-3" />Appli eTravel obligatoire à l’arrivée.</li>
+              <li className="flex items-center"><UserCheck className="text-[hsl(var(--success))] mr-3" />Photocopies ou scans de vos documents importants.</li>
+              <li className="flex items-center"><UserCheck className="text-[hsl(var(--success))] mr-3" />Adresse de votre hôtel sur vous.</li>
+              <li className="flex items-center"><UserCheck className="text-[hsl(var(--success))] mr-3" />Applis utiles : Grab, Google Maps, Maps.me.</li>
+              <li className="flex items-center"><UserCheck className="text-[hsl(var(--success))] mr-3" />Appli eTravel obligatoire à l’arrivée.</li>
             </ul>
           </CardContent>
         </Card>

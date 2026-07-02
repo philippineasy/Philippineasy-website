@@ -1,10 +1,10 @@
 import { createClient } from '@/utils/supabase/server';
 import { getArticlesByCategorySlug } from '@/services/articleService';
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import ArticleList from '@/components/shared/ArticleList';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
+import { PageHero } from '@/components/sections';
 
 interface CategoryPageProps {
   slug: string;
@@ -13,6 +13,14 @@ interface CategoryPageProps {
 }
 
 export const revalidate = 3600;
+
+// Image de secours par section quand la catégorie n'a pas de heroImage en DB.
+const HERO_FALLBACKS: Record<CategoryPageProps['basePath'], string> = {
+  'vivre-aux-philippines': '/imagesHero/nouveau-depart-aux-philippines.webp',
+  'voyager-aux-philippines': '/imagesHero/comment-voyager-aux-philippines.webp',
+  'meilleurs-plans-aux-philippines': '/imagesHero/maitriser-son-budget-aux-philippines.webp',
+  'actualites-sur-les-philippines': '/imagesHero/antennes-reseaux-aux-philippines.webp',
+};
 
 const CategoryPage = async ({ slug, basePath, pageTitle }: CategoryPageProps) => {
   const supabase = await createClient();
@@ -36,7 +44,6 @@ const CategoryPage = async ({ slug, basePath, pageTitle }: CategoryPageProps) =>
     { label: category.name },
   ];
 
-  // Items pour le JSON-LD breadcrumb
   const breadcrumbJsonLdItems = [
     { name: 'Accueil', item: '/' },
     { name: pageTitle, item: `/${basePath}` },
@@ -46,36 +53,25 @@ const CategoryPage = async ({ slug, basePath, pageTitle }: CategoryPageProps) =>
   return (
     <>
       <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
-      {category.heroImage && (
-        <section className="relative h-64 md:h-80">
-          <Image src={category.heroImage} alt={category.name} fill className="object-cover" priority />
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="text-center text-card-foreground">
-              <h1 className="text-4xl md:text-6xl font-bold mb-4">{category.name}</h1>
-              <p className="text-lg md:text-xl">{category.description}</p>
-            </div>
-          </div>
-        </section>
-      )}
-      <main className="container mx-auto px-4 py-16">
+      <PageHero
+        eyebrow={pageTitle}
+        title={category.name}
+        subtitle={category.description || undefined}
+        imageUrl={category.heroImage || HERO_FALLBACKS[basePath]}
+        imageAlt={category.name}
+      />
+      <main className="container mx-auto px-4 py-12 md:py-16">
         <Breadcrumb items={breadcrumbItems} />
 
-        {!category.heroImage && (
-           <div className="mb-12 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-primary mb-3">{category.name}</h1>
-            {category.description && (
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{category.description}</p>
-            )}
-          </div>
-        )}
-
-        <section>
-          <h2 className="section-title">Les <span className="highlight">Incontournables</span></h2>
+        <section className="mt-10">
+          <h2 className="mb-8 text-3xl font-bold tracking-[-0.01em] text-foreground">
+            Nos articles <span className="text-accent-strong">{category.name}</span>
+          </h2>
           <ArticleList articles={articles} basePath={basePath} />
         </section>
       </main>
     </>
   );
-}
+};
 
 export default CategoryPage;

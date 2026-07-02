@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
-import { Shield, Hospital, AlertTriangle, CheckCircle, Heart, Globe, ChevronRight, Landmark, Syringe, ShieldAlert } from 'lucide-react';
-import { HeroThematic } from '@/components/ui/HeroThematic';
-import Link from 'next/link';
+import { Shield, Hospital, AlertTriangle, CheckCircle, Heart, Globe, Landmark, Syringe, ShieldAlert } from 'lucide-react';
+import { PageHero, StatRow, CardGrid, LinkCard, type StatItem } from '@/components/sections';
 import { faShieldHalved } from '@fortawesome/free-solid-svg-icons';
 import { AffiliateRecommendation } from '@/components/affiliate/AffiliateRecommendation';
 import { createClient } from '@/utils/supabase/server';
@@ -42,6 +41,13 @@ export const metadata: Metadata = {
   },
 };
 
+const quickStats: StatItem[] = [
+  { icon: <Shield className="text-[18px]" />, value: '3', label: "types d'assurance" },
+  { icon: <Hospital className="text-[18px]" />, value: '6', label: 'hôpitaux de référence' },
+  { icon: <Heart className="text-[18px]" />, value: '3', label: 'HMO locales' },
+  { icon: <Globe className="text-[18px]" />, value: '4', label: 'assureurs internationaux' },
+];
+
 const SanteAssurancesPage = async () => {
   const supabase = await createClient();
   const { data: articles } = await getArticlesByCategorySlug(supabase, 'sante-assurances');
@@ -61,12 +67,13 @@ const SanteAssurancesPage = async () => {
   return (
     <div className="bg-background">
       <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
-      <HeroThematic
-        titlePart1="Santé &"
-        titlePart2="Assurances"
-        titlePart2Color="accent"
+      <PageHero
+        eyebrow="Vivre aux Philippines"
+        title="Santé &"
+        titleAccent="Assurances"
         subtitle="Protégez votre santé aux Philippines : système de soins, PhilHealth, HMO locales et assurances internationales pour vivre l'esprit tranquille."
         imageUrl="/imagesHero/securite-et-sante-aux-philippines.webp"
+        imageAlt="Santé & Assurances"
       />
 
       <div className="container mx-auto px-4 py-12 max-w-6xl">
@@ -75,28 +82,7 @@ const SanteAssurancesPage = async () => {
 
         {/* Stats rapides */}
         <section className="mb-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-5 text-center">
-              <Shield className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <p className="text-3xl font-bold text-green-700">3</p>
-              <p className="text-sm text-green-600">types d'assurance</p>
-            </div>
-            <div className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-5 text-center">
-              <Hospital className="h-8 w-8 text-amber-600 mx-auto mb-2" />
-              <p className="text-3xl font-bold text-amber-700">6</p>
-              <p className="text-sm text-amber-600">hôpitaux de référence</p>
-            </div>
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-5 text-center">
-              <Heart className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-              <p className="text-3xl font-bold text-blue-700">3</p>
-              <p className="text-sm text-blue-600">HMO locales</p>
-            </div>
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-5 text-center">
-              <Globe className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-              <p className="text-3xl font-bold text-purple-700">4</p>
-              <p className="text-sm text-purple-600">assureurs internationaux</p>
-            </div>
-          </div>
+          <StatRow stats={quickStats} className="justify-center" />
         </section>
 
         {/* Introduction */}
@@ -182,12 +168,12 @@ const SanteAssurancesPage = async () => {
           </div>
 
           {/* HMO locales */}
-          <h3 className="text-2xl font-bold text-center mb-6">Les HMO locales</h3>
-          <p className="text-center text-muted-foreground mb-6 max-w-2xl mx-auto">
-            Health Maintenance Organizations - Couverture complémentaire recommandée
-          </p>
-
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-10">
+          <CardGrid
+            title="Les HMO locales"
+            subtitle="Health Maintenance Organizations - Couverture complémentaire recommandée"
+            columns={3}
+            className="mb-10"
+          >
             {[
               { name: "Maxicare", desc: "Leader du marché avec large réseau d'hôpitaux.", features: ["Plans individuels et familiaux", "Réseau étendu", "À partir de ~15 000 PHP/an"], color: "blue" },
               { name: "Intellicare", desc: "Bon rapport qualité-prix avec options flexibles.", features: ["Plans personnalisables", "Bonne couverture dentaire", "Options maternité"], color: "purple" },
@@ -209,7 +195,7 @@ const SanteAssurancesPage = async () => {
                 </ul>
               </div>
             ))}
-          </div>
+          </CardGrid>
 
           {/* Assurances internationales */}
           <h3 className="text-2xl font-bold text-center mb-6">Assurances internationales</h3>
@@ -270,9 +256,7 @@ const SanteAssurancesPage = async () => {
           </div>
 
           {/* Hôpitaux de référence */}
-          <h3 className="text-2xl font-bold text-center mb-6">Hôpitaux de référence</h3>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
+          <CardGrid title="Hôpitaux de référence" columns={3}>
             {[
               { name: "St. Luke's Medical Center", location: "BGC & Quezon City", desc: "Standard international, soins complexes", color: "blue" },
               { name: "Makati Medical Center", location: "Makati CBD", desc: "Excellence cardiologie et oncologie", color: "green" },
@@ -294,7 +278,7 @@ const SanteAssurancesPage = async () => {
                 </div>
               </div>
             ))}
-          </div>
+          </CardGrid>
         </section>
 
         {/* Recommandation finale */}
@@ -343,38 +327,26 @@ const SanteAssurancesPage = async () => {
             Avant même votre installation, préparez votre santé pour les Philippines avec nos guides
             dédiés aux voyageurs : vaccins recommandés et conseils de sécurité au quotidien.
           </p>
-          <div className="grid md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            <Link
+          <CardGrid columns={3}>
+            <LinkCard
               href="/voyager-aux-philippines/sante-securite"
-              className="flex items-start gap-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-primary hover:shadow-md transition-all group"
-            >
-              <Shield className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium group-hover:text-primary transition-colors">Santé & Sécurité en voyage</p>
-                <p className="text-sm text-muted-foreground">Le guide complet avant le départ</p>
-              </div>
-            </Link>
-            <Link
+              icon={<Shield className="h-5 w-5" />}
+              title="Santé & Sécurité en voyage"
+              desc="Le guide complet avant le départ"
+            />
+            <LinkCard
               href="/voyager-aux-philippines/sante-securite/vaccins"
-              className="flex items-start gap-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-primary hover:shadow-md transition-all group"
-            >
-              <Syringe className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium group-hover:text-primary transition-colors">Vaccins recommandés</p>
-                <p className="text-sm text-muted-foreground">Quels vaccins prévoir avant de partir</p>
-              </div>
-            </Link>
-            <Link
+              icon={<Syringe className="h-5 w-5" />}
+              title="Vaccins recommandés"
+              desc="Quels vaccins prévoir avant de partir"
+            />
+            <LinkCard
               href="/voyager-aux-philippines/sante-securite/conseils"
-              className="flex items-start gap-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-primary hover:shadow-md transition-all group"
-            >
-              <AlertTriangle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="font-medium group-hover:text-primary transition-colors">Conseils de sécurité</p>
-                <p className="text-sm text-muted-foreground">Précautions au quotidien</p>
-              </div>
-            </Link>
-          </div>
+              icon={<AlertTriangle className="h-5 w-5" />}
+              title="Conseils de sécurité"
+              desc="Précautions au quotidien"
+            />
+          </CardGrid>
         </section>
 
         {/* Affiliate recommendations */}
@@ -395,21 +367,14 @@ const SanteAssurancesPage = async () => {
 
         {/* Voir aussi */}
         <section className="mb-16">
-          <Link
-            href="/vivre-aux-philippines/banque-finances"
-            className="flex items-center justify-between p-5 bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-xl hover:border-primary hover:shadow-md transition-all group max-w-4xl mx-auto"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                <Landmark className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <p className="font-semibold group-hover:text-primary transition-colors">Voir aussi : Banque & Finances</p>
-                <p className="text-sm text-muted-foreground">Ouvrir un compte, transférer de l'argent et gérer son quotidien</p>
-              </div>
-            </div>
-            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-          </Link>
+          <div className="max-w-4xl mx-auto">
+            <LinkCard
+              href="/vivre-aux-philippines/banque-finances"
+              icon={<Landmark className="h-5 w-5" />}
+              title="Voir aussi : Banque & Finances"
+              desc="Ouvrir un compte, transférer de l'argent et gérer son quotidien"
+            />
+          </div>
         </section>
 
         {/* Articles */}
@@ -422,27 +387,12 @@ const SanteAssurancesPage = async () => {
 
         {/* Navigation */}
         <section className="border-t border-gray-200 pt-12">
-          <h3 className="text-xl font-semibold text-center mb-6">Continuez votre exploration</h3>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
-            {[
-              { title: "Banque & Finances", href: "/vivre-aux-philippines/banque-finances", desc: "Comptes bancaires et transferts" },
-              { title: "Obtenir un visa", href: "/vivre-aux-philippines/visas-et-formalites", desc: "Types de visas et procédures" },
-              { title: "Trouver un logement", href: "/vivre-aux-philippines/logement", desc: "Prix et conseils location" },
-              { title: "Forum expatriés", href: "/forum-sur-les-philippines", desc: "Échangez avec la communauté" }
-            ].map((link, index) => (
-              <Link
-                key={index}
-                href={link.href}
-                className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 hover:border-primary hover:shadow-md transition-all group"
-              >
-                <div>
-                  <p className="font-medium group-hover:text-primary transition-colors">{link.title}</p>
-                  <p className="text-sm text-muted-foreground">{link.desc}</p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-              </Link>
-            ))}
-          </div>
+          <CardGrid title="Continuez votre exploration" columns={4}>
+            <LinkCard href="/vivre-aux-philippines/banque-finances" title="Banque & Finances" desc="Comptes bancaires et transferts" />
+            <LinkCard href="/vivre-aux-philippines/visas-et-formalites" title="Obtenir un visa" desc="Types de visas et procédures" />
+            <LinkCard href="/vivre-aux-philippines/logement" title="Trouver un logement" desc="Prix et conseils location" />
+            <LinkCard href="/forum-sur-les-philippines" title="Forum expatriés" desc="Échangez avec la communauté" />
+          </CardGrid>
         </section>
 
       </div>

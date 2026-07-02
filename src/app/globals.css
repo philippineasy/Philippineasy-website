@@ -51,6 +51,37 @@
     --warm-bg: 30 20% 98%;
   }
 
+  /* Dark theme — anchored on the BRAND ink family (#0F172A slate-900 and its
+     declinations), not a naive invert. Background is a touch deeper than ink so
+     cards read as lifted; primary/accent are nudged brighter for legibility on
+     dark, and --accent-strong flips to a light amber so orange text stays AA on
+     dark surfaces. Activated by darkMode:["class"] (no UI toggle yet). */
+  .dark {
+    --background: 222 47% 8%;         /* deep ink, ~#0B0F1A */
+    --foreground: 210 40% 96%;        /* soft off-white, ~#F0F4F8 */
+    --card: 222 47% 11%;              /* ink #0F172A — lifted surface */
+    --card-foreground: 210 40% 96%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 222 83% 63%;           /* brightened brand blue for dark bg */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 217 33% 17%;         /* slate-800 #1E293B */
+    --secondary-foreground: 210 40% 96%;
+    --muted: 217 33% 16%;             /* dark slate — section/tone pause */
+    --muted-foreground: 215 20% 68%;  /* ~slate-400, AA on dark (≈7:1) */
+    --accent: 38 92% 55%;             /* amber, kept vibrant */
+    --accent-foreground: 222 47% 11%; /* dark ink text on amber */
+    --accent-strong: 38 96% 62%;      /* light amber — AA amber text on dark */
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 215 25% 22%;            /* subtle hairline visible on ink */
+    --input: 215 25% 24%;
+    --ring: 222 83% 68%;              /* bright focus ring on dark */
+    --success: 145 58% 52%;
+    --success-foreground: 210 40% 98%;
+    --warm-bg: 222 47% 10%;
+  }
+
   * {
     @apply border-border;
   }

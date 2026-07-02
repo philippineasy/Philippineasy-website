@@ -1,8 +1,7 @@
 import { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Wifi, Globe, Smartphone } from 'lucide-react';
-import { HeroThematic } from '@/components/ui/HeroThematic';
-import Link from 'next/link';
+import { Globe, Smartphone } from 'lucide-react';
+import { PageHero } from '@/components/sections';
 import { faSimCard } from '@fortawesome/free-solid-svg-icons';
 import { AffiliateRecommendation } from '@/components/affiliate/AffiliateRecommendation';
 
@@ -14,11 +13,13 @@ export const metadata: Metadata = {
 const CarteSimPage = () => {
   return (
     <div>
-      <HeroThematic
-        titlePart1="Carte SIM"
-        titlePart2="Locale"
+      <PageHero
+        eyebrow="Guide pratique"
+        title="Carte SIM"
+        titleAccent="Locale"
         subtitle="Le guide essentiel pour acheter votre carte SIM dès votre arrivée et rester connecté à petit prix."
         imageUrl="/images/communication/personne-avec-telephone.webp"
+        imageAlt="Carte SIM Locale"
       />
       <div className="container mx-auto px-4 py-12">
         <p className="text-lg text-center mb-12 max-w-3xl mx-auto">Acheter une carte SIM locale est la solution la plus simple et économique pour avoir internet et passer des appels aux Philippines. Voici comment faire.</p>

@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
-import { CheckCircle, Clock, FileText, Briefcase, GraduationCap, Home, AlertTriangle, ExternalLink, Users, RefreshCw, Plane, Calendar, DollarSign, Shield, ChevronRight, ArrowRight } from 'lucide-react';
-import { HeroThematic } from '@/components/ui/HeroThematic';
+import { CheckCircle, Clock, FileText, GraduationCap, Home, AlertTriangle, ExternalLink, Users, RefreshCw, DollarSign, ChevronRight, ArrowRight } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlane, faCalendarDays, faHouse, faShieldHalved } from '@fortawesome/free-solid-svg-icons';
+import { PageHero, StatRow, CardGrid, LinkCard } from '@/components/sections';
 import { VisaSimulator } from '@/components/visa/VisaSimulator';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
@@ -68,11 +70,13 @@ const VisasEtFormalitesPage = async () => {
     <div className="bg-background">
       <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
 
-      <HeroThematic
-        titlePart1="Visas pour les"
-        titlePart2="Philippines"
+      <PageHero
+        eyebrow="Vivre aux Philippines"
+        title="Visas pour les"
+        titleAccent="Philippines"
         subtitle="Le guide complet et actualisé pour comprendre les différents types de visas et choisir celui qui correspond à votre projet d'expatriation."
         imageUrl="/imagesHero/visa-philippines-processus.webp"
+        imageAlt="Visas pour les Philippines"
       />
 
       <VisaSimulator />
@@ -83,28 +87,14 @@ const VisasEtFormalitesPage = async () => {
 
         {/* Stats rapides */}
         <section className="mb-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-5 text-center">
-              <Plane className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <p className="text-3xl font-bold text-green-700">30</p>
-              <p className="text-sm text-green-600">jours gratuits</p>
-            </div>
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-5 text-center">
-              <Calendar className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-              <p className="text-3xl font-bold text-blue-700">36</p>
-              <p className="text-sm text-blue-600">mois max touriste</p>
-            </div>
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-5 text-center">
-              <Home className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-              <p className="text-3xl font-bold text-purple-700">40+</p>
-              <p className="text-sm text-purple-600">ans pour SRRV</p>
-            </div>
-            <div className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-5 text-center">
-              <Shield className="h-8 w-8 text-amber-600 mx-auto mb-2" />
-              <p className="text-3xl font-bold text-amber-700">5</p>
-              <p className="text-sm text-amber-600">types de visas</p>
-            </div>
-          </div>
+          <StatRow
+            stats={[
+              { value: '30', label: 'jours gratuits', icon: <FontAwesomeIcon icon={faPlane} className="text-[18px]" /> },
+              { value: '36', label: 'mois max touriste', icon: <FontAwesomeIcon icon={faCalendarDays} className="text-[18px]" /> },
+              { value: '40+', label: 'ans pour SRRV', icon: <FontAwesomeIcon icon={faHouse} className="text-[18px]" /> },
+              { value: '5', label: 'types de visas', icon: <FontAwesomeIcon icon={faShieldHalved} className="text-[18px]" /> },
+            ]}
+          />
         </section>
 
         {/* Introduction */}
@@ -117,20 +107,20 @@ const VisasEtFormalitesPage = async () => {
         </section>
 
         {/* Avertissement */}
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 max-w-4xl mx-auto mb-12">
+        <div className="bg-accent/5 border border-accent/25 rounded-xl p-6 max-w-4xl mx-auto mb-12">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <AlertTriangle className="h-6 w-6 text-amber-600" />
+            <div className="w-12 h-12 bg-accent/15 rounded-full flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="h-6 w-6 text-accent-strong" />
             </div>
             <div>
-              <h3 className="font-semibold text-lg mb-2 text-amber-900">Informations officielles</h3>
-              <p className="text-amber-800">
+              <h3 className="font-semibold text-lg mb-2 text-foreground">Informations officielles</h3>
+              <p className="text-muted-foreground">
                 Les règles d'immigration évoluent régulièrement. Ce guide est actualisé régulièrement,
                 mais nous vous recommandons de vérifier les informations auprès du{' '}
-                <a href="https://immigration.gov.ph/" target="_blank" rel="noopener noreferrer" className="underline font-medium hover:text-amber-600">
+                <a href="https://immigration.gov.ph/" target="_blank" rel="noopener noreferrer" className="underline font-medium text-primary hover:text-primary/80">
                   Bureau of Immigration
                 </a>{' '}
-                et de l'<a href="https://parispe.dfa.gov.ph/" target="_blank" rel="noopener noreferrer" className="underline font-medium hover:text-amber-600">
+                et de l'<a href="https://parispe.dfa.gov.ph/" target="_blank" rel="noopener noreferrer" className="underline font-medium text-primary hover:text-primary/80">
                   Ambassade des Philippines en France
                 </a>.
               </p>
@@ -142,20 +132,20 @@ const VisasEtFormalitesPage = async () => {
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-center mb-8">Entrée sans visa : 30 jours gratuits</h2>
 
-          <div className="max-w-4xl mx-auto bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-l-green-500 rounded-xl p-8">
+          <div className="max-w-4xl mx-auto bg-primary/5 border border-primary/15 rounded-2xl p-8">
             <div className="flex items-start gap-4">
-              <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <CheckCircle className="h-8 w-8 text-green-600" />
+              <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="h-8 w-8 text-primary" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-xl mb-3 text-green-800">Bonne nouvelle pour les Français</h3>
-                <p className="text-green-700 mb-6">
-                  Les citoyens français bénéficient d'une <strong>exemption de visa pour les séjours de 30 jours maximum</strong>.
+                <h3 className="font-bold text-xl mb-3 text-foreground">Bonne nouvelle pour les Français</h3>
+                <p className="text-muted-foreground mb-6">
+                  Les citoyens français bénéficient d'une <strong className="font-semibold text-foreground">exemption de visa pour les séjours de 30 jours maximum</strong>.
                   Cette facilité concerne 157 nationalités au total.
                 </p>
 
-                <div className="bg-white/80 rounded-lg p-5 border border-green-200">
-                  <h4 className="font-semibold mb-3 text-green-800">Documents requis à l'arrivée :</h4>
+                <div className="bg-card rounded-lg p-5">
+                  <h4 className="font-semibold mb-3 text-foreground">Documents requis à l'arrivée :</h4>
                   <div className="space-y-3">
                     {[
                       "Passeport valide au moins 6 mois après la date de retour prévue",
@@ -163,10 +153,10 @@ const VisasEtFormalitesPage = async () => {
                       "Enregistrement sur le portail eTravel (obligatoire)"
                     ].map((doc, index) => (
                       <div key={index} className="flex items-center gap-3">
-                        <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <CheckCircle className="h-4 w-4 text-white" />
+                        <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                          <CheckCircle className="h-4 w-4 text-primary-foreground" />
                         </div>
-                        <span className="text-green-700">{doc}</span>
+                        <span className="text-foreground">{doc}</span>
                       </div>
                     ))}
                   </div>
@@ -178,17 +168,14 @@ const VisasEtFormalitesPage = async () => {
 
         {/* Visa Touriste 9A */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-3">Visa Touriste (9A)</h2>
-          <p className="text-center text-muted-foreground mb-8">Prolongez votre séjour jusqu'à 36 mois</p>
-
-          <div className="grid lg:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          <CardGrid title="Visa Touriste (9A)" subtitle="Prolongez votre séjour jusqu'à 36 mois" columns={2}>
             {/* Extension sur place */}
-            <div className="bg-white border-l-4 border-l-blue-500 rounded-xl shadow-sm overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <FileText className="h-6 w-6 text-white" />
-                  <h3 className="font-bold text-lg text-white">Extension sur place</h3>
-                </div>
+            <div className="bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest overflow-hidden">
+              <div className="flex items-center gap-3 bg-muted px-6 py-4 border-b border-border">
+                <span className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                  <FileText className="h-5 w-5 text-primary" />
+                </span>
+                <h3 className="font-bold text-lg text-foreground">Extension sur place</h3>
               </div>
               <div className="p-6">
                 <p className="text-muted-foreground mb-5">
@@ -197,9 +184,9 @@ const VisasEtFormalitesPage = async () => {
                 </p>
 
                 <div className="space-y-4">
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <h4 className="font-semibold mb-3 flex items-center gap-2 text-blue-800">
-                      <DollarSign className="h-5 w-5" />
+                  <div className="bg-muted rounded-lg p-4">
+                    <h4 className="font-semibold mb-3 flex items-center gap-2 text-foreground">
+                      <DollarSign className="h-5 w-5 text-primary" />
                       Coûts des extensions (2026)
                     </h4>
                     <div className="space-y-2">
@@ -208,19 +195,19 @@ const VisasEtFormalitesPage = async () => {
                         { label: "2 mois", price: "5 000 - 6 000 PHP" },
                         { label: "6 mois (LSVVE)", price: "11 500 - 13 900 PHP" }
                       ].map((item, index) => (
-                        <div key={index} className="flex justify-between items-center bg-white rounded px-3 py-2">
-                          <span className="text-blue-700">{item.label}</span>
-                          <span className="font-semibold text-blue-800">{item.price}</span>
+                        <div key={index} className="flex justify-between items-center bg-card rounded px-3 py-2">
+                          <span className="text-muted-foreground">{item.label}</span>
+                          <span className="font-semibold text-foreground">{item.price}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="font-semibold mb-2">ACR I-Card obligatoire</h4>
+                  <div className="bg-muted rounded-lg p-4">
+                    <h4 className="font-semibold mb-2 text-foreground">ACR I-Card obligatoire</h4>
                     <p className="text-sm text-muted-foreground">
                       Après 59 jours aux Philippines, vous devez obtenir l'Alien Certificate of Registration.
-                      <span className="block mt-1 font-medium text-gray-700">Coût : environ 3 000 PHP</span>
+                      <span className="block mt-1 font-medium text-foreground">Coût : environ 3 000 PHP</span>
                     </p>
                   </div>
                 </div>
@@ -228,12 +215,12 @@ const VisasEtFormalitesPage = async () => {
             </div>
 
             {/* Demande avant départ */}
-            <div className="bg-white border-l-4 border-l-cyan-500 rounded-xl shadow-sm overflow-hidden">
-              <div className="bg-gradient-to-r from-cyan-500 to-cyan-600 px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <Clock className="h-6 w-6 text-white" />
-                  <h3 className="font-bold text-lg text-white">Demande avant départ (59 jours)</h3>
-                </div>
+            <div className="bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest overflow-hidden">
+              <div className="flex items-center gap-3 bg-muted px-6 py-4 border-b border-border">
+                <span className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Clock className="h-5 w-5 text-primary" />
+                </span>
+                <h3 className="font-bold text-lg text-foreground">Demande avant départ (59 jours)</h3>
               </div>
               <div className="p-6">
                 <p className="text-muted-foreground mb-5">
@@ -242,8 +229,8 @@ const VisasEtFormalitesPage = async () => {
                 </p>
 
                 <div className="space-y-4">
-                  <div className="bg-cyan-50 rounded-lg p-4">
-                    <h4 className="font-semibold mb-3 text-cyan-800">Documents requis</h4>
+                  <div className="bg-muted rounded-lg p-4">
+                    <h4 className="font-semibold mb-3 text-foreground">Documents requis</h4>
                     <ul className="space-y-2 text-sm">
                       {[
                         "Formulaire de demande de visa",
@@ -252,8 +239,8 @@ const VisasEtFormalitesPage = async () => {
                         "Preuve de moyens financiers",
                         "Itinéraire de voyage"
                       ].map((doc, index) => (
-                        <li key={index} className="flex items-center gap-2 text-cyan-700">
-                          <CheckCircle className="h-4 w-4 text-cyan-500" />
+                        <li key={index} className="flex items-center gap-2 text-muted-foreground">
+                          <CheckCircle className="h-4 w-4 text-primary" />
                           {doc}
                         </li>
                       ))}
@@ -261,24 +248,24 @@ const VisasEtFormalitesPage = async () => {
                   </div>
 
                   <div className="flex gap-3">
-                    <span className="bg-cyan-100 text-cyan-700 px-4 py-2 rounded-full text-sm font-medium">
+                    <span className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
                       30-40€ de frais
                     </span>
-                    <span className="bg-cyan-100 text-cyan-700 px-4 py-2 rounded-full text-sm font-medium">
+                    <span className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
                       3-5 jours ouvrables
                     </span>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          </CardGrid>
 
           <div className="mt-6 text-center">
             <a
               href="https://e-services.immigration.gov.ph/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
+              className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium"
             >
               <ExternalLink className="h-4 w-4" />
               Portail eServices du Bureau of Immigration (extensions en ligne)
@@ -292,15 +279,15 @@ const VisasEtFormalitesPage = async () => {
           <p className="text-center text-muted-foreground mb-8">Résidence permanente aux Philippines</p>
 
           {/* Info nouvelle règle */}
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 max-w-4xl mx-auto mb-8">
+          <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 max-w-4xl mx-auto mb-8">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <RefreshCw className="h-6 w-6 text-blue-600" />
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                <RefreshCw className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-2 text-blue-900">Nouvelles règles depuis 2025</h3>
-                <p className="text-blue-800">
-                  Le programme SRRV a été modifié avec un <strong>abaissement de l'âge minimum à 40 ans</strong>
+                <h3 className="font-semibold text-lg mb-2 text-foreground">Nouvelles règles depuis 2025</h3>
+                <p className="text-muted-foreground">
+                  Le programme SRRV a été modifié avec un <strong className="font-semibold text-foreground">abaissement de l'âge minimum à 40 ans</strong>
                   et de nouveaux montants de dépôt. Ces changements s'appliquent à tous les nouveaux demandeurs.
                 </p>
               </div>
@@ -308,106 +295,108 @@ const VisasEtFormalitesPage = async () => {
           </div>
 
           {/* Callout - comparatif SRRV vs 13(a) */}
-          <div className="max-w-4xl mx-auto mb-8 bg-white border border-purple-200 rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="max-w-4xl mx-auto mb-8 bg-card border border-border rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">
               Vous hésitez entre le SRRV et le visa 13(a) pour votre projet de retraite aux Philippines ?
             </p>
             <Link
               href="/vivre-aux-philippines/visas-et-formalites/visa-longue-duree-srrv-13a-comparatif"
-              className="inline-flex items-center gap-2 text-purple-700 hover:text-purple-800 font-semibold whitespace-nowrap"
+              className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-semibold whitespace-nowrap"
             >
               Voir le comparatif détaillé SRRV vs 13(a)
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-6 max-w-5xl mx-auto mb-8">
-            {/* SRRV Classic */}
-            <div className="bg-white border-l-4 border-l-purple-500 rounded-xl shadow-sm overflow-hidden">
-              <div className="bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <Home className="h-6 w-6 text-white" />
-                  <h3 className="font-bold text-lg text-white">SRRV Classic</h3>
+          <div className="mb-8">
+            <CardGrid columns={2}>
+              {/* SRRV Classic */}
+              <div className="bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest overflow-hidden">
+                <div className="flex items-center gap-3 bg-muted px-6 py-4 border-b border-border">
+                  <span className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Home className="h-5 w-5 text-primary" />
+                  </span>
+                  <h3 className="font-bold text-lg text-foreground">SRRV Classic</h3>
                 </div>
-              </div>
-              <div className="p-6">
-                <p className="text-muted-foreground mb-5">
-                  Le visa de retraite principal pour résider aux Philippines de manière permanente.
-                </p>
-
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-purple-800">Dépôts requis :</h4>
-
-                  {[
-                    { age: "50+ avec pension", deposit: "15 000 $US", note: "+ pension 800$/mois" },
-                    { age: "50+ sans pension", deposit: "30 000 $US", note: null },
-                    { age: "40-49 avec pension", deposit: "25 000 $US", note: null },
-                    { age: "40-49 sans pension", deposit: "50 000 $US", note: null }
-                  ].map((item, index) => (
-                    <div key={index} className="flex items-center justify-between bg-purple-50 rounded-lg px-4 py-3">
-                      <div>
-                        <span className="font-medium text-purple-800">{item.age}</span>
-                        {item.note && <span className="text-xs text-purple-600 block">{item.note}</span>}
-                      </div>
-                      <span className="bg-purple-200 text-purple-800 px-3 py-1 rounded-full font-bold text-sm">
-                        {item.deposit}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-purple-100">
-                  <h4 className="font-semibold text-sm text-purple-800 mb-2">Frais supplémentaires</h4>
-                  <ul className="text-sm space-y-1 text-purple-700">
-                    <li>• Frais de dossier : 1 500 $US (principal)</li>
-                    <li>• Par personne à charge : 300 $US</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* SRRV Courtesy */}
-            <div className="bg-white border-l-4 border-l-indigo-500 rounded-xl shadow-sm overflow-hidden">
-              <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <Users className="h-6 w-6 text-white" />
-                  <h3 className="font-bold text-lg text-white">SRRV Courtesy</h3>
-                </div>
-              </div>
-              <div className="p-6">
-                <p className="text-muted-foreground mb-5">
-                  Programme spécial pour les anciens citoyens philippins ayant renoncé à leur nationalité.
-                </p>
-
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-indigo-800">Dépôts requis :</h4>
-
-                  {[
-                    { age: "50 ans et plus", deposit: "1 500 $US" },
-                    { age: "40-49 ans", deposit: "3 000 $US" }
-                  ].map((item, index) => (
-                    <div key={index} className="flex items-center justify-between bg-indigo-50 rounded-lg px-4 py-3">
-                      <span className="font-medium text-indigo-800">{item.age}</span>
-                      <span className="bg-indigo-200 text-indigo-800 px-3 py-1 rounded-full font-bold text-sm">
-                        {item.deposit}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-6 bg-indigo-50 rounded-lg p-4">
-                  <p className="text-sm text-indigo-700">
-                    <strong>Note :</strong> Ce visa est réservé aux personnes ayant eu la nationalité philippine par le passé.
+                <div className="p-6">
+                  <p className="text-muted-foreground mb-5">
+                    Le visa de retraite principal pour résider aux Philippines de manière permanente.
                   </p>
+
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-foreground">Dépôts requis :</h4>
+
+                    {[
+                      { age: "50+ avec pension", deposit: "15 000 $US", note: "+ pension 800$/mois" },
+                      { age: "50+ sans pension", deposit: "30 000 $US", note: null },
+                      { age: "40-49 avec pension", deposit: "25 000 $US", note: null },
+                      { age: "40-49 sans pension", deposit: "50 000 $US", note: null }
+                    ].map((item, index) => (
+                      <div key={index} className="flex items-center justify-between bg-muted rounded-lg px-4 py-3">
+                        <div>
+                          <span className="font-medium text-foreground">{item.age}</span>
+                          {item.note && <span className="text-xs text-muted-foreground block">{item.note}</span>}
+                        </div>
+                        <span className="bg-primary/10 text-primary px-3 py-1 rounded-full font-bold text-sm">
+                          {item.deposit}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <h4 className="font-semibold text-sm text-foreground mb-2">Frais supplémentaires</h4>
+                    <ul className="text-sm space-y-1 text-muted-foreground">
+                      <li>• Frais de dossier : 1 500 $US (principal)</li>
+                      <li>• Par personne à charge : 300 $US</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
-            </div>
+
+              {/* SRRV Courtesy */}
+              <div className="bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest overflow-hidden">
+                <div className="flex items-center gap-3 bg-muted px-6 py-4 border-b border-border">
+                  <span className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Users className="h-5 w-5 text-primary" />
+                  </span>
+                  <h3 className="font-bold text-lg text-foreground">SRRV Courtesy</h3>
+                </div>
+                <div className="p-6">
+                  <p className="text-muted-foreground mb-5">
+                    Programme spécial pour les anciens citoyens philippins ayant renoncé à leur nationalité.
+                  </p>
+
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-foreground">Dépôts requis :</h4>
+
+                    {[
+                      { age: "50 ans et plus", deposit: "1 500 $US" },
+                      { age: "40-49 ans", deposit: "3 000 $US" }
+                    ].map((item, index) => (
+                      <div key={index} className="flex items-center justify-between bg-muted rounded-lg px-4 py-3">
+                        <span className="font-medium text-foreground">{item.age}</span>
+                        <span className="bg-primary/10 text-primary px-3 py-1 rounded-full font-bold text-sm">
+                          {item.deposit}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-6 bg-muted rounded-lg p-4">
+                    <p className="text-sm text-muted-foreground">
+                      <strong className="font-semibold text-foreground">Note :</strong> Ce visa est réservé aux personnes ayant eu la nationalité philippine par le passé.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardGrid>
           </div>
 
           {/* Avantages SRRV */}
-          <div className="max-w-5xl mx-auto bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-8">
-            <h3 className="font-bold text-xl mb-6 text-green-800 flex items-center gap-3">
-              <CheckCircle className="h-6 w-6 text-green-600" />
+          <div className="max-w-5xl mx-auto bg-primary/5 border border-primary/15 rounded-2xl p-8">
+            <h3 className="font-bold text-xl mb-6 text-foreground flex items-center gap-3">
+              <CheckCircle className="h-6 w-6 text-primary" />
               Avantages du SRRV
             </h3>
             <div className="grid md:grid-cols-2 gap-4">
@@ -419,9 +408,9 @@ const VisasEtFormalitesPage = async () => {
                 "Importation franchise de biens (jusqu'à 7 000 $US)",
                 "Dépôt récupérable en cas de départ définitif"
               ].map((advantage, index) => (
-                <div key={index} className="flex items-start gap-3 bg-white/60 rounded-lg px-4 py-3">
-                  <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-green-800">{advantage}</span>
+                <div key={index} className="flex items-start gap-3 bg-card rounded-lg px-4 py-3">
+                  <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span className="text-foreground">{advantage}</span>
                 </div>
               ))}
             </div>
@@ -430,7 +419,7 @@ const VisasEtFormalitesPage = async () => {
                 href="https://pra.gov.ph/SRRVisa"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-green-700 hover:text-green-800 font-medium"
+                className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium"
               >
                 <ExternalLink className="h-4 w-4" />
                 Site officiel de la Philippine Retirement Authority (PRA)
@@ -453,7 +442,7 @@ const VisasEtFormalitesPage = async () => {
 
             <div className="relative">
               {/* Ligne centrale - visible sur desktop */}
-              <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-orange-300 via-amber-300 to-yellow-300" />
+              <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-border" />
 
               <div className="space-y-8 md:space-y-0">
                 {[
@@ -462,43 +451,40 @@ const VisasEtFormalitesPage = async () => {
                     title: "AEP (Alien Employment Permit)",
                     description: "Délivré par le DOLE - L'employeur prouve qu'aucun Philippin qualifié n'est disponible",
                     duration: "2-3 semaines",
-                    color: "orange"
                   },
                   {
                     step: "2",
                     title: "PWP (Provisional Work Permit)",
                     description: "Optionnel - Permet de travailler pendant le traitement du 9G",
                     duration: "3 mois (renouvelable)",
-                    color: "amber"
                   },
                   {
                     step: "3",
                     title: "Visa 9(G)",
                     description: "Demandé après obtention de l'AEP auprès du Bureau of Immigration",
                     duration: "1 à 3 ans",
-                    color: "yellow"
                   }
                 ].map((item, index) => (
                   <div key={index} className={`relative md:flex ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-center md:mb-8`}>
                     {/* Contenu */}
                     <div className={`md:w-5/12 ${index % 2 === 0 ? 'md:pr-8 md:text-right' : 'md:pl-8'}`}>
-                      <div className={`bg-white border-l-4 border-l-${item.color}-500 rounded-xl shadow-sm p-5`}>
+                      <div className="bg-card border-[0.5px] border-border rounded-xl shadow-card-rest p-5">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className={`bg-${item.color}-100 text-${item.color}-700 px-2 py-1 rounded text-xs font-bold`}>
+                          <span className="bg-primary/10 text-primary px-2 py-1 rounded text-xs font-bold">
                             Étape {item.step}
                           </span>
-                          <span className={`bg-${item.color}-50 text-${item.color}-600 px-2 py-1 rounded text-xs`}>
+                          <span className="bg-muted text-muted-foreground px-2 py-1 rounded text-xs">
                             {item.duration}
                           </span>
                         </div>
-                        <h4 className="font-bold text-gray-800 mb-1">{item.title}</h4>
+                        <h4 className="font-bold text-foreground mb-1">{item.title}</h4>
                         <p className="text-sm text-muted-foreground">{item.description}</p>
                       </div>
                     </div>
 
                     {/* Point central */}
                     <div className="hidden md:flex md:w-2/12 justify-center">
-                      <div className={`w-10 h-10 bg-${item.color}-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg z-10`}>
+                      <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold shadow-lg z-10">
                         {item.step}
                       </div>
                     </div>
@@ -513,14 +499,14 @@ const VisasEtFormalitesPage = async () => {
 
           {/* Points importants */}
           <div className="max-w-4xl mx-auto">
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
+            <div className="bg-accent/5 border border-accent/25 rounded-xl p-6">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <AlertTriangle className="h-6 w-6 text-amber-600" />
+                <div className="w-12 h-12 bg-accent/15 rounded-full flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle className="h-6 w-6 text-accent-strong" />
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-3 text-amber-900">Points importants à retenir</h4>
-                  <ul className="space-y-2 text-amber-800">
+                  <h4 className="font-semibold mb-3 text-foreground">Points importants à retenir</h4>
+                  <ul className="space-y-2 text-muted-foreground">
                     {[
                       "L'AEP est lié à un employeur spécifique : changement d'emploi = nouvelle demande",
                       "L'entreprise sponsor doit généralement avoir un capital minimum de 200 000 $US",
@@ -528,7 +514,7 @@ const VisasEtFormalitesPage = async () => {
                       "Certaines professions sont exemptées d'AEP (diplomates, résidents permanents...)"
                     ].map((point, index) => (
                       <li key={index} className="flex items-start gap-2">
-                        <ChevronRight className="h-5 w-5 text-amber-600 flex-shrink-0" />
+                        <ChevronRight className="h-5 w-5 text-accent-strong flex-shrink-0" />
                         <span>{point}</span>
                       </li>
                     ))}
@@ -544,12 +530,12 @@ const VisasEtFormalitesPage = async () => {
           <h2 className="text-3xl font-bold text-center mb-3">Visa Étudiant (9F)</h2>
           <p className="text-center text-muted-foreground mb-8">Poursuivez vos études aux Philippines</p>
 
-          <div className="max-w-4xl mx-auto bg-white border-l-4 border-l-teal-500 rounded-xl shadow-sm overflow-hidden">
-            <div className="bg-gradient-to-r from-teal-500 to-teal-600 px-6 py-4">
-              <div className="flex items-center gap-3">
-                <GraduationCap className="h-6 w-6 text-white" />
-                <h3 className="font-bold text-lg text-white">Étudier aux Philippines</h3>
-              </div>
+          <div className="max-w-4xl mx-auto bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest overflow-hidden">
+            <div className="flex items-center gap-3 bg-muted px-6 py-4 border-b border-border">
+              <span className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                <GraduationCap className="h-5 w-5 text-primary" />
+              </span>
+              <h3 className="font-bold text-lg text-foreground">Étudier aux Philippines</h3>
             </div>
             <div className="p-6">
               <p className="text-muted-foreground mb-6">
@@ -558,8 +544,8 @@ const VisasEtFormalitesPage = async () => {
               </p>
 
               <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-teal-50 rounded-lg p-5">
-                  <h4 className="font-semibold mb-4 text-teal-800">Procédure en 4 étapes</h4>
+                <div className="bg-muted rounded-lg p-5">
+                  <h4 className="font-semibold mb-4 text-foreground">Procédure en 4 étapes</h4>
                   <div className="space-y-3">
                     {[
                       "Admission dans une université accréditée CHED",
@@ -568,17 +554,17 @@ const VisasEtFormalitesPage = async () => {
                       "Le DFA informe l'ambassade pour délivrance du visa"
                     ].map((step, index) => (
                       <div key={index} className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-white text-xs font-bold">{index + 1}</span>
+                        <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-primary-foreground text-xs font-bold">{index + 1}</span>
                         </div>
-                        <span className="text-sm text-teal-700">{step}</span>
+                        <span className="text-sm text-muted-foreground">{step}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="bg-gray-50 rounded-lg p-5">
-                  <h4 className="font-semibold mb-4">Documents clés</h4>
+                <div className="bg-muted rounded-lg p-5">
+                  <h4 className="font-semibold mb-4 text-foreground">Documents clés</h4>
                   <ul className="space-y-2 text-sm text-muted-foreground">
                     {[
                       "Lettre d'acceptation de l'université",
@@ -589,7 +575,7 @@ const VisasEtFormalitesPage = async () => {
                       "Casier judiciaire vierge"
                     ].map((doc, index) => (
                       <li key={index} className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-teal-500" />
+                        <CheckCircle className="h-4 w-4 text-primary" />
                         {doc}
                       </li>
                     ))}
@@ -598,10 +584,10 @@ const VisasEtFormalitesPage = async () => {
               </div>
 
               <div className="mt-6 flex flex-wrap gap-3 justify-center">
-                <span className="bg-teal-100 text-teal-700 px-4 py-2 rounded-full text-sm font-medium">
+                <span className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
                   Validité : 1 an renouvelable
                 </span>
-                <span className="bg-teal-100 text-teal-700 px-4 py-2 rounded-full text-sm font-medium">
+                <span className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
                   Délai : 2 à 8 semaines
                 </span>
               </div>
@@ -611,7 +597,7 @@ const VisasEtFormalitesPage = async () => {
           <div className="mt-6 text-center">
             <Link
               href="/vivre-aux-philippines/etudier/universites"
-              className="inline-flex items-center gap-2 text-teal-600 hover:text-teal-700 font-medium"
+              className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium"
             >
               Découvrir les universités philippines
               <ArrowRight className="h-4 w-4" />
@@ -624,7 +610,7 @@ const VisasEtFormalitesPage = async () => {
           <h2 className="text-3xl font-bold text-center mb-8">Comparatif des visas</h2>
 
           <div className="overflow-x-auto">
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden min-w-[700px]">
+            <div className="bg-card border-[0.5px] border-border rounded-xl shadow-card-rest overflow-hidden min-w-[700px]">
               <div className="bg-gradient-to-r from-primary to-primary/80 text-white">
                 <div className="grid grid-cols-4 p-4">
                   <div className="font-semibold">Type de visa</div>
@@ -633,21 +619,21 @@ const VisasEtFormalitesPage = async () => {
                   <div className="font-semibold">Coût estimé</div>
                 </div>
               </div>
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-border">
                 {[
-                  { type: "Exemption (tourisme)", duration: "30 jours", condition: "Nationalité française", cost: "Gratuit", color: "green" },
-                  { type: "9A (touriste)", duration: "36 mois", condition: "Extensions successives", cost: "3 000-13 900 PHP/ext.", color: "blue" },
-                  { type: "SRRV (retraite)", duration: "Permanent", condition: "40+ ans, dépôt bancaire", cost: "15 000-50 000 $US", color: "purple" },
-                  { type: "9G (travail)", duration: "1-3 ans", condition: "Contrat + AEP", cost: "Pris en charge employeur", color: "orange" },
-                  { type: "9F (étudiant)", duration: "1 an renouv.", condition: "Admission université CHED", cost: "Variable", color: "teal" }
+                  { type: "Exemption (tourisme)", duration: "30 jours", condition: "Nationalité française", cost: "Gratuit" },
+                  { type: "9A (touriste)", duration: "36 mois", condition: "Extensions successives", cost: "3 000-13 900 PHP/ext." },
+                  { type: "SRRV (retraite)", duration: "Permanent", condition: "40+ ans, dépôt bancaire", cost: "15 000-50 000 $US" },
+                  { type: "9G (travail)", duration: "1-3 ans", condition: "Contrat + AEP", cost: "Pris en charge employeur" },
+                  { type: "9F (étudiant)", duration: "1 an renouv.", condition: "Admission université CHED", cost: "Variable" }
                 ].map((visa, index) => (
-                  <div key={index} className={`grid grid-cols-4 p-4 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-primary/5 transition-colors`}>
+                  <div key={index} className={`grid grid-cols-4 p-4 ${index % 2 === 0 ? 'bg-card' : 'bg-muted'} hover:bg-primary/5 transition-colors`}>
                     <div className="font-medium flex items-center gap-2">
-                      <div className={`w-2 h-8 bg-${visa.color}-500 rounded-full`} />
+                      <div className="w-2 h-8 bg-primary/30 rounded-full" />
                       {visa.type}
                     </div>
                     <div className="flex items-center">
-                      <span className={`bg-${visa.color}-100 text-${visa.color}-700 px-3 py-1 rounded-full text-sm font-medium`}>
+                      <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
                         {visa.duration}
                       </span>
                     </div>
@@ -662,9 +648,7 @@ const VisasEtFormalitesPage = async () => {
 
         {/* Ressources officielles */}
         <section className="mb-12">
-          <h2 className="text-3xl font-bold text-center mb-8">Ressources officielles</h2>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+          <CardGrid title="Ressources officielles" columns={4}>
             {[
               { name: "Bureau of Immigration", url: "https://immigration.gov.ph/", domain: "immigration.gov.ph" },
               { name: "Philippine Retirement Authority", url: "https://pra.gov.ph/", domain: "pra.gov.ph" },
@@ -676,7 +660,7 @@ const VisasEtFormalitesPage = async () => {
                 href={resource.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 p-4 bg-white rounded-xl border border-gray-200 hover:border-primary hover:shadow-md transition-all group"
+                className="flex items-center gap-3 p-4 bg-card rounded-xl border border-border hover:border-primary hover:shadow-card transition-all group"
               >
                 <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                   <ExternalLink className="h-5 w-5 text-primary" />
@@ -687,36 +671,21 @@ const VisasEtFormalitesPage = async () => {
                 </div>
               </a>
             ))}
-          </div>
+          </CardGrid>
         </section>
 
         {/* Navigation */}
-        <section className="border-t border-gray-200 pt-12">
-          <h3 className="text-xl font-semibold text-center mb-6">Continuez votre exploration</h3>
-          <div className="grid md:grid-cols-3 gap-4 max-w-4xl mx-auto">
-            {[
-              { title: "Trouver un logement", href: "/vivre-aux-philippines/logement", desc: "Condos, maisons, quartiers" },
-              { title: "Ouvrir un compte en banque", href: "/vivre-aux-philippines/banque-finances", desc: "Banques et assurances" },
-              { title: "Forum expatriés", href: "/forum-sur-les-philippines", desc: "Échangez avec la communauté" }
-            ].map((link, index) => (
-              <Link
-                key={index}
-                href={link.href}
-                className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 hover:border-primary hover:shadow-md transition-all group"
-              >
-                <div>
-                  <p className="font-medium group-hover:text-primary transition-colors">{link.title}</p>
-                  <p className="text-sm text-muted-foreground">{link.desc}</p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-              </Link>
-            ))}
-          </div>
+        <section className="border-t border-border pt-12">
+          <CardGrid title="Continuez votre exploration" columns={3}>
+            <LinkCard title="Trouver un logement" href="/vivre-aux-philippines/logement" desc="Condos, maisons, quartiers" cta="En savoir plus" />
+            <LinkCard title="Ouvrir un compte en banque" href="/vivre-aux-philippines/banque-finances" desc="Banques et assurances" cta="En savoir plus" />
+            <LinkCard title="Forum expatriés" href="/forum-sur-les-philippines" desc="Échangez avec la communauté" cta="En savoir plus" />
+          </CardGrid>
         </section>
 
         {/* Nos articles Visas & Formalités */}
         {articles && articles.length > 0 && (
-          <section className="border-t border-gray-200 pt-12 mt-16">
+          <section className="border-t border-border pt-12 mt-16">
             <h2 className="text-3xl font-bold text-center mb-12">Nos articles Visas & Formalités</h2>
             <ArticleList articles={articles} basePath="vivre-aux-philippines" />
           </section>

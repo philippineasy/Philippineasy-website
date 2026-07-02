@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Ship, Anchor, LifeBuoy, Ticket } from 'lucide-react';
-import { HeroThematic } from '@/components/ui/HeroThematic';
+import { PageHero } from '@/components/sections';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -12,11 +12,13 @@ export const metadata: Metadata = {
 const FerriesPage = () => {
   return (
     <div>
-      <HeroThematic
-        titlePart1="Voyager en"
-        titlePart2="Ferry"
+      <PageHero
+        eyebrow="Guide pratique"
+        title="Voyager en"
+        titleAccent="Ferry"
         subtitle="L'aventure inter-îles au rythme des vagues. Le guide complet pour naviguer dans l'archipel."
         imageUrl="/images/transport/ferry-sur-mer-calme.webp"
+        imageAlt="Voyager en Ferry"
       />
       <div className="container mx-auto px-4 py-12">
         <p className="text-lg text-center mb-12 max-w-3xl mx-auto">Le ferry est un moyen de transport incontournable pour explorer la diversité des 7 641 îles des Philippines. C'est une option économique, pittoresque et une véritable immersion dans la vie locale.</p>

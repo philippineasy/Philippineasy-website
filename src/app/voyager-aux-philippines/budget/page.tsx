@@ -1,9 +1,7 @@
 import { Metadata } from 'next';
-import { HeroThematic } from '@/components/ui/HeroThematic';
-import { AlternatingContent } from '@/components/ui/AlternatingContent';
-import { KeyStatCard } from '@/components/ui/KeyStatCard';
-import { faWallet, faBed, faUtensils, faHotel, faMoneyBillTransfer } from '@fortawesome/free-solid-svg-icons';
-import Link from 'next/link';
+import { PageHero, StatRow, SplitSection, CardGrid, LinkCard } from '@/components/sections';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faWallet, faBed, faUtensils, faHotel } from '@fortawesome/free-solid-svg-icons';
 import { AffiliateRecommendation } from '@/components/affiliate/AffiliateRecommendation';
 import { createClient } from '@/utils/supabase/server';
 import { getPageBySlug } from '@/services/pageService';
@@ -66,55 +64,79 @@ const BudgetPage = async () => {
 
   return (
     <div>
-      <HeroThematic
-        titlePart1="Maîtriser son"
-        titlePart2="Budget"
-        titlePart2Color="accent"
+      <PageHero
+        eyebrow="Voyager aux Philippines"
+        title="Maîtriser son"
+        titleAccent="Budget"
         subtitle={page.subtitle || "Découvrez comment voyager-aux-philippines aux Philippines sans vous ruiner, que vous soyez backpacker ou en quête de confort."}
         imageUrl={page.hero_image_url || "/imagesHero/maitriser-son-budget-aux-philippines.webp"}
+        imageAlt="Maîtriser son Budget"
       />
 
-      <div className="bg-muted py-20 -mt-20 relative z-20 rounded-t-2xl">
+      <section className="bg-muted py-16 md:py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Estimations par Type de Voyageur</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <KeyStatCard icon={faWallet} value="30-50€/j" label="Backpacker" color="accent" />
-            <KeyStatCard icon={faBed} value="60-100€/j" label="Confort" color="primary" />
-            <KeyStatCard icon={faUtensils} value="120€+/j" label="Luxe" color="accent" />
-          </div>
+          <h2
+            className="mb-10 text-center text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold text-foreground"
+            style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
+          >
+            Estimations par Type de Voyageur
+          </h2>
+          <StatRow
+            className="justify-center"
+            stats={[
+              { icon: <FontAwesomeIcon icon={faWallet} className="text-[18px]" />, value: '30-50€/j', label: 'Backpacker' },
+              { icon: <FontAwesomeIcon icon={faBed} className="text-[18px]" />, value: '60-100€/j', label: 'Confort' },
+              { icon: <FontAwesomeIcon icon={faUtensils} className="text-[18px]" />, value: '120€+/j', label: 'Luxe' },
+            ]}
+          />
         </div>
-      </div>
+      </section>
 
-      <AlternatingContent
+      <SplitSection
         imageUrl="/images/budget/marche-fruits-locaux.webp"
         imageAlt="Marché local avec des fruits et légumes"
+        title="Manger &"
+        titleAccent="Boire"
       >
-        <h2>Manger & <span className="text-accent">Boire</span></h2>
         <p>La nourriture est très abordable. Vous pouvez manger un repas complet dans un "carinderia" (petit restaurant local) pour quelques euros. Les bières locales comme la San Miguel sont également très bon marché.</p>
-        <ul className="list-disc list-inside space-y-2 mt-4">
+        <ul>
           <li><b>Repas local :</b> 2-4€</li>
           <li><b>Restaurant moyen :</b> 8-15€</li>
           <li><b>Bière locale :</b> ~1€</li>
         </ul>
-        <Link href="/voyager-aux-philippines/budget/nourriture" className="text-accent font-bold hover:underline mt-4 inline-block">Guide de la street food →</Link>
-      </AlternatingContent>
+      </SplitSection>
 
-      <div className="bg-muted">
-        <AlternatingContent
-          imageUrl="/images/budget/chambre-vue-mer.webp"
-          imageAlt="Chambre d'hôtel avec vue sur la mer"
-          reverse
-        >
-          <h2><span className="text-accent">Hébergement</span> & Activités</h2>
-          <p>L'hébergement représente une part importante du budget. Les auberges de jeunesse (dortoirs) sont l'option la plus économique, tandis que les resorts de luxe peuvent coûter plusieurs centaines d'euros par nuit. Les activités comme la plongée ou les tours en bateau sont à prévoir dans votre budget.</p>
-        <ul className="list-disc list-inside space-y-2 mt-4">
-            <li><b>Dortoir :</b> 8-15€</li>
-            <li><b>Chambre double simple :</b> 20-40€</li>
-            <li><b>Tour en bateau (El Nido) :</b> ~20-25€</li>
+      <SplitSection
+        tone="muted"
+        reverse
+        imageUrl="/images/budget/chambre-vue-mer.webp"
+        imageAlt="Chambre d'hôtel avec vue sur la mer"
+        title="Hébergement & Activités"
+      >
+        <p>L'hébergement représente une part importante du budget. Les auberges de jeunesse (dortoirs) sont l'option la plus économique, tandis que les resorts de luxe peuvent coûter plusieurs centaines d'euros par nuit. Les activités comme la plongée ou les tours en bateau sont à prévoir dans votre budget.</p>
+        <ul>
+          <li><b>Dortoir :</b> 8-15€</li>
+          <li><b>Chambre double simple :</b> 20-40€</li>
+          <li><b>Tour en bateau (El Nido) :</b> ~20-25€</li>
         </ul>
-          <Link href="/voyager-aux-philippines/budget/hebergement" className="text-accent font-bold hover:underline mt-4 inline-block">Comment trouver les meilleurs hôtels →</Link>
-        </AlternatingContent>
-      </div>
+      </SplitSection>
+
+      <section className="bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <CardGrid columns={2}>
+            <LinkCard
+              title="Guide de la street food"
+              href="/voyager-aux-philippines/budget/nourriture"
+              icon={<FontAwesomeIcon icon={faUtensils} className="text-[18px]" />}
+            />
+            <LinkCard
+              title="Comment trouver les meilleurs hôtels"
+              href="/voyager-aux-philippines/budget/hebergement"
+              icon={<FontAwesomeIcon icon={faBed} className="text-[18px]" />}
+            />
+          </CardGrid>
+        </div>
+      </section>
 
       <AffiliateRecommendation
         title="Nos recommandations pour economiser"

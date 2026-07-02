@@ -121,12 +121,23 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
   const siteUrl = 'https://philippineasy.com';
   const articleUrl = `${siteUrl}/${basePath}/${article.category?.slug}/${article.slug}`;
 
-  // Breadcrumb items pour le JSON-LD
+  // Breadcrumb items pour le JSON-LD — chaîne complète Accueil → Section →
+  // Catégorie → Article (le niveau section manquait, les pages catégories
+  // l'émettent : les deux doivent raconter la même hiérarchie).
+  const sectionLabels: Record<string, string> = {
+    'vivre-aux-philippines': 'Vivre aux Philippines',
+    'voyager-aux-philippines': 'Voyager aux Philippines',
+    'actualites-sur-les-philippines': 'Actualités',
+    'meilleurs-plans-aux-philippines': 'Meilleurs Plans',
+  };
   const breadcrumbItems = [
     {
       name: 'Accueil',
       item: '/',
     },
+    ...(sectionLabels[basePath]
+      ? [{ name: sectionLabels[basePath], item: `/${basePath}` }]
+      : []),
     {
       name: article.category?.name || 'Catégorie',
       item: `/${basePath}/${article.category?.slug}`,

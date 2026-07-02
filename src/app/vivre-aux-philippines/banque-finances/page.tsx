@@ -1,7 +1,5 @@
 import { Metadata } from 'next';
 import { Landmark, CreditCard, AlertTriangle, CheckCircle, ExternalLink, FileText, ChevronRight, Smartphone, Clock, HeartPulse } from 'lucide-react';
-import { HeroThematic } from '@/components/ui/HeroThematic';
-import Link from 'next/link';
 import { faMoneyBillTransfer } from '@fortawesome/free-solid-svg-icons';
 import { AffiliateRecommendation } from '@/components/affiliate/AffiliateRecommendation';
 import { createClient } from '@/utils/supabase/server';
@@ -9,6 +7,7 @@ import { getArticlesByCategorySlug } from '@/services/articleService';
 import ArticleList from '@/components/shared/ArticleList';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
+import { PageHero, StatRow, CardGrid, LinkCard } from '@/components/sections';
 
 export const metadata: Metadata = {
   title: "Banque et Finances aux Philippines 2026 : Guide Expatrié",
@@ -61,11 +60,13 @@ const BanqueFinancesPage = async () => {
   return (
     <div className="bg-background">
       <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
-      <HeroThematic
-        titlePart1="Banque &"
-        titlePart2="Finances"
+      <PageHero
+        eyebrow="Vivre aux Philippines"
+        title="Banque &"
+        titleAccent="Finances"
         subtitle="Ouvrez un compte, transférez votre argent et gérez votre quotidien financier aux Philippines : tout ce qu'il faut savoir pour s'organiser sereinement."
         imageUrl="/imagesHero/banque-assurance-philippines.webp"
+        imageAlt="Banque & Finances"
       />
 
       <div className="container mx-auto px-4 py-12 max-w-6xl">
@@ -74,28 +75,15 @@ const BanqueFinancesPage = async () => {
 
         {/* Stats rapides */}
         <section className="mb-12">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-5 text-center">
-              <Landmark className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-              <p className="text-3xl font-bold text-blue-700">3</p>
-              <p className="text-sm text-blue-600">grandes banques</p>
-            </div>
-            <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-5 text-center">
-              <Clock className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <p className="text-3xl font-bold text-green-700">59</p>
-              <p className="text-sm text-green-600">jours min. résidence</p>
-            </div>
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-5 text-center">
-              <Smartphone className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-              <p className="text-3xl font-bold text-purple-700">2</p>
-              <p className="text-sm text-purple-600">portefeuilles digitaux</p>
-            </div>
-            <div className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-5 text-center">
-              <FileText className="h-8 w-8 text-amber-600 mx-auto mb-2" />
-              <p className="text-3xl font-bold text-amber-700">6</p>
-              <p className="text-sm text-amber-600">documents requis</p>
-            </div>
-          </div>
+          <StatRow
+            stats={[
+              { icon: <Landmark className="h-5 w-5" />, value: '3', label: 'grandes banques' },
+              { icon: <Clock className="h-5 w-5" />, value: '59', label: 'jours min. résidence' },
+              { icon: <Smartphone className="h-5 w-5" />, value: '2', label: 'portefeuilles digitaux' },
+              { icon: <FileText className="h-5 w-5" />, value: '6', label: 'documents requis' },
+            ]}
+            className="justify-center gap-x-14"
+          />
         </section>
 
         {/* Introduction */}
@@ -368,21 +356,14 @@ const BanqueFinancesPage = async () => {
 
         {/* Voir aussi */}
         <section className="mb-16">
-          <Link
-            href="/vivre-aux-philippines/sante-assurances"
-            className="flex items-center justify-between p-5 bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-xl hover:border-primary hover:shadow-md transition-all group max-w-4xl mx-auto"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                <HeartPulse className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <p className="font-semibold group-hover:text-primary transition-colors">Voir aussi : Santé & Assurances</p>
-                <p className="text-sm text-muted-foreground">PhilHealth, HMO locales, assurances internationales et hôpitaux de référence</p>
-              </div>
-            </div>
-            <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-          </Link>
+          <div className="mx-auto max-w-4xl">
+            <LinkCard
+              href="/vivre-aux-philippines/sante-assurances"
+              icon={<HeartPulse className="h-5 w-5" />}
+              title="Voir aussi : Santé & Assurances"
+              desc="PhilHealth, HMO locales, assurances internationales et hôpitaux de référence"
+            />
+          </div>
         </section>
 
         {/* Articles */}
@@ -394,28 +375,13 @@ const BanqueFinancesPage = async () => {
         )}
 
         {/* Navigation */}
-        <section className="border-t border-gray-200 pt-12">
-          <h3 className="text-xl font-semibold text-center mb-6">Continuez votre exploration</h3>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
-            {[
-              { title: "Santé & Assurances", href: "/vivre-aux-philippines/sante-assurances", desc: "PhilHealth, HMO et hôpitaux" },
-              { title: "Obtenir un visa", href: "/vivre-aux-philippines/visas-et-formalites", desc: "Types de visas et procédures" },
-              { title: "Trouver un logement", href: "/vivre-aux-philippines/logement", desc: "Prix et conseils location" },
-              { title: "Forum expatriés", href: "/forum-sur-les-philippines", desc: "Échangez avec la communauté" }
-            ].map((link, index) => (
-              <Link
-                key={index}
-                href={link.href}
-                className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 hover:border-primary hover:shadow-md transition-all group"
-              >
-                <div>
-                  <p className="font-medium group-hover:text-primary transition-colors">{link.title}</p>
-                  <p className="text-sm text-muted-foreground">{link.desc}</p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-              </Link>
-            ))}
-          </div>
+        <section className="border-t border-border pt-12">
+          <CardGrid title="Continuez votre exploration" columns={4}>
+            <LinkCard href="/vivre-aux-philippines/sante-assurances" title="Santé & Assurances" desc="PhilHealth, HMO et hôpitaux" />
+            <LinkCard href="/vivre-aux-philippines/visas-et-formalites" title="Obtenir un visa" desc="Types de visas et procédures" />
+            <LinkCard href="/vivre-aux-philippines/logement" title="Trouver un logement" desc="Prix et conseils location" />
+            <LinkCard href="/forum-sur-les-philippines" title="Forum expatriés" desc="Échangez avec la communauté" />
+          </CardGrid>
         </section>
 
       </div>

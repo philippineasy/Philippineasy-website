@@ -73,5 +73,5 @@ export default async function VoyagerCategoryPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  return <CategoryPage slug={slug} basePath="voyager-aux-philippines" pageTitle="Voyager" />;
+  return <CategoryPage slug={slug} basePath="voyager-aux-philippines" pageTitle="Voyager aux Philippines" />;
 }

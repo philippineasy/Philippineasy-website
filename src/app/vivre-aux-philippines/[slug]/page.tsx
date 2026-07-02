@@ -80,5 +80,5 @@ export default async function VivreCategoryPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  return <CategoryPage slug={slug} basePath="vivre-aux-philippines" pageTitle="Y Vivre" />;
+  return <CategoryPage slug={slug} basePath="vivre-aux-philippines" pageTitle="Vivre aux Philippines" />;
 }

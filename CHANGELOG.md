@@ -5,6 +5,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Design — Refonte visuelle Phases 0+1 : Section Kit + 31 pages harmonisées sur le langage de la home (2026-07-02)
+
+Lancement de la refonte design globale (plan : `output/PLAN_REFONTE_DESIGN_SITE_2026-07.md`). Objectif : un seul langage visuel (celui de la home) sur tout le site, fin du style « AI 2025 » (HeroThematic plein écran, stats en dégradés arc-en-ciel, alternances génériques).
+
+**Phase 0 — Section Kit (`src/components/sections/`)** : 7 composants réutilisables créés par l'agent designer à partir du design system handoff — `PageHero` (hero éditorial gauche-aligné, hauteur contenue, scrim navy AA), `StatRow`, `SplitSection` (2 colonnes éditoriales), `CardGrid`/`LinkCard` (cartes fines tokenisées), `AppWindowPanel` (panneau signature bleu + fenêtre app), `CTABand`. 100 % tokens sémantiques (sauf dégradés signature volontairement constants), zéro framer-motion, Server Components. **Dark mode : bloc `.dark` complet ajouté dans `globals.css`** (famille ink, contrastes AA vérifiés dans les deux modes) — `darkMode:["class"]` était configuré mais aucun token sombre n'existait.
+
+**Phase 1 — 31 pages re-skinnées, contenu strictement verbatim** (vérifié par diff des nœuds texte ; URLs/metadata/canonical/hrefs intouchés) :
+- `CategoryPage.tsx` réécrit avec le kit (touche actualités + bons plans + fallbacks) ; labels breadcrumb « Y Vivre »/« Voyager » corrigés en « Vivre aux Philippines »/« Voyager aux Philippines ».
+- Fil d'Ariane des articles complété (`JsonLd.tsx`) : chaîne Accueil → **Section** → Catégorie → Article (le niveau section manquait — cohérence avec les pages catégories).
+- 6 pages sujets vivre, 6 guides (emploi, création d'entreprise, immobilier, bourse, universités, écoles), 18 pages voyager (destinations, budget, transport, communication, santé, quand-partir, conseils).
+- Fin du « rainbow coding » : les palettes par carte (blue/green/purple/amber/cyan…) sont consolidées sur primary/accent/destructive à usage sémantique (préférence anti-rainbow).
+- Hack de chevauchement `-mt-20` supprimé partout ; icônes en ReactNode ; imports morts nettoyés.
+
+Vérifications : tsc + eslint verts sur chaque fichier, build de production propre, smoke test local 32/32 pages (HTTP 200, H1 unique). Restent en style 2025 : la landing Rencontres (Phase 2c) et les composants legacy eux-mêmes (supprimés en Phase 5 après les Phases 2-4).
+
 ### Refonte — Fin de la double taxonomie « Vivre » + navigation 100 % couvrante (2026-07-02)
 
 Suite à l'audit d'architecture (rapport : `output/AUDIT_ARCHITECTURE_VIVRE_2026-07-02.md`) : la section vivait avec DEUX systèmes parallèles — 6 catégories DB (dans le menu, template générique moche, 0 image) et 14 pages thèmes statiques (invisibles du menu, 11/14 à zéro impression GSC sur 28 j). Objectif utilisateur : plus AUCUNE page hors menu, consolidation, et plus de vues Google.
