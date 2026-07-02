@@ -5,6 +5,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Contenu / SEO — Simulateur de visa interactif "Quel visa pour les Philippines ?" (2026-07-02)
+
+Premier "linkable asset" de la stratégie backlinks : un simulateur interactif intégré en haut de `/vivre-aux-philippines/s-installer/visas`. L'utilisateur choisit son objectif (voyager, retraite, travail, investir, télétravail, conjoint) puis répond à une question de suivi, et obtient le visa recommandé avec ses conditions clés, dépôt/durée, un encadré honnête "à vérifier" et un lien vers le comparatif SRRV vs 13(a).
+
+Intérêt : (1) donne enfin à la page visas (jusque-là "Découverte, non indexée" dans GSC) un contenu unique et interactif pour mériter l'indexation ; (2) actif partageable en communauté sans lien promotionnel direct.
+
+Données à jour 2025-2026, vérifiées par recherche web (sources : Bureau of Immigration, PRA, Executive Order n°86) : réforme SRRV du 1er septembre 2025 (âge abaissé à 40 ans, tranches 40-49 / 50+, catégories Classic/Courtesy, dépôts 15-50 k$, BI Clearance), Digital Nomad Visa (EO n°86), visa touriste 9(a), 9(g) travail, SIRV investisseur, 13(a) conjoint.
+
+Design aligné sur l'ADN de la home (section `ItineraireIABlock`) et non sur un formulaire générique : panneau bleu en dégradé `rounded-3xl`, colonne éditoriale à gauche (eyebrow, titre à accent, checklist), fenêtre "app" blanche à droite (barre style Mac) contenant le flux en lignes compactes et la fiche résultat. Composant client autonome `src/components/visa/VisaSimulator.tsx`, réutilisable ailleurs. Accessibilité (aria-live, useReducedMotion, contraste AA via `text-accent-strong`), framer-motion sobre, `tsc` + eslint OK.
+
 ### SEO — Refocus anti-cannibalisation + maillage interne section "Vivre" (2026-07-01)
 
 Suite de l'audit d'indexation : investigation de la redondance de taxonomie dans `/vivre-aux-philippines`. Le constat (données GSC par requête) : deux systèmes parallèles coexistent — des pages "thèmes" éditoriales statiques (`s-installer`, `travailler`, `investir`, `etudier`) et des catégories DB (`logement`, `visas-et-formalites`, `banque-finances`, `travail-entreprise`, etc., où vivent les articles). La cannibalisation réelle s'est révélée limitée (2 requêtes contestées : "visa retraite" et "investir aux philippines", où l'article gagne déjà) plutôt que systémique — donc refocus chirurgical, pas de migration ni de suppression de contenu.

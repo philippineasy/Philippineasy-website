@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { CheckCircle, Clock, FileText, Briefcase, GraduationCap, Home, AlertTriangle, ExternalLink, Users, RefreshCw, Plane, Calendar, DollarSign, Shield, ChevronRight, ArrowRight } from 'lucide-react';
 import { HeroThematic } from '@/components/ui/HeroThematic';
+import { VisaSimulator } from '@/components/visa/VisaSimulator';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -44,6 +45,8 @@ const VisasPage = () => {
         subtitle="Le guide complet et actualisé pour comprendre les différents types de visas et choisir celui qui correspond à votre projet d'expatriation."
         imageUrl="/imagesHero/visa-philippines-processus.webp"
       />
+
+      <VisaSimulator />
 
       <div className="container mx-auto px-4 py-12 max-w-6xl">
 
