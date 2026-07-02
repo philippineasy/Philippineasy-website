@@ -43,14 +43,14 @@ export default function CheckoutPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <h2
-            className="text-foreground mb-4 flex items-center gap-2"
-            style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#94a3b8' }}
+            className="text-muted-foreground mb-4 flex items-center gap-2"
+            style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}
           >
             Résumé de la commande
           </h2>
           <div
             className="bg-card rounded-2xl p-6"
-            style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+            style={{ border: '0.5px solid hsl(var(--border))', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
           >
             <ul className="space-y-3 mb-4">
               {cart.map((item) => (
@@ -62,7 +62,7 @@ export default function CheckoutPage() {
                     >
                       {item.product.name}
                     </p>
-                    <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
+                    <p className="text-muted-foreground" style={{ fontSize: '12px', marginTop: '2px' }}>
                       Quantité : {item.quantity}
                     </p>
                   </div>
@@ -75,13 +75,13 @@ export default function CheckoutPage() {
                 </li>
               ))}
             </ul>
-            <div className="pt-4 flex items-end justify-between" style={{ borderTop: '0.5px solid #f1f5f9' }}>
+            <div className="pt-4 flex items-end justify-between" style={{ borderTop: '0.5px solid hsl(var(--border))' }}>
               <div>
                 <p
+                  className="text-muted-foreground"
                   style={{
                     fontSize: '10px',
                     fontWeight: 600,
-                    color: '#94a3b8',
                     letterSpacing: '0.06em',
                     textTransform: 'uppercase',
                     marginBottom: '2px',
@@ -96,20 +96,20 @@ export default function CheckoutPage() {
                   {totalPrice.toFixed(2)} €
                 </p>
               </div>
-              <p style={{ fontSize: '11px', color: '#94a3b8' }}>TTC</p>
+              <p className="text-muted-foreground" style={{ fontSize: '11px' }}>TTC</p>
             </div>
           </div>
         </div>
         <div>
           <h2
-            className="text-foreground mb-4 flex items-center gap-2"
-            style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#94a3b8' }}
+            className="text-muted-foreground mb-4 flex items-center gap-2"
+            style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}
           >
             Paiement
           </h2>
           <div
             className="bg-card rounded-2xl p-6"
-            style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+            style={{ border: '0.5px solid hsl(var(--border))', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
           >
             {clientSecret && (
               <Elements options={options} stripe={stripePromise}>

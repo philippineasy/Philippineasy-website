@@ -23,8 +23,7 @@ export const MeilleursPlansClientPage = ({ initialCategories, icons }: { initial
       renderCard={(cat) => (
         <Link
           href={`/meilleurs-plans-aux-philippines/${cat.slug}`}
-          className="group bg-card rounded-2xl overflow-hidden flex flex-col h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
-          style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+          className="group bg-card rounded-2xl overflow-hidden flex flex-col h-full border-[0.5px] border-border shadow-card-rest transition-all duration-200 hover:-translate-y-1 hover:shadow-card hover:border-primary/30"
         >
           <div className="relative h-[180px] overflow-hidden">
             {cat.heroImage ? (
@@ -37,13 +36,13 @@ export const MeilleursPlansClientPage = ({ initialCategories, icons }: { initial
               />
             ) : (
               <div
-                className="w-full h-full flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #F4F7FE 0%, #dbeafe 100%)' }}
+                className="w-full h-full flex items-center justify-center bg-gradient-to-br from-soft-blue to-primary/10"
                 aria-hidden="true"
               >
                 <FontAwesomeIcon
                   icon={icons[cat.slug] || faStar}
-                  style={{ fontSize: '48px', color: '#3B5BDB', opacity: 0.25 }}
+                  className="text-primary/25"
+                  style={{ fontSize: '48px' }}
                 />
               </div>
             )}
@@ -54,14 +53,14 @@ export const MeilleursPlansClientPage = ({ initialCategories, icons }: { initial
                 {cat.name}
               </h3>
               <span
-                className="flex-shrink-0 inline-flex items-center justify-center rounded-xl"
-                style={{ width: '32px', height: '32px', backgroundColor: '#F4F7FE', color: '#3B5BDB' }}
+                className="flex-shrink-0 inline-flex items-center justify-center rounded-xl bg-soft-blue text-primary"
+                style={{ width: '32px', height: '32px' }}
                 aria-hidden="true"
               >
                 <FontAwesomeIcon icon={icons[cat.slug] || faStar} style={{ fontSize: '14px' }} />
               </span>
             </div>
-            <p className="flex-1 mb-4" style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.55 }}>
+            <p className="flex-1 mb-4 text-muted-foreground" style={{ fontSize: '13px', lineHeight: 1.55 }}>
               {cat.description}
             </p>
             <span className="inline-flex items-center gap-1 text-primary text-sm font-medium" aria-hidden="true">
@@ -79,35 +78,31 @@ export const MeilleursPlansClientPage = ({ initialCategories, icons }: { initial
         Profitez d&apos;avantages exclusifs négociés pour la communauté Philippin&apos;Easy.
       </p>
 
-      <div
-        className="bg-soft-blue rounded-2xl p-8 md:p-10 mt-20 mb-16"
-        style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
-      >
+      <div className="bg-soft-blue rounded-2xl p-8 md:p-10 mt-20 mb-16 border-[0.5px] border-border shadow-card-rest">
         <div className="flex flex-col md:flex-row items-center gap-8 md:gap-10">
           <div className="w-full md:w-2/3">
             <span
-              className="inline-flex items-center gap-2 mb-4 uppercase"
-              style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em', color: '#3B5BDB' }}
+              className="inline-flex items-center gap-2 mb-4 uppercase text-primary"
+              style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em' }}
             >
               <span aria-hidden="true">★</span>
               Programme privilège
             </span>
             <h2
-              className="mb-3"
+              className="mb-3 text-foreground"
               style={{
                 fontSize: 'clamp(1.75rem, 3.5vw, 2rem)',
                 fontWeight: 700,
                 letterSpacing: '-0.02em',
                 lineHeight: 1.15,
-                color: '#0f172a',
               }}
             >
               <span className="text-primary">Easy+</span>
               <span className="text-foreground"> — débloquez le maximum de votre voyage</span>
             </h2>
             <p
-              className="mb-6"
-              style={{ fontSize: '14px', color: '#64748b', lineHeight: 1.55 }}
+              className="mb-6 text-muted-foreground"
+              style={{ fontSize: '14px', lineHeight: 1.55 }}
             >
               Devenez membre Easy+ et accédez à des avantages exclusifs pour optimiser votre expérience aux Philippines.
             </p>
@@ -121,12 +116,12 @@ export const MeilleursPlansClientPage = ({ initialCategories, icons }: { initial
               ].map((item) => (
                 <li
                   key={item}
-                  className="flex items-start gap-2.5"
-                  style={{ fontSize: '14px', color: '#334155', lineHeight: 1.5 }}
+                  className="flex items-start gap-2.5 text-foreground/80"
+                  style={{ fontSize: '14px', lineHeight: 1.5 }}
                 >
                   <span
-                    className="flex-shrink-0 inline-flex items-center justify-center rounded-full mt-0.5"
-                    style={{ width: '18px', height: '18px', backgroundColor: '#dbeafe', color: '#3B5BDB' }}
+                    className="flex-shrink-0 inline-flex items-center justify-center rounded-full mt-0.5 bg-primary/10 text-primary"
+                    style={{ width: '18px', height: '18px' }}
                     aria-hidden="true"
                   >
                     <FontAwesomeIcon icon={faCheckCircle} style={{ fontSize: '10px' }} />
@@ -154,8 +149,8 @@ export const MeilleursPlansClientPage = ({ initialCategories, icons }: { initial
           </div>
           <div className="w-full md:w-1/3">
             <div
-              className="relative w-full h-auto rounded-xl overflow-hidden"
-              style={{ aspectRatio: '1.5/1', boxShadow: '0 8px 24px rgba(59,91,219,0.12)' }}
+              className="relative w-full h-auto rounded-xl overflow-hidden shadow-card"
+              style={{ aspectRatio: '1.5/1' }}
             >
               <Image
                 src="https://images.unsplash.com/photo-1565717432093-1657f46d4fad?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=600&fit=max"
@@ -165,8 +160,8 @@ export const MeilleursPlansClientPage = ({ initialCategories, icons }: { initial
               />
             </div>
             <p
-              className="text-center mt-3 uppercase"
-              style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', color: '#94a3b8' }}
+              className="text-center mt-3 uppercase text-muted-foreground"
+              style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em' }}
             >
               Votre carte de membre
             </p>

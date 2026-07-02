@@ -135,7 +135,7 @@ export function ArticleHero({
       {/* Cover image — 2.5:1 ratio, radius 24, shadow */}
       {article.image && (
         <figure className="mt-10 lg:mt-12">
-          <div className="relative w-full aspect-[2.5/1] rounded-[24px] overflow-hidden shadow-card">
+          <div className="relative w-full aspect-[2.5/1] rounded-[24px] overflow-hidden shadow-hero">
             <Image
               src={article.image}
               alt={plainTitle(article.title)}

@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { createBuildClient } from '@/utils/supabase/build-client';
-import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { ProductCard } from '@/components/shared/ProductCard';
 import { getProductsByCategorySlug } from '@/services/productService';
 import { getProductCategoryBySlug } from '@/services/categoryService';
@@ -89,14 +89,26 @@ export default async function MarketplaceCategoryPage({
 
   if (error || !products || products.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold">Catégorie non trouvée</h1>
-        <p>Aucun produit trouvé dans cette catégorie.</p>
+      <div className="container mx-auto px-4 py-24 text-center">
+        <div className="mx-auto max-w-md rounded-2xl border-[0.5px] border-border bg-card px-6 py-14 shadow-card-rest">
+          <h1 className="text-2xl font-bold text-foreground">Catégorie non trouvée</h1>
+          <p className="mt-2 text-muted-foreground">
+            Aucun produit n&apos;est disponible dans cette catégorie pour le moment.
+          </p>
+          <Link
+            href="/marketplace-aux-philippines"
+            className="mt-6 inline-flex h-11 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            Retour à la marketplace
+            <span aria-hidden="true">→</span>
+          </Link>
+        </div>
       </div>
     );
   }
 
   const categoryName = products[0].product_categories?.[0]?.name || 'Catégorie';
+  const productCount = products.length;
 
   const breadcrumbItems = [
     { href: '/', label: 'Accueil' },
@@ -111,15 +123,51 @@ export default async function MarketplaceCategoryPage({
   ];
 
   return (
-    <div className="container mx-auto px-4 py-16 pt-32">
+    <div>
       <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
-      <Breadcrumb items={breadcrumbItems} />
-      <h1 className="text-4xl font-bold mb-8">{categoryName}</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {products.map((product: any) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+
+      {/* Category header band */}
+      <section className="border-b border-border bg-muted py-10 md:py-12">
+        <div className="container mx-auto px-4">
+          <Breadcrumb items={breadcrumbItems} />
+          <span className="text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+            Marketplace
+          </span>
+          <h1
+            className="mt-3 text-[clamp(1.875rem,4vw,2.75rem)] font-bold text-foreground"
+            style={{ letterSpacing: '-0.02em', lineHeight: 1.1 }}
+          >
+            {categoryName}
+          </h1>
+          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
+            {productCount} {productCount > 1 ? 'produits sélectionnés' : 'produit sélectionné'} dans
+            la catégorie {categoryName.toLowerCase()} — paiement sécurisé, vendeurs vérifiés.
+          </p>
+        </div>
+      </section>
+
+      {/* Products grid */}
+      <section className="bg-background py-12 md:py-16">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto grid max-w-6xl grid-cols-2 gap-5 md:grid-cols-3 md:gap-6 xl:grid-cols-4">
+            {products.map((product: any) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+
+          <div className="mx-auto mt-12 max-w-6xl text-center">
+            <Link
+              href="/marketplace-aux-philippines"
+              className="group inline-flex items-center gap-2 text-sm font-medium text-primary transition-colors hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <span aria-hidden="true" className="transition-transform duration-200 group-hover:-translate-x-0.5">
+                ←
+              </span>
+              Voir toute la marketplace
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

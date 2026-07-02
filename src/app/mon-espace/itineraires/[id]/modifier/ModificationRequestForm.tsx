@@ -106,8 +106,8 @@ export function ModificationRequestForm({ generationId, userId, modificationsRem
 
   if (submitted) {
     return (
-      <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 px-6 py-8 text-center">
-        <CheckCircle2 className="w-10 h-10 mx-auto text-emerald-600 mb-3" aria-hidden="true" />
+      <div className="rounded-2xl border border-[hsl(var(--success)/0.3)] bg-[hsl(var(--success)/0.05)] px-6 py-8 text-center">
+        <CheckCircle2 className="w-10 h-10 mx-auto text-[hsl(var(--success))] mb-3" aria-hidden="true" />
         <strong className="block text-[16px] font-bold text-ink mb-1">
           Demande envoyée
         </strong>
@@ -161,7 +161,7 @@ export function ModificationRequestForm({ generationId, userId, modificationsRem
       {/* Description */}
       <div>
         <label htmlFor="modif-description" className="block text-[14px] font-medium text-foreground mb-2">
-          Décrivez ce que vous souhaitez changer <span className="text-rose-600">*</span>
+          Décrivez ce que vous souhaitez changer <span className="text-destructive">*</span>
         </label>
         <textarea
           id="modif-description"

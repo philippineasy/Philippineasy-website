@@ -124,13 +124,13 @@ function CheckoutContent() {
     return (
       <div className="container mx-auto px-4 py-16 max-w-2xl">
         <div className="bg-card p-8 rounded-xl border-2 border-destructive/30 text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Erreur</h1>
+          <h1 className="text-2xl font-bold text-destructive mb-4">Erreur</h1>
           <p className="text-muted-foreground mb-6">
             Parametres de paiement manquants. Veuillez recommencer la procedure.
           </p>
           <Link
             href="/itineraire-personnalise-pour-les-philippines"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
           >
             <FontAwesomeIcon icon={faArrowLeft} />
             Retour au generateur
@@ -143,7 +143,7 @@ function CheckoutContent() {
   const appearance = {
     theme: 'stripe' as const,
     variables: {
-      colorPrimary: '#2563eb',
+      colorPrimary: '#3a6fed', // matches --primary token (Stripe Elements renders in an iframe, cannot read CSS custom properties)
       borderRadius: '8px',
     },
   };
@@ -169,7 +169,7 @@ function CheckoutContent() {
         <div className="bg-primary/10 p-4 rounded-lg mb-8">
           <h2 className="font-semibold text-primary mb-2">Votre achat :</h2>
           <div className="flex items-center gap-2 text-foreground">
-            <FontAwesomeIcon icon={faCheckCircle} className="text-green-500" />
+            <FontAwesomeIcon icon={faCheckCircle} className="text-[hsl(var(--success))]" />
             <span>Itineraire personnalise aux Philippines</span>
           </div>
           <p className="text-sm text-muted-foreground mt-2">

@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
+import { faMapMarkerAlt, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import { getFullProfile } from '@/services/datingService';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -70,17 +70,22 @@ const ProfilePanel = ({ userId }: ProfilePanelProps) => {
       transition={{ duration: 0.3 }}
       className="p-6 overflow-y-auto h-full bg-muted"
     >
-      <div className="relative w-full h-64 rounded-xl overflow-hidden mb-4 shadow-lg">
+      <div className="relative w-full h-64 rounded-2xl overflow-hidden mb-4 shadow-card">
         <Image
           src={profile.profile_picture_url || '/default-avatar.webp'}
-          alt={profile.user?.username || 'Profile picture'}
+          alt={profile.user?.username ? `Photo de ${profile.user.username}` : 'Photo de profil'}
           fill
+          sizes="(max-width: 1024px) 100vw, 320px"
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent"></div>
+        <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/95 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm">
+          <FontAwesomeIcon icon={faCheckCircle} className="text-[11px]" />
+          Vérifié
+        </span>
         <div className="absolute bottom-4 left-4 text-white">
-          <h3 className="text-2xl font-bold text-shadow">{profile.user?.username}, {profile.birth_date && calculateAge(profile.birth_date)}</h3>
-          {profile.city && <p className="text-sm text-shadow-sm flex items-center"><FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2 h-3 w-3" />{profile.city}</p>}
+          <h3 className="text-2xl font-bold [text-shadow:0_1px_8px_rgba(0,0,0,0.4)]">{profile.user?.username}, {profile.birth_date && calculateAge(profile.birth_date)}</h3>
+          {profile.city && <p className="text-sm text-white/90 flex items-center [text-shadow:0_1px_6px_rgba(0,0,0,0.4)]"><FontAwesomeIcon icon={faMapMarkerAlt} className="mr-2 h-3 w-3" />{profile.city}</p>}
         </div>
       </div>
       
@@ -96,7 +101,7 @@ const ProfilePanel = ({ userId }: ProfilePanelProps) => {
           <h4 className="font-semibold text-muted-foreground text-sm uppercase tracking-wider mb-3">Centres d'intérêt</h4>
           <div className="flex flex-wrap gap-2">
             {profile.interests.map((interest: Interest) => (
-              <div key={interest.id} className="bg-accent/10 text-accent-dark text-sm font-semibold px-3 py-1 rounded-full">
+              <div key={interest.id} className="bg-primary/10 text-primary text-sm font-semibold px-3 py-1 rounded-full">
                 {interest.name}
               </div>
             ))}
@@ -117,7 +122,7 @@ const ProfilePanel = ({ userId }: ProfilePanelProps) => {
         </div>
       )}
       
-      <Link href={`/rencontre-philippines/profil/${userId}`} className="mt-8 inline-block w-full text-center px-4 py-3 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition duration-300 font-bold shadow-lg">
+      <Link href={`/rencontre-philippines/profil/${userId}`} className="mt-8 inline-flex min-h-[44px] w-full items-center justify-center px-4 py-3 bg-accent text-ink rounded-lg hover:bg-accent/90 transition-colors font-semibold shadow-cta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
         Voir le profil complet
       </Link>
     </motion.div>

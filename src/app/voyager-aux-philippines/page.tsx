@@ -1,4 +1,4 @@
-import { faMapMarkerAlt, faCalendarAlt, faPlaneDeparture, faWallet, faBriefcaseMedical, faWifi } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarAlt, faPlaneDeparture, faWallet, faBriefcaseMedical, faWifi } from '@fortawesome/free-solid-svg-icons';
 import { createClient } from '@/utils/supabase/server';
 import { getCategoriesByMainCategory } from '@/services/categoryService';
 import { VoyagerClientPage } from './VoyagerClientPage';
@@ -87,13 +87,6 @@ const VoyagerPage = async () => {
       title: "Communication",
       text: "Achetez une carte SIM locale (Globe, Smart) pour data et appels. Anglais largement parlé. Apprendre quelques mots de Tagalog est apprécié.",
       link: "/voyager-aux-philippines/communication"
-    },
-    {
-      icon: faMapMarkerAlt,
-      title: "Préparer son Itinéraire",
-      text: "Ne surchargez pas ! Choisissez 2-3 régions max pour un séjour de 2-3 semaines. Utilisez notre outil pour vous aider.",
-      link: "/itineraire",
-      linkText: "Créer mon itinéraire →"
     }
   ];
 

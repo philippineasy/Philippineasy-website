@@ -142,13 +142,21 @@ export default async function ForumCategoryPage({
       <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
       <Breadcrumb items={breadcrumbItems} />
 
-      <div className="mb-6 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-primary">{category.name}</h1>
-          <p className="text-muted-foreground mt-1">{category.description}</p>
-        </div>
+      <div className="mb-8">
+        <span className="mb-2 inline-block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+          Forum
+        </span>
+        <h1
+          className="font-bold text-foreground"
+          style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}
+        >
+          {category.name}
+        </h1>
+        {category.description && (
+          <p className="mt-3 max-w-2xl text-[16px] leading-relaxed text-muted-foreground">{category.description}</p>
+        )}
       </div>
-      
+
       <TopicListClient slug={slug} initialTopics={initialTopics || []} />
     </main>
   );

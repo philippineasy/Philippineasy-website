@@ -1,6 +1,8 @@
 import { createClient } from '@/utils/supabase/server';
 import { getForumCategories } from '@/services/forumService';
 import { ForumListClient } from '@/app/forum-sur-les-philippines/ForumListClient';
+import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -46,14 +48,50 @@ const ForumsPage = async () => {
     return <p className="text-center text-destructive">Impossible de charger les catégories du forum.</p>;
   }
 
+  const categories = forumCategories || [];
+  const totalTopics = categories.reduce((sum, category) => sum + (category.topic_count || 0), 0);
+
+  const breadcrumbItems = [
+    { href: '/', label: 'Accueil' },
+    { label: 'Forum' },
+  ];
+
+  const breadcrumbJsonLdItems = [
+    { name: 'Accueil', item: '/' },
+    { name: 'Forum', item: '/forum-sur-les-philippines' },
+  ];
+
   return (
     <main className="container mx-auto px-4 py-16 pt-32">
-      <h1 className="text-4xl font-bold text-center mb-4">Forums & <span className="text-primary">Communauté</span></h1>
-      <p className="text-center text-lg text-muted-foreground mb-16 max-w-3xl mx-auto">
-        Partagez, échangez et trouvez des réponses auprès d'autres passionnés des Philippines.
-      </p>
-      
-      <ForumListClient initialCategories={forumCategories || []} />
+      <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
+      <Breadcrumb items={breadcrumbItems} />
+
+      <div className="mx-auto mb-10 max-w-2xl text-center">
+        <span className="mb-3 inline-block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+          Communauté
+        </span>
+        <h1
+          className="font-bold text-foreground"
+          style={{
+            fontSize: 'clamp(2rem, 4.5vw, 2.75rem)',
+            lineHeight: 1.1,
+            letterSpacing: '-0.02em',
+          }}
+        >
+          Forum Philippin&apos;<span className="text-accent">Easy</span>
+        </h1>
+        <p className="mt-4 text-[17px] leading-relaxed text-muted-foreground text-pretty">
+          La communauté francophone des Philippines. Posez vos questions, partagez vos
+          expériences et trouvez des conseils auprès de voyageurs et d&apos;expatriés.
+          {totalTopics > 0 && (
+            <>
+              {' '}Déjà <strong className="text-foreground">{totalTopics.toLocaleString('fr-FR')}</strong> sujet{totalTopics !== 1 ? 's' : ''} ouvert{totalTopics !== 1 ? 's' : ''} par la communauté.
+            </>
+          )}
+        </p>
+      </div>
+
+      <ForumListClient initialCategories={categories} />
 
     </main>
   );

@@ -135,21 +135,25 @@ const SwipeFilters = ({ onApplyFilters, availableInterests }: SwipeFiltersProps)
   const labelClasses = "block text-sm font-medium text-foreground";
 
   return (
-    <div className="bg-card p-4 rounded-lg shadow-lg flex flex-col h-full">
-      <h3 className="text-xl font-semibold mb-4 border-b border-border pb-3 flex items-center text-foreground">
+    <div className="bg-card p-5 rounded-2xl border border-border/70 shadow-card flex flex-col h-full">
+      <h3 className="text-lg font-semibold mb-4 border-b border-border pb-3 flex items-center text-foreground">
         <FontAwesomeIcon icon={faFilter} className="text-primary mr-3" />
         Filtres
       </h3>
 
       {activeFilters.length > 0 && (
         <div className="mb-4">
-          <h4 className="text-sm font-semibold mb-2 text-foreground">Filtres actifs :</h4>
+          <h4 className="text-xs font-semibold uppercase tracking-[0.06em] mb-2 text-muted-foreground">Filtres actifs</h4>
           <div className="flex flex-wrap gap-2">
             {activeFilters.map((filter, index) => (
-              <div key={index} className="flex items-center bg-accent text-primary text-xs font-semibold px-2 py-1 rounded-full">
+              <div key={index} className="flex items-center bg-primary/10 text-primary text-xs font-semibold pl-3 pr-1.5 py-1 rounded-full">
                 <span>{filter.value}</span>
-                <button onClick={() => removeFilter(filter.key as keyof DatingFilters, filter.id)} className="ml-2 text-primary hover:text-primary/70">
-                  <FontAwesomeIcon icon={faTimes} />
+                <button
+                  onClick={() => removeFilter(filter.key as keyof DatingFilters, filter.id)}
+                  aria-label={`Retirer le filtre ${filter.value ?? ''}`}
+                  className="ml-1.5 flex h-5 w-5 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <FontAwesomeIcon icon={faTimes} className="text-[11px]" />
                 </button>
               </div>
             ))}
@@ -273,10 +277,10 @@ const SwipeFilters = ({ onApplyFilters, availableInterests }: SwipeFiltersProps)
       </div>
 
       <div className="mt-auto pt-6 flex flex-col sm:flex-row gap-3">
-        <button onClick={handleApply} className="w-full bg-primary text-primary-foreground py-2 px-4 rounded-md hover:bg-primary/90 font-semibold transition-colors">
+        <button onClick={handleApply} className="w-full min-h-[44px] bg-primary text-primary-foreground py-2 px-4 rounded-lg hover:bg-primary/90 font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
           Appliquer
         </button>
-        <button onClick={handleReset} className="w-full sm:w-auto bg-muted text-muted-foreground py-2 px-4 rounded-md hover:bg-muted/80 font-semibold transition-colors flex items-center justify-center">
+        <button onClick={handleReset} className="w-full sm:w-auto min-h-[44px] border border-border bg-card text-muted-foreground py-2 px-4 rounded-lg hover:bg-muted font-semibold transition-colors flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
           <FontAwesomeIcon icon={faUndo} className="mr-2 h-4 w-4" />
           Réinitialiser
         </button>

@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getTopicBySlug, getPostsByTopicId, addForumPost, deleteForumPost, updateForumPost, lockForumTopic, pinForumTopic, deleteForumTopic } from '@/services/forumService';
 import { supabase } from '@/utils/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { User } from '@supabase/supabase-js';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faReply, faQuoteRight, faEdit, faTrash, faLock, faThumbtack, faLink, faUnlock } from '@fortawesome/free-solid-svg-icons';
+import { faQuoteRight, faEdit, faTrash, faLock, faThumbtack, faLink, faUnlock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
 import { faFacebookF, faXTwitter, faWhatsapp, faLinkedinIn } from '@fortawesome/free-brands-svg-icons';
 import dynamic from 'next/dynamic';
 import { OutputData, BlockToolData } from '@editorjs/editorjs';
@@ -39,6 +40,8 @@ interface Topic {
   slug: string;
   is_locked: boolean;
   is_pinned: boolean;
+  view_count?: number;
+  reply_count?: number;
   category: {
     id: number;
     name: string;
@@ -92,7 +95,7 @@ const renderPostContent = (content: string) => {
           case 'quote':
             return (
               <blockquote key={index}>
-                {block.data.caption && <p className="font-bold text-orange-700">{block.data.caption}</p>}
+                {block.data.caption && <p className="font-bold text-accent-strong">{block.data.caption}</p>}
                 <div dangerouslySetInnerHTML={{ __html: block.data.text }} />
               </blockquote>
             );
@@ -126,12 +129,12 @@ const renderPostContent = (content: string) => {
       return <p>{content}</p>;
     }
   };
-  
-  const PostComponent = ({ post, postNumber, onQuote, user, profile, onPostUpdate }: { post: Post, postNumber: number, onQuote: (postId: number, author: string, content: string) => void, user: User | null, profile: Profile | null, onPostUpdate: () => void }) => {
+
+  const PostComponent = ({ post, postNumber, isOp, onQuote, user, profile, onPostUpdate }: { post: Post, postNumber: number, isOp: boolean, onQuote: (postId: number, author: string, content: string) => void, user: User | null, profile: Profile | null, onPostUpdate: () => void }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [editContent, setEditContent] = useState<OutputData | undefined>(undefined);
-  
+
     const handleEdit = () => {
       try {
         const contentAsObject = JSON.parse(post.content);
@@ -141,12 +144,12 @@ const renderPostContent = (content: string) => {
         console.error("Failed to parse post content for editing:");
       }
     };
-  
+
     const handleCancel = () => {
       setIsEditing(false);
       setEditContent(undefined);
     };
-  
+
     const handleSave = async () => {
       if (!editContent) return;
       const { error } = await updateForumPost(supabase, post.id, JSON.stringify(editContent));
@@ -155,14 +158,14 @@ const renderPostContent = (content: string) => {
         onPostUpdate(); // Refresh posts from parent
       } else {
         console.error("Failed to save post:", error);
-        alert("Erreur lors de la sauvegarde.");
+        toast.error("Erreur lors de la sauvegarde.");
       }
     };
-  
+
     const handleDelete = async () => {
       setIsDeleteModalOpen(true);
     };
-  
+
     const confirmDelete = async () => {
       const { error } = await deleteForumPost(supabase, post.id);
       if (!error) {
@@ -174,61 +177,85 @@ const renderPostContent = (content: string) => {
       }
       setIsDeleteModalOpen(false);
     };
-  
+
+    const joinedLabel = post.author?.created_at
+      ? new Date(post.author.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+      : null;
+
     return (
       <>
-        <div id={`post-${post.id}`} className="forum-post bg-card rounded-lg shadow-md flex flex-col md:flex-row">
-          <div className="w-full md:w-1/5 p-4 border-b md:border-b-0 md:border-r text-center md:text-left flex-shrink-0">
-            <div className="relative w-16 h-16 rounded-full mx-auto md:mx-0 mb-2 border">
-              <Image src={post.author.avatar_url || `https://ui-avatars.com/api/?name=${post.author.username}`} alt={`Avatar de ${post.author.username}`} fill className="rounded-full" sizes="64px" />
-            </div>
-          <p className="font-semibold text-primary break-words">{post.author.username}</p>
-          <p className="text-xs text-muted-foreground mt-1">Membre: {new Date(post.author.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}</p>
-          <p className="text-xs text-muted-foreground">Messages: {post.author.forum_post_count}</p>
-        </div>
-        <div className="w-full md:w-4/5 p-4 flex-grow">
-          <div className="flex justify-between items-center text-xs text-muted-foreground mb-3 pb-2 border-b">
-            <span suppressHydrationWarning>Posté le: {new Date(post.created_at).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })}</span>
-            <div>
-              <a href={`#post-${post.id}`} className="hover:underline mr-3 text-muted-foreground">#{postNumber}</a>
-              <button onClick={() => onQuote(post.id, post.author.username, post.content)} className="hover:text-primary text-muted-foreground" title="Citer"><FontAwesomeIcon icon={faQuoteRight} /></button>
-              {user && (user.id === post.user_id || profile?.role === 'super_admin') && (
-                <>
-                  <button onClick={handleEdit} className="hover:text-yellow-600 ml-2 text-muted-foreground" title="Modifier"><FontAwesomeIcon icon={faEdit} /></button>
-                  <button onClick={handleDelete} className="hover:text-destructive ml-2 text-muted-foreground" title="Supprimer"><FontAwesomeIcon icon={faTrash} /></button>
-                </>
-              )}
+        <article id={`post-${post.id}`} className="flex flex-col overflow-hidden rounded-2xl border-[0.5px] border-border bg-card shadow-card-rest md:flex-row">
+          <h2 className="sr-only">
+            {isOp ? `Message original de ${post.author?.username || 'Utilisateur'}` : `Réponse de ${post.author?.username || 'Utilisateur'}`}
+          </h2>
+          <div className="flex flex-shrink-0 flex-row items-center gap-3 border-b-[0.5px] border-border p-5 text-left md:w-[180px] md:flex-col md:items-start md:border-b-0 md:border-r-[0.5px]">
+            <span className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-full ring-1 ring-border">
+              <Image src={post.author?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author?.username || '?')}`} alt="" fill className="object-cover" sizes="56px" />
+            </span>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <p className="truncate font-semibold text-foreground">{post.author?.username || 'Utilisateur'}</p>
+                {isOp && (
+                  <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.05em] text-primary">
+                    Auteur
+                  </span>
+                )}
+              </div>
+              {joinedLabel && <p className="mt-1 text-xs text-muted-foreground">Membre depuis {joinedLabel}</p>}
+              <p className="text-xs text-muted-foreground">{post.author?.forum_post_count ?? 0} message{(post.author?.forum_post_count ?? 0) !== 1 ? 's' : ''}</p>
             </div>
           </div>
-          {isEditing ? (
-            <div className="edit-editor-container">
-              <Editor holder={`editor-edit-${post.id}`} data={editContent} onChange={setEditContent} />
-              <div className="mt-4 flex space-x-2">
-                <button onClick={handleSave} className="px-4 py-2 bg-green-500 text-card-foreground rounded hover:bg-green-600">Enregistrer</button>
-                <button onClick={handleCancel} className="px-4 py-2 bg-gray-300 text-foreground rounded hover:bg-gray-400">Annuler</button>
+          <div className="min-w-0 flex-grow p-5">
+            <div className="mb-3 flex items-center justify-between gap-3 border-b-[0.5px] border-border pb-3 text-xs text-muted-foreground">
+              <span suppressHydrationWarning>Posté le {new Date(post.created_at).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' })}</span>
+              <div className="flex items-center gap-3">
+                <a href={`#post-${post.id}`} className="text-muted-foreground hover:text-primary hover:underline">#{postNumber}</a>
+                <button onClick={() => onQuote(post.id, post.author?.username || 'Utilisateur', post.content)} className="text-muted-foreground hover:text-primary" title="Citer">
+                  <FontAwesomeIcon icon={faQuoteRight} /> <span className="hidden sm:inline">Citer</span>
+                </button>
+                {user && (user.id === post.user_id || profile?.role === 'super_admin') && (
+                  <>
+                    <button onClick={handleEdit} className="text-muted-foreground hover:text-accent-strong" title="Modifier">
+                      <FontAwesomeIcon icon={faEdit} />
+                    </button>
+                    <button onClick={handleDelete} className="text-muted-foreground hover:text-destructive" title="Supprimer">
+                      <FontAwesomeIcon icon={faTrash} />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
-          ) : (
-            <>
-              <div className="post-content prose prose-sm max-w-none text-foreground">{renderPostContent(post.content)}</div>
-              {post.updated_at && new Date(post.updated_at) > new Date(post.created_at) && (
-                <p className="text-xs italic text-muted-foreground mt-4 pt-2 border-t">Modifié le: {new Date(post.updated_at).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}</p>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-      <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} title="Confirmer la suppression">
-          <p className="text-muted-foreground mb-6">Êtes-vous sûr de vouloir supprimer ce message ? Cette action est irréversible.</p>
-          <div className="flex justify-end space-x-4">
-              <button onClick={() => setIsDeleteModalOpen(false)} className="px-4 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-md">
-                  Annuler
-              </button>
-              <button onClick={confirmDelete} className="px-4 py-2 text-sm font-medium text-card-foreground bg-destructive hover:bg-destructive/90 rounded-md">
-                  Supprimer
-              </button>
+            {isEditing ? (
+              <div className="edit-editor-container">
+                <div className="rounded-lg border border-border p-4">
+                  <Editor holder={`editor-edit-${post.id}`} data={editContent} onChange={setEditContent} />
+                </div>
+                <div className="mt-4 flex gap-2">
+                  <button onClick={handleSave} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90">Enregistrer</button>
+                  <button onClick={handleCancel} className="rounded-lg bg-muted px-4 py-2 text-sm font-medium text-foreground hover:bg-muted/80">Annuler</button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="post-content max-w-none text-[15px] leading-relaxed text-foreground">{renderPostContent(post.content)}</div>
+                {post.updated_at && new Date(post.updated_at) > new Date(post.created_at) && (
+                  <p className="mt-4 border-t-[0.5px] border-border pt-2 text-xs italic text-muted-foreground">Modifié le {new Date(post.updated_at).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}</p>
+                )}
+              </>
+            )}
           </div>
-      </Modal>
+        </article>
+        <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} title="Confirmer la suppression">
+            <p className="text-muted-foreground mb-6">Êtes-vous sûr de vouloir supprimer ce message ? Cette action est irréversible.</p>
+            <div className="flex justify-end space-x-4">
+                <button onClick={() => setIsDeleteModalOpen(false)} className="px-4 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-md">
+                    Annuler
+                </button>
+                <button onClick={confirmDelete} className="px-4 py-2 text-sm font-medium text-card-foreground bg-destructive hover:bg-destructive/90 rounded-md">
+                    Supprimer
+                </button>
+            </div>
+        </Modal>
       </>
     );
   };
@@ -262,7 +289,7 @@ export const TopicClientPage = ({ initialTopic, initialPosts }: TopicClientPageP
 
   const handleReplySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !topic) return;
+    if (!user || !topic || topic.is_locked) return;
     const { error } = await addForumPost(supabase, topic.id, user.id, JSON.stringify(replyContent));
     if (!error) {
       fetchTopicAndPosts(); // Re-fetch all posts to include the new one
@@ -271,6 +298,7 @@ export const TopicClientPage = ({ initialTopic, initialPosts }: TopicClientPageP
       }
     } else {
       console.error(error);
+      toast.error("Erreur lors de la publication de la réponse.");
     }
   };
 
@@ -341,47 +369,91 @@ export const TopicClientPage = ({ initialTopic, initialPosts }: TopicClientPageP
     }
   };
 
+  const firstPost = posts[0];
+
   return (
     <>
-      <div className="flex justify-between items-start mb-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground">{topic.title}</h1>
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        {topic.is_pinned && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-accent/15 px-2.5 py-1 text-[11px] font-semibold text-accent-strong">
+            <FontAwesomeIcon icon={faThumbtack} className="h-2.5 w-2.5" /> Épinglé
+          </span>
+        )}
+        {topic.is_locked && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
+            <FontAwesomeIcon icon={faLock} className="h-2.5 w-2.5" /> Verrouillé
+          </span>
+        )}
+      </div>
+
+      <h1
+        className="font-bold text-foreground"
+        style={{ fontSize: 'clamp(1.5rem, 3.5vw, 2.25rem)', lineHeight: 1.2, letterSpacing: '-0.02em' }}
+      >
+        {topic.title}
+      </h1>
+
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-b-[0.5px] border-border pb-5">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+          {firstPost && (
+            <>
+              <span>par <strong className="font-medium text-foreground">{firstPost.author?.username || 'Utilisateur'}</strong></span>
+              <span aria-hidden="true">·</span>
+            </>
+          )}
+          <span>{topic.reply_count ?? posts.length} réponses</span>
+          {typeof topic.view_count === 'number' && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span>{topic.view_count.toLocaleString('fr-FR')} vues</span>
+            </>
+          )}
+        </div>
         <div className="flex items-center gap-3">
-          <span className="text-sm text-accent font-medium pulse-animation">Partager sur :</span>
+          {!topic.is_locked && (
+            <a
+              href="#reply-form-container"
+              className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary"
+            >
+              Répondre
+            </a>
+          )}
+          <span className="text-sm text-muted-foreground">Partager :</span>
           <a href={`https://www.facebook.com/sharer/sharer.php?u=${currentUrl}`} target="_blank" rel="noopener noreferrer" title="Partager sur Facebook" className="text-muted-foreground hover:text-primary">
-            <FontAwesomeIcon icon={faFacebookF} size="lg" />
+            <FontAwesomeIcon icon={faFacebookF} />
           </a>
-          <a href={`https://twitter.com/intent/tweet?url=${currentUrl}&text=${encodeURIComponent(topic.title)}`} target="_blank" rel="noopener noreferrer" title="Partager sur Twitter" className="text-muted-foreground hover:text-foreground">
-            <FontAwesomeIcon icon={faXTwitter} size="lg" />
+          <a href={`https://twitter.com/intent/tweet?url=${currentUrl}&text=${encodeURIComponent(topic.title)}`} target="_blank" rel="noopener noreferrer" title="Partager sur X" className="text-muted-foreground hover:text-foreground">
+            <FontAwesomeIcon icon={faXTwitter} />
           </a>
-          <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(topic.title + ' ' + currentUrl)}`} target="_blank" rel="noopener noreferrer" title="Partager sur WhatsApp" className="text-muted-foreground hover:text-green-500">
-            <FontAwesomeIcon icon={faWhatsapp} size="lg" />
+          <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(topic.title + ' ' + currentUrl)}`} target="_blank" rel="noopener noreferrer" title="Partager sur WhatsApp" className="text-muted-foreground hover:text-[hsl(var(--success))]">
+            <FontAwesomeIcon icon={faWhatsapp} />
           </a>
-          <a href={`https://www.linkedin.com/shareArticle?mini=true&url=${currentUrl}&title=${encodeURIComponent(topic.title)}`} target="_blank" rel="noopener noreferrer" title="Partager sur LinkedIn" className="text-muted-foreground hover:text-primary/90">
-            <FontAwesomeIcon icon={faLinkedinIn} size="lg" />
+          <a href={`https://www.linkedin.com/shareArticle?mini=true&url=${currentUrl}&title=${encodeURIComponent(topic.title)}`} target="_blank" rel="noopener noreferrer" title="Partager sur LinkedIn" className="text-muted-foreground hover:text-primary">
+            <FontAwesomeIcon icon={faLinkedinIn} />
           </a>
-          <button onClick={() => navigator.clipboard.writeText(currentUrl)} title="Copier le lien" className="text-muted-foreground hover:text-primary">
-            <FontAwesomeIcon icon={faLink} size="lg" />
+          <button onClick={() => { navigator.clipboard.writeText(currentUrl); toast.success('Lien copié.'); }} title="Copier le lien" className="text-muted-foreground hover:text-primary">
+            <FontAwesomeIcon icon={faLink} />
           </button>
         </div>
       </div>
-      
+
       {profile?.role === 'super_admin' && (
-        <div className="mb-6 flex justify-end gap-2">
-          <button onClick={handleLockTopic} className={`px-3 py-1 text-sm rounded-md ${topic.is_locked ? 'bg-gray-500 text-card-foreground' : 'bg-accent text-card-foreground hover:bg-accent/90'}`}>
-            <FontAwesomeIcon icon={topic.is_locked ? faUnlock : faLock} className="mr-1" /> {topic.is_locked ? 'Déverrouiller' : 'Verrouiller'}
+        <div className="mt-4 flex justify-end gap-2">
+          <button onClick={handleLockTopic} className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${topic.is_locked ? 'bg-muted text-foreground hover:bg-muted/80' : 'bg-accent/10 text-accent-strong hover:bg-accent/20'}`}>
+            <FontAwesomeIcon icon={topic.is_locked ? faUnlock : faLock} /> {topic.is_locked ? 'Déverrouiller' : 'Verrouiller'}
           </button>
-          <button onClick={handlePinTopic} className={`px-3 py-1 text-sm rounded-md ${topic.is_pinned ? 'bg-gray-500 text-card-foreground' : 'bg-blue-500 text-card-foreground hover:bg-primary'}`}>
-            <FontAwesomeIcon icon={faThumbtack} className="mr-1" /> {topic.is_pinned ? 'Désépingler' : 'Épingler'}
+          <button onClick={handlePinTopic} className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${topic.is_pinned ? 'bg-muted text-foreground hover:bg-muted/80' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}>
+            <FontAwesomeIcon icon={faThumbtack} /> {topic.is_pinned ? 'Désépingler' : 'Épingler'}
           </button>
-          <button onClick={handleDeleteTopic} className="px-3 py-1 text-sm rounded-md bg-destructive text-card-foreground hover:bg-destructive/90">
-            <FontAwesomeIcon icon={faTrash} className="mr-1" /> Supprimer le Sujet
+          <button onClick={handleDeleteTopic} className="inline-flex items-center gap-1.5 rounded-lg bg-destructive/10 px-3 py-1.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/20">
+            <FontAwesomeIcon icon={faTrash} /> Supprimer le sujet
           </button>
         </div>
       )}
 
-      <div className="space-y-6 mb-10">
+      <div className="mt-8 space-y-4">
         {posts.map((post, index) => (
-          <PostComponent key={post.id} post={post} postNumber={index + 1} onQuote={handleQuote} user={user} profile={profile} onPostUpdate={fetchTopicAndPosts} />
+          <PostComponent key={post.id} post={post} postNumber={index + 1} isOp={index === 0} onQuote={handleQuote} user={user} profile={profile} onPostUpdate={fetchTopicAndPosts} />
         ))}
       </div>
 
@@ -397,30 +469,45 @@ export const TopicClientPage = ({ initialTopic, initialPosts }: TopicClientPageP
         </div>
       </Modal>
 
-      <div className="mt-8 text-center">
-        <button className="px-6 py-2 bg-muted/80 text-foreground rounded-lg hover:bg-gray-300 transition duration-300">
-          Voir les messages suivants
-        </button>
-      </div>
-
-      <div id="reply-form-container" className="mt-10">
-        <h2 className="text-xl font-semibold mb-4">Répondre au sujet</h2>
-        <form onSubmit={handleReplySubmit} className="bg-card p-6 rounded-lg shadow-lg space-y-4">
-          <div>
+      <div id="reply-form-container" className="mt-10 scroll-mt-32">
+        {topic.is_locked ? (
+          <div className="flex items-center gap-3 rounded-2xl border-[0.5px] border-border bg-muted/60 p-6 text-sm text-muted-foreground">
+            <FontAwesomeIcon icon={faLockOpen} className="h-4 w-4 flex-shrink-0" />
+            Ce sujet est verrouillé — les nouvelles réponses ne sont plus acceptées.
+          </div>
+        ) : user ? (
+          <form onSubmit={handleReplySubmit} aria-label="Votre réponse" className="rounded-2xl border-[0.5px] border-border bg-card p-6 shadow-card-rest">
+            <div className="mb-4 flex items-center gap-3">
+              <span className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full ring-1 ring-border">
+                <Image src={profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.username || user.email || 'Vous')}&background=random`} alt="" fill className="object-cover" sizes="40px" />
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Vous répondez à ce sujet</p>
+                <p className="text-xs text-muted-foreground">Membre connecté</p>
+              </div>
+            </div>
             <label htmlFor="editorjs-reply" className="sr-only">Votre réponse</label>
-            <div className="mt-2 border border-border rounded-md p-4 min-h-[200px]">
+            <div className="min-h-[200px] rounded-lg border border-border p-4">
               <Editor holder="editorjs-reply" onChange={setReplyContent} />
             </div>
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+              <span className="text-xs text-muted-foreground">Formatage riche disponible (titres, listes, citations, images).</span>
+              <button
+                type="submit"
+                className="inline-flex items-center gap-2 rounded-lg bg-accent px-6 py-2.5 text-sm font-semibold text-accent-foreground shadow-cta transition-all duration-200 hover:scale-[1.02] hover:bg-accent/90 active:scale-[0.99] motion-reduce:transition-none"
+              >
+                Publier la réponse
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="rounded-2xl border-[0.5px] border-border bg-card p-6 text-center shadow-card-rest">
+            <p className="mb-4 text-sm text-muted-foreground">Connectez-vous pour répondre à ce sujet.</p>
+            <Link href="/connexion" className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all duration-200 hover:scale-[1.02] hover:bg-primary/90">
+              Se connecter
+            </Link>
           </div>
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              className="px-6 py-2 bg-primary text-card-foreground rounded-lg hover:bg-primary/90 transition duration-300 font-semibold"
-            >
-              <FontAwesomeIcon icon={faReply} className="mr-2" /> Répondre
-            </button>
-          </div>
-        </form>
+        )}
       </div>
     </>
   );

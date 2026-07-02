@@ -190,8 +190,8 @@ function CompletionContent() {
     <div className="container mx-auto px-4 py-16 max-w-2xl">
       {/* Main CTA: Itinerary is ready in profile */}
       <div className="bg-card p-8 rounded-2xl border border-border shadow-lg text-center mb-8">
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <FontAwesomeIcon icon={faCheckCircle} className="text-green-500 text-4xl" />
+        <div className="w-20 h-20 bg-[hsl(var(--success)/0.15)] rounded-full flex items-center justify-center mx-auto mb-6">
+          <FontAwesomeIcon icon={faCheckCircle} className="text-[hsl(var(--success))] text-4xl" />
         </div>
         <h1 className="text-2xl font-bold text-foreground mb-2">
           Votre itineraire est pret !
@@ -288,8 +288,8 @@ function CompletionContent() {
           )}
         </div>
       ) : (
-        <div className="bg-card p-6 rounded-2xl border border-green-200 shadow-sm text-center">
-          <FontAwesomeIcon icon={faCheckCircle} className="text-green-500 text-2xl mb-2" />
+        <div className="bg-card p-6 rounded-2xl border border-[hsl(var(--success)/0.3)] shadow-sm text-center">
+          <FontAwesomeIcon icon={faCheckCircle} className="text-[hsl(var(--success))] text-2xl mb-2" />
           <p className="text-foreground font-medium">Envoye avec succes !</p>
           {deliveryEmail && <p className="text-sm text-muted-foreground">Email envoye a {email}</p>}
           {deliveryTelegram && <p className="text-sm text-muted-foreground">Message Telegram envoye</p>}

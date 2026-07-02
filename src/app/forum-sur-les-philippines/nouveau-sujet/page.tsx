@@ -48,7 +48,7 @@ const NewTopicPage = () => {
     }
 
     const result = await addTopicAndRevalidate(category.id, user.id, title, JSON.stringify(content));
-    
+
     if (result.success && result.data?.topicSlug) {
       toast.success("Sujet créé avec succès !");
       router.push(`/forum-sur-les-philippines/sujet/${result.data.topicSlug}`);
@@ -86,22 +86,20 @@ const NewTopicPage = () => {
 
   if (loading) {
     return (
-      <main className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <i className="fas fa-spinner fa-spin text-primary text-4xl"></i>
-          <p className="mt-4 text-lg text-muted-foreground">Chargement...</p>
-        </div>
+      <main className="container mx-auto px-4 py-16 pt-32 text-center">
+        <FontAwesomeIcon icon={faSpinner} className="fa-spin text-4xl text-primary" />
+        <p className="mt-4 text-lg text-muted-foreground">Chargement...</p>
       </main>
     );
   }
 
   if (!category) {
     return (
-      <main className="container mx-auto px-4 py-16">
+      <main className="container mx-auto px-4 py-16 pt-32">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-destructive">Catégorie non trouvée</h1>
-          <p className="mt-4 text-muted-foreground">La catégorie que vous cherchez n'existe pas ou a été déplacée.</p>
-          <Link href="/forum-sur-les-philippines" className="mt-6 inline-block px-6 py-3 bg-primary text-card-foreground rounded-lg hover:bg-primary/90">
+          <p className="mt-4 text-muted-foreground">La catégorie que vous cherchez n&apos;existe pas ou a été déplacée.</p>
+          <Link href="/forum-sur-les-philippines" className="mt-6 inline-block rounded-lg bg-primary px-6 py-3 text-primary-foreground hover:bg-primary/90">
             Retour aux forums
           </Link>
         </div>
@@ -110,33 +108,43 @@ const NewTopicPage = () => {
   }
 
   return (
-    <main className="container mx-auto px-4 py-16">
-      <nav className="text-sm mb-4" aria-label="Breadcrumb">
-        <ol className="list-none p-0 inline-flex">
+    <main className="container mx-auto max-w-3xl px-4 py-16 pt-32">
+      <nav className="mb-6 text-sm" aria-label="Breadcrumb">
+        <ol className="inline-flex list-none items-center p-0">
           <li className="flex items-center">
             <Link href="/" className="text-muted-foreground hover:text-primary">Accueil</Link>
-            <FontAwesomeIcon icon={faChevronRight} className="w-2.5 h-2.5 mx-3 text-muted-foreground" />
+            <FontAwesomeIcon icon={faChevronRight} className="mx-3 h-2.5 w-2.5 text-primary" />
           </li>
           <li className="flex items-center">
-            <Link href="/forum-sur-les-philippines" className="text-muted-foreground hover:text-primary">Forums</Link>
-            <FontAwesomeIcon icon={faChevronRight} className="w-2.5 h-2.5 mx-3 text-muted-foreground" />
+            <Link href="/forum-sur-les-philippines" className="text-muted-foreground hover:text-primary">Forum</Link>
+            <FontAwesomeIcon icon={faChevronRight} className="mx-3 h-2.5 w-2.5 text-primary" />
           </li>
           <li className="flex items-center">
             <Link href={`/forum-sur-les-philippines/${category.slug}`} className="text-muted-foreground hover:text-primary">{category.name}</Link>
-            <FontAwesomeIcon icon={faChevronRight} className="w-2.5 h-2.5 mx-3 text-muted-foreground" />
+            <FontAwesomeIcon icon={faChevronRight} className="mx-3 h-2.5 w-2.5 text-primary" />
           </li>
           <li className="flex items-center">
-            <span className="text-foreground font-medium">Nouveau Sujet</span>
+            <span className="font-medium text-foreground">Nouveau sujet</span>
           </li>
         </ol>
       </nav>
 
-      <h1 className="text-3xl md:text-4xl font-bold mb-2">Créer un Nouveau Sujet</h1>
-      <p className="text-muted-foreground mb-8">Dans la catégorie : <strong className="text-primary">{category.name}</strong></p>
+      <span className="mb-2 inline-block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+        Forum
+      </span>
+      <h1
+        className="font-bold text-foreground"
+        style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}
+      >
+        Créer un nouveau sujet
+      </h1>
+      <p className="mt-2 mb-8 text-muted-foreground">
+        Dans la catégorie <strong className="text-primary">{category.name}</strong>
+      </p>
 
-      <form onSubmit={handleSubmit} className="bg-card p-6 md:p-8 rounded-lg shadow-lg space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6 rounded-2xl border-[0.5px] border-border bg-card p-6 shadow-card-rest md:p-8">
         <div>
-          <label htmlFor="topic-title-input" className="block text-sm font-medium text-foreground mb-1">Titre du Sujet</label>
+          <label htmlFor="topic-title-input" className="mb-1 block text-sm font-medium text-foreground">Titre du sujet</label>
           <input
             type="text"
             id="topic-title-input"
@@ -145,27 +153,27 @@ const NewTopicPage = () => {
             maxLength={150}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-primary"
+            className="w-full rounded-lg border border-border px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring"
             placeholder="Un titre clair et concis (max 150 caractères)"
           />
         </div>
 
         <div>
-          <label htmlFor="editorjs" className="block text-sm font-medium text-foreground mb-1">Votre premier message</label>
-          <div className="mt-2 border border-border rounded-md p-4 min-h-[200px]">
+          <label htmlFor="editorjs" className="mb-1 block text-sm font-medium text-foreground">Votre premier message</label>
+          <div className="mt-2 min-h-[200px] rounded-lg border border-border p-4">
             <Editor holder="editorjs" onChange={setContent} />
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-end items-center gap-4 pt-4 border-t">
-          <Link href={`/forum-sur-les-philippines/${category.slug}`} className="text-muted-foreground hover:underline text-sm">Annuler</Link>
+        <div className="flex flex-col items-center justify-end gap-4 border-t-[0.5px] border-border pt-4 sm:flex-row">
+          <Link href={`/forum-sur-les-philippines/${category.slug}`} className="text-sm text-muted-foreground hover:underline">Annuler</Link>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full sm:w-auto px-6 py-3 bg-primary text-card-foreground rounded-lg hover:bg-primary/90 transition duration-300 font-semibold flex items-center justify-center disabled:bg-gray-400"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground shadow-cta transition-all duration-200 hover:scale-[1.02] hover:bg-accent/90 active:scale-[0.99] disabled:pointer-events-none disabled:opacity-60 motion-reduce:transition-none sm:w-auto"
           >
-            <FontAwesomeIcon icon={isSubmitting ? faSpinner : faCheck} className={`mr-2 ${isSubmitting ? 'fa-spin' : ''}`} /> 
-            {isSubmitting ? 'Création...' : 'Créer le Sujet'}
+            <FontAwesomeIcon icon={isSubmitting ? faSpinner : faCheck} className={isSubmitting ? 'fa-spin' : ''} />
+            {isSubmitting ? 'Création...' : 'Créer le sujet'}
           </button>
         </div>
       </form>

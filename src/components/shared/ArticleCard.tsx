@@ -55,11 +55,7 @@ const ArticleCard = ({ article, basePath, priority = false }: ArticleCardProps) 
   return (
     <Link
       href={href}
-      className="group bg-card rounded-2xl overflow-hidden flex flex-col h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
-      style={{
-        border: '0.5px solid #e5e7eb',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-      }}
+      className="group bg-card rounded-2xl overflow-hidden flex flex-col h-full border-[0.5px] border-border shadow-card-rest transition-all duration-200 hover:-translate-y-1 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
       <div className="relative w-full h-[180px] overflow-hidden">
         {article.image ? (
@@ -79,14 +75,12 @@ const ArticleCard = ({ article, basePath, priority = false }: ArticleCardProps) 
       <div className="px-5 pt-[18px] pb-5 flex flex-col flex-1">
         {article.category?.name && (
           <span
-            className="inline-flex items-center self-start mb-2.5 px-2 py-0.5 rounded"
+            className="inline-flex items-center self-start mb-2.5 px-2 py-0.5 rounded text-primary bg-primary/10"
             style={{
               fontSize: '10px',
               fontWeight: 700,
               letterSpacing: '0.05em',
               textTransform: 'uppercase',
-              color: '#3B5BDB',
-              backgroundColor: '#F4F7FE',
             }}
           >
             {article.category.name}
@@ -104,30 +98,26 @@ const ArticleCard = ({ article, basePath, priority = false }: ArticleCardProps) 
           {article.title}
         </h3>
         <p
-          className="mb-4 flex-1 line-clamp-3"
+          className="mb-4 flex-1 line-clamp-3 text-muted-foreground"
           style={{
             fontSize: '13px',
-            color: '#64748b',
             lineHeight: 1.55,
           }}
         >
           {getSnippet()}
         </p>
-        <div
-          className="flex items-center gap-4 pt-3 mb-3"
-          style={{ borderTop: '0.5px solid #f1f5f9' }}
-        >
+        <div className="flex items-center gap-4 pt-3 mb-3 border-t-[0.5px] border-border">
           <span
-            className="inline-flex items-center gap-1.5"
-            style={{ fontSize: '11px', color: '#94a3b8' }}
+            className="inline-flex items-center gap-1.5 text-muted-foreground/80"
+            style={{ fontSize: '11px' }}
           >
             <CalendarIcon />
             {formattedDate}
           </span>
           {article.reading_time && (
             <span
-              className="inline-flex items-center gap-1.5"
-              style={{ fontSize: '11px', color: '#94a3b8' }}
+              className="inline-flex items-center gap-1.5 text-muted-foreground/80"
+              style={{ fontSize: '11px' }}
             >
               <ClockIcon />
               {article.reading_time} min

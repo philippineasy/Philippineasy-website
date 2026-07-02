@@ -46,7 +46,7 @@ export default async function ActualitesPage() {
   }
 
   return (
-    <main className="container mx-auto px-4 py-16 pt-32">
+    <main className="container mx-auto px-4 py-16">
       <div className="text-center mb-16">
         <h1 className="text-4xl font-bold text-foreground mb-4">Actualités & <span className="text-accent">Nouveautés</span></h1>
         <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
@@ -55,7 +55,6 @@ export default async function ActualitesPage() {
       </div>
 
       <ArticleList articles={articles || []} basePath="actualites-sur-les-philippines" />
-      
     </main>
   );
 }

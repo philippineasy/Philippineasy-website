@@ -25,7 +25,7 @@ const formatPrice = (price: number) =>
 export const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <Link
-      href={`/marketplace/produit/${product.slug}`}
+      href={`/marketplace-aux-philippines/produit/${product.slug}`}
       className="group bg-card rounded-2xl overflow-hidden flex flex-col h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
       style={{
         border: '0.5px solid #e5e7eb',

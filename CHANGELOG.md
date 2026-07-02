@@ -5,6 +5,25 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Design — Refonte visuelle Phases 2-5 : surfaces produit, marketplace, hubs, compte + démolition legacy (2026-07-02)
+
+Fin de la refonte design globale (plan : `output/PLAN_REFONTE_DESIGN_SITE_2026-07.md`). Toutes les surfaces du site parlent désormais le langage visuel de la home.
+
+**Phase 2 — Surfaces produit (specs handoff pixel-perfect) :**
+- **Article** : déjà conforme à la spec (sprint avril-juin) — audit de fidélité + 3 corrections (grille `[240_1fr_300] gap-16` exacte, ombre hero, CTA final aligné sur le dégradé signature du kit). Non implémenté car données inexistantes : bloc « budget estimé », commentaires (feature jamais construite — chantier dédié si souhaité).
+- **Forum** (7 fichiers) : hub, catégorie, thread et formulaire alignés spec — lignes de sujets (avatar, badges épinglé/verrouillé, stats), composer en carte, recherche branchée sur `/recherche`, stats réelles calculées côté serveur. Honnêteté des données : pas de faux likes/« Chaud »/rôles inventés du prototype. **Bonus produit : les sujets verrouillés désactivent désormais réellement le formulaire de réponse** (l'état `is_locked` n'était pas appliqué).
+- **Rencontres** : landing migrée hors HeroThematic (dernier usage du site) ; **swipe deck refondu** conformément à la spec (stack 3 cartes, badges vérifié/compat, action bar Pass/Super Like/Like rose signature, clavier ←/→/↑, reduced-motion). Découverte : l'ancien `SwipeDeck.tsx` était du code mort pointant vers des API inexistantes → réaffecté en composant présentationnel du vrai `SwipeClientPage`. Écarts documentés (pas d'overlay match : les server actions ne remontent pas le flag — suivi additif recommandé ; pas de compteur de likes : quota inexistant dans le produit). Gating amélioré : Super Like en free → toast d'up-sell au lieu de brûler le profil.
+
+**Phase 3 — Hubs + Marketplace :**
+- Hub voyager sur le modèle vivre (grille catégories via kit + sections « Préparer son voyage » et « Itinéraires ») ; hub actualités (fix double `pt-32` préexistant) ; bons plans tokenisé ; `/itineraires-philippines` en vraie vitrine (PageHero + CardGrid + CTABand).
+- **Marketplace complet** : vitrine (PageHero + stats réelles + barre de filtres façon chips), catégories, **fiches produit** (galerie nouvelle `ProductGallery`, buy-box avec réassurance, sélecteur de quantité, avis restylés). **2 bugs corrigés : le filtre par catégorie ne fonctionnait pas** (`category_id` absent de la requête) **et double padding haut**. `ProductCard` pointe désormais vers l'URL canonique (fini le hop 301).
+
+**Phase 4 — Écosystème compte/checkout** : alignement tokens (états succès/erreur sémantiques) sur 4 fichiers, exceptions raisonnées (hex littéral pour l'iframe Stripe qui ne lit pas les CSS vars, couleurs de marque Telegram/PDF conservées).
+
+**Phase 5 — Démolition** : `HeroThematic.tsx`, `AlternatingContent.tsx`, `KeyStatCard.tsx` supprimés (zéro usage restant, vérifié) ; `ArticleCard` tokenisé (7 hex → tokens).
+
+Vérifications : tsc + eslint verts sur chaque lot, build de production propre, smoke test local étendu. Point d'arbitrage restant pour l'activation du dark mode : les titres `text-ink` (constante de marque) ne s'inversent pas — toggle UI non shippé, tokens prêts.
+
 ### Design — Refonte visuelle Phases 0+1 : Section Kit + 31 pages harmonisées sur le langage de la home (2026-07-02)
 
 Lancement de la refonte design globale (plan : `output/PLAN_REFONTE_DESIGN_SITE_2026-07.md`). Objectif : un seul langage visuel (celui de la home) sur tout le site, fin du style « AI 2025 » (HeroThematic plein écran, stats en dégradés arc-en-ciel, alternances génériques).

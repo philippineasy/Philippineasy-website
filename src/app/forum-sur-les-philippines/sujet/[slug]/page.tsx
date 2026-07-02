@@ -146,7 +146,9 @@ export default async function ForumTopicPage({
       <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
       <ForumJsonLd topic={topic as ForumTopic} posts={initialPosts as ForumPost[] || []} />
       <Breadcrumb items={breadcrumbItems} />
-      <TopicClientPage initialTopic={topic} initialPosts={initialPosts || []} />
+      <div className="mx-auto max-w-4xl">
+        <TopicClientPage initialTopic={topic} initialPosts={initialPosts || []} />
+      </div>
     </main>
   );
 }

@@ -42,14 +42,17 @@ export function ArticleFooter({ article, relatedArticles, canonicalUrl }: Props)
   return (
     <footer className="mt-16 lg:mt-20">
       {/* CTA IA block — proto pe-article-cta-block */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary/85 text-white px-8 py-10 lg:px-12 lg:py-14 mb-14 shadow-cta">
+      <div
+        className="relative overflow-hidden rounded-3xl text-white px-8 py-10 lg:px-12 lg:py-14 mb-14 shadow-hero"
+        style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #3B5BDB 100%)' }}
+      >
         <span
           aria-hidden="true"
-          className="absolute -top-12 -right-12 w-48 h-48 rounded-full border border-dashed border-white/15"
+          className="absolute -top-12 -right-12 w-48 h-48 rounded-full border-2 border-dashed border-white/[0.12]"
         />
         <span
           aria-hidden="true"
-          className="absolute -bottom-10 -left-10 w-36 h-36 rounded-full border border-dashed border-white/10"
+          className="absolute -bottom-10 -left-10 w-36 h-36 rounded-full border-2 border-dashed border-white/[0.12]"
         />
         <div className="relative max-w-[55ch]">
           <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-accent mb-3">

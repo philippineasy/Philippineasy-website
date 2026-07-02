@@ -1,101 +1,255 @@
 'use client';
 
-import { useState } from 'react';
-import toast from 'react-hot-toast';
-import TinderCard from 'react-tinder-card';
-import { DatingProfile, DatingQuestionAnswer } from '@/types';
-import { likeUser, superLikeUser } from '@/services/datingService';
+import React from 'react';
 import Image from 'next/image';
+import TinderCard from 'react-tinder-card';
+import type { DatingProfile } from '@/types';
+
+/**
+ * SwipeDeck — presentational card stack for the Rencontres discovery surface.
+ *
+ * Pure presentation: it renders the fanned stack of profile cards, the loading
+ * skeleton, the empty state and the LIKE / NOPE / SUPER stamps. All product
+ * logic (API calls, quotas, premium gating, fetch-more, match handling) lives in
+ * the parent container (SwipeClientPage) and is passed down through callbacks and
+ * the `childRefs` array so the `react-tinder-card` imperative API is untouched.
+ *
+ * Motion is handled by react-tinder-card (@react-spring under the hood). We only
+ * add decorative depth transforms for the back cards, which we drop entirely when
+ * `reducedMotion` is set — the buttons in the parent keep the deck fully usable.
+ */
+
+type SwipeDirection = 'left' | 'right' | 'up' | 'down';
 
 interface SwipeDeckProps {
   profiles: DatingProfile[];
-  currentUserAnswers: DatingQuestionAnswer[];
-  currentUserInterests: any[];
+  childRefs: React.RefObject<any>[];
+  loading: boolean;
+  reducedMotion: boolean;
+  swipeFeedback: string | null;
+  onSwipe: (direction: string, userId: string) => void;
+  onCardLeftScreen: (userId: string) => void;
+  onRequirementFulfilled: (direction: string) => void;
+  onRequirementUnfulfilled: () => void;
+  onAdjustFilters?: () => void;
 }
 
-const SwipeDeck = ({ profiles, currentUserAnswers, currentUserInterests }: SwipeDeckProps) => {
-  const [currentIndex, setCurrentIndex] = useState(profiles.length - 1);
+const CheckIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M20 6 9 17l-5-5" />
+  </svg>
+);
 
-  const canSwipe = currentIndex >= 0;
+const PinIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+);
 
-  const [match, setMatch] = useState<DatingProfile | null>(null);
+const SparkIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M12 .587l3.668 7.431L24 9.75l-6 5.847 1.416 8.265L12 19.897l-7.416 3.965L6 15.597 0 9.75l8.332-1.732z" />
+  </svg>
+);
 
-  const swiped = async (direction: string, userId: string, index: number) => {
-    setCurrentIndex(index - 1);
-    try {
-      const data = await likeUser(userId, direction);
-      if (data.match) {
-        setMatch(profiles[index]);
-      }
-    } catch (error) {
-      console.error("Failed to like user", error);
-    }
+const EmptyGlyph = () => (
+  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M8 15s1.5-2 4-2 4 2 4 2" />
+    <path d="M9 9h.01M15 9h.01" />
+  </svg>
+);
+
+/** Rotated Tinder-style stamp shown once a drag threshold is reached. */
+const FeedbackStamp = ({ feedback }: { feedback: string }) => {
+  const config: Record<string, { label: string; classes: string; rotate: string; align: string }> = {
+    right: {
+      label: 'LIKE',
+      classes: 'border-emerald-400 text-emerald-400',
+      rotate: '-rotate-12',
+      align: 'left-5 top-6',
+    },
+    left: {
+      label: 'NOPE',
+      classes: 'border-rose-500 text-rose-500',
+      rotate: 'rotate-12',
+      align: 'right-5 top-6',
+    },
+    up: {
+      label: 'SUPER',
+      classes: 'border-primary text-primary',
+      rotate: '-rotate-6',
+      align: 'left-1/2 top-10 -translate-x-1/2',
+    },
   };
+  const c = config[feedback];
+  if (!c) return null;
+  return (
+    <span
+      aria-hidden="true"
+      className={`pointer-events-none absolute z-20 rounded-xl border-[3px] bg-black/10 px-4 py-1.5 text-[28px] font-extrabold uppercase tracking-[0.08em] backdrop-blur-[1px] ${c.classes} ${c.rotate} ${c.align}`}
+    >
+      {c.label}
+    </span>
+  );
+};
 
-  const outOfFrame = (idx: number) => {
-    // console.log(`${profiles[idx]?.username} left the screen!`);
-  };
+const SwipeDeck = ({
+  profiles,
+  childRefs,
+  loading,
+  reducedMotion,
+  swipeFeedback,
+  onSwipe,
+  onCardLeftScreen,
+  onRequirementFulfilled,
+  onRequirementUnfulfilled,
+  onAdjustFilters,
+}: SwipeDeckProps) => {
+  const wrapperClass =
+    'relative w-[min(88vw,340px)] h-[min(130vw,510px)] sm:w-[380px] sm:h-[570px]';
 
-  const handleSuperLike = async (userId: string) => {
-    try {
-      await superLikeUser(userId);
-      // Maybe show some confirmation
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  };
+  if (loading) {
+    return (
+      <div className={wrapperClass}>
+        <div className="flex h-full w-full flex-col items-center justify-center gap-4 rounded-[20px] border border-border bg-muted">
+          <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-primary/25 border-t-primary motion-reduce:animate-none" />
+          <p className="text-sm font-medium text-muted-foreground">Recherche de profils…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (profiles.length === 0) {
+    return (
+      <div className={wrapperClass}>
+        <div className="flex h-full w-full flex-col items-center justify-center gap-3 rounded-[20px] border border-border bg-card px-8 text-center shadow-card">
+          <span className="text-muted-foreground/60">
+            <EmptyGlyph />
+          </span>
+          <h3 className="text-[19px] font-semibold text-foreground">
+            Plus personne à découvrir pour le moment
+          </h3>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            Revenez un peu plus tard, ou élargissez vos filtres pour rencontrer davantage de
+            personnes.
+          </p>
+          {onAdjustFilters && (
+            <button
+              type="button"
+              onClick={onAdjustFilters}
+              className="mt-2 inline-flex min-h-[44px] items-center rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              Ajuster mes filtres
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  const topIndex = profiles.length - 1;
 
   return (
-    <div className="relative w-full h-[70vh] max-w-md mx-auto flex flex-col items-center justify-center">
-      {match && (
-        <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-20">
-          <div className="text-center text-white">
-            <h2 className="text-4xl font-bold">It's a Match!</h2>
-            <p className="text-xl mt-2">Vous et {match.username} vous êtes mutuellement aimés.</p>
-            <button onClick={() => setMatch(null)} className="mt-4 bg-primary text-white px-6 py-2 rounded-lg">Continuer</button>
-          </div>
-        </div>
-      )}
-      <div className="relative w-full h-full">
-        {profiles.map((profile, index) => (
+    <div className={wrapperClass}>
+      {profiles.map((profile, index) => {
+        // depth 0 = card on top; deeper cards sit slightly scaled/offset behind.
+        const depth = topIndex - index;
+        const isTop = depth === 0;
+        const hidden = depth > 2; // only render 3 cards of visible depth
+        const depthStyle: React.CSSProperties = reducedMotion
+          ? { zIndex: index, opacity: isTop ? 1 : 0 }
+          : {
+              zIndex: index,
+              transform: `translateY(${depth * 12}px) scale(${1 - depth * 0.04})`,
+              opacity: hidden ? 0 : 1,
+              transition: 'transform 0.25s ease-out, opacity 0.25s ease-out',
+            };
+
+        return (
           <TinderCard
             key={profile.user_id}
-            onSwipe={(dir) => swiped(dir, profile.user_id, index)}
-            onCardLeftScreen={() => outOfFrame(index)}
-          preventSwipe={['up', 'down']}
-          className="absolute"
-        >
-            <div className="relative w-full h-full rounded-2xl shadow-2xl overflow-hidden bg-card">
-              <Image 
+            ref={childRefs[index]}
+            className="absolute inset-0"
+            onSwipe={(dir: SwipeDirection) => onSwipe(dir, profile.user_id)}
+            onCardLeftScreen={() => onCardLeftScreen(profile.user_id)}
+            preventSwipe={['down']}
+            swipeRequirementType="position"
+            onSwipeRequirementFulfilled={(dir: SwipeDirection) => onRequirementFulfilled(dir)}
+            onSwipeRequirementUnfulfilled={onRequirementUnfulfilled}
+          >
+            <article
+              aria-label={`${profile.username ?? 'Profil'}, ${profile.age ?? ''}`}
+              className="relative h-full w-full select-none overflow-hidden rounded-[20px] bg-card shadow-[0_20px_40px_rgba(15,23,42,0.15)]"
+              style={depthStyle}
+            >
+              <Image
                 src={profile.profile_picture_url || '/default-avatar.webp'}
-                alt={profile.username || 'Profile picture'}
-                layout="fill"
-                objectFit="cover"
+                alt={profile.username ? `Photo de ${profile.username}` : 'Photo de profil'}
+                fill
+                draggable={false}
+                sizes="(max-width: 640px) 88vw, 380px"
+                className="pointer-events-none object-cover"
+                priority={isTop}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-              <div className="absolute bottom-0 left-0 p-6 text-white">
-                <h3 className="text-3xl font-bold">{profile.username}, {profile.age}</h3>
-                <p className="text-gray-200 text-lg">{profile.city}</p>
-                <p className="text-xl font-bold text-green-400">
-                  Compatibilité : {profile.compatibility}%
-                </p>
+
+              {/* Bottom scrim for text legibility */}
+              <div
+                aria-hidden="true"
+                className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/85 via-black/35 to-transparent"
+              />
+
+              {isTop && swipeFeedback && <FeedbackStamp feedback={swipeFeedback} />}
+
+              {/* Top badges */}
+              <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/95 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm">
+                  <CheckIcon />
+                  Vérifié
+                </span>
+                {typeof profile.compatibility === 'number' && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-[11px] font-bold text-ink shadow-sm">
+                    <SparkIcon />
+                    {profile.compatibility}%
+                  </span>
+                )}
               </div>
-            </div>
+
+              {/* Bottom info */}
+              <div className="absolute inset-x-0 bottom-0 p-5 text-white">
+                <h2 className="text-[26px] font-bold leading-tight tracking-[-0.01em] [text-shadow:0_1px_8px_rgba(0,0,0,0.4)]">
+                  {profile.username}
+                  {profile.age ? <span className="font-medium">, {profile.age}</span> : null}
+                </h2>
+                {profile.city && (
+                  <p className="mt-1 flex items-center gap-1.5 text-sm text-white/90">
+                    <PinIcon />
+                    {profile.city}
+                  </p>
+                )}
+                {profile.description && (
+                  <p className="mt-2.5 line-clamp-3 text-sm leading-relaxed text-white/85">
+                    {profile.description}
+                  </p>
+                )}
+                {profile.interests && profile.interests.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {profile.interests.slice(0, 3).map((interest) => (
+                      <span
+                        key={interest.id}
+                        className="inline-flex items-center rounded-full border border-white/25 bg-white/15 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm"
+                      >
+                        {interest.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </article>
           </TinderCard>
-        ))}
-      </div>
-      <div className="flex justify-center items-center space-x-4 mt-4">
-        <button onClick={() => {}} className="bg-card rounded-full p-4 shadow-lg">
-          <svg className="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2.25a.75.75 0 01.75.75v1.502a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM10 18.25a.75.75 0 01.75-.75v-1.502a.75.75 0 01-1.5 0v1.502c0 .414.336.75.75.75zM15.606 4.394a.75.75 0 011.06 1.06l-1.06-1.06zM4.394 15.606a.75.75 0 011.06 1.06l-1.06-1.06zM18.25 10a.75.75 0 01-.75.75h-1.502a.75.75 0 010-1.5h1.502a.75.75 0 01.75.75zM3.75 10a.75.75 0 01-.75.75H1.5a.75.75 0 010-1.5h1.5a.75.75 0 01.75.75zM10 12.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z"/></svg>
-        </button>
-        <button onClick={() => canSwipe && handleSuperLike(profiles[currentIndex].user_id)} className="bg-card rounded-full p-4 shadow-lg">
-          <svg className="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-        </button>
-        <button onClick={() => {}} className="bg-card rounded-full p-4 shadow-lg">
-          <svg className="w-8 h-8 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"/></svg>
-        </button>
-      </div>
-      {!canSwipe && <p className="text-center text-muted-foreground mt-4">Plus de profils à découvrir pour le moment.</p>}
+        );
+      })}
     </div>
   );
 };

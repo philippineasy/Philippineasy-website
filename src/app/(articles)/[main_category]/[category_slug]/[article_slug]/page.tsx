@@ -193,7 +193,7 @@ export default async function ArticlePage({
           canonicalUrl={canonicalUrl}
         />
 
-        <div className="mt-12 grid grid-cols-1 lg:grid-cols-[220px_1fr_300px] gap-8 lg:gap-12">
+        <div className="mt-12 grid grid-cols-1 lg:grid-cols-[240px_1fr_300px] gap-8 lg:gap-16">
           {parsedContent && <ArticleTOC blocks={parsedContent.blocks || []} />}
 
           <article className="min-w-0">
