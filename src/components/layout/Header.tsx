@@ -20,7 +20,7 @@ interface NavLink {
   admin?: boolean;
   roles?: string[];
   badge?: string;
-  submenu?: { href: string; label: string; }[];
+  submenu?: { href: string; label: string; heading?: boolean; }[];
 }
 
 interface HeaderProps {
@@ -324,9 +324,45 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
 
           {/* Mobile drawer */}
           {isMenuOpen && (
-            <div className="md:hidden absolute top-full right-4 mt-2 w-auto max-w-xs rounded-lg shadow-xl bg-card z-20 border border-border">
+            <div className="md:hidden absolute top-full right-4 mt-2 w-[calc(100vw-2rem)] max-w-sm max-h-[70vh] overflow-y-auto rounded-lg shadow-xl bg-card z-20 border border-border">
               <div className="flex flex-col space-y-1 p-3">
-                {navLinks.map((link) => !link.special && <MobileNavLink key={link.href} {...link} />)}
+                {navLinks.map((link) => {
+                  if (link.special) return null;
+                  if (link.submenu && link.submenu.length > 0) {
+                    return (
+                      <details key={link.href} className="group">
+                        <summary className="px-3 py-2 rounded-md text-foreground hover:text-primary hover:bg-primary/10 transition-colors duration-200 cursor-pointer list-none flex items-center justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                          <span className={pathname.startsWith(link.href) ? 'font-bold' : ''}>{link.label}</span>
+                          <span aria-hidden="true" className="text-muted-foreground text-xs transition-transform duration-200 group-open:rotate-180">▾</span>
+                        </summary>
+                        <div className="pl-3 pb-1 flex flex-col">
+                          <Link
+                            href={link.href}
+                            className="px-3 py-2 rounded-md text-sm font-semibold text-primary hover:bg-primary/10 transition-colors"
+                          >
+                            Tout {link.label} →
+                          </Link>
+                          {link.submenu.map((item) =>
+                            item.heading ? (
+                              <p key={`m-heading-${item.label}`} className="px-3 pt-2 pb-0.5 text-[11px] uppercase tracking-[0.06em] font-semibold text-muted-foreground select-none">
+                                {item.label}
+                              </p>
+                            ) : (
+                              <Link
+                                key={`m-${item.label}-${item.href}`}
+                                href={item.href}
+                                className="px-3 py-2 rounded-md text-sm text-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                              >
+                                {item.label}
+                              </Link>
+                            )
+                          )}
+                        </div>
+                      </details>
+                    );
+                  }
+                  return <MobileNavLink key={link.href} {...link} />;
+                })}
                 <button
                   type="button"
                   onClick={() => {

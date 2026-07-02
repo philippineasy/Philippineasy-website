@@ -838,14 +838,14 @@ const UniversitesPage = () => {
               <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-primary transition-colors" />
             </Link>
             <Link
-              href="/vivre-aux-philippines/s-installer/visas"
+              href="/vivre-aux-philippines/visas-et-formalites"
               className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:border-primary hover:shadow-md transition-all group"
             >
               <span className="font-medium">Visas et Permis</span>
               <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-primary transition-colors" />
             </Link>
             <Link
-              href="/vivre-aux-philippines/s-installer/logement"
+              href="/vivre-aux-philippines/logement"
               className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:border-primary hover:shadow-md transition-all group"
             >
               <span className="font-medium">Trouver un Logement</span>

@@ -109,6 +109,49 @@ const nextConfig: NextConfig = {
         destination: '/itineraire-personnalise-pour-les-philippines',
         permanent: true,
       },
+      // 2026-07-02 : fusion des hubs thèmes "vivre" dans les 6 pages catégories
+      // (fin de la double taxonomie). Sources EXACTES uniquement — les guides
+      // enfants (ex. /travailler/creer-entreprise) restent en place.
+      {
+        source: '/vivre-aux-philippines/s-installer',
+        destination: '/vivre-aux-philippines',
+        permanent: true,
+      },
+      {
+        source: '/vivre-aux-philippines/s-installer/visas',
+        destination: '/vivre-aux-philippines/visas-et-formalites',
+        permanent: true,
+      },
+      {
+        source: '/vivre-aux-philippines/s-installer/logement',
+        destination: '/vivre-aux-philippines/logement',
+        permanent: true,
+      },
+      {
+        source: '/vivre-aux-philippines/s-installer/banque-assurance',
+        destination: '/vivre-aux-philippines/banque-finances',
+        permanent: true,
+      },
+      {
+        source: '/vivre-aux-philippines/travailler',
+        destination: '/vivre-aux-philippines/travail-entreprise',
+        permanent: true,
+      },
+      {
+        source: '/vivre-aux-philippines/investir',
+        destination: '/vivre-aux-philippines/travail-entreprise',
+        permanent: true,
+      },
+      {
+        source: '/vivre-aux-philippines/etudier',
+        destination: '/vivre-aux-philippines/culture-integration',
+        permanent: true,
+      },
+      {
+        source: '/vivre-aux-philippines/famille',
+        destination: '/vivre-aux-philippines/culture-integration',
+        permanent: true,
+      },
       {
         source: '/actualites',
         destination: '/actualites-sur-les-philippines',

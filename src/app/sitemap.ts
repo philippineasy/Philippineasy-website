@@ -80,21 +80,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   /* ---------- Static: Sous-pages (non couvertes par la table `pages`) ---------- */
   const subPages: SitemapEntry[] = [
-    // Vivre — S'installer (depth 3)
-    { url: `${BASE_URL}/vivre-aux-philippines/s-installer/logement`,          lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${BASE_URL}/vivre-aux-philippines/s-installer/visas`,             lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${BASE_URL}/vivre-aux-philippines/s-installer/banque-assurance`,  lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
-    // Vivre — Travailler (depth 3)
-    { url: `${BASE_URL}/vivre-aux-philippines/travailler/creer-entreprise`,   lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${BASE_URL}/vivre-aux-philippines/travailler/emploi-salarie`,     lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
-    // Vivre — Étudier (depth 3)
-    { url: `${BASE_URL}/vivre-aux-philippines/etudier/universites`,             lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${BASE_URL}/vivre-aux-philippines/etudier/ecoles-internationales`,  lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
-    // Vivre — Investir (depth 3)
-    { url: `${BASE_URL}/vivre-aux-philippines/investir/immobilier`,             lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${BASE_URL}/vivre-aux-philippines/investir/bourse-et-entreprises`,  lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
-    // Vivre — Famille
-    { url: `${BASE_URL}/vivre-aux-philippines/famille`,  lastModified: '2026-02-01', changeFrequency: 'monthly', priority: 0.6 },
+    // Vivre — Guides pratiques conservés. Les hubs thèmes (s-installer/*,
+    // travailler, investir, etudier, famille) ont été fusionnés dans les
+    // 6 pages catégories le 2026-07-02 → 301, ne PAS les remettre ici.
+    { url: `${BASE_URL}/vivre-aux-philippines/travailler/creer-entreprise`,   lastModified: '2026-07-02', changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/vivre-aux-philippines/travailler/emploi-salarie`,     lastModified: '2026-07-02', changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/vivre-aux-philippines/etudier/universites`,             lastModified: '2026-07-02', changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/vivre-aux-philippines/etudier/ecoles-internationales`,  lastModified: '2026-07-02', changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/vivre-aux-philippines/investir/immobilier`,             lastModified: '2026-07-02', changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/vivre-aux-philippines/investir/bourse-et-entreprises`,  lastModified: '2026-07-02', changeFrequency: 'monthly', priority: 0.6 },
 
     // Voyager — Destinations principales (hubs catégorie, parents des articles)
     { url: `${BASE_URL}/voyager-aux-philippines/palawan`,         lastModified: '2026-04-15', changeFrequency: 'monthly', priority: 0.7 },
@@ -142,9 +136,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   if (pagesError) console.error('Sitemap: pages query failed', pagesError.message);
 
+  // Hubs thèmes vivre fusionnés le 2026-07-02 dans les pages catégories (301) :
+  // exclus du sitemap même s'ils existent encore dans la table `pages`.
+  const mergedVivrePageSlugs = new Set(['s-installer', 'travailler', 'investir', 'etudier', 'famille']);
+
   const pageImages: SitemapEntry[] =
     (pages?.map(({ slug, created_at, hero_image_url, section }) => {
       if (!hero_image_url || !section) return null;
+      if (section === 'vivre-aux-philippines' && mergedVivrePageSlugs.has(slug)) return null;
       const sectionPath = getMainCategoryPath(section);
       return {
         url: `${BASE_URL}/${sectionPath}/${slug}`,

@@ -959,7 +959,7 @@ const EcolesInternationalesPage = () => {
               </div>
               <ChevronRight className="h-5 w-5 text-violet-600" />
             </Link>
-            <Link href="/vivre-aux-philippines/famille"
+            <Link href="/vivre-aux-philippines/culture-integration"
                   className="flex items-center justify-between p-4 bg-gradient-to-r from-rose-50 to-pink-100 border-2 border-rose-200 rounded-xl hover:border-rose-400 hover:shadow-md transition-all">
               <div className="flex items-center gap-3">
                 <Users className="h-5 w-5 text-rose-600" />
@@ -967,7 +967,7 @@ const EcolesInternationalesPage = () => {
               </div>
               <ChevronRight className="h-5 w-5 text-rose-600" />
             </Link>
-            <Link href="/vivre-aux-philippines/s-installer/visas"
+            <Link href="/vivre-aux-philippines/visas-et-formalites"
                   className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-100 border-2 border-blue-200 rounded-xl hover:border-blue-400 hover:shadow-md transition-all">
               <div className="flex items-center gap-3">
                 <FileCheck className="h-5 w-5 text-blue-600" />

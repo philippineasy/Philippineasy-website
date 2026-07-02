@@ -5,6 +5,32 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Refonte — Fin de la double taxonomie « Vivre » + navigation 100 % couvrante (2026-07-02)
+
+Suite à l'audit d'architecture (rapport : `output/AUDIT_ARCHITECTURE_VIVRE_2026-07-02.md`) : la section vivait avec DEUX systèmes parallèles — 6 catégories DB (dans le menu, template générique moche, 0 image) et 14 pages thèmes statiques (invisibles du menu, 11/14 à zéro impression GSC sur 28 j). Objectif utilisateur : plus AUCUNE page hors menu, consolidation, et plus de vues Google.
+
+**Fusion (une seule page riche par sujet, à l'URL de la catégorie DB — celle du menu, qui garde les articles) :**
+1. `visas-et-formalites` ← port intégral de `s-installer/visas` (simulateur de visa inclus) + articles de la catégorie.
+2. `logement` ← port de `s-installer/logement` + section « investir locatif » (2 CTA distincts locatif/habiter, anti-cannibalisation respectée) + articles.
+3. `travail-entreprise` ← hub `travailler` statifié + sections liant les guides conservés (emploi-salarie, creer-entreprise, bourse, immobilier) + articles.
+4. `banque-finances` + `sante-assurances` ← split de `s-installer/banque-assurance` (blocs affiliés Wise/Chapka déplacés au bon endroit) + articles.
+5. `culture-integration` ← fusion des hubs `etudier` + `famille` + guides universités/écoles liés + articles.
+
+Toutes suivent le squelette des pages destinations (HeroThematic → stats → contenu → ArticleList), avec Breadcrumb + BreadcrumbJsonLd, canonical propre, title sans suffixe brand. Les pages statiques masquent la route dynamique `[slug]` (pattern voyager/palawan, vérifié au build).
+
+**Suppressions + 301 (next.config.ts, sources exactes — les guides enfants restent en place) :** `s-installer` (+3 sous-pages), `travailler`, `investir`, `etudier`, `famille` → 8 URLs redirigées vers leurs pages fusionnées. Sitemap nettoyé (entrées statiques retirées + exclusion des slugs fusionnés issus de la table `pages`), section vivre : 21 URLs → 14.
+
+**Navigation — plus aucune page orpheline :**
+- Menu « S'installer » : groupes « Par sujet » (6 catégories) + « Guides pratiques » (6 guides conservés). `DropdownMenu` supporte désormais des intitulés de groupe non cliquables.
+- Menu « Voyager » : groupes « Destinations » (Palawan, Siargao, Cebu), « Préparer son voyage » (quand-partir, budget, transport, communication, santé-sécurité, conseils — jusqu'ici accessibles nulle part) et « Itinéraires » (`/itineraires-philippines` + itinéraire IA — jusqu'ici accessibles nulle part depuis le header).
+- **Menu mobile : bug corrigé** — le drawer ignorait tous les sous-menus (`Header.tsx`), aucune catégorie n'était accessible au doigt. Accordéons `<details>` + lien « Tout {section} ».
+- **Footer réparé** : « Visas / Logement / Travailler / Investir / Études » pointaient TOUS vers `/vivre-aux-philippines` ; désormais deep links réels. Faux liens Boracay/Manille remplacés par Quand partir + Itinéraires prêts à partir.
+- Cartes « S'installer/Travailler/Investir/Étudier » de la home (`InstallerCards`) re-pointées vers les nouvelles cibles.
+
+**Images :** les 6 catégories vivre n'avaient AUCUNE `heroImage` en DB → toutes les cartes du hub affichaient le même coucher de soleil Unsplash (fallback). 6 images réelles de `public/imagesHero/` attribuées en DB ; fallback Unsplash remplacé par une image locale. Hub simplifié : une seule grille de 6 sujets + section guides (fin de la double rangée thèmes/dossiers).
+
+**SEO :** aucun slug d'article modifié ; le refocus anti-cannibalisation du 01/07 est préservé (liens « investir » larges → article gagnant `investir-aux-philippines-guide-francais-2025`). Consolidation 21→14 URLs = concentration du crawl budget (cause racine identifiée dans l'audit indexation de juin).
+
 ### Chore — Grand tri du dépôt : 49 fichiers obsolètes retirés, secrets détrackés (2026-07-02)
 
 Audit complet de la racine du projet (fichiers du 8-10 janvier + restes d'août 2025), croisé avec le code actuel, 218 commits d'historique et la base n8n locale. Rapport détaillé : `output/RAPPORT_TRI_FICHIERS_2026-07-02.md`.

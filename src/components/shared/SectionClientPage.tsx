@@ -11,9 +11,11 @@ interface SectionClientPageProps<T extends BaseItem> {
   initialCategories: T[];
   children: ReactNode;
   renderCard: (category: T) => ReactNode;
+  /** Contenu optionnel rendu APRÈS la grille de cartes (ex. section guides) */
+  footer?: ReactNode;
 }
 
-export const SectionClientPage = <T extends BaseItem>({ initialCategories, children, renderCard }: SectionClientPageProps<T>) => {
+export const SectionClientPage = <T extends BaseItem>({ initialCategories, children, renderCard, footer }: SectionClientPageProps<T>) => {
   const [categories, setCategories] = useState<T[]>(initialCategories);
 
   const handleCategoryUpdate = (updatedCategory: T) => {
@@ -34,6 +36,7 @@ export const SectionClientPage = <T extends BaseItem>({ initialCategories, child
           </EditableWrapper>
         ))}
       </div>
+      {footer}
     </main>
   );
 };

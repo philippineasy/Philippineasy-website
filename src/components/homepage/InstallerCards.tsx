@@ -88,28 +88,28 @@ type Theme = {
 
 const themes: Theme[] = [
   {
-    href: '/vivre-aux-philippines/s-installer',
+    href: '/vivre-aux-philippines',
     title: "S'installer",
     description: 'Visas, logement, vie quotidienne aux Philippines.',
     cta: 'En savoir plus',
     icon: <HouseIcon />,
   },
   {
-    href: '/vivre-aux-philippines/travailler',
+    href: '/vivre-aux-philippines/travail-entreprise',
     title: 'Travailler',
     description: "Emploi, création d'entreprise, télétravail.",
     cta: 'Guides pro',
     icon: <BriefcaseIcon />,
   },
   {
-    href: '/vivre-aux-philippines/investir',
+    href: '/vivre-aux-philippines/investir/immobilier',
     title: 'Investir',
     description: 'Opportunités, immobilier, fiscalité.',
     cta: 'Opportunités',
     icon: <DollarIcon />,
   },
   {
-    href: '/vivre-aux-philippines/etudier',
+    href: '/vivre-aux-philippines/culture-integration',
     title: 'Étudier',
     description: "Universités, écoles, cours d'anglais.",
     cta: 'Découvrir',

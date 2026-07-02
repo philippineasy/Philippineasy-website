@@ -783,7 +783,7 @@ const BourseEntreprisesPage = () => {
               <ChevronRight className="h-5 w-5 text-green-600" />
             </Link>
             <Link
-              href="/vivre-aux-philippines/s-installer/visas"
+              href="/vivre-aux-philippines/visas-et-formalites"
               className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-200 rounded-xl hover:border-purple-400 hover:shadow-md transition-all"
             >
               <div className="flex items-center gap-3">

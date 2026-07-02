@@ -2,13 +2,20 @@ import { Metadata } from 'next';
 import { CheckCircle, Clock, FileText, Briefcase, GraduationCap, Home, AlertTriangle, ExternalLink, Users, RefreshCw, Plane, Calendar, DollarSign, Shield, ChevronRight, ArrowRight } from 'lucide-react';
 import { HeroThematic } from '@/components/ui/HeroThematic';
 import { VisaSimulator } from '@/components/visa/VisaSimulator';
+import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
+import ArticleList from '@/components/shared/ArticleList';
+import { createClient } from '@/utils/supabase/server';
+import { getArticlesByCategorySlug } from '@/services/articleService';
 import Link from 'next/link';
+
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Visas Philippines 2026 : Guide Complet pour s'installer",
   description: "Guide complet et à jour sur les visas pour vivre aux Philippines en 2026 : visa touriste 9A, visa retraite SRRV (nouvelles règles), visa travail 9G et AEP. Conditions, coûts et démarches.",
   alternates: {
-    canonical: 'https://philippineasy.com/vivre-aux-philippines/s-installer/visas',
+    canonical: 'https://philippineasy.com/vivre-aux-philippines/visas-et-formalites',
   },
   robots: {
     index: true,
@@ -24,7 +31,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Visas Philippines 2026 : Guide Complet pour s'installer",
     description: "Tout savoir sur les visas pour vivre aux Philippines : touriste, retraite SRRV, travail 9G. Conditions actualisées, coûts et procédures officielles.",
-    url: 'https://philippineasy.com/vivre-aux-philippines/s-installer/visas',
+    url: 'https://philippineasy.com/vivre-aux-philippines/visas-et-formalites',
     siteName: "Philippin'Easy",
     locale: 'fr_FR',
     type: 'article',
@@ -36,9 +43,31 @@ export const metadata: Metadata = {
   },
 };
 
-const VisasPage = () => {
+const breadcrumbItems = [
+  { href: '/', label: 'Accueil' },
+  { href: '/vivre-aux-philippines', label: 'Vivre aux Philippines' },
+  { label: 'Visas et Formalités' },
+];
+
+const breadcrumbJsonLdItems = [
+  { name: 'Accueil', item: '/' },
+  { name: 'Vivre aux Philippines', item: '/vivre-aux-philippines' },
+  { name: 'Visas et Formalités', item: '/vivre-aux-philippines/visas-et-formalites' },
+];
+
+const VisasEtFormalitesPage = async () => {
+  const supabase = await createClient();
+  const { data: articles, error } = await getArticlesByCategorySlug(supabase, 'visas-et-formalites');
+
+  if (error) {
+    console.error(error);
+    // Gérer l'erreur, par exemple en affichant un message à l'utilisateur
+  }
+
   return (
     <div className="bg-background">
+      <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
+
       <HeroThematic
         titlePart1="Visas pour les"
         titlePart2="Philippines"
@@ -49,6 +78,8 @@ const VisasPage = () => {
       <VisaSimulator />
 
       <div className="container mx-auto px-4 py-12 max-w-6xl">
+
+        <Breadcrumb items={breadcrumbItems} />
 
         {/* Stats rapides */}
         <section className="mb-12">
@@ -664,8 +695,8 @@ const VisasPage = () => {
           <h3 className="text-xl font-semibold text-center mb-6">Continuez votre exploration</h3>
           <div className="grid md:grid-cols-3 gap-4 max-w-4xl mx-auto">
             {[
-              { title: "Trouver un logement", href: "/vivre-aux-philippines/s-installer/logement", desc: "Condos, maisons, quartiers" },
-              { title: "Ouvrir un compte en banque", href: "/vivre-aux-philippines/s-installer/banque-assurance", desc: "Banques et assurances" },
+              { title: "Trouver un logement", href: "/vivre-aux-philippines/logement", desc: "Condos, maisons, quartiers" },
+              { title: "Ouvrir un compte en banque", href: "/vivre-aux-philippines/banque-finances", desc: "Banques et assurances" },
               { title: "Forum expatriés", href: "/forum-sur-les-philippines", desc: "Échangez avec la communauté" }
             ].map((link, index) => (
               <Link
@@ -683,9 +714,17 @@ const VisasPage = () => {
           </div>
         </section>
 
+        {/* Nos articles Visas & Formalités */}
+        {articles && articles.length > 0 && (
+          <section className="border-t border-gray-200 pt-12 mt-16">
+            <h2 className="text-3xl font-bold text-center mb-12">Nos articles Visas & Formalités</h2>
+            <ArticleList articles={articles} basePath="vivre-aux-philippines" />
+          </section>
+        )}
+
       </div>
     </div>
   );
 };
 
-export default VisasPage;
+export default VisasEtFormalitesPage;

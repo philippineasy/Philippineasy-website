@@ -93,7 +93,7 @@ const EmploiSalariePage = () => {
                   Ces démarches sont généralement initiées par votre employeur.
                 </p>
                 <Link
-                  href="/vivre-aux-philippines/s-installer/visas"
+                  href="/vivre-aux-philippines/visas-et-formalites"
                   className="inline-flex items-center gap-2 text-amber-700 hover:text-amber-900 font-semibold transition-colors"
                 >
                   Voir notre guide complet sur les visas
@@ -810,7 +810,7 @@ const EmploiSalariePage = () => {
             </Link>
 
             <Link
-              href="/vivre-aux-philippines/s-installer/visas"
+              href="/vivre-aux-philippines/visas-et-formalites"
               className="group flex items-center gap-4 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 hover:border-blue-400 hover:shadow-md transition-all"
             >
               <div className="p-3 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">

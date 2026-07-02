@@ -3,7 +3,14 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBriefcase, faGraduationCap, faHandshake, faHome } from '@fortawesome/free-solid-svg-icons';
+import {
+  faBriefcase,
+  faLightbulb,
+  faHome,
+  faChartLine,
+  faGraduationCap,
+  faSchool,
+} from '@fortawesome/free-solid-svg-icons';
 import { SectionClientPage } from '@/components/shared/SectionClientPage';
 
 interface Category {
@@ -13,6 +20,15 @@ interface Category {
   description: string;
   slug: string;
 }
+
+const guides = [
+  { href: '/vivre-aux-philippines/travailler/emploi-salarie', icon: faBriefcase, title: 'Trouver un emploi', desc: 'Marché du travail, secteurs qui recrutent, salaires.' },
+  { href: '/vivre-aux-philippines/travailler/creer-entreprise', icon: faLightbulb, title: 'Créer son entreprise', desc: 'Statuts, démarches SEC/DTI, restrictions étrangères.' },
+  { href: '/vivre-aux-philippines/investir/immobilier', icon: faHome, title: 'Immobilier locatif', desc: 'Investir pour louer : rendements, condos, règles.' },
+  { href: '/vivre-aux-philippines/investir/bourse-et-entreprises', icon: faChartLine, title: 'Bourse & entreprises', desc: 'PSE, actions locales, participations en société.' },
+  { href: '/vivre-aux-philippines/etudier/universites', icon: faGraduationCap, title: 'Universités', desc: 'Étudier aux Philippines : cursus, admissions, coûts.' },
+  { href: '/vivre-aux-philippines/etudier/ecoles-internationales', icon: faSchool, title: 'Écoles internationales', desc: 'Scolariser ses enfants : écoles françaises et internationales.' },
+];
 
 export const VivreClientPage = ({ initialCategories }: { initialCategories: Category[] }) => {
   const renderCard = (cat: Category) => (
@@ -26,7 +42,7 @@ export const VivreClientPage = ({ initialCategories }: { initialCategories: Cate
     >
       <div className="relative w-full h-[180px] overflow-hidden">
         <Image
-          src={cat.heroImage || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e'}
+          src={cat.heroImage || '/imagesHero/nouveau-depart-aux-philippines.webp'}
           alt={cat.name}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
@@ -65,44 +81,48 @@ export const VivreClientPage = ({ initialCategories }: { initialCategories: Cate
   );
 
   return (
-    <SectionClientPage initialCategories={initialCategories} renderCard={renderCard}>
+    <SectionClientPage
+      initialCategories={initialCategories}
+      renderCard={renderCard}
+      footer={
+        <div className="mt-16">
+          <h2 className="text-3xl font-bold mb-3 text-center">Guides <span className="text-primary">pratiques</span></h2>
+          <p className="text-center text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Nos dossiers de fond pour aller plus loin, rédigés pour les francophones.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {guides.map((guide) => (
+              <Link
+                key={guide.href}
+                href={guide.href}
+                className="group flex items-start gap-4 bg-card rounded-2xl px-5 py-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+                style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+              >
+                <span
+                  className="inline-flex shrink-0 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105"
+                  style={{ width: '44px', height: '44px', backgroundColor: '#F4F7FE', color: '#3B5BDB' }}
+                  aria-hidden="true"
+                >
+                  <FontAwesomeIcon icon={guide.icon} style={{ fontSize: '18px' }} />
+                </span>
+                <span>
+                  <h3 className="text-foreground mb-1" style={{ fontSize: '15px', fontWeight: 600, letterSpacing: '-0.01em' }}>{guide.title}</h3>
+                  <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.55 }}>{guide.desc}</p>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      }
+    >
       <h1 className="text-4xl font-bold text-center mb-4">Vivre aux <span className="text-primary">Philippines</span></h1>
-      <p className="text-center text-lg text-muted-foreground mb-16 max-w-3xl mx-auto">
+      <p className="text-center text-lg text-muted-foreground mb-12 max-w-3xl mx-auto">
         S'installer, travailler, investir... Toutes les clés pour réussir votre projet de vie dans l'archipel.
       </p>
 
-      <div className="mb-16">
-        <h2 className="text-3xl font-bold mb-8 text-center">Thématiques <span className="text-primary">Principales</span></h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {[
-            { href: '/vivre-aux-philippines/s-installer', icon: faHome, title: "S'installer", desc: 'Visas, logement, vie quotidienne.' },
-            { href: '/vivre-aux-philippines/travailler', icon: faBriefcase, title: 'Travailler', desc: "Marché de l'emploi, création d'entreprise." },
-            { href: '/vivre-aux-philippines/investir', icon: faHandshake, title: 'Investir', desc: 'Opportunités, immobilier, business.' },
-            { href: '/vivre-aux-philippines/etudier', icon: faGraduationCap, title: 'Étudier', desc: 'Universités, écoles internationales.' },
-          ].map((theme) => (
-            <Link
-              key={theme.href}
-              href={theme.href}
-              className="group flex flex-col items-center text-center bg-card rounded-2xl px-5 py-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
-              style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
-            >
-              <span
-                className="inline-flex items-center justify-center rounded-xl mb-3 transition-transform duration-200 group-hover:scale-105"
-                style={{ width: '48px', height: '48px', backgroundColor: '#F4F7FE', color: '#3B5BDB' }}
-                aria-hidden="true"
-              >
-                <FontAwesomeIcon icon={theme.icon} style={{ fontSize: '20px' }} />
-              </span>
-              <h3 className="text-foreground mb-1.5" style={{ fontSize: '16px', fontWeight: 600, letterSpacing: '-0.01em' }}>{theme.title}</h3>
-              <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.55 }}>{theme.desc}</p>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      <div id="destination-details" className="pt-10">
-        <h2 className="text-3xl font-bold mb-8 text-center">Nos <span className="text-primary">Dossiers</span></h2>
-        <p className="text-center text-muted-foreground mb-8">Explorez nos guides complets pour chaque aspect de la vie aux Philippines.</p>
+      <div className="pb-10">
+        <h2 className="text-3xl font-bold mb-2 text-center">Les 6 sujets <span className="text-primary">clés</span></h2>
+        <p className="text-center text-muted-foreground mb-6">Chaque sujet regroupe le guide de référence et tous nos articles.</p>
       </div>
     </SectionClientPage>
   );

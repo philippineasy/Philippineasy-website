@@ -9,6 +9,8 @@ interface SubMenuItem {
   href: string;
   label: string;
   highlight?: boolean;
+  /** Intitulé de groupe non cliquable (ex. « Destinations », « Guides pratiques ») */
+  heading?: boolean;
 }
 
 interface DropdownMenuProps {
@@ -56,24 +58,34 @@ export const DropdownMenu = ({ label, items, isActive }: DropdownMenuProps) => {
       <div
         role="menu"
         aria-hidden={!isOpen}
-        className={`absolute left-0 mt-2 w-56 bg-card rounded-md shadow-lg border z-20 transition-all duration-150 motion-reduce:transition-none ${
+        className={`absolute left-0 mt-2 w-64 bg-card rounded-md shadow-lg border z-20 transition-all duration-150 motion-reduce:transition-none ${
           isOpen
             ? 'opacity-100 visible translate-y-0 pointer-events-auto'
             : 'opacity-0 invisible -translate-y-1 pointer-events-none'
         }`}
       >
         <div className="py-1">
-          {items.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              tabIndex={isOpen ? undefined : -1}
-              className={`block px-4 py-2 text-sm hover:bg-muted ${item.highlight ? 'text-red-500 font-bold' : 'text-foreground'}`}
-              onClick={() => setIsOpen(false)}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {items.map((item) =>
+            item.heading ? (
+              <p
+                key={`heading-${item.label}`}
+                role="presentation"
+                className="px-4 pt-3 pb-1 text-[11px] uppercase tracking-[0.06em] font-semibold text-muted-foreground select-none"
+              >
+                {item.label}
+              </p>
+            ) : (
+              <Link
+                key={`${item.label}-${item.href}`}
+                href={item.href}
+                tabIndex={isOpen ? undefined : -1}
+                className={`block px-4 py-2 text-sm hover:bg-muted ${item.highlight ? 'text-red-500 font-bold' : 'text-foreground'}`}
+                onClick={() => setIsOpen(false)}
+              >
+                {item.label}
+              </Link>
+            )
+          )}
         </div>
       </div>
     </div>

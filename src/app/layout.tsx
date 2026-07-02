@@ -174,12 +174,37 @@ export default async function RootLayout({
     {
       label: 'Voyager',
       href: '/voyager-aux-philippines',
-      submenu: voyagerCats.map((c: Category) => ({ href: `/voyager-aux-philippines/${c.slug}`, label: c.name }))
+      submenu: [
+        { href: '#', label: 'Destinations', heading: true },
+        ...voyagerCats
+          .filter((c: Category) => c.slug !== 'conseils-voyage')
+          .map((c: Category) => ({ href: `/voyager-aux-philippines/${c.slug}`, label: c.name })),
+        { href: '#', label: 'Préparer son voyage', heading: true },
+        { href: '/voyager-aux-philippines/quand-partir', label: 'Quand partir' },
+        { href: '/voyager-aux-philippines/budget', label: 'Budget' },
+        { href: '/voyager-aux-philippines/transport', label: 'Transport' },
+        { href: '/voyager-aux-philippines/communication', label: 'Communication & SIM' },
+        { href: '/voyager-aux-philippines/sante-securite', label: 'Santé & Sécurité' },
+        { href: '/voyager-aux-philippines/conseils-voyage', label: 'Conseils pratiques' },
+        { href: '#', label: 'Itinéraires', heading: true },
+        { href: '/itineraires-philippines', label: 'Itinéraires prêts à partir' },
+        { href: '/itineraire-personnalise-pour-les-philippines', label: 'Itinéraire sur mesure (IA)' },
+      ]
     },
     {
       label: "S'installer",
       href: '/vivre-aux-philippines',
-      submenu: vivreCats.map((c: Category) => ({ href: `/vivre-aux-philippines/${c.slug}`, label: c.name }))
+      submenu: [
+        { href: '#', label: 'Par sujet', heading: true },
+        ...vivreCats.map((c: Category) => ({ href: `/vivre-aux-philippines/${c.slug}`, label: c.name })),
+        { href: '#', label: 'Guides pratiques', heading: true },
+        { href: '/vivre-aux-philippines/travailler/emploi-salarie', label: 'Trouver un emploi' },
+        { href: '/vivre-aux-philippines/travailler/creer-entreprise', label: 'Créer son entreprise' },
+        { href: '/vivre-aux-philippines/investir/immobilier', label: 'Immobilier locatif' },
+        { href: '/vivre-aux-philippines/investir/bourse-et-entreprises', label: 'Bourse & entreprises' },
+        { href: '/vivre-aux-philippines/etudier/universites', label: 'Universités' },
+        { href: '/vivre-aux-philippines/etudier/ecoles-internationales', label: 'Écoles internationales' },
+      ]
     },
     {
       label: 'Communauté',

@@ -2,12 +2,17 @@ import { Metadata } from 'next';
 import { Home, Building, MapPin, Search, Users, MessageSquare, DollarSign, CheckCircle, AlertTriangle, ExternalLink, Zap, Shield, Wifi, FileText, ChevronRight, Clock, Building2, TrendingUp } from 'lucide-react';
 import { HeroThematic } from '@/components/ui/HeroThematic';
 import Link from 'next/link';
+import { createClient } from '@/utils/supabase/server';
+import { getArticlesByCategorySlug } from '@/services/articleService';
+import ArticleList from '@/components/shared/ArticleList';
+import { Breadcrumb } from '@/components/layout/Breadcrumb';
+import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
 
 export const metadata: Metadata = {
   title: "Trouver un Logement aux Philippines en 2026 : Prix et Conseils",
   description: "Guide complet pour trouver un logement aux Philippines : prix des loyers à Manila, Cebu et BGC en 2026, meilleures plateformes (Lamudi, Carousell), conseils pour la location et pièges à éviter.",
   alternates: {
-    canonical: 'https://philippineasy.com/vivre-aux-philippines/s-installer/logement',
+    canonical: 'https://philippineasy.com/vivre-aux-philippines/logement',
   },
   robots: {
     index: true,
@@ -23,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Trouver un Logement aux Philippines en 2026 : Prix et Conseils",
     description: "Prix des loyers à Manila et Cebu, meilleures plateformes de recherche, conseils pratiques pour expatriés. Guide actualisé 2026.",
-    url: 'https://philippineasy.com/vivre-aux-philippines/s-installer/logement',
+    url: 'https://philippineasy.com/vivre-aux-philippines/logement',
     siteName: "Philippin'Easy",
     locale: 'fr_FR',
     type: 'article',
@@ -35,9 +40,29 @@ export const metadata: Metadata = {
   },
 };
 
-const LogementPage = () => {
+const breadcrumbItems = [
+  { href: '/', label: 'Accueil' },
+  { href: '/vivre-aux-philippines', label: 'Vivre aux Philippines' },
+  { label: 'Logement' },
+];
+
+const breadcrumbJsonLdItems = [
+  { name: 'Accueil', item: '/' },
+  { name: 'Vivre aux Philippines', item: '/vivre-aux-philippines' },
+  { name: 'Logement', item: '/vivre-aux-philippines/logement' },
+];
+
+const LogementPage = async () => {
+  const supabase = await createClient();
+  const { data: articles, error } = await getArticlesByCategorySlug(supabase, 'logement');
+
+  if (error) {
+    console.error(error);
+  }
+
   return (
     <div className="bg-background">
+      <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
       <HeroThematic
         titlePart1="Trouver un"
         titlePart2="Logement"
@@ -46,6 +71,8 @@ const LogementPage = () => {
       />
 
       <div className="container mx-auto px-4 py-12 max-w-6xl">
+
+        <Breadcrumb items={breadcrumbItems} />
 
         {/* Stats rapides */}
         <section className="mb-12">
@@ -608,13 +635,68 @@ const LogementPage = () => {
           </div>
         </section>
 
+        {/* Investir dans l'immobilier locatif */}
+        <section className="mb-16">
+          <div className="max-w-4xl mx-auto bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-200 rounded-2xl p-6 md:p-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <TrendingUp className="h-5 w-5 text-emerald-600" />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold text-emerald-900">Investir dans l'immobilier locatif</h2>
+            </div>
+
+            <div className="space-y-4 text-emerald-800">
+              <p>
+                Louer n'est pas la seule option : certains lecteurs envisagent d'acheter un bien aux Philippines pour le
+                mettre en location plutôt que pour y vivre eux-mêmes. Cette logique d'investissement obéit à des règles
+                différentes de celles d'une simple recherche de logement, avec un rendement locatif brut généralement
+                compris entre 5 et 8% selon les zones.
+              </p>
+              <p>
+                Les étrangers ne peuvent pas posséder de terrain aux Philippines, mais peuvent détenir un condominium à
+                100% en nom propre, dans la limite d'un quota de 40% par immeuble. Une fiscalité spécifique s'applique
+                également aux revenus locatifs.
+              </p>
+              <p>
+                Si votre objectif est de générer un revenu locatif, notre guide dédié détaille le rendement par zone,
+                la fiscalité et le processus d'achat. Si vous cherchez plutôt à acheter un bien pour y vivre vous-même,
+                sans recherche de rendement, l'article sur l'achat immobilier aux Philippines répond à cette question
+                précise.
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4 mt-6">
+              <Link
+                href="/vivre-aux-philippines/investir/immobilier"
+                className="group flex items-center justify-between gap-3 bg-white border border-emerald-300 rounded-xl p-4 hover:border-emerald-500 hover:shadow-md transition-all"
+              >
+                <div>
+                  <p className="font-semibold text-emerald-900">Investissement locatif</p>
+                  <p className="text-sm text-emerald-700">Rendement, fiscalité, quota 40%</p>
+                </div>
+                <ChevronRight className="h-5 w-5 text-emerald-500 group-hover:translate-x-0.5 transition-transform flex-shrink-0" />
+              </Link>
+              <Link
+                href="/vivre-aux-philippines/logement/acheter-immobilier-philippines"
+                className="group flex items-center justify-between gap-3 bg-white border border-gray-200 rounded-xl p-4 hover:border-primary hover:shadow-md transition-all"
+              >
+                <div>
+                  <p className="font-semibold text-foreground">Acheter pour y vivre</p>
+                  <p className="text-sm text-muted-foreground">Résidence principale, pas d'investissement</p>
+                </div>
+                <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:translate-x-0.5 transition-transform flex-shrink-0" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* Navigation */}
-        <section className="border-t border-gray-200 pt-12">
+        <section className="border-t border-gray-200 pt-12 mb-16">
           <h3 className="text-xl font-semibold text-center mb-6">Continuez votre exploration</h3>
           <div className="grid md:grid-cols-3 gap-4 max-w-4xl mx-auto">
             {[
               { title: "Investir dans l'immobilier", href: "/vivre-aux-philippines/investir/immobilier", desc: "Acheter plutôt que louer" },
-              { title: "Banques et assurances", href: "/vivre-aux-philippines/s-installer/banque-assurance", desc: "Ouvrir un compte bancaire" },
+              { title: "Banques et assurances", href: "/vivre-aux-philippines/banque-finances", desc: "Ouvrir un compte bancaire" },
               { title: "Forum expatriés", href: "/forum-sur-les-philippines", desc: "Échangez avec la communauté" }
             ].map((link, index) => (
               <Link
@@ -631,6 +713,14 @@ const LogementPage = () => {
             ))}
           </div>
         </section>
+
+        {/* Nos articles Logement */}
+        {articles && articles.length > 0 && (
+          <section className="mb-16">
+            <h2 className="text-3xl font-bold text-center mb-12">Nos articles Logement</h2>
+            <ArticleList articles={articles} basePath="vivre-aux-philippines" />
+          </section>
+        )}
 
       </div>
     </div>

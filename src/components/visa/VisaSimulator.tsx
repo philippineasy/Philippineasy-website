@@ -114,7 +114,7 @@ function getResult(objectif: ObjectifId, follow?: string): ResultData {
         ],
         caveat: 'C’est un statut touristique, pas une résidence. Pour t’installer vraiment, vise un visa long séjour (SRRV, 13a, 9g selon ton cas).',
         alternatives: ['SRRV si retraité', 'Digital Nomad Visa si télétravail'],
-        cta: { label: 'Voir tous les types de visas', href: '/vivre-aux-philippines/s-installer/visas' },
+        cta: { label: 'Voir tous les types de visas', href: '/vivre-aux-philippines/visas-et-formalites' },
       };
     }
     return {
@@ -134,7 +134,7 @@ function getResult(objectif: ObjectifId, follow?: string): ResultData {
       ],
       caveat: 'Les règles d’entrée peuvent évoluer : vérifie toujours auprès du Bureau of Immigration avant de partir.',
       alternatives: ['Extensions 9a pour un séjour plus long'],
-      cta: { label: 'Voir tous les types de visas', href: '/vivre-aux-philippines/s-installer/visas' },
+      cta: { label: 'Voir tous les types de visas', href: '/vivre-aux-philippines/visas-et-formalites' },
     };
   }
 
@@ -310,7 +310,7 @@ function getResult(objectif: ObjectifId, follow?: string): ResultData {
       ],
       caveat: 'Programme récent : les modalités d’application se déploient encore et la réciprocité entre pays est requise. Vérifie l’état d’ouverture pour la France auprès du DFA.',
       alternatives: ['9(a) prolongé en attendant', 'SIRV si tu investis'],
-      cta: { label: 'Voir tous les types de visas', href: '/vivre-aux-philippines/s-installer/visas' },
+      cta: { label: 'Voir tous les types de visas', href: '/vivre-aux-philippines/visas-et-formalites' },
     };
   }
 

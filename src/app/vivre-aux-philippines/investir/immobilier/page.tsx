@@ -904,7 +904,7 @@ const ImmobilierPage = () => {
             </Link>
 
             <Link
-              href="/vivre-aux-philippines/s-installer/visas"
+              href="/vivre-aux-philippines/visas-et-formalites"
               className="group flex items-center gap-3 p-4 bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl border border-purple-200 hover:border-purple-400 hover:shadow-md transition-all"
             >
               <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
