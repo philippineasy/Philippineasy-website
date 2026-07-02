@@ -3,7 +3,7 @@ import { Home, Building, DollarSign, Landmark, Info, AlertTriangle, CheckCircle,
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowTrendUp, faUsers, faCalculator, faClock } from '@fortawesome/free-solid-svg-icons';
-import { PageHero, StatRow, CardGrid, LinkCard } from '@/components/sections';
+import { PageHero, StatRow, SplitSection, CardGrid, LinkCard } from '@/components/sections';
 
 export const metadata: Metadata = {
   title: "Investissement Locatif aux Philippines en 2026 : Rendement et Fiscalité",
@@ -38,6 +38,43 @@ export const metadata: Metadata = {
   },
 };
 
+/* -------------------------------------------------------------------------- */
+/* En-tête de section maison : eyebrow uppercase + h2 à un mot accentué.       */
+/* Variante centrée : la page garde sa mise en page symétrique existante.      */
+/* -------------------------------------------------------------------------- */
+const SectionHeader = ({
+  eyebrow,
+  title,
+  accent,
+  description,
+}: {
+  eyebrow: string;
+  title: string;
+  accent?: string;
+  description?: string;
+}) => (
+  <div className="mx-auto mb-10 max-w-2xl text-center">
+    <span className="mb-3 inline-block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+      {eyebrow}
+    </span>
+    <h2
+      className="text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold text-foreground"
+      style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
+    >
+      {title}
+      {accent && (
+        <>
+          {' '}
+          <span className="text-accent">{accent}</span>
+        </>
+      )}
+    </h2>
+    {description && (
+      <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">{description}</p>
+    )}
+  </div>
+);
+
 const ImmobilierPage = () => {
   return (
     <div className="bg-background">
@@ -50,7 +87,7 @@ const ImmobilierPage = () => {
         imageAlt="Investir dans l'Immobilier"
       />
 
-      <div className="container mx-auto px-4 py-12 max-w-6xl">
+      <div className="container mx-auto px-4 pt-12 max-w-6xl">
 
         {/* Stats */}
         <section className="mb-16">
@@ -67,13 +104,21 @@ const ImmobilierPage = () => {
           </div>
         </section>
 
-        {/* Introduction */}
-        <section className="max-w-4xl mx-auto mb-12">
-          <p className="text-lg text-muted-foreground text-center leading-relaxed">
-            Avec une économie en croissance, une classe moyenne en expansion et des rendements locatifs attractifs,
-            les Philippines attirent de nombreux investisseurs étrangers. Cependant, la législation impose des
-            restrictions importantes qu'il est essentiel de comprendre avant d'investir.
-          </p>
+        {/* Introduction éditoriale */}
+        <section className="max-w-3xl mx-auto mb-12">
+          <SectionHeader eyebrow="Panorama du marché locatif" title="Investir dans la" accent="pierre philippine" />
+          <div className="space-y-4 text-lg text-muted-foreground text-center leading-relaxed">
+            <p>
+              Avec une économie en croissance, une classe moyenne en expansion et des rendements locatifs
+              attractifs, les Philippines attirent de nombreux investisseurs étrangers en quête d'un
+              complément de revenu ou d'un placement diversifié hors zone euro.
+            </p>
+            <p>
+              La législation impose cependant des restrictions importantes, à commencer par l'interdiction
+              constitutionnelle de posséder un terrain. Ce guide fait le tri entre ce qui est réellement
+              accessible, ce qui rapporte, et les pièges à éviter avant de signer.
+            </p>
+          </div>
         </section>
 
         {/* Callout - redirection résidence principale */}
@@ -122,10 +167,12 @@ const ImmobilierPage = () => {
 
         {/* Ce que vous pouvez acheter */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-4 text-foreground">Ce que Vous Pouvez Acheter</h2>
-          <p className="text-center text-muted-foreground mb-10 max-w-3xl mx-auto">
-            Les options légales pour les investisseurs étrangers aux Philippines.
-          </p>
+          <SectionHeader
+            eyebrow="Cadre légal"
+            title="Ce que vous pouvez"
+            accent="acheter"
+            description="La règle est stricte, mais elle laisse trois portes ouvertes. Le condominium reste l'option la plus simple : propriété à 100 % en nom propre, tant que le quota de 40 % d'unités étrangères par immeuble n'est pas atteint. Les deux autres voies — maison sur bail de terrain, ou société locale détenue à 60 % par des Philippins — restent accessibles, mais nettement plus complexes à sécuriser."
+          />
 
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {/* Condominium */}
@@ -235,12 +282,41 @@ const ImmobilierPage = () => {
           </div>
         </section>
 
+      </div>
+
+      {/* Repère éditorial — la localisation prime sur le prix affiché */}
+      <SplitSection
+        eyebrow="Le paramètre qui change tout"
+        title="La localisation,"
+        titleAccent="avant le prix"
+        imageUrl="/images/famille/famille-condominium-philippines.webp"
+        imageAlt="Résidence avec piscine et jardin tropical, exemple de condominium locatif aux Philippines"
+      >
+        <p>
+          Un même budget ne produit pas le même rendement selon le quartier. À BGC ou Makati, le ticket
+          d'entrée au mètre carré est le plus élevé de la capitale, porté par une demande d'expatriés et
+          de cadres d'entreprise — mais le rendement brut plafonne autour de 4 à 6 %.
+        </p>
+        <p>
+          À l'inverse, Quezon City ou Cebu IT Park affichent des rendements plus généreux, 6 à 8 %, portés
+          par des loyers plus accessibles et une demande locale en croissance constante.
+        </p>
+        <p className="!mt-5">
+          Avant d'acheter, le bon réflexe consiste donc à comparer le prix au mètre carré, zone par zone,
+          au rendement locatif réel qu'elle affiche.
+        </p>
+      </SplitSection>
+
+      <div className="container mx-auto px-4 pb-12 max-w-6xl">
+
         {/* Prix par zone */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-4 text-foreground">Prix de l'Immobilier à Metro Manila</h2>
-          <p className="text-center text-muted-foreground mb-10 max-w-3xl mx-auto">
-            Prix indicatifs par mètre carré dans les principales zones (2026).
-          </p>
+          <SectionHeader
+            eyebrow="Grille tarifaire 2026"
+            title="Prix par"
+            accent="quartier"
+            description="Six zones, six profils d'investissement. Rockwell et BGC concentrent la clientèle d'expatriés et de cadres, avec les tickets d'entrée les plus élevés de la capitale ; Quezon City et Mandaluyong restent nettement plus accessibles, avec une marge de progression que le marché n'a pas encore totalement absorbée."
+          />
 
           <div className="max-w-5xl mx-auto space-y-4">
             {/* Ultra-luxe */}
@@ -255,7 +331,7 @@ const ImmobilierPage = () => {
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm text-muted-foreground">Ultra-luxe, plus cher de Manila</span>
-                    <span className="font-semibold text-foreground">€5,600 - 8,800/m²</span>
+                    <span className="font-semibold text-foreground">5 600 – 8 800 €/m²</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div className="h-full bg-primary rounded-full" style={{width: '100%'}}></div>
@@ -276,7 +352,7 @@ const ImmobilierPage = () => {
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm text-muted-foreground">CBD moderne, expats, entreprises</span>
-                    <span className="font-semibold text-foreground">€4,500 - 8,000/m²</span>
+                    <span className="font-semibold text-foreground">4 500 – 8 000 €/m²</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div className="h-full bg-primary rounded-full" style={{width: '90%'}}></div>
@@ -297,7 +373,7 @@ const ImmobilierPage = () => {
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm text-muted-foreground">Centre d'affaires historique</span>
-                    <span className="font-semibold text-foreground">€4,000 - 7,200/m²</span>
+                    <span className="font-semibold text-foreground">4 000 – 7 200 €/m²</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div className="h-full bg-primary rounded-full" style={{width: '80%'}}></div>
@@ -318,7 +394,7 @@ const ImmobilierPage = () => {
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm text-muted-foreground">Second CBD, BPO, bureaux</span>
-                    <span className="font-semibold text-foreground">€2,400 - 4,500/m²</span>
+                    <span className="font-semibold text-foreground">2 400 – 4 500 €/m²</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div className="h-full bg-primary rounded-full" style={{width: '50%'}}></div>
@@ -339,7 +415,7 @@ const ImmobilierPage = () => {
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm text-muted-foreground">Plus grande ville, universités</span>
-                    <span className="font-semibold text-foreground">€1,900 - 3,200/m²</span>
+                    <span className="font-semibold text-foreground">1 900 – 3 200 €/m²</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div className="h-full bg-primary rounded-full" style={{width: '35%'}}></div>
@@ -360,7 +436,7 @@ const ImmobilierPage = () => {
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm text-muted-foreground">Connecté, bon rapport qualité/prix</span>
-                    <span className="font-semibold text-foreground">€1,600 - 2,900/m²</span>
+                    <span className="font-semibold text-foreground">1 600 – 2 900 €/m²</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div className="h-full bg-primary rounded-full" style={{width: '30%'}}></div>
@@ -373,7 +449,12 @@ const ImmobilierPage = () => {
 
         {/* Exemples de prix */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8 text-foreground">Exemples de Prix (BGC/Makati)</h2>
+          <SectionHeader
+            eyebrow="Budget type"
+            title="Exemples de prix"
+            accent="BGC / Makati"
+            description="De quoi budgétiser un premier achat. Un studio de 25 à 35 m² se négocie sur la fourchette basse du marché, quand un deux ou trois chambres de 80 à 120 m² correspond plutôt à un profil familial."
+          />
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <div className="bg-card rounded-2xl p-6 text-center border border-border">
               <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center">
@@ -381,7 +462,7 @@ const ImmobilierPage = () => {
               </div>
               <p className="text-sm text-muted-foreground font-medium mb-2">Studio (25-35 m²)</p>
               <p className="text-3xl font-bold text-foreground mb-1">₱6-12M</p>
-              <p className="text-sm text-muted-foreground">€96,000 - €192,000</p>
+              <p className="text-sm text-muted-foreground">96 000 – 192 000 €</p>
             </div>
 
             <div className="bg-card rounded-2xl p-6 text-center border border-border">
@@ -390,7 +471,7 @@ const ImmobilierPage = () => {
               </div>
               <p className="text-sm text-muted-foreground font-medium mb-2">1 chambre (40-55 m²)</p>
               <p className="text-3xl font-bold text-foreground mb-1">₱12-22M</p>
-              <p className="text-sm text-muted-foreground">€192,000 - €352,000</p>
+              <p className="text-sm text-muted-foreground">192 000 – 352 000 €</p>
             </div>
 
             <div className="bg-card rounded-2xl p-6 text-center border border-border">
@@ -399,14 +480,19 @@ const ImmobilierPage = () => {
               </div>
               <p className="text-sm text-muted-foreground font-medium mb-2">2-3 chambres (80-120 m²)</p>
               <p className="text-3xl font-bold text-foreground mb-1">₱20-45M</p>
-              <p className="text-sm text-muted-foreground">€320,000 - €720,000</p>
+              <p className="text-sm text-muted-foreground">320 000 – 720 000 €</p>
             </div>
           </div>
         </section>
 
         {/* Hors Manila */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8 text-foreground">Hors Metro Manila</h2>
+          <SectionHeader
+            eyebrow="Alternatives régionales"
+            title="Au-delà de"
+            accent="Manille"
+            description="Cebu, Davao et Iloilo affichent des prix au mètre carré très inférieurs à ceux de la capitale, portés par une économie régionale en plein essor — IT Park, BPO, développement urbain. De quoi diversifier un portefeuille locatif sans les tickets d'entrée de Manille."
+          />
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <div className="bg-card rounded-2xl p-6 border border-border hover:shadow-lg transition-shadow">
               <div className="flex items-center gap-3 mb-4">
@@ -420,7 +506,7 @@ const ImmobilierPage = () => {
               </p>
               <div className="bg-muted rounded-lg p-3">
                 <p className="font-bold text-foreground">₱80,000 - 180,000/m²</p>
-                <p className="text-xs text-muted-foreground">€1,280 - €2,880/m²</p>
+                <p className="text-xs text-muted-foreground">1 280 – 2 880 €/m²</p>
               </div>
             </div>
 
@@ -436,7 +522,7 @@ const ImmobilierPage = () => {
               </p>
               <div className="bg-muted rounded-lg p-3">
                 <p className="font-bold text-foreground">₱60,000 - 130,000/m²</p>
-                <p className="text-xs text-muted-foreground">€960 - €2,080/m²</p>
+                <p className="text-xs text-muted-foreground">960 – 2 080 €/m²</p>
               </div>
             </div>
 
@@ -452,7 +538,7 @@ const ImmobilierPage = () => {
               </p>
               <div className="bg-muted rounded-lg p-3">
                 <p className="font-bold text-foreground">₱50,000 - 100,000/m²</p>
-                <p className="text-xs text-muted-foreground">€800 - €1,600/m²</p>
+                <p className="text-xs text-muted-foreground">800 – 1 600 €/m²</p>
               </div>
             </div>
           </div>
@@ -460,7 +546,12 @@ const ImmobilierPage = () => {
 
         {/* Fiscalité */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8 text-foreground">Fiscalité Immobilière</h2>
+          <SectionHeader
+            eyebrow="Les coûts à anticiper"
+            title="Fiscalité"
+            accent="immobilière"
+            description="Au prix d'achat s'ajoutent des frais d'acquisition incontournables — DST, Transfer Tax, enregistrement, notaire — puis une fiscalité annuelle à intégrer dans le calcul de rendement, entre taxe foncière et charges de copropriété. Le Capital Gains Tax, lui, reste à la charge du vendeur."
+          />
 
           <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
             {/* Frais d'acquisition */}
@@ -533,8 +624,13 @@ const ImmobilierPage = () => {
 
         {/* Rendements locatifs */}
         <section className="mb-16">
+          <SectionHeader
+            eyebrow="Combien ça rapporte"
+            title="Rendements locatifs indicatifs"
+            accent="2026"
+            description="Le rendement brut varie du simple au double selon la zone, et vient nourrir le calcul net une fois la fiscalité des loyers déduite. Les non-résidents sont taxés à 25 % sur leurs revenus locatifs bruts — une donnée à intégrer avant de comparer un bien à un placement en France."
+          />
           <div className="bg-primary/5 rounded-2xl p-6 border border-primary/20 max-w-5xl mx-auto">
-            <h3 className="text-2xl font-bold text-center mb-6 text-foreground">Rendements Locatifs Indicatifs (2026)</h3>
             <div className="grid md:grid-cols-2 gap-8">
               <div>
                 <h4 className="font-semibold mb-4 flex items-center gap-2 text-foreground">
@@ -583,7 +679,12 @@ const ImmobilierPage = () => {
 
         {/* Processus d'achat Timeline */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-10 text-foreground">Processus d'Achat</h2>
+          <SectionHeader
+            eyebrow="Étape par étape"
+            title="Le processus"
+            accent="d'achat"
+            description="Cinq étapes séparent la première visite de la remise des clés, de la vérification du titre CCT jusqu'à l'enregistrement au Registry of Deeds. Un acompte de réservation s'engage dès le deuxième rendez-vous, suivi d'un échéancier classique pour un achat sur plan."
+          />
 
           <div className="max-w-4xl mx-auto">
             <div className="space-y-0">
@@ -701,7 +802,12 @@ const ImmobilierPage = () => {
 
         {/* Documents requis */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8 text-foreground">Documents Requis</h2>
+          <SectionHeader
+            eyebrow="À préparer en amont"
+            title="Documents"
+            accent="requis"
+            description="Réunissez ces pièces avant de vous engager : elles reviennent à chaque étape, de la due diligence à l'enregistrement du titre. Votre avocat ou votre broker peut vous aider à les rassembler à distance, via une procuration notariée."
+          />
           <div className="bg-primary/5 rounded-2xl p-6 max-w-3xl mx-auto border border-primary/20">
             <div className="space-y-3">
               <div className="flex items-center gap-3 p-3 bg-card rounded-xl">
@@ -745,7 +851,12 @@ const ImmobilierPage = () => {
 
         {/* Conseils */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8 text-foreground">Conseils Pratiques</h2>
+          <SectionHeader
+            eyebrow="Pour sécuriser l'opération"
+            title="Conseils"
+            accent="pratiques"
+            description="Un achat immobilier aux Philippines se sécurise avec les bons intermédiaires : avocat spécialisé, broker licencié PRC, et une vigilance constante sur les montages illégaux. Le timing compte aussi — développeurs et marché secondaire n'offrent pas les mêmes marges de négociation."
+          />
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             <div className="bg-card rounded-2xl p-6 border border-border">
               <div className="p-3 bg-primary/10 rounded-xl w-fit mb-4">
@@ -811,8 +922,7 @@ const ImmobilierPage = () => {
 
         {/* Ressources */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8 text-foreground">Ressources Utiles</h2>
-          <div className="grid md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+          <CardGrid eyebrow="À consulter" title="Ressources" titleAccent="utiles" columns={3}>
             <a
               href="https://www.prc.gov.ph/"
               target="_blank"
@@ -867,13 +977,12 @@ const ImmobilierPage = () => {
               <span className="font-medium text-foreground">BIR (Taxes)</span>
               <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
             </a>
-          </div>
+          </CardGrid>
         </section>
 
         {/* Navigation */}
         <section className="border-t border-border pt-12">
-          <h3 className="text-xl font-semibold text-center mb-6 text-foreground">Continuer votre exploration</h3>
-          <CardGrid columns={3}>
+          <CardGrid eyebrow="Pour aller plus loin" title="Continuez votre" titleAccent="exploration" columns={3}>
             <LinkCard
               title="Bourse et Entreprises"
               href="/vivre-aux-philippines/investir/bourse-et-entreprises"

@@ -1,9 +1,8 @@
 import { Metadata } from 'next';
-import { School, BookOpen, DollarSign, MapPin, Globe, Users, Award, FileCheck, GraduationCap, Languages, Shield, Building2, ExternalLink, ChevronRight, CheckCircle, Star, Calendar, Clock, ArrowRight, AlertTriangle } from 'lucide-react';
+import { School, BookOpen, DollarSign, MapPin, Globe, Users, Award, FileCheck, GraduationCap, Languages, Shield, Building2, ExternalLink, CheckCircle, Calendar, Clock, ArrowRight, AlertTriangle } from 'lucide-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSchool, faGlobe, faUsers, faSackDollar } from '@fortawesome/free-solid-svg-icons';
-import { PageHero, StatRow } from '@/components/sections';
-import Link from 'next/link';
+import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, CTABand } from '@/components/sections';
 
 export const metadata: Metadata = {
   title: "Écoles Internationales aux Philippines en 2026 : Guide Complet",
@@ -38,9 +37,60 @@ export const metadata: Metadata = {
   },
 };
 
+/* -------------------------------------------------------------------------- */
+/* Petit bloc éditorial local (server component), repris de la recette       */
+/* validée sur visas-et-formalites / universites : eyebrow + h2 à mot        */
+/* accentué.                                                                  */
+/* -------------------------------------------------------------------------- */
+
+const SectionHeader = ({
+  eyebrow,
+  title,
+  accent,
+  description,
+}: {
+  eyebrow: string;
+  title: string;
+  accent?: string;
+  description?: string;
+}) => (
+  <div className="max-w-2xl">
+    <span className="mb-3 inline-block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+      {eyebrow}
+    </span>
+    <h2
+      className="text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold text-foreground"
+      style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
+    >
+      {title}
+      {accent && (
+        <>
+          {' '}
+          <span className="text-accent">{accent}</span>
+        </>
+      )}
+    </h2>
+    {description && (
+      <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">{description}</p>
+    )}
+  </div>
+);
+
+const ressources = [
+  { name: 'ISM', url: 'https://www.ismanila.org/', domain: 'ismanila.org' },
+  { name: 'British School Manila', url: 'https://www.britishschoolmanila.org/', domain: 'britishschoolmanila.org' },
+  { name: 'Nord Anglia', url: 'https://www.nordangliaeducation.com/nais-manila', domain: 'nordangliaeducation.com' },
+  { name: 'Brent International', url: 'https://www.brent.edu.ph/', domain: 'brent.edu.ph' },
+  { name: 'GESM (Eurocampus)', url: 'https://www.gesm.org/', domain: 'gesm.org' },
+  { name: 'CIS Cebu', url: 'https://cis.edu.ph/', domain: 'cis.edu.ph' },
+  { name: 'Visa 9(f) - BI', url: 'https://immigration.gov.ph/student-visa-9f/', domain: 'immigration.gov.ph' },
+  { name: "Council of Int'l Schools", url: 'https://www.cois.org/', domain: 'cois.org' },
+  { name: 'IB Organization', url: 'https://www.ibo.org/', domain: 'ibo.org' },
+];
+
 const EcolesInternationalesPage = () => {
   return (
-    <>
+    <div className="bg-background">
       <PageHero
         eyebrow="Guide pratique"
         title="Les Écoles"
@@ -50,32 +100,53 @@ const EcolesInternationalesPage = () => {
         imageAlt="Les Écoles Internationales"
       />
 
-      <div className="container mx-auto px-4 py-12">
-        {/* Introduction avec stats */}
-        <section className="max-w-4xl mx-auto mb-12">
-          <p className="text-lg text-muted-foreground mb-8">
-            Les Philippines comptent parmi les destinations asiatiques les plus attractives pour les familles expatriées
-            en matière d'éducation. Avec une vingtaine d'écoles internationales accréditées, principalement à Metro Manila,
-            les enfants bénéficient d'un enseignement de qualité mondiale préparant aux meilleures universités.
-          </p>
-
-          {/* Stats boxes */}
-          <StatRow
-            stats={[
-              { value: '20+', label: 'Écoles accréditées', icon: <FontAwesomeIcon icon={faSchool} className="text-[18px]" /> },
-              { value: '50+', label: 'Nationalités', icon: <FontAwesomeIcon icon={faGlobe} className="text-[18px]" /> },
-              { value: '15-22', label: 'Élèves/classe', icon: <FontAwesomeIcon icon={faUsers} className="text-[18px]" /> },
-              { value: '6-24K€', label: 'Scolarité/an', icon: <FontAwesomeIcon icon={faSackDollar} className="text-[18px]" /> },
-            ]}
+      {/* Intro éditoriale + chiffres clés ancrés */}
+      <section className="bg-background pt-10 md:pt-12 pb-16 md:pb-20">
+        <div className="container mx-auto px-4">
+          <SectionHeader
+            eyebrow="Éducation des enfants d'expatriés"
+            title="Scolariser ses enfants,"
+            accent="sans compromis"
           />
-        </section>
+          <div className="mt-5 max-w-2xl space-y-4 text-[16px] leading-[1.7] text-muted-foreground">
+            <p>
+              Partir vivre aux Philippines ne signifie pas mettre la scolarité de vos enfants
+              entre parenthèses. Le pays compte une vingtaine d&apos;écoles internationales
+              accréditées, concentrées pour l&apos;essentiel à Metro Manila, où curricula IB,
+              américain et britannique côtoient un vrai brassage de nationalités.
+            </p>
+            <p>
+              De la maternelle à la terminale, ces établissements visent les mêmes standards
+              qu&apos;en Europe ou aux États-Unis, avec des classes réduites et un encadrement
+              personnalisé. Voici les écoles qui comptent, leurs frais de scolarité et les
+              démarches de visa pour vos enfants.
+            </p>
+          </div>
 
-        {/* Avantages clés */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-4">Pourquoi Choisir une École Internationale ?</h2>
-          <p className="text-center text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Une éducation de qualité mondiale pour préparer vos enfants aux meilleures universités
-          </p>
+          <div className="mt-10 max-w-4xl">
+            <StatRow
+              stats={[
+                { value: '20+', label: 'Écoles accréditées', icon: <FontAwesomeIcon icon={faSchool} className="text-[18px]" /> },
+                { value: '50+', label: 'Nationalités', icon: <FontAwesomeIcon icon={faGlobe} className="text-[18px]" /> },
+                { value: '15-22', label: 'Élèves/classe', icon: <FontAwesomeIcon icon={faUsers} className="text-[18px]" /> },
+                { value: '6-24K€', label: 'Scolarité/an', icon: <FontAwesomeIcon icon={faSackDollar} className="text-[18px]" /> },
+              ]}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Avantages clés (fond muté) */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8 mx-auto max-w-2xl">
+            <SectionHeader eyebrow="Le choix qui structure le séjour" title="Pourquoi une école" accent="internationale" />
+            <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">
+              Six raisons reviennent systématiquement dans les échanges avec les familles
+              installées à Manille ou à Cebu — du programme académique à la reconnaissance
+              internationale des diplômes.
+            </p>
+          </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             <div className="bg-card rounded-xl border-l-4 border-l-primary p-5 shadow-card-rest hover:shadow-card transition-all">
@@ -105,7 +176,7 @@ const EcolesInternationalesPage = () => {
               </div>
               <p className="text-muted-foreground text-sm">
                 40 à 60 nationalités par école. À ISM, plus de 50 nationalités parmi 2 200 élèves.
-                Ouverture d'esprit et maîtrise de plusieurs langues.
+                Ouverture d&apos;esprit et maîtrise de plusieurs langues.
               </p>
             </div>
 
@@ -148,7 +219,7 @@ const EcolesInternationalesPage = () => {
               </div>
               <p className="text-muted-foreground text-sm">
                 Majoritairement à Metro Manila : BGC, Makati, Parañaque, Alabang.
-                Accès facile depuis les quartiers d'expatriés.
+                Accès facile depuis les quartiers d&apos;expatriés.
               </p>
             </div>
 
@@ -165,14 +236,43 @@ const EcolesInternationalesPage = () => {
               </p>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Principales écoles */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-4">Principales Écoles à Metro Manila</h2>
-          <p className="text-center text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Les établissements les plus réputés pour l'éducation internationale
-          </p>
+      {/* Vie de famille et quartier (photo condominium, à gauche) */}
+      <SplitSection
+        eyebrow="Vie de famille"
+        title="Un quartier,"
+        titleAccent="une école"
+        imageUrl="/images/famille/famille-condominium-philippines.webp"
+        imageAlt="Résidence avec piscine sous les palmiers, quartier résidentiel prisé des familles expatriées à Manille"
+      >
+        <p>
+          Le choix de l&apos;école va souvent de pair avec celui du quartier. À Metro Manila,
+          les familles expatriées se regroupent autour de BGC, Makati, Parañaque ou Alabang —
+          des zones résidentielles avec condominiums sécurisés, parcs et commerces de proximité,
+          à quelques minutes des principaux campus.
+        </p>
+        <p className="!mt-5">
+          Un trajet scolaire court compte double avec de jeunes enfants : la circulation dense
+          de Manille aux heures de pointe peut vite allonger un trajet pourtant modeste sur la
+          carte. Beaucoup de familles choisissent d&apos;abord leur condominium en fonction de
+          l&apos;école visée, plutôt que l&apos;inverse.
+        </p>
+      </SplitSection>
+
+      {/* Principales écoles (fond muté) */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8 mx-auto max-w-2xl">
+            <SectionHeader eyebrow="Les références de Metro Manila" title="Cinq écoles qui" accent="font référence" />
+            <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">
+              ISM, BSM, Nord Anglia, Brent et le pôle franco-allemand GESM concentrent l&apos;essentiel
+              des inscriptions d&apos;enfants d&apos;expatriés dans la capitale. Chacune a sa personnalité
+              — curriculum, taille, quartier — et des frais qui varient sensiblement d&apos;un
+              établissement à l&apos;autre.
+            </p>
+          </div>
 
           <div className="space-y-6 max-w-5xl mx-auto">
             {/* ISM */}
@@ -386,7 +486,7 @@ const EcolesInternationalesPage = () => {
                   </div>
                   <p className="text-muted-foreground mb-4">
                     Trois campus aux Philippines : Manila (Laguna), Subic et Baguio.
-                    Excellentes infrastructures sportives. Option d'internat disponible.
+                    Excellentes infrastructures sportives. Option d&apos;internat disponible.
                   </p>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div className="flex items-center gap-2">
@@ -492,11 +592,21 @@ const EcolesInternationalesPage = () => {
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Écoles hors Manila */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8">Écoles Hors de Metro Manila</h2>
+      {/* Écoles hors Manila (fond blanc) */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8 mx-auto max-w-2xl">
+            <SectionHeader eyebrow="En dehors de la capitale" title="Cebu a aussi" accent="ses écoles" />
+            <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">
+              Vivre à Cebu ou dans les Visayas ne veut pas dire renoncer à un curriculum
+              international. Deux établissements y proposent un enseignement solide, dans un
+              cadre nettement plus tranquille qu&apos;à Metro Manila.
+            </p>
+          </div>
+
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             <div className="bg-card rounded-xl p-6 border border-border hover:border-primary/40 hover:shadow-card transition-all">
               <div className="flex items-center gap-3 mb-4">
@@ -538,11 +648,21 @@ const EcolesInternationalesPage = () => {
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Tableau comparatif */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8">Comparatif des Frais 2025-2026</h2>
+      {/* Tableau comparatif (fond muté) */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8 mx-auto max-w-2xl">
+            <SectionHeader eyebrow="En un coup d'œil" title="Comparatif des" accent="frais de scolarité" />
+            <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">
+              Les frais annuels varient sensiblement d&apos;un établissement à l&apos;autre, et
+              selon le niveau scolaire au sein d&apos;une même école. Voici les six écoles
+              présentées plus haut, mises côte à côte pour faciliter la comparaison.
+            </p>
+          </div>
+
           <div className="max-w-5xl mx-auto overflow-x-auto">
             <div className="overflow-hidden rounded-2xl border border-border shadow-card-rest">
               <table className="w-full">
@@ -616,11 +736,44 @@ const EcolesInternationalesPage = () => {
               * Tarifs indicatifs 2025-2026. Conversion : 1€ ≈ 58 PHP. Frais additionnels possibles.
             </p>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Visa pour enfants */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8">Visa pour les Enfants d'Expatriés</h2>
+      {/* Environnement multiculturel et intégration (photo dialogue, à droite) */}
+      <SplitSection
+        reverse
+        eyebrow="Vivre avec 50 nationalités"
+        title="S'intégrer, dans toutes les"
+        titleAccent="langues"
+        imageUrl="/images/communication/dialogue-interculturel.webp"
+        imageAlt="Étudiants échangeant en anglais dans un environnement multiculturel, illustration de la vie dans une école internationale aux Philippines"
+      >
+        <p>
+          Arriver dans une classe où l&apos;on ne connaît personne, dans une langue qui
+          n&apos;est pas la sienne, reste l&apos;une des plus grandes inquiétudes des parents.
+          Les écoles internationales y sont rodées : avec 40 à 60 nationalités représentées
+          selon l&apos;établissement, l&apos;anglais devient vite la langue commune de la cour
+          de récréation, bien avant celle de la salle de classe.
+        </p>
+        <p className="!mt-5">
+          Un accompagnement English as an Additional Language (EAL) existe dans la plupart des
+          écoles pour les enfants qui démarrent sans base solide en anglais — un vrai filet de
+          sécurité les premiers mois, le temps que la nouvelle langue s&apos;installe.
+        </p>
+      </SplitSection>
+
+      {/* Visa pour les enfants (fond muté) */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8 mx-auto max-w-2xl">
+            <SectionHeader eyebrow="Formalités" title="Le visa des" accent="enfants" />
+            <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">
+              L&apos;inscription à l&apos;école ne suffit pas : chaque enfant doit aussi être
+              en règle avec l&apos;immigration philippine. Bonne nouvelle, la plupart n&apos;ont
+              pas besoin d&apos;un visa étudiant à part entière — mais quelques cas particuliers
+              demandent une vigilance supplémentaire.
+            </p>
+          </div>
 
           {/* Bonne nouvelle */}
           <div className="max-w-4xl mx-auto mb-8">
@@ -683,7 +836,7 @@ const EcolesInternationalesPage = () => {
               <ul className="space-y-2">
                 <li className="flex items-center gap-2 bg-card/70 rounded-lg p-2">
                   <ArrowRight className="h-4 w-4 text-accent-strong" />
-                  <span className="text-sm">Lettre d'admission de l'école</span>
+                  <span className="text-sm">Lettre d&apos;admission de l&apos;école</span>
                 </li>
                 <li className="flex items-center gap-2 bg-card/70 rounded-lg p-2">
                   <ArrowRight className="h-4 w-4 text-accent-strong" />
@@ -701,9 +854,9 @@ const EcolesInternationalesPage = () => {
             </div>
           </div>
 
-          {/* WEG Warning */}
+          {/* WEG Warning — ton destructive assumé, vrai avertissement */}
           <div className="max-w-4xl mx-auto mt-6">
-            <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-5">
+            <div className="rounded-r-xl border-l-4 border-destructive bg-destructive/5 p-5">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 bg-destructive rounded-lg flex items-center justify-center flex-shrink-0">
                   <AlertTriangle className="h-5 w-5 text-destructive-foreground" />
@@ -718,11 +871,21 @@ const EcolesInternationalesPage = () => {
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Processus d'admission */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8">Processus d'Admission</h2>
+      {/* Processus d'admission (fond blanc) */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10 mx-auto max-w-2xl">
+            <SectionHeader eyebrow="Étape par étape" title="Le processus" accent="d'admission" />
+            <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">
+              Entre la première visite d&apos;école et la rentrée d&apos;août, comptez plusieurs
+              mois. Voici les cinq étapes qui jalonnent une admission réussie — ISM et BSM étant
+              parmi les plus demandées.
+            </p>
+          </div>
+
           <div className="max-w-4xl mx-auto">
             <div className="relative">
               {/* Timeline line */}
@@ -822,145 +985,80 @@ const EcolesInternationalesPage = () => {
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Ressources */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8">Ressources Officielles</h2>
-          <div className="grid md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            <a href="https://www.ismanila.org/" target="_blank" rel="noopener noreferrer"
-               className="flex items-center justify-between p-4 bg-card border border-border rounded-xl hover:border-primary/40 hover:shadow-card transition-all group">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary transition-colors">
-                  <School className="h-5 w-5 text-primary group-hover:text-primary-foreground transition-colors" />
-                </div>
-                <span className="font-medium">ISM</span>
-              </div>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
-            </a>
+      {/* Ressources officielles (cartes justifiées : liens externes) */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <CardGrid eyebrow="Pour creuser" title="Ressources" titleAccent="officielles" columns={3}>
+            {ressources.map((resource) => (
+              <a
+                key={resource.domain}
+                href={resource.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-3 rounded-2xl border-[0.5px] border-border bg-card p-4 shadow-card-rest transition-all duration-200 hover:-translate-y-1 hover:border-primary/30 hover:shadow-card motion-reduce:hover:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
+                  <ExternalLink className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[14px] font-semibold text-foreground transition-colors group-hover:text-primary">
+                    {resource.name}
+                  </span>
+                  <span className="block truncate text-[12px] text-muted-foreground">
+                    {resource.domain}
+                  </span>
+                </span>
+              </a>
+            ))}
+          </CardGrid>
+        </div>
+      </section>
 
-            <a href="https://www.britishschoolmanila.org/" target="_blank" rel="noopener noreferrer"
-               className="flex items-center justify-between p-4 bg-card border border-border rounded-xl hover:border-primary/40 hover:shadow-card transition-all group">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary transition-colors">
-                  <School className="h-5 w-5 text-primary group-hover:text-primary-foreground transition-colors" />
-                </div>
-                <span className="font-medium">British School Manila</span>
-              </div>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
-            </a>
-
-            <a href="https://www.nordangliaeducation.com/nais-manila" target="_blank" rel="noopener noreferrer"
-               className="flex items-center justify-between p-4 bg-card border border-border rounded-xl hover:border-primary/40 hover:shadow-card transition-all group">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary transition-colors">
-                  <School className="h-5 w-5 text-primary group-hover:text-primary-foreground transition-colors" />
-                </div>
-                <span className="font-medium">Nord Anglia</span>
-              </div>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
-            </a>
-
-            <a href="https://www.brent.edu.ph/" target="_blank" rel="noopener noreferrer"
-               className="flex items-center justify-between p-4 bg-card border border-border rounded-xl hover:border-primary/40 hover:shadow-card transition-all group">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary transition-colors">
-                  <School className="h-5 w-5 text-primary group-hover:text-primary-foreground transition-colors" />
-                </div>
-                <span className="font-medium">Brent International</span>
-              </div>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
-            </a>
-
-            <a href="https://www.gesm.org/" target="_blank" rel="noopener noreferrer"
-               className="flex items-center justify-between p-4 bg-card border border-border rounded-xl hover:border-primary/40 hover:shadow-card transition-all group">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary transition-colors">
-                  <School className="h-5 w-5 text-primary group-hover:text-primary-foreground transition-colors" />
-                </div>
-                <span className="font-medium">GESM (Eurocampus)</span>
-              </div>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
-            </a>
-
-            <a href="https://cis.edu.ph/" target="_blank" rel="noopener noreferrer"
-               className="flex items-center justify-between p-4 bg-card border border-border rounded-xl hover:border-primary/40 hover:shadow-card transition-all group">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary transition-colors">
-                  <School className="h-5 w-5 text-primary group-hover:text-primary-foreground transition-colors" />
-                </div>
-                <span className="font-medium">CIS Cebu</span>
-              </div>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
-            </a>
-
-            <a href="https://immigration.gov.ph/student-visa-9f/" target="_blank" rel="noopener noreferrer"
-               className="flex items-center justify-between p-4 bg-card border border-border rounded-xl hover:border-primary/40 hover:shadow-card transition-all group">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary transition-colors">
-                  <FileCheck className="h-5 w-5 text-primary group-hover:text-primary-foreground transition-colors" />
-                </div>
-                <span className="font-medium">Visa 9(f) - BI</span>
-              </div>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
-            </a>
-
-            <a href="https://www.cois.org/" target="_blank" rel="noopener noreferrer"
-               className="flex items-center justify-between p-4 bg-card border border-border rounded-xl hover:border-primary/40 hover:shadow-card transition-all group">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary transition-colors">
-                  <Award className="h-5 w-5 text-primary group-hover:text-primary-foreground transition-colors" />
-                </div>
-                <span className="font-medium">Council of Int'l Schools</span>
-              </div>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
-            </a>
-
-            <a href="https://www.ibo.org/" target="_blank" rel="noopener noreferrer"
-               className="flex items-center justify-between p-4 bg-card border border-border rounded-xl hover:border-primary/40 hover:shadow-card transition-all group">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary transition-colors">
-                  <Star className="h-5 w-5 text-primary group-hover:text-primary-foreground transition-colors" />
-                </div>
-                <span className="font-medium">IB Organization</span>
-              </div>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
-            </a>
+      {/* Navigation interne */}
+      <section className="bg-background pb-16 md:pb-20">
+        <div className="container mx-auto px-4">
+          <div className="border-t border-border pt-14">
+            <CardGrid
+              eyebrow="Pour aller plus loin"
+              title="Continuez votre"
+              titleAccent="exploration"
+              columns={3}
+            >
+              <LinkCard
+                title="Universités aux Philippines"
+                href="/vivre-aux-philippines/etudier/universites"
+                desc="Pour les études supérieures, une fois le bac en poche."
+                cta="En savoir plus"
+              />
+              <LinkCard
+                title="Guide familles expatriées"
+                href="/vivre-aux-philippines/culture-integration"
+                desc="S'installer et s'intégrer en famille aux Philippines."
+                cta="En savoir plus"
+              />
+              <LinkCard
+                title="Visas et permis"
+                href="/vivre-aux-philippines/visas-et-formalites"
+                desc="Le guide complet sur le visa 9(f) et les autres statuts."
+                cta="En savoir plus"
+              />
+            </CardGrid>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Navigation */}
-        <section className="border-t border-border pt-12">
-          <h2 className="text-2xl font-bold text-center mb-8">Continuez votre Exploration</h2>
-          <div className="grid md:grid-cols-3 gap-4 max-w-4xl mx-auto">
-            <Link href="/vivre-aux-philippines/etudier/universites"
-                  className="flex items-center justify-between p-4 bg-muted border border-border rounded-xl hover:border-primary/40 hover:shadow-card transition-all">
-              <div className="flex items-center gap-3">
-                <GraduationCap className="h-5 w-5 text-primary" />
-                <span className="font-medium">Universités aux Philippines</span>
-              </div>
-              <ChevronRight className="h-5 w-5 text-primary" />
-            </Link>
-            <Link href="/vivre-aux-philippines/culture-integration"
-                  className="flex items-center justify-between p-4 bg-muted border border-border rounded-xl hover:border-primary/40 hover:shadow-card transition-all">
-              <div className="flex items-center gap-3">
-                <Users className="h-5 w-5 text-primary" />
-                <span className="font-medium">Guide Familles Expatriées</span>
-              </div>
-              <ChevronRight className="h-5 w-5 text-primary" />
-            </Link>
-            <Link href="/vivre-aux-philippines/visas-et-formalites"
-                  className="flex items-center justify-between p-4 bg-muted border border-border rounded-xl hover:border-primary/40 hover:shadow-card transition-all">
-              <div className="flex items-center gap-3">
-                <FileCheck className="h-5 w-5 text-primary" />
-                <span className="font-medium">Visas et Permis</span>
-              </div>
-              <ChevronRight className="h-5 w-5 text-primary" />
-            </Link>
-          </div>
-        </section>
-      </div>
-    </>
+      {/* Panneau signature de clôture */}
+      <CTABand
+        title="Une question sur"
+        titleAccent="l'admission ?"
+        subtitle="Posez votre cas à la communauté d'expatriés sur le forum, ou comparez avec les universités si vos enfants ont déjà passé le bac."
+        primary={{ label: 'Poser ma question sur le forum', href: '/forum-sur-les-philippines' }}
+        secondary={{ label: 'Voir les universités', href: '/vivre-aux-philippines/etudier/universites' }}
+      />
+    </div>
   );
 };
 

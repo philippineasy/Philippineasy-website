@@ -1,9 +1,8 @@
 import { Metadata } from 'next';
-import { GraduationCap, FileText, Award, CheckCircle, ExternalLink, ChevronRight, Clock, DollarSign, BookOpen, Info, Home, Utensils, Bus, Smartphone, Building2 } from 'lucide-react';
+import { GraduationCap, FileText, Award, CheckCircle, ExternalLink, Clock, DollarSign, BookOpen, Home, Utensils, Bus, Smartphone, Building2 } from 'lucide-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGraduationCap, faGlobe, faSackDollar, faLandmark } from '@fortawesome/free-solid-svg-icons';
-import { PageHero, StatRow } from '@/components/sections';
-import Link from 'next/link';
+import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, CTABand } from '@/components/sections';
 
 export const metadata: Metadata = {
   title: "Étudier aux Philippines en 2026 : Universités, Programmes et Visa 9F",
@@ -38,9 +37,56 @@ export const metadata: Metadata = {
   },
 };
 
+/* -------------------------------------------------------------------------- */
+/* Petit bloc éditorial local (server component), repris de la recette       */
+/* validée sur visas-et-formalites : eyebrow + h2 à mot accentué.            */
+/* -------------------------------------------------------------------------- */
+
+const SectionHeader = ({
+  eyebrow,
+  title,
+  accent,
+  description,
+}: {
+  eyebrow: string;
+  title: string;
+  accent?: string;
+  description?: string;
+}) => (
+  <div className="max-w-2xl">
+    <span className="mb-3 inline-block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+      {eyebrow}
+    </span>
+    <h2
+      className="text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold text-foreground"
+      style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
+    >
+      {title}
+      {accent && (
+        <>
+          {' '}
+          <span className="text-accent">{accent}</span>
+        </>
+      )}
+    </h2>
+    {description && (
+      <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">{description}</p>
+    )}
+  </div>
+);
+
+const ressources = [
+  { name: 'CHED (Commission on Higher Ed)', url: 'https://ched.gov.ph/', domain: 'ched.gov.ph' },
+  { name: 'Bureau of Immigration', url: 'https://immigration.gov.ph/student-visa-9f/', domain: 'immigration.gov.ph' },
+  { name: 'QS Rankings Philippines', url: 'https://www.topuniversities.com/asia-university-rankings?countries=ph', domain: 'topuniversities.com' },
+  { name: 'University of the Philippines', url: 'https://www.up.edu.ph/', domain: 'up.edu.ph' },
+  { name: 'Ateneo de Manila', url: 'https://www.ateneo.edu/', domain: 'ateneo.edu' },
+  { name: 'De La Salle University', url: 'https://www.dlsu.edu.ph/', domain: 'dlsu.edu.ph' },
+];
+
 const UniversitesPage = () => {
   return (
-    <>
+    <div className="bg-background">
       <PageHero
         eyebrow="Guide pratique"
         title="Étudier aux"
@@ -50,52 +96,76 @@ const UniversitesPage = () => {
         imageAlt="Étudier aux Philippines"
       />
 
-      <div className="container mx-auto px-4 py-12">
-
-        {/* Introduction */}
-        <section className="max-w-4xl mx-auto mb-16">
-          <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-            Les Philippines sont une destination de plus en plus prisée par les étudiants internationaux,
-            grâce à des programmes enseignés en anglais, des frais de scolarité compétitifs et un coût
-            de la vie abordable. En 2026, <strong>35 universités philippines</strong> figurent dans le classement QS Asia,
-            avec l'Université des Philippines en tête.
-          </p>
-
-          {/* Stats rapides */}
-          <StatRow
-            stats={[
-              { value: '35', label: 'Universités classées QS Asia', icon: <FontAwesomeIcon icon={faGraduationCap} className="text-[18px]" /> },
-              { value: '3ème', label: 'Pays anglophone mondial', icon: <FontAwesomeIcon icon={faGlobe} className="text-[18px]" /> },
-              { value: '€320', label: 'Budget mensuel min.', icon: <FontAwesomeIcon icon={faSackDollar} className="text-[18px]" /> },
-              { value: '1908', label: 'Fondation UP Diliman', icon: <FontAwesomeIcon icon={faLandmark} className="text-[18px]" /> },
-            ]}
+      {/* Intro éditoriale + chiffres clés ancrés */}
+      <section className="bg-background pt-10 md:pt-12 pb-16 md:pb-20">
+        <div className="container mx-auto px-4">
+          <SectionHeader
+            eyebrow="L'enseignement supérieur philippin"
+            title="Une éducation en anglais,"
+            accent="à prix philippin"
           />
-        </section>
-
-        {/* Info box - Programmes en anglais */}
-        <section className="max-w-4xl mx-auto mb-16">
-          <div className="flex items-start gap-4 bg-primary/10 border border-primary/20 rounded-xl p-6">
-            <div className="p-2 bg-primary/15 rounded-full">
-              <Info className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-2">Programmes en Anglais</h3>
-              <p className="text-muted-foreground">
-                La quasi-totalité des programmes universitaires aux Philippines sont enseignés en anglais.
-                Le pays est le 3ème plus grand pays anglophone au monde. Aucun test d'anglais formel n'est
-                généralement requis pour les étudiants venant de pays anglophones ou ayant suivi un cursus
-                en anglais.
-              </p>
-            </div>
+          <div className="mt-5 max-w-2xl space-y-4 text-[16px] leading-[1.7] text-muted-foreground">
+            <p>
+              Chaque année, un nombre croissant d&apos;étudiants internationaux posent leurs
+              valises aux Philippines pour un cursus en anglais, dans un pays où les frais de
+              scolarité restent largement accessibles. En 2026, <strong>35 universités
+              philippines</strong> figurent au classement QS Asia, l&apos;Université des
+              Philippines en tête — une institution publique fondée en 1908 qui reste la
+              référence nationale.
+            </p>
+            <p>
+              De Manille à Cebu, les trois grandes universités historiques (UP, Ateneo, DLSU)
+              côtoient des campus plus modestes mais tout aussi sérieux. Voici comment choisir,
+              établissement par établissement, avec les frais et le calendrier d&apos;admission à
+              jour pour 2026.
+            </p>
           </div>
-        </section>
 
-        {/* Rankings 2026 */}
-        <section className="mb-16">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-3">Classements Internationaux 2026</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Position des principales universités philippines dans les rankings QS et Times Higher Education.
+          <div className="mt-10 max-w-4xl">
+            <StatRow
+              stats={[
+                { value: '35', label: 'Universités classées QS Asia', icon: <FontAwesomeIcon icon={faGraduationCap} className="text-[18px]" /> },
+                { value: '3ème', label: 'Pays anglophone mondial', icon: <FontAwesomeIcon icon={faGlobe} className="text-[18px]" /> },
+                { value: '€320', label: 'Budget mensuel min.', icon: <FontAwesomeIcon icon={faSackDollar} className="text-[18px]" /> },
+                { value: '1908', label: 'Fondation UP Diliman', icon: <FontAwesomeIcon icon={faLandmark} className="text-[18px]" /> },
+              ]}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Programmes en anglais (photo dialogue interculturel, à gauche) */}
+      <SplitSection
+        tone="muted"
+        eyebrow="Un avantage rare en Asie"
+        title="Étudier en"
+        titleAccent="anglais"
+        imageUrl="/images/communication/dialogue-interculturel.webp"
+        imageAlt="Étudiants échangeant en anglais dans un environnement multiculturel aux Philippines"
+      >
+        <p>
+          La quasi-totalité des programmes universitaires aux Philippines sont enseignés en
+          anglais, du premier cours de licence jusqu&apos;au doctorat. Ce n&apos;est pas un
+          hasard : le pays est le 3ème plus grand pays anglophone au monde, une conséquence
+          directe de son histoire et de son système éducatif.
+        </p>
+        <p>
+          Pour un étudiant venant d&apos;un pays anglophone, ou ayant suivi un cursus en anglais,
+          aucun test de langue formel n&apos;est généralement exigé à l&apos;inscription — un
+          frein de moins sur le chemin de l&apos;admission.
+        </p>
+      </SplitSection>
+
+      {/* Classements internationaux (fond blanc) */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8 mx-auto max-w-2xl">
+            <SectionHeader eyebrow="Excellence académique" title="Classements" accent="internationaux 2026" />
+            <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">
+              Les rankings internationaux donnent un premier repère sérieux avant de choisir. QS
+              Asia et Times Higher Education (THE) évaluent chaque année la recherche, la
+              réputation académique et l&apos;employabilité des diplômés — et quatre
+              établissements philippins reviennent systématiquement en tête.
             </p>
           </div>
 
@@ -152,7 +222,7 @@ const UniversitesPage = () => {
               </div>
               <div className="flex-grow">
                 <h3 className="font-semibold">University of Santo Tomas</h3>
-                <p className="text-sm text-muted-foreground">Plus ancienne d'Asie (1611) • Manila</p>
+                <p className="text-sm text-muted-foreground">Plus ancienne d&apos;Asie (1611) • Manila</p>
               </div>
               <div className="flex gap-2 flex-wrap justify-end">
                 <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">QS 851-900</span>
@@ -160,14 +230,19 @@ const UniversitesPage = () => {
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Big Three */}
-        <section className="mb-16 bg-muted -mx-4 px-4 py-12 md:-mx-8 md:px-8 lg:-mx-16 lg:px-16">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold mb-3">Le "Big Three" des Universités</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Les trois universités les plus prestigieuses des Philippines, chacune avec son identité et ses forces distinctes.
+      {/* Big Three (fond muté) */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10 mx-auto max-w-2xl">
+            <SectionHeader eyebrow="Les trois références" title="Le" accent="Big Three" />
+            <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">
+              Trois noms reviennent invariablement dans toute discussion sur les études
+              supérieures aux Philippines : University of the Philippines, Ateneo de Manila et De
+              La Salle University. Chacune a son identité — recherche publique, tradition
+              jésuite, ingénierie appliquée — et des frais qui varient du simple au triple.
             </p>
           </div>
 
@@ -284,7 +359,7 @@ const UniversitesPage = () => {
                   </li>
                   <li className="flex items-start gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Liens forts avec l'industrie</span>
+                    <span>Liens forts avec l&apos;industrie</span>
                   </li>
                 </ul>
                 <div className="bg-muted p-3 rounded-lg mb-3">
@@ -301,14 +376,18 @@ const UniversitesPage = () => {
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Autres universités */}
-        <section className="mb-16">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-3">Autres Universités Reconnues</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Des alternatives de qualité avec des spécialités variées et des frais plus accessibles.
+      {/* Autres universités (fond blanc) */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8 mx-auto max-w-2xl">
+            <SectionHeader eyebrow="D'autres pistes sérieuses" title="Autres universités" accent="reconnues" />
+            <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">
+              Le Big Three ne résume pas tout : plusieurs établissements offrent une formation
+              solide à des tarifs nettement plus accessibles, souvent hors de Manille — de bonnes
+              options pour un budget plus serré ou une spécialité précise.
             </p>
           </div>
 
@@ -319,7 +398,7 @@ const UniversitesPage = () => {
               </div>
               <div>
                 <h3 className="font-semibold mb-1">University of Santo Tomas</h3>
-                <p className="text-sm text-muted-foreground mb-2">Plus ancienne université d'Asie (1611). Excellence en Médecine et Architecture.</p>
+                <p className="text-sm text-muted-foreground mb-2">Plus ancienne université d&apos;Asie (1611). Excellence en Médecine et Architecture.</p>
                 <div className="flex items-center gap-2">
                   <span className="text-xs bg-muted px-2 py-1 rounded">₱100,000-150,000/an</span>
                   <span className="text-xs text-muted-foreground">Manila</span>
@@ -369,14 +448,19 @@ const UniversitesPage = () => {
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Frais de scolarité */}
-        <section className="mb-16">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-3">Frais de Scolarité par Catégorie</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Comparatif des coûts selon le type d'établissement. Les étudiants internationaux paient généralement 20-50% de plus.
+      {/* Frais de scolarité (fond muté) */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8 mx-auto max-w-2xl">
+            <SectionHeader eyebrow="Le nerf de la guerre" title="Frais de scolarité" accent="par catégorie" />
+            <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">
+              Le montant de la scolarité dépend avant tout du statut de l&apos;établissement —
+              public, privé milieu de gamme ou privé haut de gamme — et de la filière choisie. Les
+              étudiants internationaux paient généralement 20 à 50 % de plus que leurs camarades
+              philippins, un supplément à intégrer dans le budget dès le départ.
             </p>
           </div>
 
@@ -473,33 +557,37 @@ const UniversitesPage = () => {
           <p className="text-sm text-muted-foreground text-center mt-4">
             * Conversion : 1€ ≈ ₱62.5
           </p>
-        </section>
+        </div>
+      </section>
 
-        {/* Visa étudiant */}
-        <section className="mb-16 bg-muted -mx-4 px-4 py-12 md:-mx-8 md:px-8 lg:-mx-16 lg:px-16">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-3">Visa Étudiant 9(F)</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Le visa 9(F) est obligatoire pour les études supérieures de plus de 30 jours.
+      {/* Visa étudiant 9(F) (fond blanc) */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8 mx-auto max-w-2xl">
+            <SectionHeader eyebrow="Formalités" title="Visa étudiant" accent="9(F)" />
+            <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">
+              Une fois l&apos;admission décrochée, direction les démarches administratives : le
+              visa étudiant 9(F) est obligatoire pour tout cursus supérieur de plus de 30 jours.
+              Voici les conditions à remplir et les pièces à réunir avant de déposer votre dossier.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-6">
             {/* Conditions */}
             <div className="bg-card rounded-xl border border-border overflow-hidden">
-              <div className="p-4 border-b border-border bg-background flex items-center gap-3">
+              <div className="p-4 border-b border-border bg-muted flex items-center gap-3">
                 <FileText className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">Conditions d'Éligibilité</h3>
+                <h3 className="font-semibold">Conditions d&apos;Éligibilité</h3>
               </div>
               <div className="p-5">
                 <ul className="space-y-3">
                   <li className="flex items-start gap-3">
                     <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span>18 ans minimum à l'inscription</span>
+                    <span>18 ans minimum à l&apos;inscription</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Acceptation d'une université accréditée CHED</span>
+                    <span>Acceptation d&apos;une université accréditée CHED</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
@@ -519,7 +607,7 @@ const UniversitesPage = () => {
 
             {/* Documents */}
             <div className="bg-card rounded-xl border border-border overflow-hidden">
-              <div className="p-4 border-b border-border bg-background flex items-center gap-3">
+              <div className="p-4 border-b border-border bg-muted flex items-center gap-3">
                 <BookOpen className="h-5 w-5 text-primary" />
                 <h3 className="font-semibold">Documents Requis</h3>
               </div>
@@ -527,7 +615,7 @@ const UniversitesPage = () => {
                 <ul className="space-y-3">
                   <li className="flex items-start gap-3">
                     <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Lettre d'acceptation de l'université</span>
+                    <span>Lettre d&apos;acceptation de l&apos;université</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
@@ -543,7 +631,7 @@ const UniversitesPage = () => {
                   </li>
                   <li className="flex items-start gap-3">
                     <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Transcripts authentifiés par l'ambassade</span>
+                    <span>Transcripts authentifiés par l&apos;ambassade</span>
                   </li>
                 </ul>
               </div>
@@ -573,14 +661,18 @@ const UniversitesPage = () => {
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Processus admission - Timeline */}
-        <section className="mb-16">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold mb-3">Processus d'Admission</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Les étapes clés pour intégrer une université philippine en tant qu'étudiant international.
+      {/* Processus admission - Timeline (fond muté) */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-10 mx-auto max-w-2xl">
+            <SectionHeader eyebrow="Étape par étape" title="Processus" accent="d'admission" />
+            <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">
+              Entre la première recherche de programme et la rentrée d&apos;août, comptez
+              généralement plusieurs mois. Voici les cinq étapes qui jalonnent une admission
+              réussie dans une université philippine.
             </p>
           </div>
 
@@ -611,8 +703,8 @@ const UniversitesPage = () => {
                 <div className="bg-card border border-border rounded-xl p-5 shadow-card-rest flex-grow md:w-[calc(50%-40px)] md:mr-0 md:ml-auto">
                   <h3 className="font-semibold text-lg mb-2">Tests et Entretien</h3>
                   <p className="text-muted-foreground text-sm">
-                    Certaines universités exigent un test d'entrée (ACET pour Ateneo, DCAT pour DLSU, UPCAT pour UP).
-                    Un test d'anglais peut être requis.
+                    Certaines universités exigent un test d&apos;entrée (ACET pour Ateneo, DCAT pour DLSU, UPCAT pour UP).
+                    Un test d&apos;anglais peut être requis.
                   </p>
                 </div>
               </div>
@@ -623,9 +715,9 @@ const UniversitesPage = () => {
                   3
                 </div>
                 <div className="bg-card border border-border rounded-xl p-5 shadow-card-rest flex-grow md:w-[calc(50%-40px)] md:ml-0 md:mr-auto">
-                  <h3 className="font-semibold text-lg mb-2">Lettre d'Acceptation</h3>
+                  <h3 className="font-semibold text-lg mb-2">Lettre d&apos;Acceptation</h3>
                   <p className="text-muted-foreground text-sm">
-                    Une fois accepté, vous recevez une lettre officielle. L'université initie ensuite
+                    Une fois accepté, vous recevez une lettre officielle. L&apos;université initie ensuite
                     votre demande de visa auprès de la CHED et du DFA.
                   </p>
                 </div>
@@ -639,7 +731,7 @@ const UniversitesPage = () => {
                 <div className="bg-card border border-border rounded-xl p-5 shadow-card-rest flex-grow md:w-[calc(50%-40px)] md:mr-0 md:ml-auto">
                   <h3 className="font-semibold text-lg mb-2">Demande de Visa 9(F)</h3>
                   <p className="text-muted-foreground text-sm">
-                    Déposez votre demande à l'ambassade des Philippines avec tous les documents.
+                    Déposez votre demande à l&apos;ambassade des Philippines avec tous les documents.
                     Vous pouvez aussi entrer avec un visa touriste et convertir sur place.
                   </p>
                 </div>
@@ -654,201 +746,183 @@ const UniversitesPage = () => {
                   <h3 className="font-semibold text-lg mb-2">Arrivée et Enregistrement</h3>
                   <p className="text-muted-foreground text-sm">
                     À votre arrivée, enregistrez-vous au Bureau of Immigration pour obtenir votre ACR I-Card.
-                    Finalisez votre inscription à l'université.
+                    Finalisez votre inscription à l&apos;université.
                   </p>
                 </div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Coût de la vie */}
-        <section className="mb-16">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-3">Budget Étudiant Mensuel</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Estimation du coût de la vie pour un étudiant à Metro Manila (hors frais de scolarité).
-            </p>
-          </div>
-
-          <div className="max-w-3xl mx-auto">
-            <div className="bg-card border border-border rounded-xl overflow-hidden">
-              <div className="divide-y divide-border">
-                <div className="flex items-center justify-between p-4 hover:bg-muted">
-                  <div className="flex items-center gap-4">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Home className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Logement</p>
-                      <p className="text-sm text-muted-foreground">Chambre ou studio près du campus</p>
-                    </div>
-                  </div>
-                  <p className="font-semibold">₱8,000-20,000</p>
+      {/* Budget étudiant mensuel (photo marché local, à droite) */}
+      <SplitSection
+        reverse
+        eyebrow="Vie quotidienne"
+        title="Budget étudiant"
+        titleAccent="mensuel"
+        imageUrl="/images/budget/marche-fruits-locaux.webp"
+        imageAlt="Marché de fruits locaux aux Philippines, repère pour le budget alimentation d'un étudiant"
+      >
+        <p>
+          Au-delà des frais de scolarité, la vie quotidienne à Metro Manila a aussi son prix.
+          Loyer, repas, transport, connexion : voici une estimation réaliste, hors scolarité, pour
+          un étudiant installé dans la capitale.
+        </p>
+        <div className="!mt-6 bg-card border border-border rounded-xl overflow-hidden">
+          <div className="divide-y divide-border">
+            <div className="flex items-center justify-between p-4 hover:bg-muted">
+              <div className="flex items-center gap-4">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Home className="h-5 w-5 text-primary" />
                 </div>
-
-                <div className="flex items-center justify-between p-4 hover:bg-muted">
-                  <div className="flex items-center gap-4">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Utensils className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Nourriture</p>
-                      <p className="text-sm text-muted-foreground">Cantine, restaurants, courses</p>
-                    </div>
-                  </div>
-                  <p className="font-semibold">₱6,000-12,000</p>
-                </div>
-
-                <div className="flex items-center justify-between p-4 hover:bg-muted">
-                  <div className="flex items-center gap-4">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Bus className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Transport</p>
-                      <p className="text-sm text-muted-foreground">Jeepney, MRT, Grab</p>
-                    </div>
-                  </div>
-                  <p className="font-semibold">₱2,000-5,000</p>
-                </div>
-
-                <div className="flex items-center justify-between p-4 hover:bg-muted">
-                  <div className="flex items-center gap-4">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Smartphone className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Téléphone et Internet</p>
-                      <p className="text-sm text-muted-foreground">Forfait data + WiFi</p>
-                    </div>
-                  </div>
-                  <p className="font-semibold">₱1,000-2,000</p>
-                </div>
-
-                <div className="flex items-center justify-between p-4 hover:bg-muted">
-                  <div className="flex items-center gap-4">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <BookOpen className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Livres et fournitures</p>
-                      <p className="text-sm text-muted-foreground">Par semestre (lissé/mois)</p>
-                    </div>
-                  </div>
-                  <p className="font-semibold">₱500-1,000</p>
+                <div>
+                  <span className="block font-medium text-foreground">Logement</span>
+                  <span className="block text-sm text-muted-foreground">Chambre ou studio près du campus</span>
                 </div>
               </div>
+              <span className="font-semibold text-foreground">₱8,000-20,000</span>
+            </div>
 
-              <div className="bg-primary/5 p-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-bold text-lg">Budget mensuel total</p>
-                    <p className="text-sm text-muted-foreground">Hors frais de scolarité</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-primary">₱20,000-40,000</p>
-                    <p className="text-sm text-muted-foreground">≈ €320-640/mois</p>
-                  </div>
+            <div className="flex items-center justify-between p-4 hover:bg-muted">
+              <div className="flex items-center gap-4">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Utensils className="h-5 w-5 text-primary" />
                 </div>
+                <div>
+                  <span className="block font-medium text-foreground">Nourriture</span>
+                  <span className="block text-sm text-muted-foreground">Cantine, restaurants, courses</span>
+                </div>
+              </div>
+              <span className="font-semibold text-foreground">₱6,000-12,000</span>
+            </div>
+
+            <div className="flex items-center justify-between p-4 hover:bg-muted">
+              <div className="flex items-center gap-4">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Bus className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <span className="block font-medium text-foreground">Transport</span>
+                  <span className="block text-sm text-muted-foreground">Jeepney, MRT, Grab</span>
+                </div>
+              </div>
+              <span className="font-semibold text-foreground">₱2,000-5,000</span>
+            </div>
+
+            <div className="flex items-center justify-between p-4 hover:bg-muted">
+              <div className="flex items-center gap-4">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <Smartphone className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <span className="block font-medium text-foreground">Téléphone et Internet</span>
+                  <span className="block text-sm text-muted-foreground">Forfait data + WiFi</span>
+                </div>
+              </div>
+              <span className="font-semibold text-foreground">₱1,000-2,000</span>
+            </div>
+
+            <div className="flex items-center justify-between p-4 hover:bg-muted">
+              <div className="flex items-center gap-4">
+                <div className="p-2 bg-primary/10 rounded-lg">
+                  <BookOpen className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <span className="block font-medium text-foreground">Livres et fournitures</span>
+                  <span className="block text-sm text-muted-foreground">Par semestre (lissé/mois)</span>
+                </div>
+              </div>
+              <span className="font-semibold text-foreground">₱500-1,000</span>
+            </div>
+          </div>
+
+          <div className="bg-primary/5 p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="block font-bold text-lg text-foreground">Budget mensuel total</span>
+                <span className="block text-sm text-muted-foreground">Hors frais de scolarité</span>
+              </div>
+              <div className="text-right">
+                <span className="block text-2xl font-bold text-primary">₱20,000-40,000</span>
+                <span className="block text-sm text-muted-foreground">≈ €320-640/mois</span>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </SplitSection>
 
-        {/* Ressources */}
-        <section className="mb-16">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-3">Ressources Officielles</h2>
-          </div>
+      {/* Ressources officielles (cartes justifiées : liens externes) */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <CardGrid eyebrow="Pour creuser" title="Ressources" titleAccent="officielles" columns={3}>
+            {ressources.map((resource) => (
+              <a
+                key={resource.domain}
+                href={resource.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-3 rounded-2xl border-[0.5px] border-border bg-card p-4 shadow-card-rest transition-all duration-200 hover:-translate-y-1 hover:border-primary/30 hover:shadow-card motion-reduce:hover:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
+                  <ExternalLink className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[14px] font-semibold text-foreground transition-colors group-hover:text-primary">
+                    {resource.name}
+                  </span>
+                  <span className="block truncate text-[12px] text-muted-foreground">
+                    {resource.domain}
+                  </span>
+                </span>
+              </a>
+            ))}
+          </CardGrid>
+        </div>
+      </section>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 max-w-4xl mx-auto">
-            <a
-              href="https://ched.gov.ph/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between p-4 bg-card border border-border rounded-xl hover:border-primary hover:shadow-card transition-all"
+      {/* Navigation interne */}
+      <section className="bg-background pb-16 md:pb-20">
+        <div className="container mx-auto px-4">
+          <div className="border-t border-border pt-14">
+            <CardGrid
+              eyebrow="Pour aller plus loin"
+              title="Continuez votre"
+              titleAccent="exploration"
+              columns={3}
             >
-              <span className="font-medium">CHED (Commission on Higher Ed)</span>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
-            </a>
-            <a
-              href="https://immigration.gov.ph/student-visa-9f/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between p-4 bg-card border border-border rounded-xl hover:border-primary hover:shadow-card transition-all"
-            >
-              <span className="font-medium">Bureau of Immigration</span>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
-            </a>
-            <a
-              href="https://www.topuniversities.com/asia-university-rankings?countries=ph"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between p-4 bg-card border border-border rounded-xl hover:border-primary hover:shadow-card transition-all"
-            >
-              <span className="font-medium">QS Rankings Philippines</span>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
-            </a>
-            <a
-              href="https://www.up.edu.ph/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between p-4 bg-card border border-border rounded-xl hover:border-primary hover:shadow-card transition-all"
-            >
-              <span className="font-medium">University of the Philippines</span>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
-            </a>
-            <a
-              href="https://www.ateneo.edu/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between p-4 bg-card border border-border rounded-xl hover:border-primary hover:shadow-card transition-all"
-            >
-              <span className="font-medium">Ateneo de Manila</span>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
-            </a>
-            <a
-              href="https://www.dlsu.edu.ph/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-between p-4 bg-card border border-border rounded-xl hover:border-primary hover:shadow-card transition-all"
-            >
-              <span className="font-medium">De La Salle University</span>
-              <ExternalLink className="h-4 w-4 text-muted-foreground" />
-            </a>
+              <LinkCard
+                title="Écoles Internationales"
+                href="/vivre-aux-philippines/etudier/ecoles-internationales"
+                desc="Pour les enfants d'expatriés, de la maternelle au lycée."
+                cta="En savoir plus"
+              />
+              <LinkCard
+                title="Visas et Permis"
+                href="/vivre-aux-philippines/visas-et-formalites"
+                desc="Le guide complet sur le visa 9(F) et les autres statuts."
+                cta="En savoir plus"
+              />
+              <LinkCard
+                title="Trouver un Logement"
+                href="/vivre-aux-philippines/logement"
+                desc="Où loger une fois sur le campus."
+                cta="En savoir plus"
+              />
+            </CardGrid>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Navigation */}
-        <section className="border-t border-border pt-12">
-          <h2 className="text-2xl font-bold text-center mb-8">Continuez votre Exploration</h2>
-          <div className="grid md:grid-cols-3 gap-4 max-w-4xl mx-auto">
-            <Link
-              href="/vivre-aux-philippines/etudier/ecoles-internationales"
-              className="flex items-center justify-between p-4 bg-card border border-border rounded-xl hover:border-primary hover:shadow-card transition-all group"
-            >
-              <span className="font-medium">Écoles Internationales</span>
-              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-            </Link>
-            <Link
-              href="/vivre-aux-philippines/visas-et-formalites"
-              className="flex items-center justify-between p-4 bg-card border border-border rounded-xl hover:border-primary hover:shadow-card transition-all group"
-            >
-              <span className="font-medium">Visas et Permis</span>
-              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-            </Link>
-            <Link
-              href="/vivre-aux-philippines/logement"
-              className="flex items-center justify-between p-4 bg-card border border-border rounded-xl hover:border-primary hover:shadow-card transition-all group"
-            >
-              <span className="font-medium">Trouver un Logement</span>
-              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-            </Link>
-          </div>
-        </section>
-      </div>
-    </>
+      {/* Panneau signature de clôture */}
+      <CTABand
+        title="Une question sur"
+        titleAccent="votre admission ?"
+        subtitle="Posez votre cas à la communauté d'expatriés sur le forum, ou découvrez les écoles internationales si vous cherchez plutôt pour vos enfants."
+        primary={{ label: 'Poser ma question sur le forum', href: '/forum-sur-les-philippines' }}
+        secondary={{ label: 'Voir les écoles internationales', href: '/vivre-aux-philippines/etudier/ecoles-internationales' }}
+      />
+    </div>
   );
 };
 

@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
+import type { ReactNode } from 'react';
 import { Briefcase, Search, Building, Users, AlertTriangle, CheckCircle, ExternalLink, TrendingUp, Globe, FileText, Clock, ChevronRight, GraduationCap, Heart, Factory, Award, Target, Zap, MapPin, Calendar, CreditCard, Plane, Home, Shield, Star } from 'lucide-react';
-import { PageHero, StatRow, CardGrid, LinkCard } from '@/components/sections';
+import { PageHero, StatRow, CardGrid, LinkCard, SplitSection } from '@/components/sections';
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
@@ -35,6 +37,97 @@ export const metadata: Metadata = {
   },
 };
 
+/* -------------------------------------------------------------------------- */
+/* Petits blocs éditoriaux locaux (server components), repris du pattern      */
+/* validé sur /vivre-aux-philippines/visas-et-formalites. Variante centrée :  */
+/* cette page reste très "card grid", le header épouse ce rythme.            */
+/* -------------------------------------------------------------------------- */
+
+// En-tête de section centré : eyebrow uppercase + h2 avec UN mot en amber vif
+// + description optionnelle. Reprend la géométrie du header interne de CardGrid
+// pour rester cohérent avec les sections en grille de cette page.
+const SectionHeader = ({
+  eyebrow,
+  title,
+  accent,
+  description,
+}: {
+  eyebrow: string;
+  title: string;
+  accent?: string;
+  description?: string;
+}) => (
+  <div className="mx-auto mb-10 max-w-[720px] text-center">
+    <span className="text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+      {eyebrow}
+    </span>
+    <h2
+      className="mt-3 text-[clamp(1.875rem,3.5vw,2.5rem)] font-bold text-foreground"
+      style={{ letterSpacing: '-0.02em', lineHeight: 1.1 }}
+    >
+      {title}
+      {accent && (
+        <>
+          {' '}
+          <span className="text-accent">{accent}</span>
+        </>
+      )}
+    </h2>
+    {description && (
+      <p className="mt-4 text-[17px] leading-[1.6] text-muted-foreground">{description}</p>
+    )}
+  </div>
+);
+
+// Liste "cochée" (bonnes pratiques). Div-based pour ne pas hériter des puces
+// disc du rich-text de SplitSection.
+const CheckList = ({ items, columns = 1 }: { items: ReactNode[]; columns?: 1 | 2 }) => (
+  <div
+    className={cn('mt-4 grid gap-2.5', columns === 2 && 'sm:grid-cols-2 sm:gap-x-6')}
+    role="list"
+  >
+    {items.map((item, i) => (
+      <div
+        key={i}
+        role="listitem"
+        className="flex items-start gap-2.5 text-[15px] leading-[1.55] text-foreground"
+      >
+        <CheckCircle
+          className="mt-[3px] h-[18px] w-[18px] flex-shrink-0 text-primary"
+          aria-hidden="true"
+        />
+        <span>{item}</span>
+      </div>
+    ))}
+  </div>
+);
+
+// Encadré d'avertissement honnête (bord accent), pour les points de vigilance
+// culturelle. Même pattern que le CautionBox de la page visas.
+const CautionBox = ({ title, items }: { title: string; items: string[] }) => (
+  <div className="mt-6 rounded-r-lg border-l-4 border-accent bg-accent/5 py-4 pl-5 pr-4">
+    <div className="mb-2.5 flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.06em] text-accent-strong">
+      <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+      {title}
+    </div>
+    <div className="flex flex-col gap-2" role="list">
+      {items.map((it, i) => (
+        <div
+          key={i}
+          role="listitem"
+          className="flex gap-2.5 text-[14px] leading-[1.55] text-foreground/85"
+        >
+          <span
+            className="mt-[7px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-accent-strong"
+            aria-hidden="true"
+          />
+          <span>{it}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 const EmploiSalariePage = () => {
   return (
     <div className="bg-background">
@@ -47,33 +140,37 @@ const EmploiSalariePage = () => {
         imageAlt="Trouver un Emploi Salarié"
       />
 
-      <div className="container mx-auto px-4 py-12 max-w-6xl">
+      {/* Introduction + prérequis légal */}
+      <section className="bg-background pt-12 pb-16 md:pt-14 md:pb-20">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <SectionHeader eyebrow="Marché du travail" title="Où votre profil" accent="trouve sa place" />
 
-        {/* Introduction */}
-        <section className="mb-16">
-          <p className="text-lg text-muted-foreground leading-relaxed max-w-4xl mx-auto text-center">
-            Les Philippines offrent de réelles opportunités professionnelles aux étrangers qualifiés,
-            notamment dans les secteurs en forte croissance. L'anglais étant la langue des affaires,
-            les francophones bilingues y trouvent souvent leur place.
-          </p>
-        </section>
+          <div className="mx-auto max-w-3xl space-y-4 text-center text-lg leading-relaxed text-muted-foreground">
+            <p>
+              Les Philippines offrent de réelles opportunités professionnelles aux étrangers qualifiés,
+              notamment dans les secteurs en forte croissance. L&apos;anglais étant la langue des affaires,
+              les francophones bilingues y trouvent souvent leur place.
+            </p>
+            <p>
+              Encore faut-il savoir où chercher. Ce guide réunit les secteurs qui recrutent, les
+              plateformes qui fonctionnent vraiment, les fourchettes de salaires observées sur le terrain
+              et les démarches administratives à anticiper avant de signer un contrat.
+            </p>
+          </div>
 
-        {/* Stats */}
-        <section className="mb-16 border-y border-border py-10">
-          <StatRow
-            stats={[
-              { value: '6', label: 'Secteurs porteurs' },
-              { value: '1.5M', label: 'Emplois BPO' },
-              { value: '2-4', label: 'Mois visa 9G' },
-              { value: '13', label: 'Mois de salaire' },
-            ]}
-            className="mx-auto max-w-4xl justify-center"
-          />
-        </section>
+          <div className="mt-12 border-y border-border py-10">
+            <StatRow
+              stats={[
+                { value: '6', label: 'Secteurs porteurs' },
+                { value: '1.5M', label: 'Emplois BPO' },
+                { value: '2-4', label: 'Mois visa 9G' },
+                { value: '13', label: 'Mois de salaire' },
+              ]}
+              className="mx-auto max-w-4xl justify-center"
+            />
+          </div>
 
-        {/* Prérequis légaux */}
-        <section className="mb-16">
-          <div className="max-w-4xl mx-auto rounded-2xl border border-accent/30 bg-accent/10 p-6">
+          <div className="mt-12 max-w-4xl mx-auto rounded-2xl border border-accent/30 bg-accent/10 p-6">
             <div className="flex items-start gap-4">
               <div className="p-3 bg-accent/15 rounded-full">
                 <AlertTriangle className="h-6 w-6 text-accent-strong" />
@@ -82,7 +179,7 @@ const EmploiSalariePage = () => {
                 <h3 className="font-bold text-lg mb-2 text-foreground">Prérequis légal : AEP + Visa 9G</h3>
                 <p className="text-foreground/80 mb-4">
                   Pour travailler légalement aux Philippines, vous devez obtenir un <strong>Alien Employment Permit (AEP)</strong>
-                  délivré par le DOLE, suivi d'un <strong>visa de travail 9(G)</strong> du Bureau of Immigration.
+                  délivré par le DOLE, suivi d&apos;un <strong>visa de travail 9(G)</strong> du Bureau of Immigration.
                   Ces démarches sont généralement initiées par votre employeur.
                 </p>
                 <Link
@@ -95,13 +192,17 @@ const EmploiSalariePage = () => {
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Secteurs qui recrutent */}
-        <section className="mb-16">
+      {/* Secteurs qui recrutent */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4 max-w-6xl">
           <CardGrid
-            title="Secteurs qui recrutent des expatriés"
-            subtitle="Certains secteurs sont particulièrement ouverts aux talents étrangers, que ce soit pour leur expertise technique ou leurs compétences linguistiques."
+            eyebrow="Où sont les postes"
+            title="Secteurs qui recrutent des"
+            titleAccent="expatriés"
+            subtitle="Le pays compte à lui seul environ 1,5 million d'emplois dans le BPO, mais l'appétit pour les profils internationaux dépasse largement les centres d'appels. Six familles de métiers concentrent l'essentiel des embauches d'expatriés, avec des besoins et des salaires très différents d'un secteur à l'autre. Certains secteurs sont particulièrement ouverts aux talents étrangers, que ce soit pour leur expertise technique ou leurs compétences linguistiques."
             columns={3}
           >
             {/* BPO */}
@@ -253,11 +354,19 @@ const EmploiSalariePage = () => {
               </div>
             </div>
           </CardGrid>
-        </section>
+        </div>
+      </section>
 
-        {/* Où chercher */}
-        <section className="mb-16">
-          <CardGrid title="Où trouver des offres d'emploi ?" columns={2}>
+      {/* Où chercher */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <CardGrid
+            eyebrow="Candidater efficacement"
+            title="Où trouver des"
+            titleAccent="offres d'emploi"
+            subtitle="Quatre plateformes concentrent l'essentiel des offres accessibles aux étrangers, des généralistes comme LinkedIn et Indeed aux spécialistes locaux comme JobStreet et Kalibrr. Les canaux plus informels ne sont pas en reste : pages carrière des multinationales, cabinets de recrutement et groupes Facebook diffusent souvent des postes qui n'apparaissent nulle part ailleurs."
+            columns={2}
+          >
             {/* Plateformes en ligne */}
             <div className="rounded-2xl border-[0.5px] border-border bg-card p-6 shadow-card-rest">
               <div className="flex items-center gap-3 mb-6">
@@ -370,11 +479,18 @@ const EmploiSalariePage = () => {
               </div>
             </div>
           </CardGrid>
-        </section>
+        </div>
+      </section>
 
-        {/* Salaires */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8 text-foreground">Salaires et packages</h2>
+      {/* Salaires */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <SectionHeader
+            eyebrow="Combien attendre"
+            title="Salaires et"
+            accent="packages"
+            description="Les fourchettes ci-dessous correspondent à des salaires bruts mensuels, hors avantages complémentaires. Elles varient sensiblement selon le secteur, la taille de l'entreprise et le niveau d'anglais ou d'expertise technique recherché."
+          />
 
           <div className="max-w-5xl mx-auto space-y-8">
             {/* Tableau salaires */}
@@ -545,71 +661,51 @@ const EmploiSalariePage = () => {
               </div>
             </CardGrid>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Culture du travail */}
-        <section className="mb-16">
-          <CardGrid title="Culture du travail aux Philippines" columns={2}>
-            {/* Ce qui fonctionne */}
-            <div className="rounded-2xl border-[0.5px] border-border bg-card p-6 shadow-card-rest">
-              <h3 className="font-bold text-lg text-foreground mb-4 flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-primary" />
-                Ce qui fonctionne
-              </h3>
-              <div className="space-y-4">
-                <div className="border-l-4 border-l-primary pl-4 py-2 bg-muted/40 rounded-r-lg">
-                  <p className="font-semibold text-foreground">Respect de la hiérarchie</p>
-                  <p className="text-sm text-muted-foreground">Les Philippins valorisent le respect des aînés et supérieurs</p>
-                </div>
-                <div className="border-l-4 border-l-primary pl-4 py-2 bg-muted/40 rounded-r-lg">
-                  <p className="font-semibold text-foreground">Communication indirecte</p>
-                  <p className="text-sm text-muted-foreground">Privilégiez la diplomatie, évitez la confrontation directe</p>
-                </div>
-                <div className="border-l-4 border-l-primary pl-4 py-2 bg-muted/40 rounded-r-lg">
-                  <p className="font-semibold text-foreground">Relations personnelles</p>
-                  <p className="text-sm text-muted-foreground">Prenez le temps de construire des liens avec vos collègues</p>
-                </div>
-                <div className="border-l-4 border-l-primary pl-4 py-2 bg-muted/40 rounded-r-lg">
-                  <p className="font-semibold text-foreground">Patience</p>
-                  <p className="text-sm text-muted-foreground">Les processus peuvent prendre plus de temps qu'en Europe</p>
-                </div>
-              </div>
-            </div>
+      {/* Culture du travail (photo, casse la monotonie des cartes) */}
+      <SplitSection
+        eyebrow="S'intégrer au bureau"
+        title="La culture du"
+        titleAccent="travail philippin"
+        imageUrl="/images/communication/dialogue-interculturel.webp"
+        imageAlt="Collègues de différentes origines échangeant et riant ensemble"
+      >
+        <p>
+          Le monde du travail philippin obéit à des codes bien à lui, hérités d&apos;une culture où
+          la face et le respect priment sur la confrontation directe. Les comprendre vous évitera
+          bien des maladresses avec vos collègues et accélérera votre intégration dans l&apos;entreprise.
+        </p>
+        <h4>Ce qui fonctionne</h4>
+        <CheckList
+          items={[
+            'Le respect de la hiérarchie : les Philippins valorisent particulièrement le respect des aînés et des supérieurs',
+            'Une communication indirecte : privilégiez la diplomatie et évitez la confrontation directe',
+            'Des relations personnelles : prenez le temps de construire des liens avec vos collègues',
+            'De la patience : les processus peuvent prendre plus de temps qu’en Europe',
+          ]}
+        />
+        <CautionBox
+          title="À éviter"
+          items={[
+            "Les critiques publiques : on n'embarrasse jamais quelqu'un devant les autres",
+            'L’impatience visible : la colère fait perdre la face à tout le monde',
+            'L’arrogance : évitez de vous positionner en "supérieur"',
+            "Ignorer les fêtes d'entreprise : les événements internes comptent pour la cohésion d'équipe",
+          ]}
+        />
+      </SplitSection>
 
-            {/* À éviter */}
-            <div className="rounded-2xl border-[0.5px] border-border bg-card p-6 shadow-card-rest">
-              <h3 className="font-bold text-lg text-foreground mb-4 flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
-                À éviter
-              </h3>
-              <div className="space-y-4">
-                <div className="border-l-4 border-l-destructive pl-4 py-2 bg-muted/40 rounded-r-lg">
-                  <p className="font-semibold text-foreground">Critiques publiques</p>
-                  <p className="text-sm text-muted-foreground">Ne jamais embarrasser quelqu'un devant les autres</p>
-                </div>
-                <div className="border-l-4 border-l-destructive pl-4 py-2 bg-muted/40 rounded-r-lg">
-                  <p className="font-semibold text-foreground">Impatience visible</p>
-                  <p className="text-sm text-muted-foreground">La colère fait perdre la face à tout le monde</p>
-                </div>
-                <div className="border-l-4 border-l-destructive pl-4 py-2 bg-muted/40 rounded-r-lg">
-                  <p className="font-semibold text-foreground">Arrogance</p>
-                  <p className="text-sm text-muted-foreground">Évitez de vous positionner comme "supérieur"</p>
-                </div>
-                <div className="border-l-4 border-l-destructive pl-4 py-2 bg-muted/40 rounded-r-lg">
-                  <p className="font-semibold text-foreground">Ignorer les fêtes</p>
-                  <p className="text-sm text-muted-foreground">Les événements d'entreprise sont importants pour la cohésion</p>
-                </div>
-              </div>
-            </div>
-          </CardGrid>
-        </section>
-
-        {/* Démarches Timeline */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-4 text-foreground">Démarches pour être embauché</h2>
-          <p className="text-center text-muted-foreground mb-10 max-w-3xl mx-auto">
-            Le processus complet prend généralement 2 à 4 mois. Votre employeur gère la plupart des démarches.
-          </p>
+      {/* Démarches Timeline */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <SectionHeader
+            eyebrow="Une fois l'offre en poche"
+            title="Démarches pour"
+            accent="être embauché"
+            description="Le processus complet prend généralement 2 à 4 mois. Votre employeur gère la plupart des démarches, mais mieux vaut connaître chaque étape pour anticiper les délais et ne rien laisser traîner."
+          />
 
           <div className="max-w-4xl mx-auto">
             <div className="space-y-0">
@@ -721,11 +817,19 @@ const EmploiSalariePage = () => {
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Entreprises qui recrutent */}
-        <section className="mb-16">
-          <CardGrid title="Entreprises qui recrutent des expatriés" columns={3}>
+      {/* Entreprises qui recrutent */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <CardGrid
+            eyebrow="Qui recrute"
+            title="Entreprises qui recrutent des"
+            titleAccent="expatriés"
+            subtitle="Multinationales du BPO, géants de la tech ou cabinets financiers : ces entreprises embauchent régulièrement des profils étrangers à Manille, à Cebu et dans les grandes villes du pays. Voici un aperçu, non exhaustif, des employeurs les plus actifs par secteur."
+            columns={3}
+          >
             <div className="rounded-2xl border-[0.5px] border-border bg-card p-6 shadow-card-rest">
               <div className="flex items-center gap-3 mb-4">
                 <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -774,27 +878,31 @@ const EmploiSalariePage = () => {
               </div>
             </div>
           </CardGrid>
-        </section>
+        </div>
+      </section>
 
-        {/* Navigation */}
-        <section className="border-t border-border pt-12">
-          <CardGrid title="Continuer votre exploration" columns={2}>
-            <LinkCard
-              title="Créer son entreprise"
-              href="/vivre-aux-philippines/travailler/creer-entreprise"
-              desc="Entrepreneuriat aux Philippines"
-              icon={<Briefcase className="h-5 w-5" />}
-            />
-            <LinkCard
-              title="Guide des visas"
-              href="/vivre-aux-philippines/visas-et-formalites"
-              desc="Toutes les options légales"
-              icon={<FileText className="h-5 w-5" />}
-            />
-          </CardGrid>
-        </section>
+      {/* Navigation */}
+      <section className="bg-background pb-16 md:pb-20">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="border-t border-border pt-14">
+            <CardGrid eyebrow="Pour aller plus loin" title="Continuez votre" titleAccent="exploration" columns={2}>
+              <LinkCard
+                title="Créer son entreprise"
+                href="/vivre-aux-philippines/travailler/creer-entreprise"
+                desc="Entrepreneuriat aux Philippines"
+                icon={<Briefcase className="h-5 w-5" />}
+              />
+              <LinkCard
+                title="Guide des visas"
+                href="/vivre-aux-philippines/visas-et-formalites"
+                desc="Toutes les options légales"
+                icon={<FileText className="h-5 w-5" />}
+              />
+            </CardGrid>
+          </div>
+        </div>
+      </section>
 
-      </div>
     </div>
   );
 };

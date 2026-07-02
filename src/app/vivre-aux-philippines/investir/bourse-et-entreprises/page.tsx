@@ -3,7 +3,7 @@ import { Briefcase, TrendingUp, Building, Info, AlertTriangle, CheckCircle, Exte
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChartLine, faBuilding, faSackDollar, faBullseye } from '@fortawesome/free-solid-svg-icons';
-import { PageHero, StatRow, CardGrid, LinkCard } from '@/components/sections';
+import { PageHero, StatRow, SplitSection, CardGrid, LinkCard } from '@/components/sections';
 
 export const metadata: Metadata = {
   title: "Investir en Bourse aux Philippines en 2026 : PSE, Actions, Entreprises",
@@ -38,6 +38,43 @@ export const metadata: Metadata = {
   },
 };
 
+/* -------------------------------------------------------------------------- */
+/* En-tête de section maison : eyebrow uppercase + h2 à un mot accentué.       */
+/* Variante centrée : la page garde sa mise en page symétrique existante.      */
+/* -------------------------------------------------------------------------- */
+const SectionHeader = ({
+  eyebrow,
+  title,
+  accent,
+  description,
+}: {
+  eyebrow: string;
+  title: string;
+  accent?: string;
+  description?: string;
+}) => (
+  <div className="mx-auto mb-10 max-w-2xl text-center">
+    <span className="mb-3 inline-block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+      {eyebrow}
+    </span>
+    <h2
+      className="text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold text-foreground"
+      style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
+    >
+      {title}
+      {accent && (
+        <>
+          {' '}
+          <span className="text-accent">{accent}</span>
+        </>
+      )}
+    </h2>
+    {description && (
+      <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">{description}</p>
+    )}
+  </div>
+);
+
 const BourseEntreprisesPage = () => {
   return (
     <div>
@@ -50,19 +87,24 @@ const BourseEntreprisesPage = () => {
         imageAlt="Investir en Bourse et Entreprises"
       />
 
-      <div className="container mx-auto px-4 py-12">
-        {/* Introduction */}
-        <section className="max-w-4xl mx-auto mb-12">
-          <p className="text-lg text-muted-foreground mb-8">
-            Au-delà de l'immobilier, les Philippines offrent des opportunités d'investissement diversifiées via
-            le marché boursier local (PSE) et l'investissement direct dans les entreprises. Avec une économie
-            parmi les plus dynamiques d'Asie du Sud-Est, le pays attire les investisseurs en quête de croissance
-            à long terme.
-          </p>
+      <div className="container mx-auto px-4 pt-12">
+        {/* Introduction éditoriale */}
+        <section className="max-w-3xl mx-auto mb-12">
+          <SectionHeader eyebrow="Diversifier son placement" title="Au-delà de" accent="l'immobilier" />
+          <div className="space-y-4 text-lg text-muted-foreground text-center leading-relaxed">
+            <p>
+              Le marché boursier local (PSE) et l'investissement direct dans les entreprises philippines
+              ouvrent une autre voie, plus liquide et plus accessible à distance que la pierre.
+            </p>
+            <p>
+              Avec une économie parmi les plus dynamiques d'Asie du Sud-Est, le pays attire les
+              investisseurs en quête de croissance à long terme — à condition de connaître les règles du jeu.
+            </p>
+          </div>
 
           {/* Stats boxes */}
           <StatRow
-            className="justify-center gap-x-14"
+            className="mt-10 justify-center gap-x-14"
             stats={[
               { icon: <FontAwesomeIcon icon={faChartLine} className="text-[18px]" />, value: '~6,200', label: 'PSEi Index' },
               { icon: <FontAwesomeIcon icon={faBuilding} className="text-[18px]" />, value: '280+', label: 'Sociétés cotées' },
@@ -121,10 +163,12 @@ const BourseEntreprisesPage = () => {
 
         {/* Comment investir */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-4 text-foreground">Comment Investir à la PSE</h2>
-          <p className="text-center text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Deux options principales selon votre statut de résidence
-          </p>
+          <SectionHeader
+            eyebrow="Deux options selon votre statut"
+            title="Comment investir"
+            accent="à la PSE"
+            description="Le choix dépend surtout de votre statut de résidence. Un broker international type Interactive Brokers ou Boom Securities s'ouvre à distance, sans mettre les pieds aux Philippines ; un broker local comme COL Financial ou BDO/BPI Securities suppose un visa résident, une ACR I-Card et souvent un passage en agence."
+          />
 
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {/* Broker International */}
@@ -199,9 +243,43 @@ const BourseEntreprisesPage = () => {
           </div>
         </section>
 
+      </div>
+
+      {/* Repère éditorial — le passage du broker en ligne au broker local */}
+      <SplitSection
+        eyebrow="Résident ou pas"
+        title="Choisir son"
+        titleAccent="courtier"
+        imageUrl="/imagesHero/banque-assurance-philippines.webp"
+        imageAlt="Agence bancaire aux Philippines proposant un service de courtage en actions"
+        reverse
+      >
+        <p>
+          Sans visa résident, la voie la plus rapide reste un broker international : ouverture 100 %
+          en ligne, avec pour seuls documents un passeport, un justificatif de domicile et, pour les
+          plateformes américaines, un formulaire W-8BEN.
+        </p>
+        <p>
+          Une fois installé sur place avec un visa long séjour, un broker local comme COL Financial
+          ou une filiale de banque (BDO, BPI) devient accessible — au prix d'un dossier plus lourd :
+          ACR I-Card, TIN et souvent une visite en agence.
+        </p>
+        <p className="!mt-5">
+          Cette seconde voie ouvre aussi la porte aux services bancaires classiques, pratiques pour
+          rapatrier des dividendes ou gérer un compte au quotidien.
+        </p>
+      </SplitSection>
+
+      <div className="container mx-auto px-4 pb-12">
+
         {/* Fiscalité */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8 text-foreground">Fiscalité des Investissements</h2>
+          <SectionHeader
+            eyebrow="Ce que le fisc philippin retient"
+            title="Fiscalité des"
+            accent="investissements"
+            description="Chaque flux — dividende, plus-value, frais de courtage — a son propre taux. Les dividendes versés à une personne physique sont retenus à la source à 25 %, contre 30 % pour une société étrangère, sauf réduction par convention fiscale."
+          />
           <div className="max-w-4xl mx-auto">
             <div className="overflow-hidden rounded-2xl border border-border shadow-sm">
               <table className="w-full">
@@ -284,10 +362,12 @@ const BourseEntreprisesPage = () => {
 
         {/* Secteurs porteurs */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-4 text-foreground">Secteurs Porteurs en 2026</h2>
-          <p className="text-center text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Les secteurs les plus dynamiques de l'économie philippine
-          </p>
+          <SectionHeader
+            eyebrow="Où se concentre la croissance"
+            title="Secteurs porteurs"
+            accent="en 2026"
+            description="De l'immobilier commercial aux télécoms, six secteurs concentrent l'essentiel de la capitalisation du PSEi. Les conglomérats familiaux et les banques dominent l'indice, pendant que la consommation et la tech captent la croissance de la classe moyenne."
+          />
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {/* Immobilier */}
@@ -402,7 +482,12 @@ const BourseEntreprisesPage = () => {
 
         {/* Investir dans une entreprise non cotée */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8 text-foreground">Investir dans une Entreprise Non Cotée</h2>
+          <SectionHeader
+            eyebrow="Sortir du coté"
+            title="Investir dans une entreprise"
+            accent="non cotée"
+            description="D'autres perspectives — et d'autres risques. La participation étrangère y reste plafonnée à 40 % dans la plupart des secteurs, sauf ceux ouverts à 100 % listés dans la FINL (Foreign Investment Negative List)."
+          />
           <div className="max-w-4xl mx-auto">
             {/* Alerte 40% */}
             <div className="bg-accent/10 border-2 border-accent/30 rounded-2xl p-6 mb-8">
@@ -482,7 +567,12 @@ const BourseEntreprisesPage = () => {
 
         {/* SIRV */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8 text-foreground">Visa Investisseur : SIRV</h2>
+          <SectionHeader
+            eyebrow="Résidence par l'investissement"
+            title="Visa investisseur"
+            accent="SIRV"
+            description="Un investissement de 75 000 $US minimum peut aussi ouvrir droit à la résidence permanente. Une alternative aux visas de retraite, pensée pour les investisseurs encore actifs professionnellement — l'immobilier n'y est en revanche pas éligible."
+          />
           <div className="max-w-4xl mx-auto">
             <div className="bg-primary/5 rounded-2xl p-8 border-2 border-primary/30 shadow-lg">
               <div className="flex items-center gap-4 mb-6">
@@ -508,7 +598,7 @@ const BourseEntreprisesPage = () => {
                       <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                         <CheckCircle className="h-3 w-3 text-primary-foreground" />
                       </div>
-                      <span className="text-foreground">Investissement minimum : <strong>US$75,000</strong></span>
+                      <span className="text-foreground">Investissement minimum : <strong>75 000 $US</strong></span>
                     </li>
                     <li className="flex items-start gap-2">
                       <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -526,7 +616,7 @@ const BourseEntreprisesPage = () => {
                       <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                         <CheckCircle className="h-3 w-3 text-primary-foreground" />
                       </div>
-                      <span className="text-foreground">Frais de dossier : ~US$300</span>
+                      <span className="text-foreground">Frais de dossier : ~300 $US</span>
                     </li>
                   </ul>
                 </div>
@@ -562,7 +652,7 @@ const BourseEntreprisesPage = () => {
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-0 text-sm">
                   <div className="flex items-center gap-2">
                     <span className="w-7 h-7 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-xs">1</span>
-                    <span className="text-foreground">Dépôt $75K+ (DBP/Land Bank)</span>
+                    <span className="text-foreground">Dépôt 75 000 $+ (DBP/Land Bank)</span>
                   </div>
                   <ArrowRight className="hidden md:block h-4 w-4 text-primary/40 mx-2" />
                   <div className="flex items-center gap-2">
@@ -597,7 +687,12 @@ const BourseEntreprisesPage = () => {
 
         {/* Conseils */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8 text-foreground">Conseils Pratiques</h2>
+          <SectionHeader
+            eyebrow="Avant de placer vos fonds"
+            title="Conseils"
+            accent="pratiques"
+            description="Diversifiez plutôt que de tout miser sur un seul secteur, et anticipez des retenues à la source élevées — 25 à 30 % selon le cas. Vérifiez systématiquement qu'un courtier est licencié auprès de la SEC Philippines avant de lui confier des fonds."
+          />
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             <div className="bg-card rounded-xl p-6 border border-border hover:border-primary/30 hover:shadow-md transition-all">
               <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
@@ -647,8 +742,7 @@ const BourseEntreprisesPage = () => {
 
         {/* Ressources */}
         <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8 text-foreground">Ressources Officielles</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
+          <CardGrid eyebrow="À consulter" title="Ressources" titleAccent="officielles" columns={3}>
             <a
               href="https://www.pse.com.ph/"
               target="_blank"
@@ -738,13 +832,12 @@ const BourseEntreprisesPage = () => {
               </div>
               <ExternalLink className="h-4 w-4 text-muted-foreground" />
             </a>
-          </div>
+          </CardGrid>
         </section>
 
         {/* Navigation */}
         <section className="border-t border-border pt-12">
-          <h2 className="text-2xl font-bold text-center mb-8 text-foreground">Continuez votre Exploration</h2>
-          <CardGrid columns={3}>
+          <CardGrid eyebrow="Pour aller plus loin" title="Continuez votre" titleAccent="exploration" columns={3}>
             <LinkCard
               title="Investir en Immobilier"
               href="/vivre-aux-philippines/investir/immobilier"

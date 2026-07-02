@@ -5,6 +5,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Design/Contenu — Phase 6c : éditorialisation des 6 guides vivre (2026-07-02)
+
+Réplication de la recette validée sur les 6 gros guides : emploi-salarie, creer-entreprise, universites, ecoles-internationales, immobilier (locatif), bourse-et-entreprises. Traitement adapté aux guides denses : en-têtes maison (eyebrow + h2 à mot accentué orange vif) sur chaque grande section, paragraphe de prose d'introduction par section (règles copywriting, zéro tic IA, zéro fait inventé), 1-2 chapitres SplitSection photo par page, tableaux/timelines/fiches conservés intégralement. Prix anglo-saxons corrigés en format français (« €5,600 - 8,800 » → « 5 600 – 8 800 € », « US$75,000 » → « 75 000 $US »). Fact-check automatique : 6/6 pages ✅ (369 faits vérifiés au total, doublé d'une re-vérification indépendante). Focus anti-cannibalisation préservé (immobilier = locatif ; requête large « investir » → article dédié). Incident : 2 agents tués par une erreur API en cours de lot — travail vérifié sur disque (une page complète récupérée, zéro écrite pour l'autre) et missions relancées ; aucune page à moitié éditée n'est passée.
+
 ### Design/Contenu — Phase 6b : recomposition éditoriale des 5 sujets vivre + purge Unsplash totale (2026-07-02)
 
 Réplication de la recette de la page exemplaire visas-et-formalites (validée par Hugo) sur les 5 autres sujets vivre : logement, travail-entreprise, banque-finances, sante-assurances, culture-integration. Pour chaque page : prose éditoriale rédigée selon les skills copywriting/copy-editing (français, vouvoiement, zéro tic IA), chapitres SplitSection avec photos locales alternées, tableaux/étapes intégrés, une seule pause tonale, cartes uniquement si justifié. **Fact-check automatique obligatoire** (script scratchpad : chiffres + entités de l'ancienne version tous présents dans la nouvelle) : 5/5 pages ✅ (seuls faux positifs : paramètres d'URL Unsplash supprimées et un diviseur JS). Blocs affiliés Wise/Chapka et liens anti-cannibalisation préservés au caractère près.
