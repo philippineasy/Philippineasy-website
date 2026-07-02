@@ -53,7 +53,9 @@ export const CardGrid = ({
               {titleAccent && (
                 <>
                   {' '}
-                  <span className="text-accent-strong">{titleAccent}</span>
+                  {/* Vivid amber signature word (large display heading) — matches
+                      the homepage H2 accent. Links/small text keep accent-strong. */}
+                  <span className="text-accent">{titleAccent}</span>
                 </>
               )}
             </h2>

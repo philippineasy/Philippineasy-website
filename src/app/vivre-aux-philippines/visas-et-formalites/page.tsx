@@ -1,14 +1,16 @@
 import { Metadata } from 'next';
-import { CheckCircle, Clock, FileText, GraduationCap, Home, AlertTriangle, ExternalLink, Users, RefreshCw, DollarSign, ChevronRight, ArrowRight } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { CheckCircle, ExternalLink, ArrowRight, AlertTriangle } from 'lucide-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlane, faCalendarDays, faHouse, faShieldHalved } from '@fortawesome/free-solid-svg-icons';
-import { PageHero, StatRow, CardGrid, LinkCard } from '@/components/sections';
+import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, CTABand } from '@/components/sections';
 import { VisaSimulator } from '@/components/visa/VisaSimulator';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
 import ArticleList from '@/components/shared/ArticleList';
 import { createClient } from '@/utils/supabase/server';
 import { getArticlesByCategorySlug } from '@/services/articleService';
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
 export const revalidate = 3600;
@@ -57,13 +59,232 @@ const breadcrumbJsonLdItems = [
   { name: 'Visas et Formalités', item: '/vivre-aux-philippines/visas-et-formalites' },
 ];
 
+const SRRV_ARTICLE =
+  '/vivre-aux-philippines/visas-et-formalites/visa-longue-duree-srrv-13a-comparatif';
+
+/* -------------------------------------------------------------------------- */
+/* Petits blocs éditoriaux locaux (server components).                         */
+/* Le pattern d'en-tête reprend celui de la home : eyebrow + h2 à mot accentué.*/
+/* -------------------------------------------------------------------------- */
+
+// En-tête de section : eyebrow uppercase + h2 avec UN mot en amber vif.
+const SectionHeader = ({
+  eyebrow,
+  title,
+  accent,
+  description,
+}: {
+  eyebrow: string;
+  title: string;
+  accent?: string;
+  description?: string;
+}) => (
+  <div className="max-w-2xl">
+    <span className="mb-3 inline-block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+      {eyebrow}
+    </span>
+    <h2
+      className="text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold text-foreground"
+      style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
+    >
+      {title}
+      {accent && (
+        <>
+          {' '}
+          <span className="text-accent">{accent}</span>
+        </>
+      )}
+    </h2>
+    {description && (
+      <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">{description}</p>
+    )}
+  </div>
+);
+
+// Liste "cochée" (documents, avantages). Div-based pour ne pas hériter des
+// puces disc du rich-text de SplitSection. Accepte du JSX (liens inline).
+const CheckList = ({ items, columns = 1 }: { items: ReactNode[]; columns?: 1 | 2 }) => (
+  <div
+    className={cn('mt-4 grid gap-2.5', columns === 2 && 'sm:grid-cols-2 sm:gap-x-6')}
+    role="list"
+  >
+    {items.map((item, i) => (
+      <div
+        key={i}
+        role="listitem"
+        className="flex items-start gap-2.5 text-[15px] leading-[1.55] text-foreground"
+      >
+        <CheckCircle
+          className="mt-[3px] h-[18px] w-[18px] flex-shrink-0 text-primary"
+          aria-hidden="true"
+        />
+        <span>{item}</span>
+      </div>
+    ))}
+  </div>
+);
+
+// Étapes numérotées (processus 9G / 9F). Pastille bleue + titre + méta + texte.
+const Steps = ({
+  steps,
+}: {
+  steps: { title?: string; meta?: string; text: string }[];
+}) => (
+  <div className="mt-5 flex flex-col gap-4" role="list">
+    {steps.map((s, i) => (
+      <div key={i} role="listitem" className="flex gap-3.5">
+        <span
+          className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-primary text-[13px] font-bold text-primary-foreground"
+          aria-hidden="true"
+        >
+          {i + 1}
+        </span>
+        <div className="pt-0.5">
+          {s.title && (
+            <span className="flex flex-wrap items-center gap-2 text-[15px] font-semibold text-foreground">
+              {s.title}
+              {s.meta && (
+                <span className="rounded bg-muted px-2 py-0.5 text-[12px] font-medium tabular-nums text-muted-foreground">
+                  {s.meta}
+                </span>
+              )}
+            </span>
+          )}
+          <span
+            className={cn(
+              'block text-[14px] leading-[1.55]',
+              // With a title, the text is a supporting caption; on its own it
+              // carries the step, so it stays at full foreground contrast.
+              s.title ? 'mt-1 text-muted-foreground' : 'pt-1 text-foreground'
+            )}
+          >
+            {s.text}
+          </span>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+// Table de données compacte (coûts, dépôts). Le libellé + un montant aligné à
+// droite ; les chiffres sont en `text-foreground` pour un contraste AA net.
+const DataTable = ({
+  caption,
+  rows,
+}: {
+  caption: string;
+  rows: { label: string; sub?: string; value: string }[];
+}) => (
+  <div className="mt-6 overflow-hidden rounded-xl border-[0.5px] border-border bg-card">
+    <div className="border-b border-border bg-muted px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+      {caption}
+    </div>
+    <dl className="divide-y divide-border">
+      {rows.map((r) => (
+        <div key={r.label} className="flex items-baseline justify-between gap-4 px-4 py-3">
+          <dt className="text-[14px] text-foreground">
+            {r.label}
+            {r.sub && (
+              <span className="mt-0.5 block text-[12.5px] leading-snug text-muted-foreground">
+                {r.sub}
+              </span>
+            )}
+          </dt>
+          <dd className="whitespace-nowrap text-[14px] font-semibold tabular-nums text-foreground">
+            {r.value}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+);
+
+// Encadré d'avertissement honnête (bord accent, façon "À vérifier" du simulateur).
+const CautionBox = ({ title, items }: { title: string; items: string[] }) => (
+  <div className="mt-6 rounded-r-lg border-l-4 border-accent bg-accent/5 py-4 pl-5 pr-4">
+    <div className="mb-2.5 flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.06em] text-accent-strong">
+      <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+      {title}
+    </div>
+    <div className="flex flex-col gap-2" role="list">
+      {items.map((it, i) => (
+        <div
+          key={i}
+          role="listitem"
+          className="flex gap-2.5 text-[14px] leading-[1.55] text-foreground/85"
+        >
+          <span
+            className="mt-[7px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-accent-strong"
+            aria-hidden="true"
+          />
+          <span>{it}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// Lien-action (portails officiels, articles liés). Rendu à l'intérieur du
+// rich-text de SplitSection : on force la couleur accent-strong (AA) et le
+// no-underline via `style` inline, qui prime sur la règle `[&_a]` du conteneur.
+const inlineLinkClass =
+  'group mt-6 inline-flex items-center gap-2 text-[15px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm';
+const inlineLinkStyle = {
+  color: 'hsl(var(--accent-strong))',
+  textDecoration: 'none',
+} as const;
+
+const InlineLink = ({
+  href,
+  external,
+  children,
+}: {
+  href: string;
+  external?: boolean;
+  children: ReactNode;
+}) =>
+  external ? (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={inlineLinkClass}
+      style={inlineLinkStyle}
+    >
+      <ExternalLink className="h-4 w-4" aria-hidden="true" />
+      {children}
+    </a>
+  ) : (
+    <Link href={href} className={inlineLinkClass} style={inlineLinkStyle}>
+      {children}
+      <ArrowRight
+        className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:group-hover:translate-x-0"
+        aria-hidden="true"
+      />
+    </Link>
+  );
+
+const comparatifRows = [
+  { type: 'Exemption (tourisme)', duration: '30 jours', condition: 'Nationalité française', cost: 'Gratuit' },
+  { type: '9(A) touriste', duration: '36 mois', condition: 'Extensions successives', cost: '3 000 – 13 900 PHP / ext.' },
+  { type: 'SRRV (retraite)', duration: 'Permanent', condition: '40 ans et plus, dépôt bancaire', cost: '15 000 – 50 000 $US' },
+  { type: '9(G) travail', duration: '1 à 3 ans', condition: 'Contrat + AEP', cost: "Pris en charge par l'employeur" },
+  { type: '9(F) étudiant', duration: '1 an renouv.', condition: 'Admission université CHED', cost: 'Variable' },
+];
+
+const ressources = [
+  { name: 'Bureau of Immigration', url: 'https://immigration.gov.ph/', domain: 'immigration.gov.ph' },
+  { name: 'Philippine Retirement Authority', url: 'https://pra.gov.ph/', domain: 'pra.gov.ph' },
+  { name: 'Ambassade des Philippines (Paris)', url: 'https://parispe.dfa.gov.ph/', domain: 'parispe.dfa.gov.ph' },
+  { name: 'eTravel (enregistrement)', url: 'https://etravel.gov.ph/', domain: 'etravel.gov.ph' },
+];
+
 const VisasEtFormalitesPage = async () => {
   const supabase = await createClient();
   const { data: articles, error } = await getArticlesByCategorySlug(supabase, 'visas-et-formalites');
 
   if (error) {
     console.error(error);
-    // Gérer l'erreur, par exemple en affichant un message à l'utilisateur
   }
 
   return (
@@ -74,624 +295,433 @@ const VisasEtFormalitesPage = async () => {
         eyebrow="Vivre aux Philippines"
         title="Visas pour les"
         titleAccent="Philippines"
-        subtitle="Le guide complet et actualisé pour comprendre les différents types de visas et choisir celui qui correspond à votre projet d'expatriation."
+        subtitle="Le guide complet et actualisé pour comprendre chaque type de visa et choisir celui qui colle à votre projet d'expatriation."
         imageUrl="/imagesHero/visa-philippines-processus.webp"
-        imageAlt="Visas pour les Philippines"
+        imageAlt="Formalités et visas pour s'installer aux Philippines"
       />
 
+      {/* Simulateur (panneau signature) — reste en haut, intouché. */}
       <VisaSimulator />
 
-      <div className="container mx-auto px-4 py-12 max-w-6xl">
+      {/* Intro éditoriale + chiffres clés ancrés */}
+      <section className="bg-background pt-10 md:pt-12">
+        <div className="container mx-auto px-4">
+          <Breadcrumb items={breadcrumbItems} />
 
-        <Breadcrumb items={breadcrumbItems} />
-
-        {/* Stats rapides */}
-        <section className="mb-12">
-          <StatRow
-            stats={[
-              { value: '30', label: 'jours gratuits', icon: <FontAwesomeIcon icon={faPlane} className="text-[18px]" /> },
-              { value: '36', label: 'mois max touriste', icon: <FontAwesomeIcon icon={faCalendarDays} className="text-[18px]" /> },
-              { value: '40+', label: 'ans pour SRRV', icon: <FontAwesomeIcon icon={faHouse} className="text-[18px]" /> },
-              { value: '5', label: 'types de visas', icon: <FontAwesomeIcon icon={faShieldHalved} className="text-[18px]" /> },
-            ]}
-          />
-        </section>
-
-        {/* Introduction */}
-        <section className="mb-12">
-          <p className="text-lg text-muted-foreground leading-relaxed max-w-4xl mx-auto text-center">
-            L'obtention du bon visa est la première étape de votre expatriation aux Philippines.
-            Que vous souhaitiez y séjourner quelques mois, y travailler ou y prendre votre retraite,
-            ce guide vous présente les options disponibles avec les conditions et tarifs en vigueur en 2026.
-          </p>
-        </section>
-
-        {/* Avertissement */}
-        <div className="bg-accent/5 border border-accent/25 rounded-xl p-6 max-w-4xl mx-auto mb-12">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-accent/15 rounded-full flex items-center justify-center flex-shrink-0">
-              <AlertTriangle className="h-6 w-6 text-accent-strong" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-2 text-foreground">Informations officielles</h3>
-              <p className="text-muted-foreground">
-                Les règles d'immigration évoluent régulièrement. Ce guide est actualisé régulièrement,
-                mais nous vous recommandons de vérifier les informations auprès du{' '}
-                <a href="https://immigration.gov.ph/" target="_blank" rel="noopener noreferrer" className="underline font-medium text-primary hover:text-primary/80">
-                  Bureau of Immigration
-                </a>{' '}
-                et de l'<a href="https://parispe.dfa.gov.ph/" target="_blank" rel="noopener noreferrer" className="underline font-medium text-primary hover:text-primary/80">
-                  Ambassade des Philippines en France
-                </a>.
+          <div className="mt-8">
+            <SectionHeader
+              eyebrow="Votre installation commence ici"
+              title="Le bon visa,"
+              accent="première étape"
+            />
+            <div className="mt-5 max-w-2xl space-y-4 text-[16px] leading-[1.7] text-muted-foreground">
+              <p>
+                Avant les cartons et le billet d'avion, une question décide de tout : sous quel
+                statut allez-vous entrer et rester aux Philippines ? Quelques semaines de vacances,
+                une retraite au soleil ou un poste dans une entreprise locale ne passent pas par la
+                même porte.
+              </p>
+              <p>
+                Nous avons réuni les cinq voies principales, avec leurs conditions, leurs coûts et
+                leurs durées à jour de 2026. Le simulateur ci-dessus vous donne déjà une piste ; les
+                sections qui suivent entrent dans le détail, visa par visa.
               </p>
             </div>
           </div>
-        </div>
 
-        {/* Exemption Visa - Entrée gratuite */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8">Entrée sans visa : 30 jours gratuits</h2>
-
-          <div className="max-w-4xl mx-auto bg-primary/5 border border-primary/15 rounded-2xl p-8">
-            <div className="flex items-start gap-4">
-              <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                <CheckCircle className="h-8 w-8 text-primary" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-xl mb-3 text-foreground">Bonne nouvelle pour les Français</h3>
-                <p className="text-muted-foreground mb-6">
-                  Les citoyens français bénéficient d'une <strong className="font-semibold text-foreground">exemption de visa pour les séjours de 30 jours maximum</strong>.
-                  Cette facilité concerne 157 nationalités au total.
-                </p>
-
-                <div className="bg-card rounded-lg p-5">
-                  <h4 className="font-semibold mb-3 text-foreground">Documents requis à l'arrivée :</h4>
-                  <div className="space-y-3">
-                    {[
-                      "Passeport valide au moins 6 mois après la date de retour prévue",
-                      "Billet d'avion de sortie du territoire philippin",
-                      "Enregistrement sur le portail eTravel (obligatoire)"
-                    ].map((doc, index) => (
-                      <div key={index} className="flex items-center gap-3">
-                        <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                          <CheckCircle className="h-4 w-4 text-primary-foreground" />
-                        </div>
-                        <span className="text-foreground">{doc}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="mt-10 max-w-4xl">
+            <StatRow
+              stats={[
+                { value: '30', label: 'jours gratuits', icon: <FontAwesomeIcon icon={faPlane} className="text-[18px]" /> },
+                { value: '36', label: 'mois max touriste', icon: <FontAwesomeIcon icon={faCalendarDays} className="text-[18px]" /> },
+                { value: '40+', label: 'ans pour le SRRV', icon: <FontAwesomeIcon icon={faHouse} className="text-[18px]" /> },
+                { value: '5', label: 'types de visas', icon: <FontAwesomeIcon icon={faShieldHalved} className="text-[18px]" /> },
+              ]}
+            />
           </div>
-        </section>
 
-        {/* Visa Touriste 9A */}
-        <section className="mb-16">
-          <CardGrid title="Visa Touriste (9A)" subtitle="Prolongez votre séjour jusqu'à 36 mois" columns={2}>
-            {/* Extension sur place */}
-            <div className="bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest overflow-hidden">
-              <div className="flex items-center gap-3 bg-muted px-6 py-4 border-b border-border">
-                <span className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <FileText className="h-5 w-5 text-primary" />
-                </span>
-                <h3 className="font-bold text-lg text-foreground">Extension sur place</h3>
-              </div>
-              <div className="p-6">
-                <p className="text-muted-foreground mb-5">
-                  Après vos 30 jours gratuits, prolongez votre séjour directement aux Philippines
-                  auprès du Bureau of Immigration.
-                </p>
-
-                <div className="space-y-4">
-                  <div className="bg-muted rounded-lg p-4">
-                    <h4 className="font-semibold mb-3 flex items-center gap-2 text-foreground">
-                      <DollarSign className="h-5 w-5 text-primary" />
-                      Coûts des extensions (2026)
-                    </h4>
-                    <div className="space-y-2">
-                      {[
-                        { label: "1 mois", price: "3 000 - 4 000 PHP" },
-                        { label: "2 mois", price: "5 000 - 6 000 PHP" },
-                        { label: "6 mois (LSVVE)", price: "11 500 - 13 900 PHP" }
-                      ].map((item, index) => (
-                        <div key={index} className="flex justify-between items-center bg-card rounded px-3 py-2">
-                          <span className="text-muted-foreground">{item.label}</span>
-                          <span className="font-semibold text-foreground">{item.price}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="bg-muted rounded-lg p-4">
-                    <h4 className="font-semibold mb-2 text-foreground">ACR I-Card obligatoire</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Après 59 jours aux Philippines, vous devez obtenir l'Alien Certificate of Registration.
-                      <span className="block mt-1 font-medium text-foreground">Coût : environ 3 000 PHP</span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Demande avant départ */}
-            <div className="bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest overflow-hidden">
-              <div className="flex items-center gap-3 bg-muted px-6 py-4 border-b border-border">
-                <span className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Clock className="h-5 w-5 text-primary" />
-                </span>
-                <h3 className="font-bold text-lg text-foreground">Demande avant départ (59 jours)</h3>
-              </div>
-              <div className="p-6">
-                <p className="text-muted-foreground mb-5">
-                  Demandez un visa de 59 jours auprès de l'ambassade avant votre départ.
-                  Utile si vous n'avez pas de billet retour.
-                </p>
-
-                <div className="space-y-4">
-                  <div className="bg-muted rounded-lg p-4">
-                    <h4 className="font-semibold mb-3 text-foreground">Documents requis</h4>
-                    <ul className="space-y-2 text-sm">
-                      {[
-                        "Formulaire de demande de visa",
-                        "Passeport valide 6 mois minimum",
-                        "2 photos d'identité récentes",
-                        "Preuve de moyens financiers",
-                        "Itinéraire de voyage"
-                      ].map((doc, index) => (
-                        <li key={index} className="flex items-center gap-2 text-muted-foreground">
-                          <CheckCircle className="h-4 w-4 text-primary" />
-                          {doc}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <span className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
-                      30-40€ de frais
-                    </span>
-                    <span className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
-                      3-5 jours ouvrables
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardGrid>
-
-          <div className="mt-6 text-center">
+          <p className="mt-6 max-w-3xl text-[14px] leading-[1.6] text-muted-foreground">
+            Les règles d'immigration changent souvent. Nous tenons cette page à jour, mais
+            vérifiez toujours les détails auprès du{' '}
             <a
-              href="https://e-services.immigration.gov.ph/"
+              href="https://immigration.gov.ph/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium"
+              className="font-medium text-accent-strong underline underline-offset-2 hover:text-accent-strong/80"
             >
-              <ExternalLink className="h-4 w-4" />
-              Portail eServices du Bureau of Immigration (extensions en ligne)
-            </a>
-          </div>
-        </section>
-
-        {/* Visa Retraite SRRV */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-3">Visa Retraite SRRV</h2>
-          <p className="text-center text-muted-foreground mb-8">Résidence permanente aux Philippines</p>
-
-          {/* Info nouvelle règle */}
-          <div className="bg-primary/5 border border-primary/20 rounded-xl p-6 max-w-4xl mx-auto mb-8">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                <RefreshCw className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-lg mb-2 text-foreground">Nouvelles règles depuis 2025</h3>
-                <p className="text-muted-foreground">
-                  Le programme SRRV a été modifié avec un <strong className="font-semibold text-foreground">abaissement de l'âge minimum à 40 ans</strong>
-                  et de nouveaux montants de dépôt. Ces changements s'appliquent à tous les nouveaux demandeurs.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Callout - comparatif SRRV vs 13(a) */}
-          <div className="max-w-4xl mx-auto mb-8 bg-card border border-border rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">
-              Vous hésitez entre le SRRV et le visa 13(a) pour votre projet de retraite aux Philippines ?
-            </p>
-            <Link
-              href="/vivre-aux-philippines/visas-et-formalites/visa-longue-duree-srrv-13a-comparatif"
-              className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-semibold whitespace-nowrap"
+              Bureau of Immigration
+            </a>{' '}
+            et de l'
+            <a
+              href="https://parispe.dfa.gov.ph/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-accent-strong underline underline-offset-2 hover:text-accent-strong/80"
             >
-              Voir le comparatif détaillé SRRV vs 13(a)
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-
-          <div className="mb-8">
-            <CardGrid columns={2}>
-              {/* SRRV Classic */}
-              <div className="bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest overflow-hidden">
-                <div className="flex items-center gap-3 bg-muted px-6 py-4 border-b border-border">
-                  <span className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Home className="h-5 w-5 text-primary" />
-                  </span>
-                  <h3 className="font-bold text-lg text-foreground">SRRV Classic</h3>
-                </div>
-                <div className="p-6">
-                  <p className="text-muted-foreground mb-5">
-                    Le visa de retraite principal pour résider aux Philippines de manière permanente.
-                  </p>
-
-                  <div className="space-y-3">
-                    <h4 className="font-semibold text-foreground">Dépôts requis :</h4>
-
-                    {[
-                      { age: "50+ avec pension", deposit: "15 000 $US", note: "+ pension 800$/mois" },
-                      { age: "50+ sans pension", deposit: "30 000 $US", note: null },
-                      { age: "40-49 avec pension", deposit: "25 000 $US", note: null },
-                      { age: "40-49 sans pension", deposit: "50 000 $US", note: null }
-                    ].map((item, index) => (
-                      <div key={index} className="flex items-center justify-between bg-muted rounded-lg px-4 py-3">
-                        <div>
-                          <span className="font-medium text-foreground">{item.age}</span>
-                          {item.note && <span className="text-xs text-muted-foreground block">{item.note}</span>}
-                        </div>
-                        <span className="bg-primary/10 text-primary px-3 py-1 rounded-full font-bold text-sm">
-                          {item.deposit}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-4 pt-4 border-t border-border">
-                    <h4 className="font-semibold text-sm text-foreground mb-2">Frais supplémentaires</h4>
-                    <ul className="text-sm space-y-1 text-muted-foreground">
-                      <li>• Frais de dossier : 1 500 $US (principal)</li>
-                      <li>• Par personne à charge : 300 $US</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              {/* SRRV Courtesy */}
-              <div className="bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest overflow-hidden">
-                <div className="flex items-center gap-3 bg-muted px-6 py-4 border-b border-border">
-                  <span className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Users className="h-5 w-5 text-primary" />
-                  </span>
-                  <h3 className="font-bold text-lg text-foreground">SRRV Courtesy</h3>
-                </div>
-                <div className="p-6">
-                  <p className="text-muted-foreground mb-5">
-                    Programme spécial pour les anciens citoyens philippins ayant renoncé à leur nationalité.
-                  </p>
-
-                  <div className="space-y-3">
-                    <h4 className="font-semibold text-foreground">Dépôts requis :</h4>
-
-                    {[
-                      { age: "50 ans et plus", deposit: "1 500 $US" },
-                      { age: "40-49 ans", deposit: "3 000 $US" }
-                    ].map((item, index) => (
-                      <div key={index} className="flex items-center justify-between bg-muted rounded-lg px-4 py-3">
-                        <span className="font-medium text-foreground">{item.age}</span>
-                        <span className="bg-primary/10 text-primary px-3 py-1 rounded-full font-bold text-sm">
-                          {item.deposit}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-6 bg-muted rounded-lg p-4">
-                    <p className="text-sm text-muted-foreground">
-                      <strong className="font-semibold text-foreground">Note :</strong> Ce visa est réservé aux personnes ayant eu la nationalité philippine par le passé.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardGrid>
-          </div>
-
-          {/* Avantages SRRV */}
-          <div className="max-w-5xl mx-auto bg-primary/5 border border-primary/15 rounded-2xl p-8">
-            <h3 className="font-bold text-xl mb-6 text-foreground flex items-center gap-3">
-              <CheckCircle className="h-6 w-6 text-primary" />
-              Avantages du SRRV
-            </h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              {[
-                "Résidence permanente aux Philippines",
-                "Entrées et sorties illimitées du territoire",
-                "Pas de renouvellement annuel du visa",
-                "Exemption de certains droits de douane",
-                "Importation franchise de biens (jusqu'à 7 000 $US)",
-                "Dépôt récupérable en cas de départ définitif"
-              ].map((advantage, index) => (
-                <div key={index} className="flex items-start gap-3 bg-card rounded-lg px-4 py-3">
-                  <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="text-foreground">{advantage}</span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-6 text-center">
-              <a
-                href="https://pra.gov.ph/SRRVisa"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium"
-              >
-                <ExternalLink className="h-4 w-4" />
-                Site officiel de la Philippine Retirement Authority (PRA)
-              </a>
-            </div>
-          </div>
-        </section>
-
-        {/* Visa Travail 9G - Timeline */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-3">Visa de Travail (9G) et Permis AEP</h2>
-          <p className="text-center text-muted-foreground max-w-3xl mx-auto mb-10">
-            Pour travailler légalement aux Philippines, vous devez obtenir un Alien Employment Permit (AEP)
-            puis un visa de travail 9(G).
+              Ambassade des Philippines en France
+            </a>{' '}
+            avant de vous engager.
           </p>
+        </div>
+      </section>
 
-          {/* Timeline du processus */}
-          <div className="max-w-4xl mx-auto mb-10">
-            <h3 className="text-xl font-semibold text-center mb-8">Processus d'obtention</h3>
+      {/* Chapitre 1 — Entrée sans visa (photo aéroport, à gauche) */}
+      <SplitSection
+        eyebrow="À l'arrivée"
+        title="Trente jours"
+        titleAccent="sans visa"
+        imageUrl="/imagesHero/comment-voyager-aux-philippines.webp"
+        imageAlt="Avion à la porte d'embarquement, départ vers les Philippines"
+      >
+        <p>
+          Bonne nouvelle pour les Français : vous entrez aux Philippines sans aucun visa préalable,
+          pour un séjour de 30 jours. Cette facilité concerne 157 nationalités, et elle suffit
+          largement à de premières vacances ou à un repérage avant l'installation.
+        </p>
+        <h4>À présenter à l'arrivée</h4>
+        <CheckList
+          items={[
+            'Un passeport valide au moins 6 mois après votre date de retour prévue',
+            "Un billet d'avion prouvant votre sortie du territoire philippin",
+            <>
+              Votre enregistrement sur le portail{' '}
+              <a href="https://etravel.gov.ph/" target="_blank" rel="noopener noreferrer">
+                eTravel
+              </a>
+              , désormais obligatoire
+            </>,
+          ]}
+        />
+        <p className="!mt-5">
+          Ces 30 jours ne se prolongent pas à la frontière. Pour rester plus longtemps, on bascule
+          sur le visa touriste et ses extensions.
+        </p>
+      </SplitSection>
 
-            <div className="relative">
-              {/* Ligne centrale - visible sur desktop */}
-              <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-border" />
+      {/* Chapitre 2 — Visa touriste 9A (photo Boracay, à droite) */}
+      <SplitSection
+        reverse
+        eyebrow="Rester plus longtemps"
+        title="Prolonger jusqu'à"
+        titleAccent="36 mois"
+        imageUrl="/imagesHero/boracay-white-beach.webp"
+        imageAlt="Rue animée de Boracay le soir, voyageurs au long cours"
+      >
+        <p>
+          Envie de prendre votre temps ? Une fois les 30 jours écoulés, le visa touriste 9(A) se
+          prolonge directement sur place, auprès du Bureau of Immigration, jusqu'à 36 mois
+          cumulés grâce au programme LSVVE.
+        </p>
+        <DataTable
+          caption="Coût des extensions · 2026"
+          rows={[
+            { label: '1 mois', value: '3 000 – 4 000 PHP' },
+            { label: '2 mois', value: '5 000 – 6 000 PHP' },
+            { label: '6 mois (LSVVE)', value: '11 500 – 13 900 PHP' },
+          ]}
+        />
+        <p className="!mt-5">
+          Un point à ne pas oublier : passé 59 jours sur le sol philippin, l'ACR I-Card
+          (<em>Alien Certificate of Registration</em>) devient obligatoire. Comptez environ 3 000 PHP.
+        </p>
+        <p>
+          Vous partez sans billet retour ? Demandez plutôt un visa de 59 jours à l'ambassade
+          avant de décoller : autour de 30 à 40 € de frais et 3 à 5 jours ouvrables, sur présentation
+          d'un dossier classique (formulaire, deux photos, preuve de moyens, itinéraire).
+        </p>
+        <InlineLink href="https://e-services.immigration.gov.ph/" external>
+          Prolonger en ligne : le portail eServices du Bureau of Immigration
+        </InlineLink>
+      </SplitSection>
 
-              <div className="space-y-8 md:space-y-0">
-                {[
-                  {
-                    step: "1",
-                    title: "AEP (Alien Employment Permit)",
-                    description: "Délivré par le DOLE - L'employeur prouve qu'aucun Philippin qualifié n'est disponible",
-                    duration: "2-3 semaines",
-                  },
-                  {
-                    step: "2",
-                    title: "PWP (Provisional Work Permit)",
-                    description: "Optionnel - Permet de travailler pendant le traitement du 9G",
-                    duration: "3 mois (renouvelable)",
-                  },
-                  {
-                    step: "3",
-                    title: "Visa 9(G)",
-                    description: "Demandé après obtention de l'AEP auprès du Bureau of Immigration",
-                    duration: "1 à 3 ans",
-                  }
-                ].map((item, index) => (
-                  <div key={index} className={`relative md:flex ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-center md:mb-8`}>
-                    {/* Contenu */}
-                    <div className={`md:w-5/12 ${index % 2 === 0 ? 'md:pr-8 md:text-right' : 'md:pl-8'}`}>
-                      <div className="bg-card border-[0.5px] border-border rounded-xl shadow-card-rest p-5">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="bg-primary/10 text-primary px-2 py-1 rounded text-xs font-bold">
-                            Étape {item.step}
-                          </span>
-                          <span className="bg-muted text-muted-foreground px-2 py-1 rounded text-xs">
-                            {item.duration}
-                          </span>
-                        </div>
-                        <h4 className="font-bold text-foreground mb-1">{item.title}</h4>
-                        <p className="text-sm text-muted-foreground">{item.description}</p>
-                      </div>
-                    </div>
+      {/* Chapitre 3 — Visa retraite SRRV (photo résidence, à gauche) */}
+      <SplitSection
+        eyebrow="S'installer à la retraite"
+        title="Le visa retraite"
+        titleAccent="SRRV"
+        imageUrl="/images/famille/famille-condominium-philippines.webp"
+        imageAlt="Résidence avec piscine sous les palmiers aux Philippines"
+      >
+        <p>
+          Le SRRV (<em>Special Resident Retiree's Visa</em>) s'adresse aux retraités qui
+          veulent poser leurs valises pour de bon. En échange d'un dépôt bloqué dans une banque
+          philippine, il ouvre une résidence permanente, sans renouvellement annuel à surveiller.
+        </p>
+        <p>
+          Depuis 2025, les règles ont bougé. L'âge minimum descend à 40 ans et les montants de
+          dépôt ont été revus. Ces nouvelles conditions valent pour tous les nouveaux dossiers.
+        </p>
+        <DataTable
+          caption="Dépôt requis · SRRV Classic"
+          rows={[
+            { label: '50 ans et plus, avec pension', sub: "Pension d'au moins 800 $/mois", value: '15 000 $US' },
+            { label: '50 ans et plus, sans pension', value: '30 000 $US' },
+            { label: '40 à 49 ans, avec pension', value: '25 000 $US' },
+            { label: '40 à 49 ans, sans pension', value: '50 000 $US' },
+          ]}
+        />
+        <p className="!mt-5">
+          S'y ajoutent 1 500 $US de frais de dossier pour le demandeur principal, plus 300 $US
+          par personne à charge.
+        </p>
+        <p>
+          Une variante existe, le SRRV Courtesy, réservée aux anciens citoyens philippins ayant
+          renoncé à leur nationalité : le dépôt tombe à 1 500 $US dès 50 ans, ou 3 000 $US entre 40
+          et 49 ans.
+        </p>
+        <InlineLink href={SRRV_ARTICLE}>Comparatif détaillé SRRV vs 13(a)</InlineLink>
+      </SplitSection>
 
-                    {/* Point central */}
-                    <div className="hidden md:flex md:w-2/12 justify-center">
-                      <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-bold shadow-lg z-10">
-                        {item.step}
-                      </div>
-                    </div>
-
-                    {/* Espace vide */}
-                    <div className="hidden md:block md:w-5/12" />
-                  </div>
-                ))}
-              </div>
-            </div>
+      {/* Bande "atouts du SRRV" (fond muté, texte foncé = contraste AA) */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <SectionHeader
+            eyebrow="Ce que ça change"
+            title="Les atouts du"
+            accent="SRRV"
+            description="Au-delà du droit de rester, le SRRV simplifie la vie quotidienne d'un retraité installé sur place."
+          />
+          <div className="mt-8 max-w-4xl">
+            <CheckList
+              columns={2}
+              items={[
+                'Une résidence permanente aux Philippines',
+                'Des entrées et sorties du territoire sans limite',
+                'Aucun renouvellement annuel à gérer',
+                'Une exemption de certains droits de douane',
+                "L'importation de vos biens en franchise, jusqu'à 7 000 $US",
+                'Un dépôt que vous récupérez en cas de départ définitif',
+              ]}
+            />
           </div>
+          <a
+            href="https://pra.gov.ph/SRRVisa"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-8 inline-flex items-center gap-2 text-[15px] font-semibold text-accent-strong hover:text-accent-strong/80"
+          >
+            <ExternalLink className="h-4 w-4" aria-hidden="true" />
+            Site officiel de la Philippine Retirement Authority (PRA)
+          </a>
+        </div>
+      </section>
 
-          {/* Points importants */}
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-accent/5 border border-accent/25 rounded-xl p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-accent/15 rounded-full flex items-center justify-center flex-shrink-0">
-                  <AlertTriangle className="h-6 w-6 text-accent-strong" />
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-3 text-foreground">Points importants à retenir</h4>
-                  <ul className="space-y-2 text-muted-foreground">
-                    {[
-                      "L'AEP est lié à un employeur spécifique : changement d'emploi = nouvelle demande",
-                      "L'entreprise sponsor doit généralement avoir un capital minimum de 200 000 $US",
-                      "Tout retard de renouvellement peut entraîner des pénalités ou un blacklistage",
-                      "Certaines professions sont exemptées d'AEP (diplomates, résidents permanents...)"
-                    ].map((point, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <ChevronRight className="h-5 w-5 text-accent-strong flex-shrink-0" />
-                        <span>{point}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+      {/* Chapitre 4 — Visa de travail 9G (photo travailleur, à droite) */}
+      <SplitSection
+        reverse
+        eyebrow="Travailler légalement"
+        title="Visa de travail"
+        titleAccent="9(G)"
+        imageUrl="/imagesHero/travailleur-etranger-aux-philippines.webp"
+        imageAlt="Travailleur étranger sur un chantier aux Philippines"
+      >
+        <p>
+          Travailler légalement aux Philippines suppose deux documents qui vont de pair : un permis
+          de travail, l'AEP délivré par le DOLE, puis le visa 9(G) lui-même. Et tout commence
+          par l'employeur.
+        </p>
+        <Steps
+          steps={[
+            {
+              title: 'AEP — permis de travail',
+              meta: '2 à 3 semaines',
+              text: "Délivré par le DOLE. Votre employeur doit démontrer qu'aucun Philippin qualifié n'est disponible pour le poste.",
+            },
+            {
+              title: 'PWP — permis provisoire',
+              meta: '3 mois, renouvelable',
+              text: 'Facultatif. Il vous laisse travailler pendant que le 9(G) est instruit.',
+            },
+            {
+              title: 'Visa 9(G)',
+              meta: '1 à 3 ans',
+              text: "Déposé après l'AEP auprès du Bureau of Immigration.",
+            },
+          ]}
+        />
+        <CautionBox
+          title="À garder en tête"
+          items={[
+            "L'AEP est rattaché à un employeur précis : changer de poste, c'est refaire toute la démarche.",
+            "L'entreprise qui vous parraine doit en général disposer d'un capital d'au moins 200 000 $US.",
+            'Un renouvellement en retard peut coûter des pénalités, voire un blacklistage.',
+            'Certaines professions en sont dispensées, comme les diplomates ou les résidents permanents.',
+          ]}
+        />
+      </SplitSection>
 
-        {/* Visa Étudiant 9F */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-3">Visa Étudiant (9F)</h2>
-          <p className="text-center text-muted-foreground mb-8">Poursuivez vos études aux Philippines</p>
+      {/* Chapitre 5 — Visa étudiant 9F (photo université, à gauche) */}
+      <SplitSection
+        eyebrow="Étudier sur place"
+        title="Visa étudiant"
+        titleAccent="9(F)"
+        imageUrl="/imagesHero/ou-et-comment-etudier-aux-philippines.webp"
+        imageAlt="Université historique dans une rue animée des Philippines"
+      >
+        <p>
+          Vous avez 18 ans ou plus et une place dans une université philippine accréditée par la CHED
+          (<em>Commission on Higher Education</em>) ? Le visa étudiant 9(F) vous ouvre les portes de
+          l'enseignement supérieur sur l'archipel.
+        </p>
+        <h4>Le parcours, étape par étape</h4>
+        <Steps
+          steps={[
+            { text: 'Décrochez votre admission dans un établissement accrédité CHED.' },
+            { text: "L'université transmet votre dossier à la CHED." },
+            { text: 'Après validation, il part au Bureau of Immigration.' },
+            { text: "Le DFA prévient l'ambassade, qui délivre votre visa." },
+          ]}
+        />
+        <h4>Les pièces à réunir</h4>
+        <CheckList
+          columns={2}
+          items={[
+            "Lettre d'acceptation de l'université",
+            'Relevés de notes authentifiés',
+            'Certificat de bonne conduite',
+            'Preuve de capacité financière',
+            'Certificat médical',
+            'Casier judiciaire vierge',
+          ]}
+        />
+        <p className="!mt-5">
+          Le visa 9(F) est valable un an, renouvelable, et compte 2 à 8 semaines de délai
+          d'obtention.
+        </p>
+        <InlineLink href="/vivre-aux-philippines/etudier/universites">
+          Découvrir les universités philippines
+        </InlineLink>
+      </SplitSection>
 
-          <div className="max-w-4xl mx-auto bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest overflow-hidden">
-            <div className="flex items-center gap-3 bg-muted px-6 py-4 border-b border-border">
-              <span className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                <GraduationCap className="h-5 w-5 text-primary" />
-              </span>
-              <h3 className="font-bold text-lg text-foreground">Étudier aux Philippines</h3>
-            </div>
-            <div className="p-6">
-              <p className="text-muted-foreground mb-6">
-                Le visa étudiant 9(F) est destiné aux étrangers de 18 ans et plus souhaitant suivre des études supérieures
-                dans une université accréditée par la CHED (Commission on Higher Education).
-              </p>
+      {/* Comparatif (pause tonale mutée, tableau sur carte blanche) */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <SectionHeader eyebrow="En un coup d'œil" title="Comparatif des" accent="visas" />
 
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-muted rounded-lg p-5">
-                  <h4 className="font-semibold mb-4 text-foreground">Procédure en 4 étapes</h4>
-                  <div className="space-y-3">
-                    {[
-                      "Admission dans une université accréditée CHED",
-                      "L'université transmet votre dossier à la CHED",
-                      "Après approbation, transmission au Bureau of Immigration",
-                      "Le DFA informe l'ambassade pour délivrance du visa"
-                    ].map((step, index) => (
-                      <div key={index} className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-primary-foreground text-xs font-bold">{index + 1}</span>
-                        </div>
-                        <span className="text-sm text-muted-foreground">{step}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-muted rounded-lg p-5">
-                  <h4 className="font-semibold mb-4 text-foreground">Documents clés</h4>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    {[
-                      "Lettre d'acceptation de l'université",
-                      "Relevés de notes authentifiés",
-                      "Certificat de bonne conduite",
-                      "Preuve de capacité financière",
-                      "Certificat médical",
-                      "Casier judiciaire vierge"
-                    ].map((doc, index) => (
-                      <li key={index} className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-primary" />
-                        {doc}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              <div className="mt-6 flex flex-wrap gap-3 justify-center">
-                <span className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
-                  Validité : 1 an renouvelable
-                </span>
-                <span className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium">
-                  Délai : 2 à 8 semaines
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 text-center">
-            <Link
-              href="/vivre-aux-philippines/etudier/universites"
-              className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium"
-            >
-              Découvrir les universités philippines
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </section>
-
-        {/* Tableau récapitulatif - Style amélioré */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8">Comparatif des visas</h2>
-
-          <div className="overflow-x-auto">
-            <div className="bg-card border-[0.5px] border-border rounded-xl shadow-card-rest overflow-hidden min-w-[700px]">
-              <div className="bg-gradient-to-r from-primary to-primary/80 text-white">
-                <div className="grid grid-cols-4 p-4">
-                  <div className="font-semibold">Type de visa</div>
-                  <div className="font-semibold">Durée max.</div>
-                  <div className="font-semibold">Condition principale</div>
-                  <div className="font-semibold">Coût estimé</div>
-                </div>
+          <div className="mt-8 overflow-x-auto">
+            <div className="min-w-[720px] overflow-hidden rounded-2xl border-[0.5px] border-border bg-card shadow-card-rest">
+              <div className="grid grid-cols-[1.4fr_0.8fr_1.4fr_1.1fr] bg-primary text-[13px] font-semibold uppercase tracking-[0.04em] text-primary-foreground">
+                <div className="px-5 py-4">Type de visa</div>
+                <div className="px-5 py-4">Durée max.</div>
+                <div className="px-5 py-4">Condition principale</div>
+                <div className="px-5 py-4">Coût estimé</div>
               </div>
               <div className="divide-y divide-border">
-                {[
-                  { type: "Exemption (tourisme)", duration: "30 jours", condition: "Nationalité française", cost: "Gratuit" },
-                  { type: "9A (touriste)", duration: "36 mois", condition: "Extensions successives", cost: "3 000-13 900 PHP/ext." },
-                  { type: "SRRV (retraite)", duration: "Permanent", condition: "40+ ans, dépôt bancaire", cost: "15 000-50 000 $US" },
-                  { type: "9G (travail)", duration: "1-3 ans", condition: "Contrat + AEP", cost: "Pris en charge employeur" },
-                  { type: "9F (étudiant)", duration: "1 an renouv.", condition: "Admission université CHED", cost: "Variable" }
-                ].map((visa, index) => (
-                  <div key={index} className={`grid grid-cols-4 p-4 ${index % 2 === 0 ? 'bg-card' : 'bg-muted'} hover:bg-primary/5 transition-colors`}>
-                    <div className="font-medium flex items-center gap-2">
-                      <div className="w-2 h-8 bg-primary/30 rounded-full" />
-                      {visa.type}
+                {comparatifRows.map((visa, index) => (
+                  <div
+                    key={visa.type}
+                    className={cn(
+                      'grid grid-cols-[1.4fr_0.8fr_1.4fr_1.1fr] items-center',
+                      index % 2 === 1 && 'bg-muted/50'
+                    )}
+                  >
+                    <div className="flex items-center gap-3 px-5 py-4">
+                      <span className="h-8 w-1.5 flex-shrink-0 rounded-full bg-primary/30" aria-hidden="true" />
+                      <span className="text-[14px] font-semibold text-foreground">{visa.type}</span>
                     </div>
-                    <div className="flex items-center">
-                      <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
+                    <div className="px-5 py-4">
+                      <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-[13px] font-medium text-primary">
                         {visa.duration}
                       </span>
                     </div>
-                    <div className="text-muted-foreground flex items-center">{visa.condition}</div>
-                    <div className="font-medium flex items-center">{visa.cost}</div>
+                    <div className="px-5 py-4 text-[14px] text-muted-foreground">{visa.condition}</div>
+                    <div className="px-5 py-4 text-[14px] font-medium text-foreground">{visa.cost}</div>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Ressources officielles */}
-        <section className="mb-12">
-          <CardGrid title="Ressources officielles" columns={4}>
-            {[
-              { name: "Bureau of Immigration", url: "https://immigration.gov.ph/", domain: "immigration.gov.ph" },
-              { name: "Philippine Retirement Authority", url: "https://pra.gov.ph/", domain: "pra.gov.ph" },
-              { name: "Ambassade Philippines (Paris)", url: "https://parispe.dfa.gov.ph/", domain: "parispe.dfa.gov.ph" },
-              { name: "eTravel (enregistrement)", url: "https://etravel.gov.ph/", domain: "etravel.gov.ph" }
-            ].map((resource, index) => (
+      {/* Ressources officielles (cartes justifiées : liens externes) */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <CardGrid eyebrow="À consulter" title="Ressources" titleAccent="officielles" columns={4}>
+            {ressources.map((resource) => (
               <a
-                key={index}
+                key={resource.domain}
                 href={resource.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 p-4 bg-card rounded-xl border border-border hover:border-primary hover:shadow-card transition-all group"
+                className="group flex items-center gap-3 rounded-2xl border-[0.5px] border-border bg-card p-4 shadow-card-rest transition-all duration-200 hover:-translate-y-1 hover:border-primary/30 hover:shadow-card motion-reduce:hover:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
-                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                  <ExternalLink className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium text-sm group-hover:text-primary transition-colors">{resource.name}</p>
-                  <p className="text-xs text-muted-foreground">{resource.domain}</p>
-                </div>
+                <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
+                  <ExternalLink className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[14px] font-semibold text-foreground transition-colors group-hover:text-primary">
+                    {resource.name}
+                  </span>
+                  <span className="block truncate text-[12px] text-muted-foreground">
+                    {resource.domain}
+                  </span>
+                </span>
               </a>
             ))}
           </CardGrid>
+        </div>
+      </section>
+
+      {/* Navigation interne */}
+      <section className="bg-background pb-16 md:pb-20">
+        <div className="container mx-auto px-4">
+          <div className="border-t border-border pt-14">
+            <CardGrid
+              eyebrow="Pour aller plus loin"
+              title="Continuez votre"
+              titleAccent="exploration"
+              columns={3}
+            >
+              <LinkCard
+                title="Trouver un logement"
+                href="/vivre-aux-philippines/logement"
+                desc="Condos, maisons et quartiers où poser ses valises."
+                cta="En savoir plus"
+              />
+              <LinkCard
+                title="Ouvrir un compte en banque"
+                href="/vivre-aux-philippines/banque-finances"
+                desc="Banques, assurances et gestion de votre argent sur place."
+                cta="En savoir plus"
+              />
+              <LinkCard
+                title="Forum des expatriés"
+                href="/forum-sur-les-philippines"
+                desc="Posez vos questions à ceux qui ont déjà fait le grand saut."
+                cta="Rejoindre la discussion"
+              />
+            </CardGrid>
+          </div>
+        </div>
+      </section>
+
+      {/* Articles de la catégorie */}
+      {articles && articles.length > 0 && (
+        <section className="bg-background pb-16 md:pb-20">
+          <div className="container mx-auto px-4">
+            <div className="border-t border-border pt-14">
+              <SectionHeader
+                eyebrow="À lire aussi"
+                title="Nos articles visas &"
+                accent="formalités"
+              />
+              <div className="mt-8">
+                <ArticleList articles={articles} basePath="vivre-aux-philippines" />
+              </div>
+            </div>
+          </div>
         </section>
+      )}
 
-        {/* Navigation */}
-        <section className="border-t border-border pt-12">
-          <CardGrid title="Continuez votre exploration" columns={3}>
-            <LinkCard title="Trouver un logement" href="/vivre-aux-philippines/logement" desc="Condos, maisons, quartiers" cta="En savoir plus" />
-            <LinkCard title="Ouvrir un compte en banque" href="/vivre-aux-philippines/banque-finances" desc="Banques et assurances" cta="En savoir plus" />
-            <LinkCard title="Forum expatriés" href="/forum-sur-les-philippines" desc="Échangez avec la communauté" cta="En savoir plus" />
-          </CardGrid>
-        </section>
-
-        {/* Nos articles Visas & Formalités */}
-        {articles && articles.length > 0 && (
-          <section className="border-t border-border pt-12 mt-16">
-            <h2 className="text-3xl font-bold text-center mb-12">Nos articles Visas & Formalités</h2>
-            <ArticleList articles={articles} basePath="vivre-aux-philippines" />
-          </section>
-        )}
-
-      </div>
+      {/* Panneau signature de clôture */}
+      <CTABand
+        title="Un doute sur"
+        titleAccent="votre situation ?"
+        subtitle="Relancez le simulateur en haut de page pour une première orientation, ou exposez votre cas à la communauté d'expatriés sur le forum."
+        primary={{ label: 'Poser ma question sur le forum', href: '/forum-sur-les-philippines' }}
+        secondary={{ label: 'Comparatif SRRV vs 13(a)', href: SRRV_ARTICLE }}
+      />
     </div>
   );
 };
