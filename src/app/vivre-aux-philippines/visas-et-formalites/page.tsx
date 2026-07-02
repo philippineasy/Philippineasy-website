@@ -517,8 +517,8 @@ const VisasEtFormalitesPage = async () => {
       >
         <p>
           Travailler légalement aux Philippines suppose deux documents qui vont de pair : un permis
-          de travail, l'AEP délivré par le DOLE, puis le visa 9(G) lui-même. Et tout commence
-          par l'employeur.
+          de travail, l'AEP (<em>Alien Employment Permit</em>) délivré par le DOLE, puis le visa
+          9(G) lui-même. Et tout commence par l'employeur.
         </p>
         <Steps
           steps={[
