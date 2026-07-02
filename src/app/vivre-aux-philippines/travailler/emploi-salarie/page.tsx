@@ -43,7 +43,7 @@ const EmploiSalariePage = () => {
         title="Trouver un"
         titleAccent="Emploi Salarié"
         subtitle="Le marché du travail philippin pour les expatriés : opportunités, démarches et conseils pour décrocher un poste."
-        imageUrl="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1932&auto=format&fit=crop"
+        imageUrl="/imagesHero/travailleur-etranger-aux-philippines.webp"
         imageAlt="Trouver un Emploi Salarié"
       />
 

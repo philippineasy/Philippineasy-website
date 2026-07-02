@@ -1,13 +1,16 @@
 import { Metadata } from 'next';
-import { Shield, Hospital, AlertTriangle, CheckCircle, Heart, Globe, Landmark, Syringe, ShieldAlert } from 'lucide-react';
-import { PageHero, StatRow, CardGrid, LinkCard, type StatItem } from '@/components/sections';
+import type { ReactNode } from 'react';
+import Link from 'next/link';
+import { Shield, Hospital, Heart, Globe, CheckCircle, AlertTriangle, ExternalLink, ArrowRight, Landmark, Syringe } from 'lucide-react';
 import { faShieldHalved } from '@fortawesome/free-solid-svg-icons';
+import { PageHero, StatRow, SplitSection, CardGrid, LinkCard } from '@/components/sections';
 import { AffiliateRecommendation } from '@/components/affiliate/AffiliateRecommendation';
-import { createClient } from '@/utils/supabase/server';
-import { getArticlesByCategorySlug } from '@/services/articleService';
-import ArticleList from '@/components/shared/ArticleList';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
+import ArticleList from '@/components/shared/ArticleList';
+import { createClient } from '@/utils/supabase/server';
+import { getArticlesByCategorySlug } from '@/services/articleService';
+import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: "Santé et Assurances aux Philippines 2026 : Guide Expatrié",
@@ -41,32 +44,235 @@ export const metadata: Metadata = {
   },
 };
 
-const quickStats: StatItem[] = [
-  { icon: <Shield className="text-[18px]" />, value: '3', label: "types d'assurance" },
-  { icon: <Hospital className="text-[18px]" />, value: '6', label: 'hôpitaux de référence' },
-  { icon: <Heart className="text-[18px]" />, value: '3', label: 'HMO locales' },
-  { icon: <Globe className="text-[18px]" />, value: '4', label: 'assureurs internationaux' },
+const breadcrumbItems = [
+  { href: '/', label: 'Accueil' },
+  { href: '/vivre-aux-philippines', label: 'Vivre aux Philippines' },
+  { label: 'Santé & Assurances' },
+];
+
+const breadcrumbJsonLdItems = [
+  { name: 'Accueil', item: '/' },
+  { name: 'Vivre aux Philippines', item: '/vivre-aux-philippines' },
+  { name: 'Santé & Assurances', item: '/vivre-aux-philippines/sante-assurances' },
+];
+
+/* -------------------------------------------------------------------------- */
+/* Petits blocs éditoriaux locaux (server components), repris à l'identique   */
+/* du pattern validé sur /vivre-aux-philippines/visas-et-formalites.          */
+/* -------------------------------------------------------------------------- */
+
+// En-tête de section : eyebrow uppercase + h2 avec UN mot en amber vif.
+const SectionHeader = ({
+  eyebrow,
+  title,
+  accent,
+  description,
+}: {
+  eyebrow: string;
+  title: string;
+  accent?: string;
+  description?: string;
+}) => (
+  <div className="max-w-2xl">
+    <span className="mb-3 inline-block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+      {eyebrow}
+    </span>
+    <h2
+      className="text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold text-foreground"
+      style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
+    >
+      {title}
+      {accent && (
+        <>
+          {' '}
+          <span className="text-accent">{accent}</span>
+        </>
+      )}
+    </h2>
+    {description && (
+      <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">{description}</p>
+    )}
+  </div>
+);
+
+// Liste "cochée" (garanties, assureurs). Div-based pour ne pas hériter des
+// puces disc du rich-text de SplitSection. Accepte du JSX (liens inline).
+const CheckList = ({ items, columns = 1 }: { items: ReactNode[]; columns?: 1 | 2 }) => (
+  <div
+    className={cn('mt-4 grid gap-2.5', columns === 2 && 'sm:grid-cols-2 sm:gap-x-6')}
+    role="list"
+  >
+    {items.map((item, i) => (
+      <div
+        key={i}
+        role="listitem"
+        className="flex items-start gap-2.5 text-[15px] leading-[1.55] text-foreground"
+      >
+        <CheckCircle
+          className="mt-[3px] h-[18px] w-[18px] flex-shrink-0 text-primary"
+          aria-hidden="true"
+        />
+        <span>{item}</span>
+      </div>
+    ))}
+  </div>
+);
+
+// Étapes numérotées (la recommandation en 3 niveaux). Pastille bleue + titre + texte.
+const Steps = ({
+  steps,
+}: {
+  steps: { title?: string; meta?: string; text: string }[];
+}) => (
+  <div className="mt-5 flex flex-col gap-4" role="list">
+    {steps.map((s, i) => (
+      <div key={i} role="listitem" className="flex gap-3.5">
+        <span
+          className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-primary text-[13px] font-bold text-primary-foreground"
+          aria-hidden="true"
+        >
+          {i + 1}
+        </span>
+        <div className="pt-0.5">
+          {s.title && (
+            <span className="flex flex-wrap items-center gap-2 text-[15px] font-semibold text-foreground">
+              {s.title}
+              {s.meta && (
+                <span className="rounded bg-muted px-2 py-0.5 text-[12px] font-medium tabular-nums text-muted-foreground">
+                  {s.meta}
+                </span>
+              )}
+            </span>
+          )}
+          <span
+            className={cn(
+              'block text-[14px] leading-[1.55]',
+              s.title ? 'mt-1 text-muted-foreground' : 'pt-1 text-foreground'
+            )}
+          >
+            {s.text}
+          </span>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+// Table de données compacte (cotisations, coûts). Le libellé + un montant aligné
+// à droite ; les chiffres sont en `text-foreground` pour un contraste AA net.
+const DataTable = ({
+  caption,
+  rows,
+}: {
+  caption: string;
+  rows: { label: string; sub?: string; value: string }[];
+}) => (
+  <div className="mt-6 overflow-hidden rounded-xl border-[0.5px] border-border bg-card">
+    <div className="border-b border-border bg-muted px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+      {caption}
+    </div>
+    <dl className="divide-y divide-border">
+      {rows.map((r) => (
+        <div key={r.label} className="flex items-baseline justify-between gap-4 px-4 py-3">
+          <dt className="text-[14px] text-foreground">
+            {r.label}
+            {r.sub && (
+              <span className="mt-0.5 block text-[12.5px] leading-snug text-muted-foreground">
+                {r.sub}
+              </span>
+            )}
+          </dt>
+          <dd className="whitespace-nowrap text-[14px] font-semibold tabular-nums text-foreground">
+            {r.value}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+);
+
+// Encadré d'avertissement honnête (bord accent).
+const CautionBox = ({ title, items }: { title: string; items: string[] }) => (
+  <div className="mt-6 rounded-r-lg border-l-4 border-accent bg-accent/5 py-4 pl-5 pr-4">
+    <div className="mb-2.5 flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.06em] text-accent-strong">
+      <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+      {title}
+    </div>
+    <div className="flex flex-col gap-2" role="list">
+      {items.map((it, i) => (
+        <div
+          key={i}
+          role="listitem"
+          className="flex gap-2.5 text-[14px] leading-[1.55] text-foreground/85"
+        >
+          <span
+            className="mt-[7px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-accent-strong"
+            aria-hidden="true"
+          />
+          <span>{it}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// Lien-action (portails officiels). Rendu à l'intérieur du rich-text de
+// SplitSection : on force la couleur accent-strong (AA) et le no-underline
+// via `style` inline, qui prime sur la règle `[&_a]` du conteneur.
+const inlineLinkClass =
+  'group mt-6 inline-flex items-center gap-2 text-[15px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm';
+const inlineLinkStyle = {
+  color: 'hsl(var(--accent-strong))',
+  textDecoration: 'none',
+} as const;
+
+const InlineLink = ({
+  href,
+  external,
+  children,
+}: {
+  href: string;
+  external?: boolean;
+  children: ReactNode;
+}) =>
+  external ? (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={inlineLinkClass}
+      style={inlineLinkStyle}
+    >
+      <ExternalLink className="h-4 w-4" aria-hidden="true" />
+      {children}
+    </a>
+  ) : (
+    <Link href={href} className={inlineLinkClass} style={inlineLinkStyle}>
+      {children}
+      <ArrowRight
+        className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:group-hover:translate-x-0"
+        aria-hidden="true"
+      />
+    </Link>
+  );
+
+const hopitauxRows = [
+  { name: "St. Luke's Medical Center", location: 'BGC & Quezon City', desc: 'Standard international, soins complexes' },
+  { name: 'Makati Medical Center', location: 'Makati CBD', desc: 'Excellence en cardiologie et oncologie' },
+  { name: 'The Medical City', location: 'Pasig', desc: 'Équipe multilingue, département international' },
+  { name: 'Asian Hospital', location: 'Alabang (Sud Manille)', desc: 'Excellentes infrastructures' },
+  { name: "Cebu Doctors' University Hospital", location: 'Cebu City', desc: 'Référence pour les Visayas, tarifs accessibles' },
+  { name: 'Chong Hua Hospital', location: 'Cebu City', desc: 'Accrédité JCI (standard international)' },
 ];
 
 const SanteAssurancesPage = async () => {
   const supabase = await createClient();
   const { data: articles } = await getArticlesByCategorySlug(supabase, 'sante-assurances');
 
-  const breadcrumbItems = [
-    { href: '/', label: 'Accueil' },
-    { href: '/vivre-aux-philippines', label: 'Vivre aux Philippines' },
-    { label: 'Santé & Assurances' },
-  ];
-
-  const breadcrumbJsonLdItems = [
-    { name: 'Accueil', item: '/' },
-    { name: 'Vivre aux Philippines', item: '/vivre-aux-philippines' },
-    { name: 'Santé & Assurances', item: '/vivre-aux-philippines/sante-assurances' },
-  ];
-
   return (
     <div className="bg-background">
       <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
+
       <PageHero
         eyebrow="Vivre aux Philippines"
         title="Santé &"
@@ -76,298 +282,299 @@ const SanteAssurancesPage = async () => {
         imageAlt="Santé & Assurances"
       />
 
-      <div className="container mx-auto px-4 py-12 max-w-6xl">
+      {/* Intro éditoriale + chiffres clés ancrés */}
+      <section className="bg-background pt-10 md:pt-12">
+        <div className="container mx-auto px-4">
+          <Breadcrumb items={breadcrumbItems} />
 
-        <Breadcrumb items={breadcrumbItems} />
-
-        {/* Stats rapides */}
-        <section className="mb-12">
-          <StatRow stats={quickStats} className="justify-center" />
-        </section>
-
-        {/* Introduction */}
-        <section className="mb-12">
-          <p className="text-lg text-muted-foreground leading-relaxed max-w-4xl mx-auto text-center">
-            Une fois installé aux Philippines, souscrire une assurance santé adaptée est une priorité
-            pour vous protéger en cas de pépin. Le système de santé philippin est de qualité dans les
-            grandes villes, mais les soins peuvent être coûteux. Ce guide vous accompagne dans le choix
-            d'une couverture adaptée à votre situation.
-          </p>
-        </section>
-
-        {/* ========== SECTION ASSURANCE ========== */}
-        <section className="mb-16">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-              <Shield className="h-6 w-6 text-green-600" />
-            </div>
-            <h2 className="text-3xl font-bold">Assurance Santé</h2>
-          </div>
-          <p className="text-center text-muted-foreground mb-10 max-w-3xl mx-auto">
-            Le système de santé philippin est de qualité dans les grandes villes, mais les soins peuvent
-            être coûteux. Une bonne couverture est indispensable.
-          </p>
-
-          {/* PhilHealth */}
-          <div className="max-w-4xl mx-auto bg-white border-l-4 border-l-green-500 rounded-xl shadow-sm overflow-hidden mb-10">
-            <div className="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4">
-              <div className="flex items-center gap-3">
-                <Shield className="h-6 w-6 text-white" />
-                <h3 className="font-bold text-lg text-white">PhilHealth : L'assurance sociale nationale</h3>
-              </div>
-            </div>
-            <div className="p-6">
-              <p className="text-muted-foreground mb-5">
-                PhilHealth est le système national d'assurance santé philippin. Les expatriés résidents
-                peuvent y adhérer volontairement pour bénéficier d'une couverture de base.
+          <div className="mt-8">
+            <SectionHeader
+              eyebrow="Une priorité dès l'installation"
+              title="Se soigner aux"
+              accent="Philippines"
+            />
+            <div className="mt-5 max-w-2xl space-y-4 text-[16px] leading-[1.7] text-muted-foreground">
+              <p>
+                Une fois vos valises posées, la santé grimpe vite en tête des priorités. Les
+                grandes villes offrent des soins de bon niveau, mais dans le privé, la facture
+                suit — une bonne couverture n&apos;est pas un luxe, c&apos;est une nécessité.
               </p>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-green-50 rounded-lg p-4">
-                  <h4 className="font-semibold mb-3 text-green-800">Cotisations 2026</h4>
-                  <div className="space-y-3">
-                    {[
-                      { label: "Salariés", value: "5% du salaire (partagé)" },
-                      { label: "Adhésion volontaire", value: "2 400 à 5 000 PHP/an" }
-                    ].map((item, index) => (
-                      <div key={index} className="bg-white rounded-lg px-4 py-2 border border-green-100">
-                        <span className="font-medium text-green-800 text-sm">{item.label}</span>
-                        <p className="text-green-700 text-xs">{item.value}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="font-semibold mb-3">Couverture</h4>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    {[
-                      "Hospitalisations (forfaits)",
-                      "Consultations publiques",
-                      "Chirurgies non urgentes"
-                    ].map((item, index) => (
-                      <li key={index} className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              <div className="mt-5 bg-amber-50 border border-amber-200 rounded-xl p-4">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-amber-800">
-                    <strong>Limite :</strong> PhilHealth fonctionne avec des forfaits fixes.
-                    Reste à charge jusqu'à 40% pour les soins complexes ou hôpitaux privés.
-                  </p>
-                </div>
-              </div>
+              <p>
+                Nous avons détaillé les trois niveaux de protection à votre disposition :
+                PhilHealth, l&apos;assurance sociale nationale, les HMO locales pour le quotidien,
+                et les assurances internationales pour les pépins plus lourds. Avec, en bout de
+                chaîne, les hôpitaux où ces couvertures sont vraiment utiles.
+              </p>
             </div>
           </div>
 
-          {/* HMO locales */}
-          <CardGrid
-            title="Les HMO locales"
-            subtitle="Health Maintenance Organizations - Couverture complémentaire recommandée"
-            columns={3}
-            className="mb-10"
-          >
-            {[
-              { name: "Maxicare", desc: "Leader du marché avec large réseau d'hôpitaux.", features: ["Plans individuels et familiaux", "Réseau étendu", "À partir de ~15 000 PHP/an"], color: "blue" },
-              { name: "Intellicare", desc: "Bon rapport qualité-prix avec options flexibles.", features: ["Plans personnalisables", "Bonne couverture dentaire", "Options maternité"], color: "purple" },
-              { name: "MediCard", desc: "Ancienneté et fiabilité sur le marché philippin.", features: ["+500 hôpitaux partenaires", "Plans entreprise/individuels", "Réclamation simple"], color: "teal" }
-            ].map((hmo, index) => (
-              <div key={index} className={`bg-gradient-to-br from-${hmo.color}-50 to-${hmo.color}-100 border border-${hmo.color}-200 rounded-xl p-5`}>
-                <div className={`w-12 h-12 bg-${hmo.color}-100 rounded-full flex items-center justify-center mb-3`}>
-                  <Heart className={`h-6 w-6 text-${hmo.color}-600`} />
-                </div>
-                <h4 className={`font-bold text-${hmo.color}-800 mb-2`}>{hmo.name}</h4>
-                <p className={`text-sm text-${hmo.color}-700 mb-3`}>{hmo.desc}</p>
-                <ul className="space-y-1">
-                  {hmo.features.map((feature, idx) => (
-                    <li key={idx} className={`text-xs text-${hmo.color}-600 flex items-center gap-1`}>
-                      <CheckCircle className="h-3 w-3" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
+          <div className="mt-10 max-w-4xl">
+            <StatRow
+              stats={[
+                { value: '3', label: "types d'assurance", icon: <Shield className="text-[18px]" /> },
+                { value: '6', label: 'hôpitaux de référence', icon: <Hospital className="text-[18px]" /> },
+                { value: '3', label: 'HMO locales', icon: <Heart className="text-[18px]" /> },
+                { value: '4', label: 'assureurs internationaux', icon: <Globe className="text-[18px]" /> },
+              ]}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Chapitre 1 — PhilHealth (photo agence assurance, à droite) */}
+      <SplitSection
+        eyebrow="L'assurance sociale"
+        title="PhilHealth, le"
+        titleAccent="socle national"
+        imageUrl="/imagesHero/banque-assurance-philippines.webp"
+        imageAlt="Agence bancaire affichant une enseigne assurance aux Philippines"
+      >
+        <p>
+          PhilHealth est le système national d&apos;assurance santé des Philippines. En tant
+          qu&apos;expatrié résident, vous pouvez y adhérer volontairement pour une couverture de
+          base — utile en complément, mais rarement suffisante à elle seule.
+        </p>
+        <DataTable
+          caption="Cotisations 2026"
+          rows={[
+            { label: 'Salariés', value: '5% du salaire (partagé)' },
+            { label: 'Adhésion volontaire', value: '2 400 à 5 000 PHP/an' },
+          ]}
+        />
+        <h4>Ce qui est couvert</h4>
+        <CheckList
+          items={[
+            'Hospitalisations, sous forme de forfaits',
+            'Consultations dans le secteur public',
+            'Chirurgies non urgentes',
+          ]}
+        />
+        <CautionBox
+          title="La limite à connaître"
+          items={[
+            "Les forfaits sont fixes : ce n'est pas un remboursement intégral des frais réels.",
+            'Pour les soins complexes ou en hôpital privé, le reste à charge grimpe jusqu\'à 40%.',
+          ]}
+        />
+        <InlineLink href="https://www.philhealth.gov.ph/" external>
+          Adhérer en ligne : le portail officiel de PhilHealth
+        </InlineLink>
+      </SplitSection>
+
+      {/* Chapitre 2 — HMO locales (photo résidence, à gauche) */}
+      <SplitSection
+        reverse
+        eyebrow="Le complément recommandé"
+        title="Les HMO,"
+        titleAccent="au quotidien"
+        imageUrl="/images/famille/famille-condominium-philippines.webp"
+        imageAlt="Résidence avec piscine et jardin tropical, cadre de vie d'un expatrié aux Philippines"
+      >
+        <p>
+          Pour les soins courants — consultations, petits pépins, dentaire — la plupart des
+          expatriés s&apos;appuient sur une HMO (<em>Health Maintenance Organization</em>), une
+          couverture complémentaire souscrite en plus de PhilHealth.
+        </p>
+        <p>
+          Trois acteurs se partagent ce marché. Maxicare, leader avec le plus large réseau
+          d&apos;hôpitaux partenaires, propose des plans individuels et familiaux à partir
+          d&apos;environ 15 000 PHP par an. Intellicare mise sur des formules personnalisables,
+          une bonne couverture dentaire et des options maternité. MediCard, l&apos;un des plus
+          anciens acteurs du secteur, revendique plus de 500 hôpitaux partenaires et une
+          procédure de réclamation simplifiée, pour les particuliers comme pour les entreprises.
+        </p>
+        <p className="!mt-5">
+          Ces couvertures suffisent au quotidien. Pour un accident grave, une hospitalisation
+          lourde ou un rapatriement, mieux vaut regarder du côté des assurances internationales.
+        </p>
+      </SplitSection>
+
+      {/* Chapitre 3 — Assurances internationales (photo voyage/aéroport, à droite) */}
+      <SplitSection
+        eyebrow="Pour les coups durs"
+        title="Une couverture"
+        titleAccent="mondiale"
+        imageUrl="/images/sante/vaccins-voyage-philippines.webp"
+        imageAlt="Voyageuse portant un masque et consultant son téléphone dans un aéroport"
+      >
+        <p>
+          Pour une couverture complète avec rapatriement et soins à l&apos;étranger, les
+          assurances internationales offrent une meilleure prise en charge dans les hôpitaux
+          premium.
+        </p>
+        <h4>Quatre assureurs de référence</h4>
+        <CheckList
+          columns={2}
+          items={[
+            <>
+              <a href="https://www.cigna.com/" target="_blank" rel="noopener noreferrer">
+                Cigna Global
+              </a>{' '}
+              — couverture mondiale
+            </>,
+            <>
+              <a href="https://www.allianzcare.com/" target="_blank" rel="noopener noreferrer">
+                Allianz Care
+              </a>{' '}
+              — plans modulables
+            </>,
+            <>
+              <a href="https://www.axa.com/" target="_blank" rel="noopener noreferrer">
+                AXA
+              </a>{' '}
+              — présence locale
+            </>,
+            <>
+              <a href="https://www.april-international.com/" target="_blank" rel="noopener noreferrer">
+                April International
+              </a>{' '}
+              — spécialiste des expatriés français
+            </>,
+          ]}
+        />
+        <DataTable
+          caption="Coûts indicatifs · 2026"
+          rows={[
+            { label: 'Plan de base', sub: 'Hospitalisation', value: '30 – 50 €/mois' },
+            { label: 'Intermédiaire', sub: 'Consultations + hospitalisation', value: '80 – 150 €/mois' },
+            { label: 'Premium', sub: 'Couverture complète + rapatriement', value: '200 – 400 €/mois' },
+          ]}
+        />
+        <p className="!mt-5">
+          Ces tarifs varient selon votre âge, le niveau de couverture et la franchise choisie.
+        </p>
+      </SplitSection>
+
+      {/* Hôpitaux de référence (cartes sobres sur fond blanc) */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <SectionHeader eyebrow="Où se faire soigner" title="Hôpitaux de" accent="référence" />
+
+          <div className="mt-8 overflow-x-auto">
+            <div className="min-w-[640px] overflow-hidden rounded-2xl border-[0.5px] border-border bg-card shadow-card-rest">
+              <div className="grid grid-cols-[1.6fr_1fr_1.6fr] bg-primary text-[13px] font-semibold uppercase tracking-[0.04em] text-primary-foreground">
+                <div className="px-5 py-4">Hôpital</div>
+                <div className="px-5 py-4">Localisation</div>
+                <div className="px-5 py-4">Spécialité</div>
               </div>
-            ))}
-          </CardGrid>
-
-          {/* Assurances internationales */}
-          <h3 className="text-2xl font-bold text-center mb-6">Assurances internationales</h3>
-
-          <div className="max-w-4xl mx-auto bg-white border-l-4 border-l-indigo-500 rounded-xl shadow-sm overflow-hidden mb-10">
-            <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 px-6 py-4">
-              <div className="flex items-center gap-3">
-                <Globe className="h-6 w-6 text-white" />
-                <h3 className="font-bold text-lg text-white">Couverture mondiale pour expatriés</h3>
-              </div>
-            </div>
-            <div className="p-6">
-              <p className="text-muted-foreground mb-6">
-                Pour une couverture complète avec rapatriement et soins à l'étranger,
-                les assurances internationales offrent une meilleure prise en charge dans les hôpitaux premium.
-              </p>
-
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                {[
-                  { name: "Cigna Global", desc: "Couverture mondiale", url: "https://www.cigna.com/" },
-                  { name: "Allianz Care", desc: "Plans modulables", url: "https://www.allianzcare.com/" },
-                  { name: "AXA", desc: "Présence locale", url: "https://www.axa.com/" },
-                  { name: "April International", desc: "Spécialiste expats français", url: "https://www.april-international.com/" }
-                ].map((insurer, index) => (
-                  <a
-                    key={index}
-                    href={insurer.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-4 bg-indigo-50 border border-indigo-100 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all group text-center"
+              <div className="divide-y divide-border">
+                {hopitauxRows.map((h, index) => (
+                  <div
+                    key={h.name}
+                    className={cn(
+                      'grid grid-cols-[1.6fr_1fr_1.6fr] items-center',
+                      index % 2 === 1 && 'bg-muted/50'
+                    )}
                   >
-                    <h4 className="font-semibold text-indigo-800 group-hover:text-indigo-900">{insurer.name}</h4>
-                    <p className="text-xs text-indigo-600">{insurer.desc}</p>
-                  </a>
+                    <div className="flex items-center gap-3 px-5 py-4">
+                      <span className="h-8 w-1.5 flex-shrink-0 rounded-full bg-primary/30" aria-hidden="true" />
+                      <span className="text-[14px] font-semibold text-foreground">{h.name}</span>
+                    </div>
+                    <div className="px-5 py-4">
+                      <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-[13px] font-medium text-primary">
+                        {h.location}
+                      </span>
+                    </div>
+                    <div className="px-5 py-4 text-[14px] text-muted-foreground">{h.desc}</div>
+                  </div>
                 ))}
               </div>
-
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
-                <h4 className="font-semibold text-blue-900 mb-3">Coûts indicatifs (2026)</h4>
-                <div className="grid md:grid-cols-3 gap-3">
-                  {[
-                    { type: "Plan de base", price: "30-50 €/mois", desc: "Hospitalisation" },
-                    { type: "Intermédiaire", price: "80-150 €/mois", desc: "Consultations + hospi" },
-                    { type: "Premium", price: "200-400 €/mois", desc: "Complet + rapatriement" }
-                  ].map((plan, index) => (
-                    <div key={index} className="bg-white rounded-lg p-3 border border-blue-100 text-center">
-                      <span className="text-xs text-blue-600 uppercase">{plan.type}</span>
-                      <p className="text-lg font-bold text-blue-800">{plan.price}</p>
-                      <p className="text-xs text-blue-600">{plan.desc}</p>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs text-blue-700 mt-3 text-center">
-                  * Tarifs selon âge, couverture et franchises
-                </p>
-              </div>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Hôpitaux de référence */}
-          <CardGrid title="Hôpitaux de référence" columns={3}>
-            {[
-              { name: "St. Luke's Medical Center", location: "BGC & Quezon City", desc: "Standard international, soins complexes", color: "blue" },
-              { name: "Makati Medical Center", location: "Makati CBD", desc: "Excellence cardiologie et oncologie", color: "green" },
-              { name: "The Medical City", location: "Pasig", desc: "Équipe multilingue, dpt. international", color: "purple" },
-              { name: "Asian Hospital", location: "Alabang (Sud Manila)", desc: "Excellentes infrastructures", color: "amber" },
-              { name: "Cebu Doctors' University Hospital", location: "Cebu City", desc: "Référence Visayas, tarifs accessibles", color: "teal" },
-              { name: "Chong Hua Hospital", location: "Cebu City", desc: "Accrédité JCI (standard international)", color: "indigo" }
-            ].map((hospital, index) => (
-              <div key={index} className={`bg-white border-l-4 border-l-${hospital.color}-500 rounded-xl shadow-sm p-5`}>
-                <div className="flex items-start gap-3">
-                  <div className={`w-10 h-10 bg-${hospital.color}-100 rounded-full flex items-center justify-center flex-shrink-0`}>
-                    <Hospital className={`h-5 w-5 text-${hospital.color}-600`} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-sm">{hospital.name}</h4>
-                    <p className={`text-xs text-${hospital.color}-600 mb-1`}>{hospital.location}</p>
-                    <p className="text-xs text-muted-foreground">{hospital.desc}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </CardGrid>
-        </section>
-
-        {/* Recommandation finale */}
-        <section className="mb-16">
-          <div className="max-w-4xl mx-auto bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 rounded-xl p-8">
-            <div className="flex items-start gap-4">
-              <div className="w-14 h-14 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                <Heart className="h-8 w-8 text-primary" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-4">Notre recommandation</h3>
-                <p className="text-muted-foreground mb-6">
-                  Pour une protection optimale, nous conseillons aux expatriés de combiner :
-                </p>
-                <div className="space-y-4">
-                  {[
-                    { num: "1", title: "PhilHealth", desc: "Couverture de base (obligatoire si salarié, recommandé sinon)", color: "green" },
-                    { num: "2", title: "Une HMO locale", desc: "Maxicare, Intellicare pour soins courants et consultations", color: "blue" },
-                    { num: "3", title: "Assurance internationale", desc: "Pour événements majeurs et rapatriement si budget le permet", color: "purple" }
-                  ].map((step, index) => (
-                    <div key={index} className="flex items-start gap-4 bg-white/60 rounded-xl p-4">
-                      <div className={`w-10 h-10 bg-${step.color}-500 rounded-full flex items-center justify-center flex-shrink-0`}>
-                        <span className="text-white font-bold">{step.num}</span>
-                      </div>
-                      <div>
-                        <span className="font-semibold">{step.title}</span>
-                        <p className="text-sm text-muted-foreground">{step.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+      {/* Notre recommandation (pause tonale mutée — bloc conclusif éditorial) */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <SectionHeader
+            eyebrow="Notre avis"
+            title="Comment combiner"
+            accent="les trois"
+            description="Pour une protection complète sans payer plus que nécessaire, on recommande d'empiler ces trois niveaux."
+          />
+          <div className="mt-2 max-w-2xl">
+            <Steps
+              steps={[
+                {
+                  title: 'PhilHealth',
+                  text: 'La couverture de base : obligatoire si vous êtes salarié, recommandée dans tous les autres cas.',
+                },
+                {
+                  title: 'Une HMO locale',
+                  text: 'Maxicare ou Intellicare, par exemple, pour les soins courants et les consultations du quotidien.',
+                },
+                {
+                  title: 'Une assurance internationale',
+                  text: "Pour les événements majeurs et le rapatriement, si votre budget le permet.",
+                },
+              ]}
+            />
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Pour aller plus loin : renvois vers les guides santé & sécurité voyage */}
-        <section className="mb-16">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center">
-              <ShieldAlert className="h-6 w-6 text-teal-600" />
-            </div>
-            <h2 className="text-2xl font-bold">Pour aller plus loin</h2>
-          </div>
-          <p className="text-center text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Avant même votre installation, préparez votre santé pour les Philippines avec nos guides
-            dédiés aux voyageurs : vaccins recommandés et conseils de sécurité au quotidien.
-          </p>
-          <CardGrid columns={3}>
+      {/* Avant l'installation : renvois vers les guides santé & sécurité voyage */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <CardGrid
+            eyebrow="Avant même l'installation"
+            title="Préparez aussi votre"
+            titleAccent="départ"
+            subtitle="Nos guides dédiés aux voyageurs restent utiles avant de poser vos valises : vaccins recommandés et conseils de sécurité au quotidien."
+            columns={3}
+          >
             <LinkCard
               href="/voyager-aux-philippines/sante-securite"
               icon={<Shield className="h-5 w-5" />}
               title="Santé & Sécurité en voyage"
               desc="Le guide complet avant le départ"
+              cta="Lire le guide"
             />
             <LinkCard
               href="/voyager-aux-philippines/sante-securite/vaccins"
               icon={<Syringe className="h-5 w-5" />}
               title="Vaccins recommandés"
               desc="Quels vaccins prévoir avant de partir"
+              cta="Voir les vaccins"
             />
             <LinkCard
               href="/voyager-aux-philippines/sante-securite/conseils"
               icon={<AlertTriangle className="h-5 w-5" />}
               title="Conseils de sécurité"
               desc="Précautions au quotidien"
+              cta="Lire les conseils"
             />
           </CardGrid>
-        </section>
+        </div>
+      </section>
 
-        {/* Affiliate recommendations */}
-        <AffiliateRecommendation
-          title="Nos recommandations pour les expats"
-          icon={faShieldHalved}
-          location="sante_assurances_page"
-          items={[
-            {
-              name: 'Chapka',
-              description: "Pour les expats: Cap Expatrie couvre les frais medicaux, hospitalisation et rapatriement aux Philippines. Alternative aux HMO locales pour une couverture complete.",
-              advantage: 'Couverture monde entier — rapatriement inclus',
-              url: 'https://www.chapkadirect.fr/assurance-voyage.html',
-              recommended: true,
-            },
-          ]}
-        />
+      {/* Affiliate recommendations — position inchangée */}
+      <section className="bg-background">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-4xl">
+            <AffiliateRecommendation
+              title="Nos recommandations pour les expats"
+              icon={faShieldHalved}
+              location="sante_assurances_page"
+              items={[
+                {
+                  name: 'Chapka',
+                  description: "Pour les expats: Cap Expatrie couvre les frais medicaux, hospitalisation et rapatriement aux Philippines. Alternative aux HMO locales pour une couverture complete.",
+                  advantage: 'Couverture monde entier — rapatriement inclus',
+                  url: 'https://www.chapkadirect.fr/assurance-voyage.html',
+                  recommended: true,
+                },
+              ]}
+            />
+          </div>
+        </div>
+      </section>
 
-        {/* Voir aussi */}
-        <section className="mb-16">
-          <div className="max-w-4xl mx-auto">
+      {/* Voir aussi */}
+      <section className="bg-background pb-16">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-4xl">
             <LinkCard
               href="/vivre-aux-philippines/banque-finances"
               icon={<Landmark className="h-5 w-5" />}
@@ -375,27 +582,37 @@ const SanteAssurancesPage = async () => {
               desc="Ouvrir un compte, transférer de l'argent et gérer son quotidien"
             />
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Articles */}
-        {articles && articles.length > 0 && (
-          <section className="mb-16">
+      {/* Articles de la catégorie (intouché) */}
+      {articles && articles.length > 0 && (
+        <section className="bg-background pb-16 md:pb-20">
+          <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center mb-12">Nos Articles sur la Santé & les Assurances</h2>
             <ArticleList articles={articles} basePath="vivre-aux-philippines" />
-          </section>
-        )}
-
-        {/* Navigation */}
-        <section className="border-t border-gray-200 pt-12">
-          <CardGrid title="Continuez votre exploration" columns={4}>
-            <LinkCard href="/vivre-aux-philippines/banque-finances" title="Banque & Finances" desc="Comptes bancaires et transferts" />
-            <LinkCard href="/vivre-aux-philippines/visas-et-formalites" title="Obtenir un visa" desc="Types de visas et procédures" />
-            <LinkCard href="/vivre-aux-philippines/logement" title="Trouver un logement" desc="Prix et conseils location" />
-            <LinkCard href="/forum-sur-les-philippines" title="Forum expatriés" desc="Échangez avec la communauté" />
-          </CardGrid>
+          </div>
         </section>
+      )}
 
-      </div>
+      {/* Navigation interne */}
+      <section className="bg-background pb-16 md:pb-20">
+        <div className="container mx-auto px-4">
+          <div className="border-t border-border pt-14">
+            <CardGrid
+              eyebrow="Pour aller plus loin"
+              title="Continuez votre"
+              titleAccent="exploration"
+              columns={4}
+            >
+              <LinkCard href="/vivre-aux-philippines/banque-finances" title="Banque & Finances" desc="Comptes bancaires et transferts" />
+              <LinkCard href="/vivre-aux-philippines/visas-et-formalites" title="Obtenir un visa" desc="Types de visas et procédures" />
+              <LinkCard href="/vivre-aux-philippines/logement" title="Trouver un logement" desc="Prix et conseils location" />
+              <LinkCard href="/forum-sur-les-philippines" title="Forum expatriés" desc="Échangez avec la communauté" />
+            </CardGrid>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

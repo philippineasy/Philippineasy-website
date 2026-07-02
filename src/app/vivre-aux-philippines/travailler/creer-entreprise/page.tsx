@@ -43,7 +43,7 @@ const CreerEntreprisePage = () => {
         title="Créer son"
         titleAccent="Entreprise"
         subtitle="Guide complet pour lancer votre activité aux Philippines : structures juridiques, capital requis, démarches administratives et opportunités fiscales."
-        imageUrl="https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop"
+        imageUrl="/imagesHero/nouveau-depart-aux-philippines.webp"
         imageAlt="Créer son Entreprise"
       />
 

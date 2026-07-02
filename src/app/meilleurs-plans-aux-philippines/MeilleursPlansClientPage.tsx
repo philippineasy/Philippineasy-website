@@ -153,7 +153,7 @@ export const MeilleursPlansClientPage = ({ initialCategories, icons }: { initial
               style={{ aspectRatio: '1.5/1' }}
             >
               <Image
-                src="https://images.unsplash.com/photo-1565717432093-1657f46d4fad?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=600&fit=max"
+                src="/imagesHero/philippines-itineraire-multi-iles.webp"
                 alt="Carte privilège"
                 fill
                 className="object-cover"

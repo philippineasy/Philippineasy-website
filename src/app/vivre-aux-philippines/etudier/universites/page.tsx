@@ -46,7 +46,7 @@ const UniversitesPage = () => {
         title="Étudier aux"
         titleAccent="Philippines"
         subtitle="Un enseignement de qualité en anglais, des frais abordables et une expérience culturelle unique pour les étudiants internationaux."
-        imageUrl="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop"
+        imageUrl="/imagesHero/ou-et-comment-etudier-aux-philippines.webp"
         imageAlt="Étudier aux Philippines"
       />
 

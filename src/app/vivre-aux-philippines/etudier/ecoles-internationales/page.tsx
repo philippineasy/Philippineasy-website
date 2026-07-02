@@ -46,7 +46,7 @@ const EcolesInternationalesPage = () => {
         title="Les Écoles"
         titleAccent="Internationales"
         subtitle="Offrez à vos enfants une éducation de classe mondiale dans un environnement multiculturel aux Philippines."
-        imageUrl="https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=2132&auto=format&fit=crop"
+        imageUrl="/imagesHero/ou-et-comment-etudier-aux-philippines.webp"
         imageAlt="Les Écoles Internationales"
       />
 

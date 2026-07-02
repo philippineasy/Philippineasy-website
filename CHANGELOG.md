@@ -5,6 +5,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Design/Contenu — Phase 6b : recomposition éditoriale des 5 sujets vivre + purge Unsplash totale (2026-07-02)
+
+Réplication de la recette de la page exemplaire visas-et-formalites (validée par Hugo) sur les 5 autres sujets vivre : logement, travail-entreprise, banque-finances, sante-assurances, culture-integration. Pour chaque page : prose éditoriale rédigée selon les skills copywriting/copy-editing (français, vouvoiement, zéro tic IA), chapitres SplitSection avec photos locales alternées, tableaux/étapes intégrés, une seule pause tonale, cartes uniquement si justifié. **Fact-check automatique obligatoire** (script scratchpad : chiffres + entités de l'ancienne version tous présents dans la nouvelle) : 5/5 pages ✅ (seuls faux positifs : paramètres d'URL Unsplash supprimées et un diviseur JS). Blocs affiliés Wise/Chapka et liens anti-cannibalisation préservés au caractère près.
+
+**Purge Unsplash complète** : les 18 dernières URLs stock (heros bus/vols/nourriture/hebergement/logement/guides, panneaux connexion, fallbacks) remplacées par des photos locales pertinentes — `grep unsplash src/` = 0 (critère QA du design system enfin atteint). Les 2 covers d'articles en base qui pointaient encore vers Unsplash basculées sur des images hébergées par le site.
+
 ### Design — Refonte visuelle Phases 2-5 : surfaces produit, marketplace, hubs, compte + démolition legacy (2026-07-02)
 
 Fin de la refonte design globale (plan : `output/PLAN_REFONTE_DESIGN_SITE_2026-07.md`). Toutes les surfaces du site parlent désormais le langage visuel de la home.

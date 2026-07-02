@@ -46,7 +46,7 @@ const BourseEntreprisesPage = () => {
         title="Investir en Bourse"
         titleAccent="et Entreprises"
         subtitle="Guide complet pour investir à la bourse philippine et dans les entreprises locales : PSE, secteurs porteurs, fiscalité et visa investisseur."
-        imageUrl="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=2070&auto=format&fit=crop"
+        imageUrl="/imagesHero/comment-investir-aux-philippines.webp"
         imageAlt="Investir en Bourse et Entreprises"
       />
 

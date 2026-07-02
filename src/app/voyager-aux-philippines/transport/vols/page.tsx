@@ -18,7 +18,7 @@ const VolsPage = async () => {
         title="Vols Intérieurs"
         titleAccent="aux Philippines"
         subtitle="Le moyen le plus rapide pour sauter d'île en île et maximiser votre temps."
-        imageUrl="https://images.unsplash.com/photo-1578314193411-06a44993749d?q=80&w=2070&auto=format&fit=crop"
+        imageUrl="/images/transport/vue-aerienne-nuageuse.webp"
         imageAlt="Vols Intérieurs aux Philippines"
       />
 
@@ -27,7 +27,7 @@ const VolsPage = async () => {
       <SplitSection
         title="Conseils pour les"
         titleAccent="Vols"
-        imageUrl="https://images.unsplash.com/photo-152459271464c-a0491da35d0a?q=80&w=2070&auto=format&fit=crop"
+        imageUrl="/images/transport/vue-aerienne-nuageuse.webp"
         imageAlt="Tableau d'affichage des départs dans un aéroport"
       >
         <p>Prendre l'avion est souvent indispensable pour voyager entre les principaux archipels des Philippines (Luzon, Visayas, Mindanao).</p>

@@ -114,7 +114,7 @@ const VendeurConnexionPage = () => {
 
             {/* Info Section */}
             <div className="w-full md:w-1/2 relative">
-              <Image src="https://images.unsplash.com/photo-1528605248644-14dd04022da1?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=800&fit=max" alt="Artisanat" fill className="object-cover" />
+              <Image src="/images/budget/marche-fruits-locaux.webp" alt="Marché local aux Philippines" fill className="object-cover" />
               <div className="relative p-10 md:p-12 bg-gradient-to-b from-primary/80 via-primary/90 to-primary h-full flex flex-col justify-center text-primary-foreground">
                 <h3 className="text-4xl font-bold mb-6 text-accent/90">Vendez sur Philippin'Easy</h3>
                 <p className="mb-8 text-lg">Rejoignez une communauté de vendeurs passionnés et développez votre activité.</p>

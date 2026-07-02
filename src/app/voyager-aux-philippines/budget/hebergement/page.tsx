@@ -60,8 +60,8 @@ const HebergementPage = () => {
       </div>
 
       <SplitSection
-        imageUrl="https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1925&auto=format&fit=crop"
-        imageAlt="Piscine d'un hôtel de luxe"
+        imageUrl="/images/budget/dortoir-auberge-jeunesse.webp"
+        imageAlt="Dortoir dans une auberge de jeunesse aux Philippines"
         title="Les Auberges de Jeunesse : Convivialité et Économies"
       >
         <p>Après quelques heures de bus sur les routes de montagne de Luzon, quoi de mieux qu’un lit en dortoir pour reposer son dos, et un rooftop pour siroter une bière avec d'autres voyageurs ? Les auberges philippines allient simplicité et rencontres inoubliables.</p>
@@ -77,8 +77,8 @@ const HebergementPage = () => {
       <SplitSection
         tone="muted"
         reverse
-        imageUrl="https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop"
-        imageAlt="Chambre d'hôtel confortable"
+        imageUrl="/images/budget/resort-de-luxe-philippines.webp"
+        imageAlt="Resort de luxe aux Philippines"
         title="Hôtels et Resorts : Confort et Services"
       >
         <p>Que vous soyez digital nomad ou en lune de miel, les hôtels philippins couvrent tous les besoins : climatisation, piscine, service de chambre… Le luxe reste accessible dans bien des provinces.</p>

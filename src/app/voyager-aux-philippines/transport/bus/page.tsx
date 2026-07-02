@@ -18,7 +18,7 @@ const BusPage = async () => {
         title="Voyager en"
         titleAccent="Bus & Van"
         subtitle="Le moyen le plus authentique et économique pour explorer les îles en profondeur."
-        imageUrl="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1974&auto=format&fit=crop"
+        imageUrl="/images/transport/jeepney-aux-philippines.webp"
         imageAlt="Voyager en Bus & Van"
       />
 
@@ -27,7 +27,7 @@ const BusPage = async () => {
       <SplitSection
         title="Conseils pour Voyager en"
         titleAccent="Bus"
-        imageUrl="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1974&auto=format&fit=crop"
+        imageUrl="/images/transport/jeepney-aux-philippines.webp"
         imageAlt="Bus coloré typique des Philippines"
       >
         <p>Le bus est le roi des transports terrestres aux Philippines. C'est un moyen économique et efficace de parcourir de longues distances sur une même île.</p>

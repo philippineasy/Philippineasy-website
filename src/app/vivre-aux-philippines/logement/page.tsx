@@ -1,13 +1,18 @@
 import { Metadata } from 'next';
-import { Home, Building, MapPin, Search, Users, MessageSquare, DollarSign, CheckCircle, AlertTriangle, ExternalLink, Zap, Shield, Wifi, FileText, ChevronRight, Building2, TrendingUp } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { CheckCircle, ExternalLink, ArrowRight, AlertTriangle, MessageSquare } from 'lucide-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuilding, faSackDollar, faLocationDot, faClock } from '@fortawesome/free-solid-svg-icons';
-import { PageHero, StatRow, CardGrid, LinkCard } from '@/components/sections';
-import { createClient } from '@/utils/supabase/server';
-import { getArticlesByCategorySlug } from '@/services/articleService';
-import ArticleList from '@/components/shared/ArticleList';
+import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, CTABand } from '@/components/sections';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
+import ArticleList from '@/components/shared/ArticleList';
+import { createClient } from '@/utils/supabase/server';
+import { getArticlesByCategorySlug } from '@/services/articleService';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
+
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Trouver un Logement aux Philippines en 2026 : Prix et Conseils",
@@ -53,6 +58,166 @@ const breadcrumbJsonLdItems = [
   { name: 'Logement', item: '/vivre-aux-philippines/logement' },
 ];
 
+/* -------------------------------------------------------------------------- */
+/* Petits blocs éditoriaux locaux (server components), repris de la recette   */
+/* validée sur visas-et-formalites : eyebrow + h2 à mot accentué, listes      */
+/* cochées, tables de données compactes, encadré d'avertissement, lien inline.*/
+/* -------------------------------------------------------------------------- */
+
+const SectionHeader = ({
+  eyebrow,
+  title,
+  accent,
+  description,
+}: {
+  eyebrow: string;
+  title: string;
+  accent?: string;
+  description?: string;
+}) => (
+  <div className="max-w-2xl">
+    <span className="mb-3 inline-block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+      {eyebrow}
+    </span>
+    <h2
+      className="text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold text-foreground"
+      style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
+    >
+      {title}
+      {accent && (
+        <>
+          {' '}
+          <span className="text-accent">{accent}</span>
+        </>
+      )}
+    </h2>
+    {description && (
+      <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">{description}</p>
+    )}
+  </div>
+);
+
+// Liste "cochée" (plateformes, pièces à réunir, bons réflexes). Div-based pour
+// ne pas hériter des puces disc du rich-text de SplitSection.
+const CheckList = ({ items, columns = 1 }: { items: ReactNode[]; columns?: 1 | 2 }) => (
+  <div
+    className={cn('mt-4 grid gap-2.5', columns === 2 && 'sm:grid-cols-2 sm:gap-x-6')}
+    role="list"
+  >
+    {items.map((item, i) => (
+      <div
+        key={i}
+        role="listitem"
+        className="flex items-start gap-2.5 text-[15px] leading-[1.55] text-foreground"
+      >
+        <CheckCircle
+          className="mt-[3px] h-[18px] w-[18px] flex-shrink-0 text-primary"
+          aria-hidden="true"
+        />
+        <span>{item}</span>
+      </div>
+    ))}
+  </div>
+);
+
+// Table de données compacte (loyers, charges, contrats). Libellé + valeur
+// alignée à droite ; chiffres en `text-foreground` pour un contraste AA net.
+const DataTable = ({
+  caption,
+  rows,
+}: {
+  caption: string;
+  rows: { label: string; sub?: string; value: string }[];
+}) => (
+  <div className="mt-6 overflow-hidden rounded-xl border-[0.5px] border-border bg-card">
+    <div className="border-b border-border bg-muted px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+      {caption}
+    </div>
+    <dl className="divide-y divide-border">
+      {rows.map((r) => (
+        <div key={r.label} className="flex items-baseline justify-between gap-4 px-4 py-3">
+          <dt className="text-[14px] text-foreground">
+            {r.label}
+            {r.sub && (
+              <span className="mt-0.5 block text-[12.5px] leading-snug text-muted-foreground">
+                {r.sub}
+              </span>
+            )}
+          </dt>
+          <dd className="whitespace-nowrap text-[14px] font-semibold tabular-nums text-foreground">
+            {r.value}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+);
+
+// Encadré d'avertissement (bord accent). Réservé aux réflexes anti-arnaque.
+const CautionBox = ({ title, items }: { title: string; items: string[] }) => (
+  <div className="mt-4 rounded-r-lg border-l-4 border-accent bg-accent/5 py-4 pl-5 pr-4">
+    <div className="mb-2.5 flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.06em] text-accent-strong">
+      <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+      {title}
+    </div>
+    <div className="flex flex-col gap-2" role="list">
+      {items.map((it, i) => (
+        <div
+          key={i}
+          role="listitem"
+          className="flex gap-2.5 text-[14px] leading-[1.55] text-foreground/85"
+        >
+          <span
+            className="mt-[7px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-accent-strong"
+            aria-hidden="true"
+          />
+          <span>{it}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// Lien-action (plateformes, articles liés). Rendu dans le rich-text de
+// SplitSection : couleur accent-strong (AA) et no-underline forcés via `style`,
+// qui prime sur la règle `[&_a]` du conteneur.
+const inlineLinkClass =
+  'group mt-6 inline-flex items-center gap-2 text-[15px] font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm';
+const inlineLinkStyle = {
+  color: 'hsl(var(--accent-strong))',
+  textDecoration: 'none',
+} as const;
+
+const InlineLink = ({
+  href,
+  external,
+  children,
+}: {
+  href: string;
+  external?: boolean;
+  children: ReactNode;
+}) =>
+  external ? (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={inlineLinkClass}
+      style={inlineLinkStyle}
+    >
+      <ExternalLink className="h-4 w-4" aria-hidden="true" />
+      {children}
+    </a>
+  ) : (
+    <Link href={href} className={inlineLinkClass} style={inlineLinkStyle}>
+      {children}
+      <ArrowRight
+        className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:group-hover:translate-x-0"
+        aria-hidden="true"
+      />
+    </Link>
+  );
+
 const LogementPage = async () => {
   const supabase = await createClient();
   const { data: articles, error } = await getArticlesByCategorySlug(supabase, 'logement');
@@ -64,612 +229,449 @@ const LogementPage = async () => {
   return (
     <div className="bg-background">
       <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
+
       <PageHero
         eyebrow="Vivre aux Philippines"
         title="Trouver un"
         titleAccent="Logement"
         subtitle="Le guide pratique pour dénicher votre appartement ou maison aux Philippines, avec les prix actuels et les meilleures stratégies de recherche."
-        imageUrl="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1974&auto=format&fit=crop"
+        imageUrl="/images/investir/vue-condominium-philippines.webp"
         imageAlt="Trouver un Logement"
       />
 
-      <div className="container mx-auto px-4 py-12 max-w-6xl">
+      {/* Intro éditoriale + chiffres clés ancrés */}
+      <section className="bg-background pt-10 md:pt-12">
+        <div className="container mx-auto px-4">
+          <Breadcrumb items={breadcrumbItems} />
 
-        <Breadcrumb items={breadcrumbItems} />
+          <div className="mt-8">
+            <SectionHeader eyebrow="Où poser vos valises" title="Trouver le bon" accent="toit" />
+            <div className="mt-5 max-w-2xl space-y-4 text-[16px] leading-[1.7] text-muted-foreground">
+              <p>
+                Un condo qui domine BGC, un appartement lumineux du côté de Cebu, une maison
+                derrière les grilles d&apos;un village sécurisé : le marché locatif philippin
+                couvre à peu près tous les budgets et tous les styles de vie. Reste à savoir où
+                chercher, combien prévoir et ce qui se négocie vraiment.
+              </p>
+              <p>
+                Ce guide réunit les prix constatés à Manille et à Cebu en 2026, les plateformes et
+                les réseaux qui fonctionnent réellement sur place, ainsi que les pièges à éviter
+                avant de signer un bail.
+              </p>
+            </div>
+          </div>
 
-        {/* Stats rapides */}
-        <section className="mb-12">
-          <StatRow
-            stats={[
-              { value: '3', label: 'types de logement', icon: <FontAwesomeIcon icon={faBuilding} className="text-[18px]" /> },
-              { value: '14k', label: 'PHP minimum/mois', icon: <FontAwesomeIcon icon={faSackDollar} className="text-[18px]" /> },
-              { value: '2', label: 'villes principales', icon: <FontAwesomeIcon icon={faLocationDot} className="text-[18px]" /> },
-              { value: '12', label: 'mois de bail min.', icon: <FontAwesomeIcon icon={faClock} className="text-[18px]" /> },
-            ]}
-          />
-        </section>
+          <div className="mt-10 max-w-4xl">
+            <StatRow
+              stats={[
+                { value: '3', label: 'types de logement', icon: <FontAwesomeIcon icon={faBuilding} className="text-[18px]" /> },
+                { value: '14k', label: 'PHP minimum/mois', icon: <FontAwesomeIcon icon={faSackDollar} className="text-[18px]" /> },
+                { value: '2', label: 'villes principales', icon: <FontAwesomeIcon icon={faLocationDot} className="text-[18px]" /> },
+                { value: '12', label: 'mois de bail min.', icon: <FontAwesomeIcon icon={faClock} className="text-[18px]" /> },
+              ]}
+            />
+          </div>
 
-        {/* Introduction */}
-        <section className="mb-12">
-          <p className="text-lg text-muted-foreground leading-relaxed max-w-4xl mx-auto text-center">
-            Que vous visiez un condo moderne à BGC, un appartement abordable à Cebu ou une maison dans un village sécurisé,
-            le marché locatif philippin offre des options pour tous les budgets. Ce guide vous aide à comprendre
-            les prix actuels, les meilleures plateformes et les pratiques locales.
+          <p className="mt-6 max-w-3xl text-[14px] leading-[1.6] text-muted-foreground">
+            Ces fourchettes restent indicatives : le prix d&apos;un bien dépend de l&apos;étage, de
+            la vue et de la saison, et il se négocie presque toujours aux Philippines.
           </p>
-        </section>
+        </div>
+      </section>
 
-        {/* Types de logements */}
-        <section className="mb-16">
-          <CardGrid title="Les types de logements" subtitle="Choisissez celui qui correspond à votre style de vie" columns={3}>
-            {/* Condominium */}
-            <div className="bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest overflow-hidden">
-              <div className="flex items-center gap-3 bg-muted px-5 py-4 border-b border-border">
-                <span className="w-9 h-9 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Building2 className="h-5 w-5 text-primary" />
-                </span>
-                <h3 className="font-bold text-lg text-foreground">Condominium</h3>
-              </div>
-              <div className="p-5">
-                <p className="text-muted-foreground text-sm mb-4">
-                  Le choix préféré des expatriés. Sécurité 24/7, piscine, salle de sport et vue imprenable.
-                </p>
-                <div className="space-y-2">
-                  {[
-                    { icon: Shield, label: "Sécurité renforcée" },
-                    { icon: CheckCircle, label: "Commodités incluses" },
-                    { icon: Zap, label: "Générateur de secours" }
-                  ].map((item, index) => (
-                    <div key={index} className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2">
-                      <item.icon className="h-4 w-4 text-primary" />
-                      <span className="text-sm text-foreground">{item.label}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 pt-4 border-t border-border">
-                  <span className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-xs font-medium">
-                    Le plus populaire
-                  </span>
-                </div>
-              </div>
+      {/* Chapitre 1 — Types de logement (photo famille/condo, à gauche) */}
+      <SplitSection
+        eyebrow="Ce qui existe sur le marché"
+        title="Trois familles de"
+        titleAccent="logement"
+        imageUrl="/images/famille/famille-condominium-philippines.webp"
+        imageAlt="Famille profitant de la piscine d'une résidence de condominiums aux Philippines"
+      >
+        <p>
+          Trois formats se partagent l&apos;essentiel du marché : le condominium en tour avec ses
+          services, la maison individuelle dans un lotissement fermé, et l&apos;appartement plus
+          modeste dans un immeuble ancien. Le choix dépend surtout du budget et de la vie de
+          quartier recherchée.
+        </p>
+        <p>
+          Le condominium reste le réflexe numéro un des expatriés : sécurité active 24 h/24,
+          piscine, salle de sport et souvent un générateur de secours qui prend le relais lors des
+          coupures de courant. La maison, en <em>house and lot</em>, offre plus d&apos;espace et un
+          jardin, dans des subdivisions surveillées par des gardiens — un format que privilégient
+          les familles. L&apos;appartement, enfin, reste l&apos;option la plus économique, avec des
+          baux souvent plus flexibles, même s&apos;il n&apos;inclut pas les commodités d&apos;un
+          condo.
+        </p>
+        <DataTable
+          caption="En un coup d'œil"
+          rows={[
+            { label: 'Condominium', sub: 'Sécurité, piscine, salle de sport', value: 'Le plus demandé' },
+            { label: 'Maison (house and lot)', sub: 'Jardin, subdivision sécurisée', value: 'Pour les familles' },
+            { label: 'Appartement', sub: 'Emplacements variés, bail flexible', value: 'Budget serré' },
+          ]}
+        />
+      </SplitSection>
+
+      {/* Chapitre 2 — Prix des loyers 2026 (photo studio meublé, à droite) */}
+      <SplitSection
+        reverse
+        eyebrow="Le nerf de la guerre"
+        title="Manila et Cebu,"
+        titleAccent="deux marchés"
+        imageUrl="/images/budget/apparthotel-coquet.webp"
+        imageAlt="Studio meublé moderne avec kitchenette, exemple de location aux Philippines"
+      >
+        <p>
+          Les loyers varient fortement selon la ville et le quartier, mais Metro Manila et Cebu
+          City concentrent l&apos;essentiel de la demande expatriée. Voici les fourchettes
+          observées en 2026, hors charges.
+        </p>
+        <DataTable
+          caption="Loyers à Metro Manila · BGC, Makati, Rockwell, Ortigas"
+          rows={[
+            { label: 'Studio (20-30 m²)', value: '25 000 – 40 000 PHP' },
+            { label: '1 chambre (35-50 m²)', value: '35 000 – 60 000 PHP' },
+            { label: '2 chambres (60-80 m²)', value: '50 000 – 95 000 PHP' },
+            { label: '3 chambres+ (100+ m²)', value: '80 000 – 150 000 PHP' },
+          ]}
+        />
+        <p className="!mt-5">À Cebu, comptez sensiblement moins pour un espace équivalent.</p>
+        <DataTable
+          caption="Loyers à Cebu City · IT Park, Business Park, Lahug, Mactan"
+          rows={[
+            { label: 'Studio (20-30 m²)', value: '14 000 – 23 000 PHP' },
+            { label: '1 chambre (35-50 m²)', value: '22 000 – 50 000 PHP' },
+            { label: '2 chambres (60-80 m²)', value: '35 000 – 80 000 PHP' },
+            { label: 'Maison 2-3 ch.', value: '40 000 – 70 000 PHP' },
+          ]}
+        />
+        <p className="!mt-5">
+          Le loyer affiché n&apos;est jamais le montant final. Comptez ces postes en plus, chaque
+          mois :
+        </p>
+        <DataTable
+          caption="Charges à prévoir en plus du loyer"
+          rows={[
+            { label: 'Électricité', value: '3 000 – 8 000 PHP/mois' },
+            { label: 'Eau', value: '300 – 800 PHP/mois' },
+            { label: 'Internet fibre', value: '1 500 – 3 000 PHP/mois' },
+            { label: 'Charges de copropriété', sub: 'Entretien des parties communes du condo', value: '2 000 – 6 000 PHP/mois' },
+            { label: 'Parking', value: '2 000 – 5 000 PHP/mois' },
+          ]}
+        />
+      </SplitSection>
+
+      {/* Chapitre 3 — Où chercher (photo jeepney/quartier, à gauche) */}
+      <SplitSection
+        eyebrow="La chasse au logement"
+        title="Où chercher un"
+        titleAccent="logement"
+        imageUrl="/images/transport/jeepney-aux-philippines.webp"
+        imageAlt="Jeepney coloré dans une rue résidentielle aux Philippines"
+      >
+        <p>
+          La chasse démarre en ligne, sur les plateformes spécialisées et les réseaux sociaux,
+          avant de se conclure la plupart du temps par une visite organisée par un agent local.
+        </p>
+        <h4>Les plateformes qui comptent</h4>
+        <CheckList
+          items={[
+            <>
+              <a href="https://www.lamudi.com.ph/" target="_blank" rel="noopener noreferrer">
+                Lamudi.com.ph
+              </a>
+              , le leader du marché, avec le plus large choix d&apos;annonces
+            </>,
+            <>
+              <a href="https://www.dotproperty.com.ph/" target="_blank" rel="noopener noreferrer">
+                DotProperty.com.ph
+              </a>
+              , une interface plus soignée, pratique pour affiner sa recherche
+            </>,
+            <>
+              <a
+                href="https://www.carousell.ph/categories/property-102"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Carousell Property
+              </a>
+              , pour les annonces postées en direct par les propriétaires
+            </>,
+          ]}
+        />
+        <h4>Les groupes Facebook actifs</h4>
+        <CheckList
+          columns={2}
+          items={[
+            'Manila Expats Housing',
+            'Cebu Apartments for Rent',
+            'BGC Condo Rentals',
+            'Makati Rentals – Direct Owners',
+          ]}
+        />
+        <p className="!mt-5">
+          Une recherche simple, du type « [ville] apartments for rent », suffit généralement à
+          remonter les groupes les plus actifs.
+        </p>
+        <p>
+          Les agents immobiliers (<em>brokers</em>) restent utiles pour les biens haut de gamme et
+          la négociation. Leur commission — 1 mois de loyer, en général — est le plus souvent
+          payée par le propriétaire. Vérifiez simplement que l&apos;agent est enregistré auprès de
+          la PRC avant de vous engager.
+        </p>
+      </SplitSection>
+
+      {/* Chapitre 4 — Conditions de location (photo emménagement, à droite) */}
+      <SplitSection
+        reverse
+        eyebrow="Avant de signer"
+        title="Dépôt, durée et"
+        titleAccent="contrat"
+        imageUrl="/imagesHero/nouveau-depart-aux-philippines.webp"
+        imageAlt="Locataire arrivant avec ses valises devant sa nouvelle maison aux Philippines"
+      >
+        <p>
+          Mieux vaut connaître les usages locaux avant de signer : ce qui se paie d&apos;avance, ce
+          qui se négocie, et la durée d&apos;engagement standard.
+        </p>
+        <DataTable
+          caption="À prévoir à l'entrée"
+          rows={[
+            { label: 'Dépôt de garantie', value: '2 mois de loyer' },
+            { label: 'Avance de loyer', value: '1 à 2 mois' },
+            { label: 'Total à la signature', value: '3 à 4 mois de loyer' },
+          ]}
+        />
+        <p className="!mt-5">
+          Le dépôt couvre les dommages éventuels et les loyers impayés ; il est normalement
+          restitué en fin de bail, déduction faite des réparations. Les chèques post-datés
+          (<em>post-dated checks</em>) sont parfois acceptés en garantie, et le chèque reste, plus
+          généralement, un moyen de paiement courant pour le loyer mensuel.
+        </p>
+        <DataTable
+          caption="Types de contrat courants"
+          rows={[
+            { label: 'Bail standard', sub: '12 mois, renouvelable — pénalité en cas de départ anticipé', value: 'Classique' },
+            { label: 'Courte durée', sub: '6 mois possible, loyer majoré de 10 à 20 %', value: 'Flexible' },
+            { label: 'Location meublée', sub: "Très répandue, électroménager souvent inclus", value: 'Pratique' },
+          ]}
+        />
+      </SplitSection>
+
+      {/* Pause tonale (fond muté) — bonnes pratiques avant de signer + contact */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <SectionHeader
+            eyebrow="Avant de signer"
+            title="Ce qui fait la"
+            accent="différence"
+            description="Douze réflexes qui évitent les mauvaises surprises une fois les clés en main."
+          />
+
+          <div className="mt-8 max-w-4xl">
+            <div className="mb-2.5 flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.06em] text-primary">
+              <CheckCircle className="h-4 w-4" aria-hidden="true" />À faire
             </div>
+            <CheckList
+              columns={2}
+              items={[
+                'Visitez toujours en personne — les photos flattent plus que la réalité',
+                "Vérifiez la pression de l'eau et l'état de la climatisation",
+                "Testez la connexion internet réellement disponible dans l'immeuble",
+                "Photographiez l'état des lieux avant d'emménager",
+                'Demandez une copie du titre de propriété ou du contrat de gestion',
+                'Négociez — les loyers affichés sont rarement figés',
+              ]}
+            />
 
-            {/* Maison */}
-            <div className="bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest overflow-hidden">
-              <div className="flex items-center gap-3 bg-muted px-5 py-4 border-b border-border">
-                <span className="w-9 h-9 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Home className="h-5 w-5 text-primary" />
-                </span>
-                <h3 className="font-bold text-lg text-foreground">Maison (House & Lot)</h3>
-              </div>
-              <div className="p-5">
-                <p className="text-muted-foreground text-sm mb-4">
-                  Plus d'espace et de tranquillité dans des "subdivisions" sécurisées avec gardiens.
-                </p>
-                <div className="space-y-2">
-                  {[
-                    { icon: CheckCircle, label: "Jardin privatif possible" },
-                    { icon: TrendingUp, label: "Plus de surface habitable" },
-                    { icon: Users, label: "Idéal pour les familles" }
-                  ].map((item, index) => (
-                    <div key={index} className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2">
-                      <item.icon className="h-4 w-4 text-primary" />
-                      <span className="text-sm text-foreground">{item.label}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 pt-4 border-t border-border">
-                  <span className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-xs font-medium">
-                    Pour les familles
-                  </span>
-                </div>
-              </div>
+            <div className="mb-2.5 mt-10 flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.06em] text-accent-strong">
+              <AlertTriangle className="h-4 w-4" aria-hidden="true" />À éviter
             </div>
+            <CautionBox
+              title="Réflexes anti-arnaque"
+              items={[
+                "Payer avant même d'avoir vu le logement de vos propres yeux",
+                'Se laisser tenter par une offre trop belle pour être vraie',
+                "Un rez-de-chaussée (RDC) si vous pouvez l'éviter — inondations et sécurité",
+                'Signer sans avoir lu le contrat dans son intégralité',
+                'Ignorer les nuisances sonores ou olfactives du quartier',
+                'Sous-estimer le temps de trajet aux heures de pointe',
+              ]}
+            />
 
-            {/* Appartement */}
-            <div className="bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest overflow-hidden">
-              <div className="flex items-center gap-3 bg-muted px-5 py-4 border-b border-border">
-                <span className="w-9 h-9 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Building className="h-5 w-5 text-primary" />
-                </span>
-                <h3 className="font-bold text-lg text-foreground">Appartement</h3>
+            <h3 className="mb-3 mt-10 text-[20px] font-semibold tracking-[-0.01em] text-foreground">
+              Contacter un propriétaire
+            </h3>
+            <p className="mb-4 text-[15px] leading-[1.6] text-muted-foreground">
+              Les échanges se font presque toujours en anglais. Voici une trame qui couvre
+              l&apos;essentiel :
+            </p>
+            <div className="overflow-hidden rounded-xl border-[0.5px] border-border bg-card">
+              <div className="flex items-center gap-2.5 border-b border-border bg-background px-4 py-2.5 text-[13px] font-semibold text-muted-foreground">
+                <MessageSquare className="h-4 w-4 text-primary" aria-hidden="true" />
+                Exemple de message, en anglais
               </div>
-              <div className="p-5">
-                <p className="text-muted-foreground text-sm mb-4">
-                  Option économique sans les commodités des condos mais souvent bien situés.
-                </p>
-                <div className="space-y-2">
-                  {[
-                    { icon: DollarSign, label: "Budget accessible" },
-                    { icon: MapPin, label: "Emplacements variés" },
-                    { icon: CheckCircle, label: "Contrats flexibles" }
-                  ].map((item, index) => (
-                    <div key={index} className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2">
-                      <item.icon className="h-4 w-4 text-primary" />
-                      <span className="text-sm text-foreground">{item.label}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 pt-4 border-t border-border">
-                  <span className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-xs font-medium">
-                    Budget serré
-                  </span>
-                </div>
-              </div>
-            </div>
-          </CardGrid>
-        </section>
-
-        {/* Prix des loyers 2026 */}
-        <section className="mb-16">
-          <CardGrid title="Prix des loyers en 2026" subtitle="Comparatif entre les deux grandes métropoles" columns={2}>
-            {/* Metro Manila */}
-            <div className="bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest overflow-hidden">
-              <div className="flex items-center gap-3 bg-muted px-6 py-4 border-b border-border">
-                <span className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <MapPin className="h-5 w-5 text-primary" />
-                </span>
-                <div>
-                  <h3 className="font-bold text-lg text-foreground">Metro Manila</h3>
-                  <p className="text-muted-foreground text-sm">BGC, Makati, Rockwell, Ortigas</p>
-                </div>
-              </div>
-              <div className="p-6">
-                <p className="text-muted-foreground text-sm mb-5">
-                  La capitale économique avec les prix les plus élevés du pays dans les quartiers d'affaires.
-                </p>
-
-                <div className="space-y-4">
-                  {[
-                    { type: "Studio (20-30 m²)", min: 25000, max: 40000 },
-                    { type: "1 chambre (35-50 m²)", min: 35000, max: 60000 },
-                    { type: "2 chambres (60-80 m²)", min: 50000, max: 95000 },
-                    { type: "3 chambres+ (100+ m²)", min: 80000, max: 150000 }
-                  ].map((item, index) => (
-                    <div key={index} className="bg-muted rounded-lg p-4">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium text-foreground">{item.type}</span>
-                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                          {(item.min / 1000).toFixed(0)}k - {(item.max / 1000).toFixed(0)}k PHP
-                        </span>
-                      </div>
-                      <div className="w-full bg-card rounded-full h-2">
-                        <div
-                          className="bg-primary h-2 rounded-full"
-                          style={{ width: `${(item.max / 150000) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Cebu */}
-            <div className="bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest overflow-hidden">
-              <div className="flex items-center gap-3 bg-muted px-6 py-4 border-b border-border">
-                <span className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                  <MapPin className="h-5 w-5 text-primary" />
-                </span>
-                <div>
-                  <h3 className="font-bold text-lg text-foreground">Cebu City</h3>
-                  <p className="text-muted-foreground text-sm">IT Park, Business Park, Lahug, Mactan</p>
-                </div>
-              </div>
-              <div className="p-6">
-                <p className="text-muted-foreground text-sm mb-5">
-                  Excellent rapport qualité-prix avec une scène expatriée dynamique et la proximité des plages.
-                </p>
-
-                <div className="space-y-4">
-                  {[
-                    { type: "Studio (20-30 m²)", min: 14000, max: 23000 },
-                    { type: "1 chambre (35-50 m²)", min: 22000, max: 50000 },
-                    { type: "2 chambres (60-80 m²)", min: 35000, max: 80000 },
-                    { type: "Maison 2-3 ch.", min: 40000, max: 70000 }
-                  ].map((item, index) => (
-                    <div key={index} className="bg-muted rounded-lg p-4">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium text-foreground">{item.type}</span>
-                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                          {(item.min / 1000).toFixed(0)}k - {(item.max / 1000).toFixed(0)}k PHP
-                        </span>
-                      </div>
-                      <div className="w-full bg-card rounded-full h-2">
-                        <div
-                          className="bg-primary h-2 rounded-full"
-                          style={{ width: `${(item.max / 150000) * 100}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </CardGrid>
-
-          {/* Charges supplémentaires */}
-          <div className="max-w-5xl mx-auto mt-8">
-            <div className="bg-accent/5 border border-accent/25 rounded-xl p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-accent/15 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Zap className="h-6 w-6 text-accent-strong" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-foreground mb-3">Charges à prévoir en plus du loyer</h4>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {[
-                      { label: "Électricité", value: "3 000 - 8 000 PHP/mois" },
-                      { label: "Eau", value: "300 - 800 PHP/mois" },
-                      { label: "Internet fibre", value: "1 500 - 3 000 PHP/mois" },
-                      { label: "Association fees", value: "2 000 - 6 000 PHP/mois" },
-                      { label: "Parking", value: "2 000 - 5 000 PHP/mois" }
-                    ].map((charge, index) => (
-                      <div key={index} className="bg-card rounded-lg px-4 py-3 border border-border">
-                        <span className="font-medium text-foreground text-sm">{charge.label}</span>
-                        <p className="text-muted-foreground text-xs">{charge.value}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Où chercher */}
-        <section className="mb-16">
-          <CardGrid title="Où chercher un logement ?" subtitle="Les meilleures ressources pour votre recherche" columns={3}>
-            {/* Plateformes en ligne */}
-            <div className="bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest p-6">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                <Search className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="font-bold text-lg mb-2 text-foreground">Plateformes en ligne</h3>
-              <p className="text-muted-foreground text-sm mb-4">
-                Les sites spécialisés sont le meilleur point de départ.
-              </p>
-              <div className="space-y-3">
-                {[
-                  { name: "Lamudi.com.ph", desc: "Le leader, large choix", url: "https://www.lamudi.com.ph/" },
-                  { name: "DotProperty.com.ph", desc: "Bonne interface", url: "https://www.dotproperty.com.ph/" },
-                  { name: "Carousell Property", desc: "Annonces directes", url: "https://www.carousell.ph/categories/property-102" }
-                ].map((platform, index) => (
-                  <a
-                    key={index}
-                    href={platform.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2 hover:bg-primary/10 transition-colors group"
-                  >
-                    <ExternalLink className="h-4 w-4 text-primary" />
-                    <div>
-                      <span className="text-sm font-medium text-foreground group-hover:text-primary">{platform.name}</span>
-                      <p className="text-xs text-muted-foreground">{platform.desc}</p>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </div>
-
-            {/* Groupes Facebook */}
-            <div className="bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest p-6">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                <Users className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="font-bold text-lg mb-2 text-foreground">Groupes Facebook</h3>
-              <p className="text-muted-foreground text-sm mb-4">
-                Facebook Marketplace et groupes locaux sont très utilisés.
-              </p>
-              <div className="space-y-2">
-                {[
-                  "Manila Expats Housing",
-                  "Cebu Apartments for Rent",
-                  "BGC Condo Rentals",
-                  "Makati Rentals - Direct Owners"
-                ].map((group, index) => (
-                  <div key={index} className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2">
-                    <CheckCircle className="h-4 w-4 text-primary" />
-                    <span className="text-sm text-foreground">{group}</span>
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground mt-3 bg-muted rounded p-2">
-                Tip: Recherchez "[Ville] + apartments + rent"
-              </p>
-            </div>
-
-            {/* Agents immobiliers */}
-            <div className="bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest p-6">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                <Building className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="font-bold text-lg mb-2 text-foreground">Agents immobiliers</h3>
-              <p className="text-muted-foreground text-sm mb-4">
-                Les brokers facilitent la recherche haut de gamme.
-              </p>
-              <div className="space-y-2">
-                {[
-                  "Commission : 1 mois de loyer",
-                  "Souvent payée par le propriétaire",
-                  "Utile pour la négociation"
-                ].map((point, index) => (
-                  <div key={index} className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2">
-                    <CheckCircle className="h-4 w-4 text-primary" />
-                    <span className="text-sm text-foreground">{point}</span>
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground mt-3 bg-muted rounded p-2">
-                Vérifiez l'enregistrement PRC de l'agent
-              </p>
-            </div>
-          </CardGrid>
-        </section>
-
-        {/* Conditions de location */}
-        <section className="mb-16">
-          <CardGrid title="Conditions de location" subtitle="Ce qu'il faut savoir avant de signer" columns={2}>
-            {/* Dépôt et avance */}
-            <div className="bg-primary/5 border border-primary/15 rounded-2xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                  <DollarSign className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="font-bold text-lg text-foreground">Dépôt et avance</h3>
-              </div>
-
-              <div className="bg-card rounded-xl p-5 text-center mb-4 shadow-card-rest">
-                <p className="text-3xl font-bold text-primary">2 + 1-2</p>
-                <p className="text-sm text-muted-foreground">mois de dépôt + mois d'avance</p>
-                <p className="text-xs text-muted-foreground mt-1">= 3 à 4 mois à l'entrée</p>
-              </div>
-
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <ChevronRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                  Le dépôt couvre dommages et impayés
-                </li>
-                <li className="flex items-start gap-2">
-                  <ChevronRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                  Post-dated checks parfois acceptés
-                </li>
-                <li className="flex items-start gap-2">
-                  <ChevronRight className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                  Chèques encore courants pour paiements mensuels
-                </li>
-              </ul>
-            </div>
-
-            {/* Durée et contrat */}
-            <div className="bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center">
-                  <FileText className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <h3 className="font-bold text-lg text-foreground">Durée et contrat</h3>
-              </div>
-
-              <div className="space-y-4">
-                {[
-                  { type: "Bail standard", desc: "12 mois, renouvelable. Pénalité si départ anticipé.", badge: "Classique" },
-                  { type: "Courte durée", desc: "6 mois possible mais loyer majoré (+10-20%).", badge: "Flexible" },
-                  { type: "Location meublée", desc: "Très courante, inclut souvent l'électroménager.", badge: "Pratique" }
-                ].map((item, index) => (
-                  <div key={index} className="border-b border-border pb-3 last:border-0 last:pb-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium text-foreground">{item.type}</span>
-                      <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">{item.badge}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </CardGrid>
-        </section>
-
-        {/* Conseils pratiques */}
-        <section className="mb-16">
-          <CardGrid title="Conseils pratiques" columns={2}>
-            {/* À faire */}
-            <div className="bg-primary/5 border border-primary/15 rounded-2xl overflow-hidden">
-              <div className="flex items-center gap-3 bg-primary/10 px-6 py-4">
-                <CheckCircle className="h-6 w-6 text-primary" />
-                <h3 className="font-bold text-lg text-foreground">À faire</h3>
-              </div>
-              <div className="p-6">
-                <ul className="space-y-3">
-                  {[
-                    { title: "Visitez en personne", desc: "Les photos peuvent être trompeuses" },
-                    { title: "Vérifiez la pression de l'eau", desc: "Et l'état de la climatisation" },
-                    { title: "Testez la connexion internet", desc: "Disponible dans le bâtiment" },
-                    { title: "Photographiez tout", desc: "Avant d'emménager pour l'état des lieux" },
-                    { title: "Demandez une copie du titre", desc: "De propriété ou du contrat de gestion" },
-                    { title: "Négociez", desc: "Les loyers sont souvent discutables" }
-                  ].map((item, index) => (
-                    <li key={index} className="flex items-start gap-3 bg-card rounded-lg p-3">
-                      <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                      <div>
-                        <span className="font-medium text-foreground">{item.title}</span>
-                        <p className="text-sm text-muted-foreground">{item.desc}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            {/* À éviter */}
-            <div className="bg-destructive/5 border border-destructive/15 rounded-2xl overflow-hidden">
-              <div className="flex items-center gap-3 bg-destructive/10 px-6 py-4">
-                <AlertTriangle className="h-6 w-6 text-destructive" />
-                <h3 className="font-bold text-lg text-foreground">À éviter</h3>
-              </div>
-              <div className="p-6">
-                <ul className="space-y-3">
-                  {[
-                    { title: "Ne payez jamais", desc: "Sans avoir vu le logement physiquement" },
-                    { title: "Méfiez-vous des offres", desc: "Trop belles pour être vraies (arnaques)" },
-                    { title: "Évitez les RDC", desc: "Si possible (inondations, sécurité)" },
-                    { title: "Ne signez pas", desc: "Sans avoir lu intégralement le contrat" },
-                    { title: "Vérifiez les nuisances", desc: "Bruit, odeurs, trafic" },
-                    { title: "Ne sous-estimez pas", desc: "Le temps de trajet aux heures de pointe" }
-                  ].map((item, index) => (
-                    <li key={index} className="flex items-start gap-3 bg-card rounded-lg p-3">
-                      <AlertTriangle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
-                      <div>
-                        <span className="font-medium text-foreground">{item.title}</span>
-                        <p className="text-sm text-muted-foreground">{item.desc}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </CardGrid>
-        </section>
-
-        {/* Exemple de message */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8">Comment contacter un propriétaire</h2>
-
-          <div className="max-w-4xl mx-auto bg-card border-[0.5px] border-border rounded-2xl shadow-card-rest overflow-hidden">
-            <div className="flex items-center gap-3 bg-muted px-6 py-4 border-b border-border">
-              <span className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                <MessageSquare className="h-5 w-5 text-primary" />
-              </span>
-              <h3 className="font-bold text-lg text-foreground">Exemple de message en anglais</h3>
-            </div>
-            <div className="p-6">
-              <div className="bg-muted rounded-xl p-6 font-mono text-sm leading-relaxed text-foreground">
+              <div className="space-y-3 px-5 py-5 font-mono text-[13px] leading-[1.7] text-foreground">
                 <p>Hello,</p>
-                <br />
-                <p>I saw your listing for the [1-bedroom condo] in [BGC/Makati] on [Lamudi/Facebook].</p>
-                <br />
-                <p>I'm a French expatriate looking for a long-term rental (12+ months). I'm interested in scheduling a viewing at your earliest convenience.</p>
-                <br />
+                <p>
+                  I saw your listing for the [1-bedroom condo] in [BGC/Makati] on
+                  [Lamudi/Facebook].
+                </p>
+                <p>
+                  I&apos;m a French expatriate looking for a long-term rental (12+ months). I&apos;m
+                  interested in scheduling a viewing at your earliest convenience.
+                </p>
                 <p>Could you please confirm:</p>
-                <p className="ml-4">- If the unit is still available</p>
-                <p className="ml-4">- The monthly rent and what's included</p>
-                <p className="ml-4">- The required deposit and advance</p>
-                <p className="ml-4">- When we could arrange a visit</p>
-                <br />
+                <p className="pl-4">- If the unit is still available</p>
+                <p className="pl-4">- The monthly rent and what&apos;s included</p>
+                <p className="pl-4">- The required deposit and advance</p>
+                <p className="pl-4">- When we could arrange a visit</p>
                 <p>Thank you for your time.</p>
-                <br />
-                <p>Best regards,<br />[Votre nom]<br />[Votre numéro]</p>
-              </div>
-
-              <div className="mt-6 bg-primary/5 border border-primary/15 rounded-xl p-5">
-                <h4 className="font-semibold text-foreground mb-3">Conseils de communication</h4>
-                <div className="grid md:grid-cols-2 gap-2">
-                  {[
-                    "Communications principalement en anglais",
-                    "Viber et WhatsApp très utilisés",
-                    "Répondez vite : bons logements partent vite",
-                    "Soyez poli mais direct"
-                  ].map((tip, index) => (
-                    <div key={index} className="flex items-center gap-2 text-sm text-foreground">
-                      <CheckCircle className="h-4 w-4 text-primary flex-shrink-0" />
-                      {tip}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Fournisseurs Internet */}
-        <section className="mb-16">
-          <CardGrid
-            title="Connectivité internet"
-            subtitle="Crucial pour le télétravail - vérifiez la couverture avant de signer"
-            columns={3}
-          >
-            {[
-              { name: "PLDT Fibr", desc: "Leader du marché, bonne couverture", price: "1 699 PHP/mois" },
-              { name: "Globe Fiber", desc: "Alternative solide, bon SAV", price: "1 499 PHP/mois" },
-              { name: "Converge", desc: "Bon rapport qualité-prix", price: "1 500 PHP/mois" }
-            ].map((provider, index) => (
-              <div key={index} className="bg-card border-[0.5px] border-border rounded-xl shadow-card-rest p-5 text-center">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Wifi className="h-6 w-6 text-primary" />
-                </div>
-                <h4 className="font-bold text-foreground">{provider.name}</h4>
-                <p className="text-sm text-muted-foreground mt-1">{provider.desc}</p>
-                <p className="text-xs text-primary mt-2 bg-primary/10 rounded-full px-3 py-1 inline-block">
-                  À partir de {provider.price}
+                <p>
+                  Best regards,
+                  <br />
+                  [Votre nom]
+                  <br />
+                  [Votre numéro]
                 </p>
               </div>
-            ))}
-          </CardGrid>
-        </section>
-
-        {/* Investir dans l'immobilier locatif */}
-        <section className="mb-16">
-          <div className="max-w-4xl mx-auto bg-primary/5 border border-primary/15 rounded-2xl p-6 md:p-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                <TrendingUp className="h-5 w-5 text-primary" />
-              </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-foreground">Investir dans l'immobilier locatif</h2>
             </div>
 
-            <div className="space-y-4 text-muted-foreground">
-              <p>
-                Louer n'est pas la seule option : certains lecteurs envisagent d'acheter un bien aux Philippines pour le
-                mettre en location plutôt que pour y vivre eux-mêmes. Cette logique d'investissement obéit à des règles
-                différentes de celles d'une simple recherche de logement, avec un rendement locatif brut généralement
-                compris entre 5 et 8% selon les zones.
-              </p>
-              <p>
-                Les étrangers ne peuvent pas posséder de terrain aux Philippines, mais peuvent détenir un condominium à
-                100% en nom propre, dans la limite d'un quota de 40% par immeuble. Une fiscalité spécifique s'applique
-                également aux revenus locatifs.
-              </p>
-              <p>
-                Si votre objectif est de générer un revenu locatif, notre guide dédié détaille le rendement par zone,
-                la fiscalité et le processus d'achat. Si vous cherchez plutôt à acheter un bien pour y vivre vous-même,
-                sans recherche de rendement, l'article sur l'achat immobilier aux Philippines répond à cette question
-                précise.
-              </p>
+            <div className="mb-2.5 mt-6 flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.06em] text-primary">
+              <CheckCircle className="h-4 w-4" aria-hidden="true" />
+              Bons réflexes de communication
             </div>
+            <CheckList
+              columns={2}
+              items={[
+                'Les échanges se font principalement en anglais',
+                'Viber et WhatsApp sont les messageries les plus utilisées',
+                'Répondez vite : les bons logements partent en quelques heures',
+                'Restez poli mais direct dans vos messages',
+              ]}
+            />
+          </div>
+        </div>
+      </section>
 
-            <CardGrid columns={2} className="mt-6">
+      {/* Chapitre 5 — Internet et connectivité (photo antennes, à gauche) */}
+      <SplitSection
+        eyebrow="Télétravail oblige"
+        title="Internet et"
+        titleAccent="connectivité"
+        imageUrl="/imagesHero/antennes-reseaux-aux-philippines.webp"
+        imageAlt="Antennes télécoms au-dessus d'un quartier résidentiel aux Philippines"
+      >
+        <p>
+          Le télétravail rend la question incontournable : vérifiez la couverture fibre du
+          quartier avant de signer, pas après.
+        </p>
+        <DataTable
+          caption="Fournisseurs fibre les plus courants"
+          rows={[
+            { label: 'PLDT Fibr', sub: 'Leader du marché, bonne couverture', value: '1 699 PHP/mois' },
+            { label: 'Globe Fiber', sub: 'Alternative solide, bon SAV', value: '1 499 PHP/mois' },
+            { label: 'Converge', sub: 'Bon rapport qualité-prix', value: '1 500 PHP/mois' },
+          ]}
+        />
+        <p className="!mt-5">
+          Dans les immeubles récents, la fibre est en général déjà tirée jusqu&apos;au palier ;
+          ailleurs, comptez quelques jours d&apos;installation après la signature du contrat.
+        </p>
+      </SplitSection>
+
+      {/* Chapitre 6 — Investir dans l'immobilier locatif (acquis anti-cannibalisation, photo à droite) */}
+      <SplitSection
+        reverse
+        eyebrow="Une autre logique"
+        title="Investir dans"
+        titleAccent="l'immobilier locatif"
+        imageUrl="/images/investir/vue-condominium-philippines.webp"
+        imageAlt="Villa avec piscine à débordement et vue sur la mer, exemple de bien locatif haut de gamme"
+      >
+        <p>
+          Louer n&apos;est pas la seule option : certains lecteurs envisagent d&apos;acheter un
+          bien aux Philippines pour le mettre en location plutôt que pour y vivre eux-mêmes. Cette
+          logique d&apos;investissement obéit à des règles différentes de celles d&apos;une simple
+          recherche de logement, avec un rendement locatif brut généralement compris entre 5 et
+          8 % selon les zones.
+        </p>
+        <p>
+          Les étrangers ne peuvent pas posséder de terrain aux Philippines, mais peuvent détenir un
+          condominium à 100 % en nom propre, dans la limite d&apos;un quota de 40 % par immeuble.
+          Une fiscalité spécifique s&apos;applique aux revenus locatifs.
+        </p>
+        <p>
+          Si votre objectif est de générer un revenu locatif, notre guide dédié détaille le
+          rendement par zone, la fiscalité et le processus d&apos;achat. Pour acheter un bien où
+          vivre vous-même, sans recherche de rendement, l&apos;article sur l&apos;achat immobilier
+          aux Philippines répond à cette question précise.
+        </p>
+        <InlineLink href="/vivre-aux-philippines/investir/immobilier">
+          Investissement locatif : rendement, fiscalité, quota 40 %
+        </InlineLink>
+        <br />
+        <InlineLink href="/vivre-aux-philippines/logement/acheter-immobilier-philippines">
+          Acheter pour y vivre : résidence principale, pas d&apos;investissement
+        </InlineLink>
+      </SplitSection>
+
+      {/* Navigation interne */}
+      <section className="bg-background pb-16 md:pb-20">
+        <div className="container mx-auto px-4">
+          <div className="border-t border-border pt-14">
+            <CardGrid
+              eyebrow="Pour aller plus loin"
+              title="Continuez votre"
+              titleAccent="exploration"
+              columns={3}
+            >
               <LinkCard
-                title="Investissement locatif"
+                title="Investir dans l'immobilier"
                 href="/vivre-aux-philippines/investir/immobilier"
-                desc="Rendement, fiscalité, quota 40%"
+                desc="Acheter plutôt que louer."
                 cta="En savoir plus"
               />
               <LinkCard
-                title="Acheter pour y vivre"
-                href="/vivre-aux-philippines/logement/acheter-immobilier-philippines"
-                desc="Résidence principale, pas d'investissement"
+                title="Banques et assurances"
+                href="/vivre-aux-philippines/banque-finances"
+                desc="Ouvrir un compte bancaire sur place."
                 cta="En savoir plus"
+              />
+              <LinkCard
+                title="Forum des expatriés"
+                href="/forum-sur-les-philippines"
+                desc="Échangez avec la communauté."
+                cta="Rejoindre la discussion"
               />
             </CardGrid>
           </div>
+        </div>
+      </section>
+
+      {/* Articles de la catégorie */}
+      {articles && articles.length > 0 && (
+        <section className="bg-background pb-16 md:pb-20">
+          <div className="container mx-auto px-4">
+            <div className="border-t border-border pt-14">
+              <SectionHeader eyebrow="À lire aussi" title="Nos articles" accent="logement" />
+              <div className="mt-8">
+                <ArticleList articles={articles} basePath="vivre-aux-philippines" />
+              </div>
+            </div>
+          </div>
         </section>
+      )}
 
-        {/* Navigation */}
-        <section className="border-t border-border pt-12 mb-16">
-          <CardGrid title="Continuez votre exploration" columns={3}>
-            <LinkCard title="Investir dans l'immobilier" href="/vivre-aux-philippines/investir/immobilier" desc="Acheter plutôt que louer" cta="En savoir plus" />
-            <LinkCard title="Banques et assurances" href="/vivre-aux-philippines/banque-finances" desc="Ouvrir un compte bancaire" cta="En savoir plus" />
-            <LinkCard title="Forum expatriés" href="/forum-sur-les-philippines" desc="Échangez avec la communauté" cta="En savoir plus" />
-          </CardGrid>
-        </section>
-
-        {/* Nos articles Logement */}
-        {articles && articles.length > 0 && (
-          <section className="mb-16">
-            <h2 className="text-3xl font-bold text-center mb-12">Nos articles Logement</h2>
-            <ArticleList articles={articles} basePath="vivre-aux-philippines" />
-          </section>
-        )}
-
-      </div>
+      {/* Panneau signature de clôture */}
+      <CTABand
+        title="Une question sur"
+        titleAccent="votre logement ?"
+        subtitle="Posez votre cas à la communauté d'expatriés sur le forum, ou creusez la question de l'achat si louer ne vous suffit plus."
+        primary={{ label: 'Poser ma question sur le forum', href: '/forum-sur-les-philippines' }}
+        secondary={{ label: 'Acheter plutôt que louer', href: '/vivre-aux-philippines/investir/immobilier' }}
+      />
     </div>
   );
 };

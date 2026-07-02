@@ -41,7 +41,7 @@ export const VoyagerClientPage = ({ initialDestinations, practicalTips }: { init
       desc={dest.description}
       cta={`Explorer ${dest.name}`}
       image={{
-        src: dest.heroImage || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e',
+        src: dest.heroImage || '/imagesHero/comment-voyager-aux-philippines.webp',
         alt: dest.name,
       }}
     />

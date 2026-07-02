@@ -18,7 +18,7 @@ const NourriturePage = () => {
         title="Manger aux Philippines"
         titleAccent="Un Festin Abordable"
         subtitle="Saveurs, sourires et surprises à chaque coin de rue. Voici comment vous régaler sans exploser votre budget."
-        imageUrl="https://images.unsplash.com/photo-1506354666786-959d6d497f1a?q=80&w=2070&auto=format&fit=crop"
+        imageUrl="/images/budget/marche-fruits-locaux.webp"
         imageAlt="Manger aux Philippines Un Festin Abordable"
       />
 
@@ -93,7 +93,7 @@ const NourriturePage = () => {
       </SplitSection>
 
       <SplitSection
-        imageUrl="https://images.unsplash.com/photo-1598511721105-fbcf4f484905?q=80&w=1974&auto=format&fit=crop"
+        imageUrl="/images/nourriture/street-food-philippine.webp"
         imageAlt="Touriste mangeant dans une échoppe locale"
         title="Faut-il craindre la Street Food ? Pas tant que ça"
       >
