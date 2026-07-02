@@ -82,7 +82,7 @@ export default async function WeatherTicker() {
 
   return (
     <div
-      className="bg-ink text-white/80 text-[12px] border-t border-white/5"
+      className="bg-night text-white/80 text-[12px] border-t border-white/5"
       role="status"
       aria-live="polite"
     >

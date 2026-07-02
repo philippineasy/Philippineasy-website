@@ -40,12 +40,12 @@ async function getOrderDetails(
 }
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string }> = {
-  pending: { label: 'En attente', bg: 'bg-amber-500/10', text: 'text-amber-700' },
-  paid: { label: 'Payée', bg: 'bg-emerald-500/10', text: 'text-emerald-700' },
-  shipped: { label: 'Expédiée', bg: 'bg-sky-500/10', text: 'text-sky-700' },
-  delivered: { label: 'Livrée', bg: 'bg-emerald-500/10', text: 'text-emerald-700' },
-  cancelled: { label: 'Annulée', bg: 'bg-rose-500/10', text: 'text-rose-700' },
-  refunded: { label: 'Remboursée', bg: 'bg-violet-500/10', text: 'text-violet-700' },
+  pending: { label: 'En attente', bg: 'bg-amber-500/10', text: 'text-amber-700 dark:text-amber-400' },
+  paid: { label: 'Payée', bg: 'bg-emerald-500/10', text: 'text-emerald-700 dark:text-emerald-400' },
+  shipped: { label: 'Expédiée', bg: 'bg-sky-500/10', text: 'text-sky-700 dark:text-sky-400' },
+  delivered: { label: 'Livrée', bg: 'bg-emerald-500/10', text: 'text-emerald-700 dark:text-emerald-400' },
+  cancelled: { label: 'Annulée', bg: 'bg-rose-500/10', text: 'text-rose-700 dark:text-rose-400' },
+  refunded: { label: 'Remboursée', bg: 'bg-violet-500/10', text: 'text-violet-700 dark:text-violet-400' },
 };
 
 function formatDate(iso: string): string {

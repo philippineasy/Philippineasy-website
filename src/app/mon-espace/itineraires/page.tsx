@@ -20,9 +20,9 @@ const VARIANT_LABEL: Record<string, string> = {
 };
 
 const VARIANT_TONE: Record<string, { bg: string; text: string; dot: string }> = {
-  relax: { bg: 'bg-sky-500/10', text: 'text-sky-700', dot: 'bg-sky-500' },
-  balanced: { bg: 'bg-emerald-500/10', text: 'text-emerald-700', dot: 'bg-emerald-500' },
-  adventure: { bg: 'bg-amber-500/10', text: 'text-amber-700', dot: 'bg-amber-500' },
+  relax: { bg: 'bg-sky-500/10', text: 'text-sky-700 dark:text-sky-400', dot: 'bg-sky-500' },
+  balanced: { bg: 'bg-emerald-500/10', text: 'text-emerald-700 dark:text-emerald-400', dot: 'bg-emerald-500' },
+  adventure: { bg: 'bg-amber-500/10', text: 'text-amber-700 dark:text-amber-400', dot: 'bg-amber-500' },
 };
 
 function formatDate(iso: string): string {
@@ -79,7 +79,7 @@ export default async function MonEspaceItinerairesPage() {
         <div className="grid grid-cols-3 gap-3">
           <KPI label="Itinéraires débloqués" value={totalPaid} icon={<MapIcon className="w-4 h-4" />} accent="bg-primary/10 text-primary" />
           <KPI label="Total dépensé" value={`${totalSpent.toFixed(2)}€`} icon={<Sparkles className="w-4 h-4" />} accent="bg-accent/15 text-accent" />
-          <KPI label="Modifications restantes" value={totalModRemaining} icon={<CheckCircle2 className="w-4 h-4" />} accent="bg-emerald-500/10 text-emerald-700" />
+          <KPI label="Modifications restantes" value={totalModRemaining} icon={<CheckCircle2 className="w-4 h-4" />} accent="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" />
         </div>
       )}
 
@@ -116,7 +116,7 @@ export default async function MonEspaceItinerairesPage() {
                     Acheté le {formatDate(g.created_at)}
                   </span>
                   {g.delivered_at && (
-                    <span className="inline-flex items-center gap-1 text-[12px] text-emerald-700">
+                    <span className="inline-flex items-center gap-1 text-[12px] text-emerald-700 dark:text-emerald-400">
                       <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
                       Livré
                     </span>
@@ -175,7 +175,7 @@ export default async function MonEspaceItinerairesPage() {
                     <div className="flex flex-wrap gap-2">
                       <Link
                         href={`/itineraire/${g.id}`}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-accent text-ink px-4 py-2 text-[13px] font-semibold shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-accent text-accent-foreground px-4 py-2 text-[13px] font-semibold shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                         Voir le détail (carte, photos, jours)
@@ -228,7 +228,7 @@ export default async function MonEspaceItinerairesPage() {
         return (
           <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 px-5 py-4">
             <div className="flex items-start gap-3">
-              <AlertCircle className="shrink-0 w-5 h-5 text-amber-700 mt-0.5" aria-hidden="true" />
+              <AlertCircle className="shrink-0 w-5 h-5 text-amber-700 dark:text-amber-400 mt-0.5" aria-hidden="true" />
               <div className="min-w-0 flex-1">
                 <strong className="block text-[14px] font-semibold text-ink mb-0.5">
                   {pendingGens.length} génération{pendingGens.length > 1 ? 's' : ''} en attente de paiement
@@ -285,7 +285,7 @@ function EmptyPaidState({ pendingCount }: { pendingCount: number }) {
       </p>
       <Link
         href="/itineraire-personnalise-pour-les-philippines"
-        className="inline-flex items-center gap-2 rounded-full bg-accent text-ink px-5 py-2.5 text-[14px] font-semibold shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform"
+        className="inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-5 py-2.5 text-[14px] font-semibold shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform"
       >
         ✨ Créer mon itinéraire
       </Link>

@@ -62,9 +62,9 @@ export function ResendItineraryButton({ generationId, email }: Props) {
         'inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-[13px] font-medium transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2',
         success
-          ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700'
+          ? 'border-[hsl(var(--success)/0.4)] bg-[hsl(var(--success)/0.1)] text-[hsl(var(--success))]'
           : error
-          ? 'border-rose-500/40 bg-rose-500/10 text-rose-700'
+          ? 'border-destructive/40 bg-destructive/10 text-destructive'
           : 'border-border bg-card text-foreground hover:border-primary/40 hover:text-primary',
         submitting ? 'opacity-60 cursor-wait' : '',
       ].join(' ')}

@@ -5,6 +5,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Feature — Dark mode complet + rattrapage des pages restées à l'ancienne interface (2026-07-03)
+
+**Dark mode (toggle actif)** : le token `ink` devient adaptatif (`hsl(var(--ink))` — les titres de marque passent en clair sur thème sombre) ; nouveau token constant `night` (#0F172A) pour les surfaces signature qui ne basculent jamais (footer, ticker météo, sidebar admin, scrims de modales) ; texte sur boutons ambre verrouillé via `accent-foreground`. Toggle lune/soleil dans le header (desktop + drawer mobile), icône en pur CSS (zéro mismatch d'hydratation), persistance localStorage, préférence système par défaut, script inline anti-flash dans le layout, `color-scheme` natif. Sweep de compatibilité sur 20 fichiers secondaires (mon-espace, profil, rencontre, vendeur, légales : statuts sémantiques → tokens success/destructive + variants `dark:`), exceptions raisonnées (badges stores, scrims photo, gradients premium).
+
+**Pages restées à l'ancienne interface (signalées par Hugo), refondues :**
+- `/itineraire-personnalise-pour-les-philippines` (LE funnel payant) : hero signature bleu + fenêtre « app » mockup, stepper redessiné, formulaire en carte structurée, propositions/pricing tokenisés (leurs hex cassaient le dark). Zéro logique funnel/Stripe touchée — parcours à re-tester (génération, sélection, paiement, resume magic-link).
+- `/services` : pricing cards façon Stripe/Linear, panneau signature « Des Français sur place », Pack Ultime unifié en ServiceCard tokenisé. **Bug réparé : les ancres #buddy et #pack-ultime référencées par le menu/footer/JSON-LD n'existaient pas dans la page.** ⚠️ Le CTA WhatsApp contient toujours le placeholder `wa.me/VOTRE_NUMERO`.
+- Outils communautaires bus + vols : formulaires en fenêtre « app » signature, cartes de trajets au style kit, filtres en chips, erreurs en tokens.
+
+**Contenu mince enrichi (recherche web sourcée ~115 URLs)** : `/voyager-aux-philippines/communication` (internet par île avec données Ookla/DataReportal 2025, Starlink, apps Messenger/Viber/Grab/GCash, section guides + articles) et `/communication/carte-sim` transformé en guide de référence ~1 100 mots (Globe vs Smart vs DITO avec mesures Opensignal 2025, SIM Registration Act pas-à-pas, achat aéroport vs ville avec prix PHP, eSIM locales vs Airalo/Holafly, forfaits par profil). Canonical self-referencing ajouté + title requêté (« Globe, Smart ou DITO ? Guide 2026 »). Fact-checks ✅ (contenu existant préservé, tout le neuf est sourcé).
+
 ### Design/Contenu — Phase 6d : éditorialisation des 18 pages voyager — FIN de la refonte (2026-07-02)
 
 Dernier lot de la recette validée : destinations (palawan, cebu-visayas, siargao), conseils-voyage, quand-partir, budget (+hébergement, nourriture), communication (+carte-sim, expressions), transport (+bus, ferries, vols), sante-securite (+conseils, vaccins). En-têtes maison + prose de transition par section, suppression systématique des StatRow détournés (phrases → prose, seul le vrai chiffre 28°C récupéré), lexiques tagalog et forfaits SIM convertis en tables, comparateurs bus/vols et blocs Klook/affiliés byte-identiques, contenu médical (vaccins) préservé mot pour mot, emojis hors charte retirés. Fact-check : 18/18 ✅ (+ vérification manuelle des entités sur les destinations, pauvres en chiffres). Avec ce lot, **100 % des pages de contenu du site suivent la recette éditoriale validée** (exemplaire visas → 5 sujets vivre → 6 guides → 18 voyager).

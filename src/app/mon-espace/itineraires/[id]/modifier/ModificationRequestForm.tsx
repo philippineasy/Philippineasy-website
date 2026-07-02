@@ -116,7 +116,7 @@ export function ModificationRequestForm({ generationId, userId, modificationsRem
         </p>
         <Link
           href="/mon-espace/messages"
-          className="inline-flex items-center gap-2 rounded-full bg-accent text-ink px-4 py-2 text-[13px] font-semibold shadow-cta hover:bg-accent/90 transition-transform"
+          className="inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-4 py-2 text-[13px] font-semibold shadow-cta hover:bg-accent/90 transition-transform"
         >
           Aller aux messages →
         </Link>
@@ -192,7 +192,7 @@ export function ModificationRequestForm({ generationId, userId, modificationsRem
         <button
           type="submit"
           disabled={submitting || description.trim().length < 30}
-          className="inline-flex items-center gap-2 rounded-full bg-accent text-ink px-5 py-2.5 text-[14px] font-semibold shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+          className="inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-5 py-2.5 text-[14px] font-semibold shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         >
           {submitting ? (
             <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Envoi…</>

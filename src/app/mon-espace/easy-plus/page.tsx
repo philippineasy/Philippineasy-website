@@ -44,10 +44,10 @@ function formatExpiry(iso: string | null | undefined): { label: string; days: nu
   if (!iso) return { label: 'Aucun abonnement actif', days: null, tone: 'text-muted-foreground' };
   const ms = new Date(iso).getTime() - Date.now();
   const days = Math.ceil(ms / 86400000);
-  if (days < 0) return { label: 'Expiré', days, tone: 'text-rose-700' };
-  if (days <= 7) return { label: `${days} jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}`, days, tone: 'text-amber-700' };
-  if (days <= 30) return { label: `${days} jours restants`, days, tone: 'text-emerald-700' };
-  return { label: `${days} jours restants`, days, tone: 'text-emerald-700' };
+  if (days < 0) return { label: 'Expiré', days, tone: 'text-destructive' };
+  if (days <= 7) return { label: `${days} jour${days > 1 ? 's' : ''} restant${days > 1 ? 's' : ''}`, days, tone: 'text-accent-strong' };
+  if (days <= 30) return { label: `${days} jours restants`, days, tone: 'text-[hsl(var(--success))]' };
+  return { label: `${days} jours restants`, days, tone: 'text-[hsl(var(--success))]' };
 }
 
 export default async function MonEspaceEasyPlusPage() {
@@ -88,7 +88,7 @@ export default async function MonEspaceEasyPlusPage() {
           <div className="flex items-center gap-4 min-w-0">
             <span className={[
               'shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center',
-              isActive ? 'bg-accent text-ink' : 'bg-muted text-muted-foreground',
+              isActive ? 'bg-accent text-accent-foreground' : 'bg-muted text-muted-foreground',
             ].join(' ')}>
               <Crown className="w-7 h-7" aria-hidden="true" />
             </span>
@@ -107,7 +107,7 @@ export default async function MonEspaceEasyPlusPage() {
           {!isActive && (
             <Link
               href="/services#easy-plus"
-              className="inline-flex items-center gap-2 rounded-full bg-accent text-ink px-5 py-2.5 text-[14px] font-semibold shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+              className="inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-5 py-2.5 text-[14px] font-semibold shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
             >
               <Sparkles className="w-4 h-4" />
               Devenir membre — dès 29 €/mois
@@ -142,7 +142,7 @@ export default async function MonEspaceEasyPlusPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 mb-0.5">
                     <strong className="text-[15px] font-semibold text-ink">{perk.title}</strong>
-                    {isActive && <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" aria-hidden="true" />}
+                    {isActive && <Check className="w-3.5 h-3.5 text-[hsl(var(--success))] shrink-0" aria-hidden="true" />}
                   </div>
                   <p className="text-[13px] text-muted-foreground leading-snug">{perk.description}</p>
                 </div>
@@ -167,7 +167,7 @@ export default async function MonEspaceEasyPlusPage() {
             </div>
             <Link
               href="/services#easy-plus"
-              className="inline-flex items-center gap-2 rounded-full bg-accent text-ink px-5 py-3 text-[14px] font-semibold shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+              className="inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-5 py-3 text-[14px] font-semibold shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
             >
               Voir les options
             </Link>

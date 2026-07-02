@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { UserMenu } from './UserMenu';
 import { Cart } from './Cart';
 import { DropdownMenu } from './DropdownMenu';
+import { ThemeToggle } from './ThemeToggle';
 import { useIAOverlay } from '@/contexts/IAOverlayContext';
 
 interface NavLink {
@@ -128,7 +129,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
     const isActive = pathname.startsWith(href) || (activeMainCategory && label.toLowerCase() === activeMainCategory.toLowerCase());
     const baseClasses = "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transition-none";
     const activeClasses = "bg-primary/10 text-primary font-bold";
-    const specialClasses = "bg-accent text-ink shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] font-semibold motion-reduce:hover:scale-100";
+    const specialClasses = "bg-accent text-accent-foreground shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] font-semibold motion-reduce:hover:scale-100";
     const defaultClasses = "text-foreground hover:text-primary hover:bg-primary/10";
     const adminClasses = "text-destructive hover:text-destructive/90 hover:bg-destructive/10";
 
@@ -214,10 +215,11 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
             </Link>
 
             <div className="flex items-center gap-1.5">
+              <ThemeToggle className="hidden md:inline-flex" />
               <button
                 onClick={() => setIsSearchModalOpen(true)}
                 aria-label="Rechercher sur le site"
-                className="hidden md:inline-flex w-11 h-11 items-center justify-center rounded-full text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="hidden md:inline-flex w-11 h-11 items-center justify-center rounded-full text-foreground/70 hover:bg-primary/10 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <FontAwesomeIcon icon={faSearch} className="text-[16px]" />
               </button>
@@ -232,7 +234,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
                       aria-label={unreadCount > 0 ? `Notifications (${unreadCount} non lues)` : 'Notifications'}
                       aria-haspopup="true"
                       aria-expanded={isNotificationsOpen}
-                      className={`relative w-11 h-11 inline-flex items-center justify-center rounded-full text-slate-700 hover:bg-primary/10 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${unreadCount > 0 ? 'animate-pulse motion-reduce:animate-none' : ''}`}
+                      className={`relative w-11 h-11 inline-flex items-center justify-center rounded-full text-foreground/70 hover:bg-primary/10 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${unreadCount > 0 ? 'animate-pulse motion-reduce:animate-none' : ''}`}
                     >
                       <FontAwesomeIcon icon={faBell} className="text-[16px]" />
                       {unreadCount > 0 && (
@@ -372,7 +374,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
                       (window as any).gtag('event', 'ia_overlay_opened', { source: 'header_mobile' });
                     }
                   }}
-                  className="px-3 py-2 rounded-md bg-accent text-ink shadow-cta font-semibold hover:bg-accent/90 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  className="px-3 py-2 rounded-md bg-accent text-accent-foreground shadow-cta font-semibold hover:bg-accent/90 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                 >
                   + Créer Itinéraire
                 </button>
@@ -382,6 +384,10 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
                 >
                   <FontAwesomeIcon icon={faSearch} className="mr-2" /> Rechercher
                 </button>
+                <div className="flex items-center px-3 py-1">
+                  <ThemeToggle />
+                  <span className="ml-2 text-sm text-muted-foreground">Thème clair / sombre</span>
+                </div>
               </div>
             </div>
           )}

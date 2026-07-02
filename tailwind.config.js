@@ -52,8 +52,10 @@ module.exports = {
   			},
   			'warm-yellow': '#FCD34D',
   			'soft-blue': '#F4F7FE',
-  			ink: '#0F172A',
-  			'ink-dim': '#1E293B'
+  			ink: 'hsl(var(--ink))',
+  			'ink-dim': 'hsl(var(--ink-dim))',
+  			// Surface sombre CONSTANTE (footer, ticker, scrims) — ne bascule pas en dark
+  			night: '#0F172A'
   		},
   		borderRadius: {
   			lg: 'var(--radius)',

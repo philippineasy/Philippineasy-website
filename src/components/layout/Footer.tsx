@@ -101,7 +101,7 @@ const Footer = () => {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-ink text-slate-400 pt-16 pb-6 px-4">
+    <footer className="bg-night text-slate-400 pt-16 pb-6 px-4">
       <div className="container mx-auto max-w-[1200px]">
         {/* Top : brand col + 4 nav cols */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_3fr] gap-12 pb-10 border-b border-white/10">
@@ -127,7 +127,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook Philippin'Easy"
-                className="inline-flex w-11 h-11 items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-ink transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="inline-flex w-11 h-11 items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-accent-foreground transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <FontAwesomeIcon icon={faFacebookF} className="text-[15px]" />
               </a>
@@ -136,7 +136,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram Philippin'Easy"
-                className="inline-flex w-11 h-11 items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-ink transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="inline-flex w-11 h-11 items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-accent-foreground transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <FontAwesomeIcon icon={faInstagram} className="text-[15px]" />
               </a>
@@ -145,7 +145,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Telegram Philippin'Easy"
-                className="inline-flex w-11 h-11 items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-ink transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="inline-flex w-11 h-11 items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-accent-foreground transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <FontAwesomeIcon icon={faTelegram} className="text-[15px]" />
               </a>
@@ -154,7 +154,7 @@ const Footer = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="YouTube Philippin'Easy"
-                className="inline-flex w-11 h-11 items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-ink transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                className="inline-flex w-11 h-11 items-center justify-center rounded-full bg-white/[0.06] text-slate-400 hover:bg-accent hover:text-accent-foreground transition-all duration-200 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <FontAwesomeIcon icon={faYoutube} className="text-[15px]" />
               </a>
@@ -182,7 +182,7 @@ const Footer = () => {
                 <button
                   type="submit"
                   aria-label="S'inscrire à la newsletter"
-                  className="px-4 min-h-[44px] bg-accent text-ink rounded-r-md hover:bg-accent/90 transition-colors duration-200 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+                  className="px-4 min-h-[44px] bg-accent text-accent-foreground rounded-r-md hover:bg-accent/90 transition-colors duration-200 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
                   disabled={newsletterStatus === 'loading'}
                 >
                   <FontAwesomeIcon

@@ -204,7 +204,7 @@ const EditDatingProfilePage = () => {
                   <div>
                     <label htmlFor="description" className="block text-sm font-medium text-foreground">Description</label>
                     <textarea id="description" {...register('description', { required: 'La description est requise.' })} className="mt-1 block w-full rounded-md border-border shadow-sm focus:border-primary focus:ring-primary" rows={5}></textarea>
-                    {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>}
+                    {errors.description && <p className="text-destructive text-xs mt-1">{errors.description.message}</p>}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -228,7 +228,7 @@ const EditDatingProfilePage = () => {
                           />
                         )}
                       />
-                      {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city.message}</p>}
+                      {errors.city && <p className="text-destructive text-xs mt-1">{errors.city.message}</p>}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-foreground">Orientation Sexuelle</label>
@@ -387,7 +387,7 @@ const EditDatingProfilePage = () => {
               {isLoading ? 'Sauvegarde...' : 'Sauvegarder les modifications'}
             </button>
           </div>
-          {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+          {error && <p className="text-destructive text-center mt-4">{error}</p>}
         </form>
 
         <ConfirmationModal

@@ -8,7 +8,6 @@ import { CustomSelect, SelectOption } from '@/components/shared/CustomSelect';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/Button';
 import { InterestSelector } from './InterestSelector';
-import { fadeInUp } from './animations';
 import type { Duration } from '@/config/itinerary-pricing';
 
 // Email validation simple (RFC 5322-ish, suffisant pour le frontend)
@@ -63,6 +62,9 @@ interface PreferencesFormProps {
   defaultEmail?: string;
 }
 
+// Micro-label partagé par tous les champs — hiérarchie nette et cohérente.
+const fieldLabel = 'mb-1.5 block text-sm font-semibold text-foreground';
+
 export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated, authLoading, defaultEmail }: PreferencesFormProps) {
   const [travelType, setTravelType] = useState('');
   const [duration, setDuration] = useState<Duration | ''>('');
@@ -97,21 +99,28 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
   const displayError = error || formError;
 
   return (
-    <motion.div
-      variants={fadeInUp}
-      initial="initial"
-      animate="animate"
-      className="bg-card rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.06)] max-w-4xl mx-auto p-6 md:p-10 border border-border/50"
+    <div
+      id="itinerary-form"
+      className="mx-auto max-w-4xl scroll-mt-32 animate-fade-in-up rounded-2xl border border-border bg-card p-6 shadow-card md:p-10"
     >
-      <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-        <h2 className="text-2xl font-semibold text-foreground mb-6 border-b border-border pb-3 flex items-center gap-2">
-          <FontAwesomeIcon icon={faCompass} className="text-primary" />
-          Dites-nous ce que vous recherchez :
-        </h2>
+      <form className="space-y-7" onSubmit={(e) => e.preventDefault()}>
+        {/* En-tête de carte — eyebrow + titre + rassurance */}
+        <div className="border-b border-border pb-5">
+          <span className="mb-2 flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.08em] text-primary">
+            <FontAwesomeIcon icon={faCompass} aria-hidden="true" />
+            Étape 1 · Aperçu gratuit
+          </span>
+          <h2 className="text-2xl font-semibold text-foreground" style={{ letterSpacing: '-0.01em' }}>
+            Dites-nous ce que vous recherchez
+          </h2>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            Quelques préférences suffisent — vous pourrez tout ajuster ensuite.
+          </p>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
           <div>
-            <label className="block text-foreground mb-1 font-medium">Type de voyage</label>
+            <label className={fieldLabel}>Type de voyage</label>
             <CustomSelect
               options={travelTypeOptions}
               value={travelType}
@@ -120,7 +129,7 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
             />
           </div>
           <div>
-            <label className="block text-foreground mb-1 font-medium">Duree du sejour</label>
+            <label className={fieldLabel}>Duree du sejour</label>
             <CustomSelect
               options={durationOptions}
               value={duration}
@@ -130,9 +139,9 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
           <div>
-            <label className="block text-foreground mb-1 font-medium">Budget (par personne, hors vol inter)</label>
+            <label className={fieldLabel}>Budget (par personne, hors vol inter)</label>
             <CustomSelect
               options={budgetOptions}
               value={budget}
@@ -141,7 +150,7 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
             />
           </div>
           <div>
-            <label className="block text-foreground mb-1 font-medium">Style de voyage principal</label>
+            <label className={fieldLabel}>Style de voyage principal</label>
             <CustomSelect
               options={tripStyleOptions}
               value={tripStyle}
@@ -152,7 +161,7 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
         </div>
 
         <div>
-          <label className="block text-foreground mb-2 font-medium">Vos centres d&apos;interet (max 3) :</label>
+          <label className={fieldLabel}>Vos centres d&apos;interet (max 3)</label>
           <InterestSelector
             selected={interests}
             onChange={setInterests}
@@ -160,13 +169,13 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
         </div>
 
         <div>
-          <label className="block text-foreground mb-1 font-medium">Preferences ou informations complementaires ?</label>
+          <label className={fieldLabel}>Preferences ou informations complementaires ?</label>
           <Textarea
             rows={3}
             value={additionalInfo}
             onChange={(e) => setAdditionalInfo(e.target.value)}
             placeholder="Ex: rythme souhaite (relax/intense), iles a eviter/privilegier, voyage avec enfants..."
-            className="bg-muted/50 hover:border-primary/50 focus:bg-card"
+            className="rounded-lg bg-muted/50 hover:border-primary/50 focus:bg-card focus-visible:ring-primary/30"
           />
         </div>
 
@@ -174,7 +183,7 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-xl text-sm"
+            className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
           >
             {displayError}
           </motion.div>
@@ -183,11 +192,11 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
         {/* Champ email — capture necessaire pour anonymes (recovery + magic link payment) */}
         {!authLoading && !isAuthenticated && (
           <div>
-            <label htmlFor="itinerary-email" className="block text-foreground mb-1 font-medium">
+            <label htmlFor="itinerary-email" className={fieldLabel}>
               Votre email <span className="text-destructive">*</span>
             </label>
             <div className="relative">
-              <FontAwesomeIcon icon={faEnvelope} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <FontAwesomeIcon icon={faEnvelope} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/70" aria-hidden="true" />
               <input
                 id="itinerary-email"
                 type="email"
@@ -196,37 +205,35 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
                 placeholder="votre@email.com"
                 autoComplete="email"
                 required
-                className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg bg-muted/50 hover:border-primary/50 focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors"
+                className="min-h-[44px] w-full rounded-lg border border-border bg-muted/50 py-3 pl-10 pr-4 transition-colors hover:border-primary/50 focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="mt-1.5 text-xs text-muted-foreground">
               On vous envoie l&apos;apercu et on retient vos preferences si vous revenez plus tard.
             </p>
           </div>
         )}
 
-        <div className="border-t border-border mt-6 pt-6 text-center">
+        <div className="border-t border-border pt-6 text-center">
           {authLoading ? (
             <div className="py-4">
-              <FontAwesomeIcon icon={faSpinner} className="animate-spin text-primary text-2xl" />
+              <FontAwesomeIcon icon={faSpinner} className="animate-spin text-2xl text-primary" />
             </div>
           ) : (
             <>
-              <motion.div whileHover={{ scale: isLoading ? 1 : 1.02 }} whileTap={{ scale: isLoading ? 1 : 0.98 }}>
-                <Button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={isLoading}
-                  size="lg"
-                  className="w-full md:w-auto px-8 py-4 bg-accent text-accent-foreground text-lg hover:bg-accent/90 font-semibold shadow-md hover:shadow-lg transition-all h-auto"
-                >
-                  {isLoading ? (
-                    <><FontAwesomeIcon icon={faSpinner} className="mr-2 animate-spin" /> Generation en cours...</>
-                  ) : (
-                    <><FontAwesomeIcon icon={faMagic} className="mr-2" /> Voir mon apercu gratuit</>
-                  )}
-                </Button>
-              </motion.div>
+              <Button
+                type="button"
+                onClick={handleSubmit}
+                disabled={isLoading}
+                size="lg"
+                className="h-auto w-full bg-accent px-8 py-4 text-lg font-semibold text-accent-foreground shadow-cta transition-all duration-200 hover:bg-accent/90 hover:scale-[1.02] hover:shadow-xl active:scale-[0.99] motion-reduce:hover:scale-100 md:w-auto"
+              >
+                {isLoading ? (
+                  <><FontAwesomeIcon icon={faSpinner} className="mr-2 animate-spin" /> Generation en cours...</>
+                ) : (
+                  <><FontAwesomeIcon icon={faMagic} className="mr-2" /> Voir mon apercu gratuit</>
+                )}
+              </Button>
 
               {/* Loading feedback panel — visible only during generation */}
               <AnimatePresence>
@@ -237,12 +244,12 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
                     transition={{ duration: 0.3 }}
-                    className="mt-6 bg-primary/5 border border-primary/20 rounded-2xl p-6 text-center space-y-3"
+                    className="mt-6 space-y-3 rounded-2xl border border-primary/20 bg-primary/5 p-6 text-center"
                   >
-                    <p className="text-foreground font-semibold text-base">
+                    <p className="text-base font-semibold text-foreground">
                       Votre itineraire est en cours de creation...
                     </p>
-                    <p className="text-muted-foreground text-sm leading-relaxed max-w-md mx-auto">
+                    <p className="mx-auto max-w-md text-sm leading-relaxed text-muted-foreground">
                       Nos experts IA analysent vos preferences et selectionnent les meilleurs lieux aux Philippines.
                     </p>
 
@@ -251,7 +258,7 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
                       {[0, 1, 2, 3, 4].map((i) => (
                         <motion.span
                           key={i}
-                          className="block w-1.5 h-1.5 rounded-full bg-primary"
+                          className="block h-1.5 w-1.5 rounded-full bg-primary"
                           animate={{ opacity: [0.25, 1, 0.25] }}
                           transition={{
                             duration: 1.4,
@@ -264,9 +271,9 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
                     </div>
 
                     {/* Progress bar */}
-                    <div className="w-full bg-primary/10 rounded-full h-1.5 overflow-hidden max-w-xs mx-auto">
+                    <div className="mx-auto h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-primary/10">
                       <motion.div
-                        className="h-full bg-primary rounded-full"
+                        className="h-full rounded-full bg-primary"
                         initial={{ x: '-100%' }}
                         animate={{ x: '100%' }}
                         transition={{
@@ -277,20 +284,20 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
                       />
                     </div>
 
-                    <p className="text-muted-foreground text-xs font-medium pt-1">
+                    <p className="pt-1 text-xs font-medium text-muted-foreground">
                       Veuillez ne pas fermer cette page. Cela peut prendre jusqu&apos;a 1 minute.
                     </p>
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              <p className="text-sm text-muted-foreground mt-4">
+              <p className="mt-4 text-sm text-muted-foreground">
                 <FontAwesomeIcon icon={faLock} className="mr-1" /> Apercu gratuit. Aucun engagement avant validation.
               </p>
             </>
           )}
         </div>
       </form>
-    </motion.div>
+    </div>
   );
 }

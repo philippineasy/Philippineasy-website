@@ -67,7 +67,7 @@ export function AddProductForm({ categories, vendorId }: AddProductFormProps) {
       </div>
       <div>
         <label htmlFor="image" className="block text-foreground mb-2 font-semibold">Image du produit</label>
-        <input type="file" id="image" name="image" required accept="image/png, image/jpeg" className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
+        <input type="file" id="image" name="image" required accept="image/png, image/jpeg" className="w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
       </div>
       <div>
         <button type="submit" disabled={loading} className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition duration-300 font-semibold disabled:opacity-50">

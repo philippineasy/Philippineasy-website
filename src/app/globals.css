@@ -22,6 +22,7 @@
 
 @layer base {
   :root {
+    color-scheme: light;
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -49,6 +50,11 @@
     --success: 145 63% 42%; /* green-600 */
     --success-foreground: 210 40% 98%;
     --warm-bg: 30 20% 98%;
+    /* ink = texte de titre de marque. Bascule en clair sur thème sombre ;
+       pour une SURFACE sombre constante (footer, ticker, scrim), utiliser
+       le token `night` (tailwind) qui ne bascule jamais. */
+    --ink: 222 47% 11%;               /* #0F172A */
+    --ink-dim: 217 33% 17%;           /* #1E293B */
   }
 
   /* Dark theme — anchored on the BRAND ink family (#0F172A slate-900 and its
@@ -57,8 +63,11 @@
      dark, and --accent-strong flips to a light amber so orange text stays AA on
      dark surfaces. Activated by darkMode:["class"] (no UI toggle yet). */
   .dark {
+    color-scheme: dark;
     --background: 222 47% 8%;         /* deep ink, ~#0B0F1A */
     --foreground: 210 40% 96%;        /* soft off-white, ~#F0F4F8 */
+    --ink: 210 40% 96%;               /* text-ink devient clair en dark */
+    --ink-dim: 215 20% 68%;
     --card: 222 47% 11%;              /* ink #0F172A — lifted surface */
     --card-foreground: 210 40% 96%;
     --popover: 222 47% 11%;

@@ -102,7 +102,7 @@ export function WhatsAppGate({ userId, entitlements, whatsappNumber }: Props) {
                 type="button"
                 onClick={save}
                 disabled={saving || !number.trim()}
-                className="rounded-lg bg-accent text-ink px-4 py-2 text-[13px] font-semibold shadow-cta hover:bg-accent/90 active:scale-[0.99] transition-transform disabled:opacity-60 disabled:cursor-wait"
+                className="rounded-lg bg-accent text-accent-foreground px-4 py-2 text-[13px] font-semibold shadow-cta hover:bg-accent/90 active:scale-[0.99] transition-transform disabled:opacity-60 disabled:cursor-wait"
               >
                 {saving ? 'Sauvegarde…' : 'Enregistrer'}
               </button>

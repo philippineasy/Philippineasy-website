@@ -122,7 +122,7 @@ const ProfilePanel = ({ userId }: ProfilePanelProps) => {
         </div>
       )}
       
-      <Link href={`/rencontre-philippines/profil/${userId}`} className="mt-8 inline-flex min-h-[44px] w-full items-center justify-center px-4 py-3 bg-accent text-ink rounded-lg hover:bg-accent/90 transition-colors font-semibold shadow-cta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+      <Link href={`/rencontre-philippines/profil/${userId}`} className="mt-8 inline-flex min-h-[44px] w-full items-center justify-center px-4 py-3 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-colors font-semibold shadow-cta focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
         Voir le profil complet
       </Link>
     </motion.div>

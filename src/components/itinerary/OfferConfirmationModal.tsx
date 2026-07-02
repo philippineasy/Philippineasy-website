@@ -137,7 +137,7 @@ export function OfferConfirmationModal({
             initial="initial"
             animate="animate"
             exit="exit"
-            className="absolute inset-0 bg-ink/70 backdrop-blur-md"
+            className="absolute inset-0 bg-night/70 backdrop-blur-md"
             onClick={handleClose}
           />
 

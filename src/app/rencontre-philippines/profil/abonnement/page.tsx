@@ -60,7 +60,7 @@ const AbonnementPage = () => {
             </div>
             <div>
               <h2 className="text-lg font-semibold">Statut</h2>
-              <p className={`capitalize font-medium ${subscription.status === 'active' ? 'text-green-600' : 'text-yellow-600'}`}>
+              <p className={`capitalize font-medium ${subscription.status === 'active' ? 'text-[hsl(var(--success))]' : 'text-yellow-600 dark:text-yellow-400'}`}>
                 {subscription.status === 'active' ? 'Actif' : 'En cours'}
               </p>
             </div>
@@ -69,7 +69,7 @@ const AbonnementPage = () => {
               <p className="text-muted-foreground">{new Date(subscription.current_period_end * 1000).toLocaleDateString('fr-FR')}</p>
             </div>
             {subscription.cancel_at_period_end ? (
-              <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-r-lg">
+              <div className="bg-yellow-100 dark:bg-yellow-900/30 border-l-4 border-yellow-500 text-yellow-700 dark:text-yellow-400 p-4 rounded-r-lg">
                 <p className="font-bold">Résilisation programmée</p>
                 <p>Votre abonnement prendra fin le {new Date(subscription.current_period_end * 1000).toLocaleDateString('fr-FR')}.</p>
               </div>

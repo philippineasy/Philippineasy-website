@@ -68,8 +68,8 @@ export function AdminSidebar({ isSuperAdmin }: Props) {
   };
 
   return (
-    <aside className="hidden lg:flex w-60 shrink-0 bg-ink text-white flex-col border-r border-ink-dim sticky top-20 h-[calc(100vh-5rem)]">
-      <div className="px-6 pt-6 pb-4 border-b border-ink-dim">
+    <aside className="hidden lg:flex w-60 shrink-0 bg-night text-white flex-col border-r border-white/10 sticky top-20 h-[calc(100vh-5rem)]">
+      <div className="px-6 pt-6 pb-4 border-b border-white/10">
         <Link
           href="/admin"
           className="flex items-center gap-2 text-[18px] font-bold tracking-[-0.01em]"
@@ -104,7 +104,7 @@ export function AdminSidebar({ isSuperAdmin }: Props) {
                           'flex items-center gap-3 px-3 py-2 rounded-lg text-[13.5px] font-medium transition-colors',
                           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-ink',
                           active
-                            ? 'bg-accent text-ink shadow-sm'
+                            ? 'bg-accent text-accent-foreground shadow-sm'
                             : 'text-white/80 hover:bg-white/5 hover:text-white',
                         ].join(' ')}
                         aria-current={active ? 'page' : undefined}
@@ -121,7 +121,7 @@ export function AdminSidebar({ isSuperAdmin }: Props) {
         })}
       </nav>
 
-      <div className="px-6 py-4 border-t border-ink-dim">
+      <div className="px-6 py-4 border-t border-white/10">
         <Link
           href="/"
           className="block text-[12px] text-white/50 hover:text-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"

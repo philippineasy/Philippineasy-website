@@ -91,7 +91,7 @@ export function ArticleAside({ relatedArticles }: Props) {
           />
           <button
             type="submit"
-            className="w-full rounded-lg bg-accent text-ink font-semibold text-[14px] px-3 py-2.5 shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform motion-reduce:transition-none motion-reduce:hover:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+            className="w-full rounded-lg bg-accent text-accent-foreground font-semibold text-[14px] px-3 py-2.5 shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform motion-reduce:transition-none motion-reduce:hover:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
           >
             S'inscrire
           </button>

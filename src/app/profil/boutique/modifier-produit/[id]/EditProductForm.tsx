@@ -82,7 +82,7 @@ export function EditProductForm({ categories, product }: EditProductFormProps) {
                 <Image src={product.image_urls[0]} alt="Image actuelle" width={100} height={100} className="rounded-md" />
             </div>
         )}
-        <input type="file" id="image" name="image" accept="image/png, image/jpeg" className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
+        <input type="file" id="image" name="image" accept="image/png, image/jpeg" className="w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
         <p className="text-xs text-muted-foreground mt-1">Laissez vide pour conserver l'image actuelle.</p>
       </div>
       <div>

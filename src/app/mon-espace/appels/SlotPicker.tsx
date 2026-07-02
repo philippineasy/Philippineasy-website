@@ -149,7 +149,7 @@ export default function SlotPicker({ bookingId, onBooked }: SlotPickerProps) {
                   'rounded-lg border px-3 py-2.5 text-[14px] font-semibold tabular-nums transition-all',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
                   isSelected
-                    ? 'border-accent bg-accent text-ink ring-1 ring-accent shadow-cta'
+                    ? 'border-accent bg-accent text-accent-foreground ring-1 ring-accent shadow-cta'
                     : 'border-border bg-card text-foreground hover:border-accent/40 hover:bg-accent/5',
                 ].join(' ')}
               >
@@ -181,7 +181,7 @@ export default function SlotPicker({ bookingId, onBooked }: SlotPickerProps) {
               type="button"
               onClick={handleBook}
               disabled={booking}
-              className="inline-flex items-center gap-1.5 rounded-full bg-accent text-ink px-4 py-2 text-[13px] font-semibold shadow-cta hover:bg-accent/90 active:scale-[0.99] transition-transform disabled:opacity-60 disabled:cursor-wait focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+              className="inline-flex items-center gap-1.5 rounded-full bg-accent text-accent-foreground px-4 py-2 text-[13px] font-semibold shadow-cta hover:bg-accent/90 active:scale-[0.99] transition-transform disabled:opacity-60 disabled:cursor-wait focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
             >
               {booking ? (
                 <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Réservation…</>

@@ -4,13 +4,13 @@ import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { ItineraryHero } from '@/components/itinerary/ItineraryHero';
 import { HowItWorks } from '@/components/itinerary/HowItWorks';
 import { PreferencesForm } from '@/components/itinerary/PreferencesForm';
 import { ProposalCards } from '@/components/itinerary/ProposalCards';
 import { OfferSelection } from '@/components/itinerary/OfferSelection';
 import { PaymentAuthModal } from '@/components/itinerary/PaymentAuthModal';
 import { OfferConfirmationModal } from '@/components/itinerary/OfferConfirmationModal';
-import { fadeInUp } from '@/components/itinerary/animations';
 import {
   PRICING_GRID,
   type Duration,
@@ -410,22 +410,10 @@ function ItineraireContent() {
         )}
       </AnimatePresence>
 
-      <div className="container mx-auto px-4 py-16">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="text-center mb-8"
-        >
-          <h1 className="text-4xl font-bold mb-4">
-            Creez Votre <span className="text-primary">Itineraire Ideal</span> aux Philippines
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Notre assistant IA concoit le voyage de vos reves en quelques minutes. Indiquez vos preferences, choisissez votre formule, partez serein !
-          </p>
-        </motion.div>
+      {/* Hero signature — panneau bleu + fenêtre app, porte le H1 unique */}
+      <ItineraryHero />
 
+      <div className="container mx-auto px-4 pb-16 pt-10 md:pt-14">
         {/* Comment ca marche */}
         <HowItWorks />
 

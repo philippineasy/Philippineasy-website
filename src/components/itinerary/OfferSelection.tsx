@@ -1,5 +1,6 @@
 'use client';
 
+import type { CSSProperties } from 'react';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRocket, faStar, faCrown, faArrowRight, faLock } from '@fortawesome/free-solid-svg-icons';
@@ -24,26 +25,36 @@ interface OfferSelectionProps {
   onPayment: (offer: OfferType) => void;
 }
 
+// Icon/badge tints are self-contained chips (own bg + readable text), so they
+// hold up in light and dark. Everything else is driven by semantic tokens.
 const OFFER_CONFIG = {
   express: { icon: faRocket, iconBg: '#F4F7FE', iconColor: '#3B5BDB', badgeBg: '#F4F7FE', badgeColor: '#3B5BDB' },
-  premium: { icon: faStar, iconBg: '#FEF3C7', iconColor: '#F59E0B', badgeBg: '#FEF3C7', badgeColor: '#B45309' },
-  conciergerie: { icon: faCrown, iconBg: '#F3E8FF', iconColor: '#A855F7', badgeBg: '#F3E8FF', badgeColor: '#7E22CE' },
+  premium: { icon: faStar, iconBg: '#FEF3C7', iconColor: '#B45309', badgeBg: '#FEF3C7', badgeColor: '#B45309' },
+  conciergerie: { icon: faCrown, iconBg: '#F3E8FF', iconColor: '#7E22CE', badgeBg: '#F3E8FF', badgeColor: '#7E22CE' },
 } as const;
 
 const OFFER_ORDER: OfferType[] = ['express', 'premium', 'conciergerie'];
 
+const microLabel: CSSProperties = {
+  fontSize: '10px',
+  fontWeight: 600,
+  letterSpacing: '0.06em',
+  textTransform: 'uppercase',
+  color: 'hsl(var(--muted-foreground))',
+};
+
 export function OfferSelection({ selectedOffer, onSelectOffer, currentPricing, duration, onPayment }: OfferSelectionProps) {
   return (
     <div className="mt-10">
-      <h3 className="text-xl font-bold text-foreground mb-2 text-center">
+      <h3 className="mb-2 text-center text-xl font-bold text-foreground">
         Choisissez votre formule
       </h3>
-      <p className="text-muted-foreground text-center mb-8">
+      <p className="mb-8 text-center text-muted-foreground">
         Pour un sejour de <span className="font-semibold text-primary">{DURATION_LABELS[duration]}</span>
       </p>
 
       <motion.div
-        className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        className="grid grid-cols-1 gap-6 md:grid-cols-3"
         variants={staggerContainer}
         initial="initial"
         animate="animate"
@@ -60,31 +71,30 @@ export function OfferSelection({ selectedOffer, onSelectOffer, currentPricing, d
               key={offerKey}
               variants={fadeInUp}
               onClick={() => onSelectOffer(offerKey)}
-              className="bg-card rounded-2xl cursor-pointer transition-all duration-200 relative flex flex-col overflow-hidden hover:-translate-y-1"
+              className="relative flex cursor-pointer flex-col overflow-hidden rounded-2xl bg-card transition-all duration-200 hover:-translate-y-1"
               style={{
-                border: isSelected ? '1.5px solid #3B5BDB' : '0.5px solid #e5e7eb',
-                boxShadow: isSelected ? '0 8px 24px rgba(59,91,219,0.15)' : '0 1px 2px rgba(0,0,0,0.03)',
+                border: isSelected ? '1.5px solid hsl(var(--primary))' : '0.5px solid hsl(var(--border))',
+                boxShadow: isSelected ? '0 8px 24px hsl(var(--primary) / 0.18)' : '0 1px 2px rgba(0,0,0,0.04)',
               }}
             >
               {isPremium && (
                 <div
-                  className="flex items-center justify-center gap-1.5 py-2"
+                  className="flex items-center justify-center gap-1.5 py-2 text-white"
                   style={{
                     background: 'linear-gradient(135deg, #3B5BDB 0%, #1e40af 100%)',
-                    color: '#ffffff',
                     fontSize: '10px',
                     fontWeight: 700,
                     letterSpacing: '0.08em',
                     textTransform: 'uppercase',
                   }}
                 >
-                  <Sparkles className="w-3 h-3" />
+                  <Sparkles className="h-3 w-3" />
                   Recommandé
                 </div>
               )}
 
-              <div className="p-6 flex flex-col flex-1">
-                <div className="flex items-center justify-between gap-3 mb-4">
+              <div className="flex flex-1 flex-col p-6">
+                <div className="mb-4 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5">
                     <span
                       className="inline-flex items-center justify-center rounded-xl"
@@ -98,7 +108,7 @@ export function OfferSelection({ selectedOffer, onSelectOffer, currentPricing, d
                     </span>
                   </div>
                   <span
-                    className="inline-flex items-center px-2 py-0.5 rounded"
+                    className="inline-flex items-center rounded px-2 py-0.5"
                     style={{
                       fontSize: '10px',
                       fontWeight: 700,
@@ -112,57 +122,46 @@ export function OfferSelection({ selectedOffer, onSelectOffer, currentPricing, d
                   </span>
                 </div>
 
+                <p style={{ ...microLabel, marginBottom: '2px' }}>Prix</p>
                 <p
-                  style={{
-                    fontSize: '10px',
-                    fontWeight: 600,
-                    color: '#94a3b8',
-                    letterSpacing: '0.06em',
-                    textTransform: 'uppercase',
-                    marginBottom: '2px',
-                  }}
-                >
-                  Prix
-                </p>
-                <p
-                  className="text-foreground tabular-nums mb-1"
-                  style={{ fontSize: '32px', fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1, color: '#3B5BDB' }}
+                  className="mb-1 tabular-nums text-primary"
+                  style={{ fontSize: '32px', fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1 }}
                 >
                   {pricing.price > 0 ? formatPrice(pricing.price) : 'Sur devis'}
                 </p>
-                <p className="mb-5 mt-2" style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.55 }}>
+                <p className="mb-5 mt-2 text-[13px] leading-[1.55] text-muted-foreground">
                   {offer.description}
                 </p>
 
-                <ul className="space-y-2.5 mb-6 flex-1 pt-5" style={{ borderTop: '0.5px solid #f1f5f9' }}>
+                <ul className="mb-6 flex-1 space-y-2.5 border-t border-border pt-5">
                   {offer.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2.5" style={{ fontSize: '13px', color: '#334155', lineHeight: 1.5 }}>
+                    <li key={idx} className="flex items-start gap-2.5 text-[13px] leading-[1.5] text-foreground/80">
                       <span
-                        className="flex-shrink-0 inline-flex items-center justify-center rounded-full mt-0.5"
-                        style={{ width: '16px', height: '16px', backgroundColor: '#F4F7FE', color: '#3B5BDB' }}
+                        className="mt-0.5 inline-flex flex-shrink-0 items-center justify-center rounded-full"
+                        style={{ width: '16px', height: '16px', backgroundColor: 'hsl(var(--primary) / 0.12)', color: 'hsl(var(--primary))' }}
                         aria-hidden="true"
                       >
-                        <Check className="w-2.5 h-2.5" />
+                        <Check className="h-2.5 w-2.5" />
                       </span>
                       {feature}
                     </li>
                   ))}
                 </ul>
 
-                <div className="pt-4" style={{ borderTop: '0.5px solid #f1f5f9' }}>
+                <div className="border-t border-border pt-4">
                   {pricing.modifications === 0 ? (
-                    <p className="flex items-center gap-2" style={{ fontSize: '12px', color: '#94a3b8' }}>
-                      <AlertTriangle className="w-3.5 h-3.5 text-destructive/60" />
+                    <p className="flex items-center gap-2 text-[12px] text-muted-foreground">
+                      <AlertTriangle className="h-3.5 w-3.5 text-destructive/60" />
                       Aucune modification incluse
                     </p>
                   ) : pricing.modifications === -1 ? (
-                    <p className="flex items-center gap-2" style={{ fontSize: '12px', color: '#3B5BDB', fontWeight: 600 }}>
-                      <Infinity className="w-3.5 h-3.5" />
+                    <p className="flex items-center gap-2 text-[12px] font-semibold text-primary">
+                      <Infinity className="h-3.5 w-3.5" />
                       Modifications illimitées
                     </p>
                   ) : (
-                    <p className="flex items-center gap-2" style={{ fontSize: '12px', color: '#3B5BDB', fontWeight: 600 }}>
-                      <Check className="w-3.5 h-3.5" />
+                    <p className="flex items-center gap-2 text-[12px] font-semibold text-primary">
+                      <Check className="h-3.5 w-3.5" />
                       {pricing.modifications} modification{pricing.modifications > 1 ? 's' : ''} incluse{pricing.modifications > 1 ? 's' : ''}
                     </p>
                   )}
@@ -174,16 +173,13 @@ export function OfferSelection({ selectedOffer, onSelectOffer, currentPricing, d
       </motion.div>
 
       {/* Modifications supplementaires */}
-      <div
-        className="mt-6 p-4 bg-card rounded-2xl"
-        style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
-      >
-        <p className="text-center" style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.55 }}>
+      <div className="mt-6 rounded-2xl border border-border bg-card p-4 shadow-card-rest">
+        <p className="text-center text-[13px] leading-[1.55] text-muted-foreground">
           <strong className="text-foreground">Besoin de plus de modifications ?</strong> Ajoutez-en à tout moment :
           {Object.entries(MODIFICATION_PRICES).map(([key, value], idx) => (
             <span key={key}>
               {idx > 0 && ' |'} {value.description}{' '}
-              <strong className="text-foreground tabular-nums">{formatPrice(value.price)}</strong>
+              <strong className="tabular-nums text-foreground">{formatPrice(value.price)}</strong>
             </span>
           ))}
         </p>
@@ -201,20 +197,18 @@ export function OfferSelection({ selectedOffer, onSelectOffer, currentPricing, d
 
       {/* Bouton de paiement */}
       <div className="mt-8 text-center">
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="inline-block">
-          <Button
-            onClick={() => onPayment(selectedOffer)}
-            size="lg"
-            className="px-10 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all h-auto"
-          >
-            <FontAwesomeIcon icon={faArrowRight} className="mr-2" />
-            {currentPricing[selectedOffer].price > 0
-              ? `Debloquer pour ${formatPrice(currentPricing[selectedOffer].price)}`
-              : 'Demander un devis'
-            }
-          </Button>
-        </motion.div>
-        <p className="text-xs text-muted-foreground mt-3 flex items-center justify-center gap-1.5">
+        <Button
+          onClick={() => onPayment(selectedOffer)}
+          size="lg"
+          className="h-auto px-10 py-4 text-lg font-semibold shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl active:scale-[0.99] motion-reduce:hover:scale-100"
+        >
+          <FontAwesomeIcon icon={faArrowRight} className="mr-2" />
+          {currentPricing[selectedOffer].price > 0
+            ? `Debloquer pour ${formatPrice(currentPricing[selectedOffer].price)}`
+            : 'Demander un devis'
+          }
+        </Button>
+        <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
           <FontAwesomeIcon icon={faLock} className="text-[10px]" />
           Paiement securise par Stripe • Livraison instantanee par email
         </p>

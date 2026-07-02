@@ -127,7 +127,7 @@ export default function VendorApplicationClientPage({ user }: VendorApplicationC
               <div><span className="font-semibold">Description:</span> {formData.vendorDescription}</div>
             </div>
             <div className="flex items-start pt-4">
-              <input type="checkbox" id="terms" name="terms" checked={formData.terms} onChange={handleInputChange} required className="h-4 w-4 mt-1 text-primary focus:ring-primary border-gray-300 rounded" />
+              <input type="checkbox" id="terms" name="terms" checked={formData.terms} onChange={handleInputChange} required className="h-4 w-4 mt-1 text-primary focus:ring-primary border-border rounded" />
               <label htmlFor="terms" className="ml-2 block text-sm text-foreground">
                 Je confirme avoir lu et accepté les <Link href="/conditions-partenaires" className="text-primary hover:underline">conditions de partenariat</Link> de la marketplace.
               </label>

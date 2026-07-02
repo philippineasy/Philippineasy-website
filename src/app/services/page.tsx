@@ -2,41 +2,35 @@
 
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faCrown,
-  faUsers,
-  faShieldAlt,
-  faPlane,
-  faHeart,
-  faStar,
-  faCheck,
-  faArrowRight,
-} from '@fortawesome/free-solid-svg-icons';
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
-import ServiceCard, { Feature } from '@/components/services/ServiceCard';
+import ServiceCard from '@/components/services/ServiceCard';
 import FAQSchema from '@/components/shared/FAQSchema';
 import ServicesJsonLd from '@/components/shared/ServicesJsonLd';
-import InfoTooltip from '@/components/ui/InfoTooltip';
-import {
-  BUDDY_PRICING,
-  VOYAGE_SEREIN_PRICING,
-  PACK_ULTIME_PRICING,
-  SERVICE_DETAILS,
-  SERVICE_DURATION_LABELS,
-} from '@/config/services-pricing';
+import { PageHero, CardGrid, type StatItem } from '@/components/sections';
+import { cn } from '@/lib/utils';
 
 // Descriptions détaillées pour les infobulles
 const TOOLTIPS = {
-  itineraireConciergerie: "Programme jour par jour 100% personnalisé, hébergements recommandés avec liens booking, Google Maps intégré, modifications illimitées, contact WhatsApp direct avec Hugo",
-  buddySystem: "2-4 calls de 30min avec un expatrié français vivant aux Philippines, contact WhatsApp direct avec votre buddy, conseils locaux personnalisés avant/pendant/après voyage",
-  suiviWhatsapp: "Support en temps réel pendant votre voyage : problèmes de transport, recommandations restaurants, urgences. Réponse garantie sous 2h max",
-  easyPlus: "-20% chez tous nos partenaires (hôtels, activités, transports), support prioritaire 24/7, guides premium offerts, assistant IA illimité WhatsApp/Telegram",
-  rencontrePremium: "Profil vérifié et mis en avant, likes illimités, voir qui vous a liké, filtres avancés (localisation, âge, centres d'intérêt), messagerie prioritaire",
-  guidePdf: "Accès à tous les guides PDF Philippineasy pendant la durée de ton pack (Visa Philippines, Coût de la vie, Destinations secrètes, et tous les nouveaux guides à venir) — format PDF téléchargeable et imprimable",
-  groupePrive: "Accès à vie au Discord/Telegram exclusif avec la communauté d'expats et voyageurs francophones aux Philippines - entraide, bons plans, rencontres",
-  itinerairePremium: "Itinéraire IA personnalisé avec modifications gratuites, export PDF, liens Google Maps, recommandations hébergements et restaurants",
-  callAvantDepart: "Call vidéo de 30min avec Hugo pour préparer votre voyage : derniers conseils, check-list personnalisée, réponse à toutes vos questions",
-  checklistPersonnalisee: "Liste complète et personnalisée : documents, vaccins, applications à télécharger, objets à emporter, budget à prévoir",
+  itineraireConciergerie:
+    "Programme jour par jour 100% personnalisé, hébergements recommandés avec liens booking, Google Maps intégré, modifications illimitées, contact WhatsApp direct avec Hugo",
+  buddySystem:
+    "2-4 calls de 30min avec un expatrié français vivant aux Philippines, contact WhatsApp direct avec votre buddy, conseils locaux personnalisés avant/pendant/après voyage",
+  suiviWhatsapp:
+    "Support en temps réel pendant votre voyage : problèmes de transport, recommandations restaurants, urgences. Réponse garantie sous 2h max",
+  easyPlus:
+    "-20% chez tous nos partenaires (hôtels, activités, transports), support prioritaire 24/7, guides premium offerts, assistant IA illimité WhatsApp/Telegram",
+  rencontrePremium:
+    "Profil vérifié et mis en avant, likes illimités, voir qui vous a liké, filtres avancés (localisation, âge, centres d'intérêt), messagerie prioritaire",
+  guidePdf:
+    "Accès à tous les guides PDF Philippineasy pendant la durée de ton pack (Visa Philippines, Coût de la vie, Destinations secrètes, et tous les nouveaux guides à venir) — format PDF téléchargeable et imprimable",
+  groupePrive:
+    "Accès à vie au Discord/Telegram exclusif avec la communauté d'expats et voyageurs francophones aux Philippines - entraide, bons plans, rencontres",
+  itinerairePremium:
+    "Itinéraire IA personnalisé avec modifications gratuites, export PDF, liens Google Maps, recommandations hébergements et restaurants",
+  callAvantDepart:
+    "Call vidéo de 30min avec Hugo pour préparer votre voyage : derniers conseils, check-list personnalisée, réponse à toutes vos questions",
+  checklistPersonnalisee:
+    "Liste complète et personnalisée : documents, vaccins, applications à télécharger, objets à emporter, budget à prévoir",
 };
 
 const serviceFAQs = [
@@ -62,457 +56,639 @@ const serviceFAQs = [
   },
 ];
 
+const heroStats: StatItem[] = [
+  { value: '10 000+', label: 'Voyageurs accompagnés' },
+  { value: '98 %', label: 'Satisfaction' },
+  { value: '100 %', label: 'Francophone' },
+  { value: '7j/7', label: 'Support WhatsApp' },
+];
+
+// --- Aperçu des offres itinéraire (renvoi vers le générateur IA) ---
+const itineraryTiers = [
+  { name: 'Express', price: '9,99 € – 29,99 €', desc: '100 % IA, livraison instantanée', popular: false },
+  { name: 'Premium', price: '29 € – 99 €', desc: 'IA + retouches + support e-mail', popular: true },
+  { name: 'Conciergerie', price: '79 € – 219 €', desc: 'Sur-mesure + WhatsApp direct', popular: false },
+];
+
+// --- Panneau signature : la différence humaine ---
+const diffBullets = [
+  "IA + humain : la technologie prépare, un vrai Français vous guide.",
+  "Pas une agence : un guide francophone qui vit l'archipel au quotidien.",
+  "Des conseils testés sur le terrain, jamais recopiés d'un guide touristique.",
+  '+10 000 voyageurs accompagnés depuis 2020.',
+];
+
+// --- Icônes inline (feather, stroke 1.8) ---
+const iconProps = {
+  width: 20,
+  height: 20,
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 1.8,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+  'aria-hidden': true,
+};
+
+const SparkleIcon = () => (
+  <svg {...iconProps}>
+    <path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3z" />
+    <path d="M19 14l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8z" />
+  </svg>
+);
+
+const UsersIcon = () => (
+  <svg {...iconProps}>
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
+
+const ChatIcon = () => (
+  <svg {...iconProps}>
+    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+  </svg>
+);
+
+const HeartIcon = () => (
+  <svg {...iconProps}>
+    <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z" />
+  </svg>
+);
+
+const StarIcon = () => (
+  <svg {...iconProps}>
+    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+  </svg>
+);
+
+const PanelCheck = () => (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="3"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M20 6L9 17l-5-5" />
+  </svg>
+);
+
+const humanPillars = [
+  {
+    icon: <SparkleIcon />,
+    title: 'Itinéraire IA en 30 secondes',
+    text: 'Un plan jour par jour, prêt avant même votre premier échange.',
+  },
+  {
+    icon: <UsersIcon />,
+    title: 'Un buddy expat français',
+    text: 'Il vit aux Philippines, connaît le terrain et vous répond en français.',
+  },
+  {
+    icon: <ChatIcon />,
+    title: 'Suivi WhatsApp 7j/7',
+    text: 'Un souci sur place ? Réponse sous 2h, avant, pendant et après.',
+  },
+];
+
+// --- Communauté & abonnements ---
+const rencontrePlans = [
+  { label: '1 mois', price: '19,99 €', unit: '/mois', best: false },
+  { label: '3 mois', price: '14,99 €', unit: '/mois', best: false },
+  { label: '6 mois', price: '9,99 €', unit: '/mois', best: true },
+];
+const easyPlusPlans = [
+  { label: 'Mensuel', price: '29,99 €', unit: '/mois', best: false },
+  { label: 'Annuel (−31 %)', price: '249 €', unit: '/an', best: true },
+];
+
 export default function ServicesPage() {
   return (
     <div className="min-h-screen">
       <FAQSchema faqs={serviceFAQs} />
       <ServicesJsonLd />
 
-      {/* Hero Section */}
-      <section className="relative bg-muted py-20 px-4">
-        <div className="container mx-auto text-center max-w-4xl">
-          <span className="inline-block bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6">
-            Services Exclusifs
-          </span>
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-            Accompagnement <span className="text-primary">Personnalisé</span> aux Philippines
-          </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Des services uniques que nos concurrents ne peuvent pas offrir : IA + Humain, Buddy
-            System avec expats français, suivi WhatsApp en temps réel.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
-            <span className="flex items-center gap-2">
-              <FontAwesomeIcon icon={faCheck} className="text-green-500" />
-              +10 000 voyageurs accompagnés
-            </span>
-            <span className="flex items-center gap-2">
-              <FontAwesomeIcon icon={faCheck} className="text-green-500" />
-              Satisfaction 98%
-            </span>
-            <span className="flex items-center gap-2">
-              <FontAwesomeIcon icon={faCheck} className="text-green-500" />
-              Support francophone
-            </span>
-          </div>
-        </div>
-      </section>
+      {/* Hero — editorial photo + stats (H1 unique) */}
+      <PageHero
+        eyebrow="Services Easy+ · Accompagnement humain"
+        title="Un accompagnement humain aux"
+        titleAccent="Philippines"
+        subtitle="IA + expat français sur place : Buddy System, itinéraires sur-mesure et suivi WhatsApp 7j/7. Ce qu'aucune agence ne peut offrir."
+        imageUrl="/imagesHero/comment-voyager-aux-philippines.webp"
+        imageAlt="Voyageurs accompagnés par Philippin'Easy aux Philippines"
+        stats={heroStats}
+      />
 
-      {/* Section 1: Voyageurs - Itinéraires */}
-      <section className="py-16 px-4 bg-card">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <FontAwesomeIcon icon={faPlane} className="text-4xl text-accent mb-4" />
-            <h2 className="text-3xl font-bold text-foreground mb-4">Pour les Voyageurs</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Préparez votre voyage avec nos itinéraires personnalisés générés par IA
-            </p>
-          </div>
+      {/* Section 1 — Itinéraires IA (aperçu des offres) */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <CardGrid
+            eyebrow="Pour les voyageurs"
+            title="Un itinéraire sur-mesure en"
+            titleAccent="30 secondes"
+            subtitle="Choisissez votre niveau d'accompagnement : 100 % IA, IA avec retouches, ou conciergerie avec un contact direct."
+            columns={3}
+          >
+            {itineraryTiers.map((tier) => (
+              <div
+                key={tier.name}
+                className={cn(
+                  'relative flex flex-col rounded-2xl bg-card p-6 text-center transition-all duration-200 hover:-translate-y-1 motion-reduce:hover:transform-none',
+                  tier.popular
+                    ? 'border-[1.5px] border-primary shadow-card'
+                    : 'border-[0.5px] border-border shadow-card-rest hover:border-primary/30 hover:shadow-card'
+                )}
+              >
+                {tier.popular && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-[0.06em] text-primary-foreground">
+                    Populaire
+                  </span>
+                )}
+                <h3 className="mt-1 text-[17px] font-semibold text-foreground">{tier.name}</h3>
+                <p
+                  className={cn(
+                    'mt-3 text-[26px] font-bold tabular-nums tracking-[-0.02em]',
+                    tier.popular ? 'text-primary' : 'text-foreground'
+                  )}
+                >
+                  {tier.price}
+                </p>
+                <p className="mt-2 text-[13px] leading-[1.5] text-muted-foreground">{tier.desc}</p>
+              </div>
+            ))}
+          </CardGrid>
 
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-muted/50 rounded-xl p-6 text-center">
-              <h3 className="font-bold text-lg mb-2">Express</h3>
-              <p className="text-2xl font-bold text-primary mb-2">9.99€ - 29.99€</p>
-              <p className="text-sm text-muted-foreground">100% IA, livraison instantanée</p>
-            </div>
-            <div className="bg-primary/10 rounded-xl p-6 text-center border-2 border-primary">
-              <span className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
-                Populaire
-              </span>
-              <h3 className="font-bold text-lg mb-2 mt-2">Premium</h3>
-              <p className="text-2xl font-bold text-primary mb-2">29€ - 99€</p>
-              <p className="text-sm text-muted-foreground">IA + modifications + support email</p>
-            </div>
-            <div className="bg-muted/50 rounded-xl p-6 text-center">
-              <h3 className="font-bold text-lg mb-2">Conciergerie</h3>
-              <p className="text-2xl font-bold text-primary mb-2">79€ - 219€</p>
-              <p className="text-sm text-muted-foreground">Sur-mesure + WhatsApp direct</p>
-            </div>
-          </div>
-
-          <div className="text-center">
+          <div className="mt-10 text-center">
             <Link
               href="/itineraire-personnalise-pour-les-philippines"
-              className="inline-flex items-center gap-2 bg-accent text-accent-foreground px-6 py-3 rounded-lg font-semibold hover:bg-accent/90 transition-colors"
+              className="inline-flex items-center gap-2 rounded-lg bg-accent px-7 py-3.5 text-base font-semibold text-accent-foreground shadow-cta transition-all duration-200 hover:scale-[1.02] hover:bg-accent/90 motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              Créer mon itinéraire <FontAwesomeIcon icon={faArrowRight} />
+              Créer mon itinéraire
+              <span aria-hidden="true">→</span>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Section 2: Accompagnement Personnalisé */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <FontAwesomeIcon icon={faUsers} className="text-4xl text-primary mb-4" />
-            <h2 className="text-3xl font-bold text-foreground mb-4">Accompagnement Personnalisé</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Ce que nos concurrents ne peuvent PAS offrir : un vrai accompagnement humain avec des
-              français sur place
-            </p>
-          </div>
+      {/* Section 2 — Panneau signature : la différence humaine */}
+      <section className="bg-muted py-10 md:py-16">
+        <div className="container mx-auto px-4">
+          <div
+            className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl text-white"
+            style={{
+              background: 'linear-gradient(135deg, #3B5BDB 0%, #1e40af 100%)',
+              padding: 'clamp(2.5rem, 5vw, 4rem)',
+            }}
+          >
+            <span
+              className="pointer-events-none absolute rounded-full"
+              style={{
+                width: '320px',
+                height: '320px',
+                top: '-120px',
+                right: '-80px',
+                border: '2px dashed rgba(255,255,255,0.13)',
+              }}
+              aria-hidden="true"
+            />
+            <span
+              className="pointer-events-none absolute rounded-full"
+              style={{
+                width: '200px',
+                height: '200px',
+                bottom: '-60px',
+                left: '-40px',
+                border: '2px dashed rgba(255,255,255,0.13)',
+              }}
+              aria-hidden="true"
+            />
 
-          {/* Buddy System */}
-          <div className="mb-16">
-            <h3 className="text-2xl font-bold text-center mb-8 flex items-center justify-center gap-3">
-              <FontAwesomeIcon icon={faUsers} className="text-primary" />
-              Buddy System
-              <span className="bg-accent text-accent-foreground text-xs px-3 py-1 rounded-full">
-                Exclusif
-              </span>
-            </h3>
-            <p className="text-center text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Un expatrié français vivant aux Philippines devient votre mentor personnel
-            </p>
+            <div className="relative grid grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-12">
+              {/* Gauche — pitch éditorial */}
+              <div>
+                <span
+                  className="mb-4 inline-block text-[13px] font-medium uppercase"
+                  style={{ letterSpacing: '0.08em', color: 'rgba(255,255,255,0.95)' }}
+                >
+                  <span className="mr-1.5 text-accent" aria-hidden="true">
+                    ✦
+                  </span>
+                  La différence Philippin&apos;Easy
+                </span>
+                <h2
+                  className="mb-4 font-bold text-white"
+                  style={{
+                    fontSize: 'clamp(1.875rem, 3.5vw, 2.5rem)',
+                    letterSpacing: '-0.02em',
+                    lineHeight: 1.1,
+                  }}
+                >
+                  Des Français qui vivent <span className="text-accent">sur place</span>
+                </h2>
+                <p className="mb-6 text-[15px] leading-[1.6]" style={{ color: 'rgba(255,255,255,0.92)' }}>
+                  Nos concurrents vendent un PDF ou un chatbot. Nous, on vous met en relation avec
+                  quelqu&apos;un qui connaît vraiment le terrain — et qui parle votre langue.
+                </p>
+                <ul className="flex flex-col gap-2.5" role="list">
+                  {diffBullets.map((point) => (
+                    <li
+                      key={point}
+                      className="flex items-center gap-2.5 text-[14px]"
+                      style={{ color: 'rgba(255,255,255,0.92)' }}
+                    >
+                      <span
+                        className="inline-flex h-[22px] w-[22px] flex-shrink-0 items-center justify-center rounded-full bg-accent/20 text-accent"
+                        aria-hidden="true"
+                      >
+                        <PanelCheck />
+                      </span>
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
-              <ServiceCard
-                name="Buddy Court Séjour"
-                description="3-5 jours"
-                features={[
-                  { text: '2 calls de 30min', tooltip: 'Calls vidéo avec votre buddy expatrié : 1 avant le départ + 1 pendant le voyage' },
-                  { text: 'WhatsApp 1 semaine', tooltip: TOOLTIPS.suiviWhatsapp },
-                  { text: 'Conseils locaux personnalisés', tooltip: 'Recommandations basées sur vos goûts : restaurants, activités, bonnes adresses testées par votre buddy' },
-                ]}
-                price={79}
-                icon="faUsers"
-                ctaText="Choisir"
-                ctaHref="/checkout/services?type=buddy_short"
-              />
-              <ServiceCard
-                name="Buddy Standard"
-                description="1-2 semaines"
-                features={[
-                  { text: '3 calls de 30min', tooltip: 'Calls vidéo avec votre buddy : 1 avant départ + 1 à mi-parcours + 1 debriefing' },
-                  { text: 'WhatsApp 2 semaines', tooltip: TOOLTIPS.suiviWhatsapp },
-                  { text: 'Conseils locaux personnalisés', tooltip: 'Recommandations basées sur vos goûts : restaurants, activités, bonnes adresses testées par votre buddy' },
-                  { text: 'Support pendant le voyage', tooltip: 'Aide en cas de problème : traduction, négociation, urgences - votre buddy est joignable' },
-                ]}
-                price={119}
-                icon="faUsers"
-                badge="Populaire"
-                highlighted
-                ctaText="Choisir"
-                ctaHref="/checkout/services?type=buddy_medium"
-              />
-              <ServiceCard
-                name="Buddy Long Séjour"
-                description="3+ semaines"
-                features={[
-                  { text: '4 calls de 30min', tooltip: 'Calls vidéo réguliers : préparation + pendant voyage + debriefing + suivi expatriation' },
-                  { text: 'WhatsApp 1 mois', tooltip: TOOLTIPS.suiviWhatsapp },
-                  { text: 'Conseils locaux personnalisés', tooltip: 'Recommandations basées sur vos goûts : restaurants, activités, bonnes adresses testées par votre buddy' },
-                  { text: 'Support complet', tooltip: 'Accompagnement total : recherche logement, démarches administratives, intégration locale' },
-                  { text: 'Réseau d\'entraide', tooltip: 'Accès au réseau de contacts de votre buddy : autres expats, locaux de confiance, bons plans exclusifs' },
-                ]}
-                price={149}
-                icon="faUsers"
-                ctaText="Choisir"
-                ctaHref="/checkout/services?type=buddy_long"
-              />
-            </div>
-          </div>
-
-          {/* Pack Voyage Serein */}
-          <div className="mb-16">
-            <h3 className="text-2xl font-bold text-center mb-8 flex items-center justify-center gap-3">
-              <FontAwesomeIcon icon={faShieldAlt} className="text-green-500" />
-              Pack Voyage Serein
-            </h3>
-            <p className="text-center text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Itinéraire Premium + Call avec Hugo + Suivi WhatsApp pendant tout votre voyage
-            </p>
-
-            <div className="grid md:grid-cols-3 gap-6">
-              <ServiceCard
-                name="Serein Court"
-                description="3-5 jours"
-                features={[
-                  { text: 'Itinéraire Premium inclus', tooltip: TOOLTIPS.itinerairePremium },
-                  { text: 'Call 30min avant départ', tooltip: TOOLTIPS.callAvantDepart },
-                  { text: 'Suivi WhatsApp 1 semaine', tooltip: TOOLTIPS.suiviWhatsapp },
-                  { text: 'Checklist personnalisée', tooltip: TOOLTIPS.checklistPersonnalisee },
-                ]}
-                price={99}
-                icon="faShieldAlt"
-                ctaText="Choisir"
-                ctaHref="/checkout/services?type=voyage_serein_short"
-              />
-              <ServiceCard
-                name="Serein Standard"
-                description="1-2 semaines"
-                features={[
-                  { text: 'Itinéraire Premium inclus', tooltip: TOOLTIPS.itinerairePremium },
-                  { text: 'Call 30min avant départ', tooltip: TOOLTIPS.callAvantDepart },
-                  { text: 'Suivi WhatsApp 2 semaines', tooltip: TOOLTIPS.suiviWhatsapp },
-                  { text: 'Checklist personnalisée', tooltip: TOOLTIPS.checklistPersonnalisee },
-                  { text: 'Support en cas de problème', tooltip: 'Assistance réactive si imprévu : annulation vol, problème hôtel, urgence médicale - on gère avec vous' },
-                ]}
-                price={149}
-                icon="faShieldAlt"
-                badge="Populaire"
-                highlighted
-                ctaText="Choisir"
-                ctaHref="/checkout/services?type=voyage_serein_medium"
-              />
-              <ServiceCard
-                name="Serein Long"
-                description="3+ semaines"
-                features={[
-                  { text: 'Itinéraire Premium inclus', tooltip: TOOLTIPS.itinerairePremium },
-                  { text: 'Call 30min avant départ', tooltip: TOOLTIPS.callAvantDepart },
-                  { text: 'Suivi WhatsApp 3 semaines', tooltip: TOOLTIPS.suiviWhatsapp },
-                  { text: 'Checklist personnalisée', tooltip: TOOLTIPS.checklistPersonnalisee },
-                  { text: 'Support prioritaire', tooltip: 'Réponse garantie sous 1h en cas d\'urgence, assistance VIP tout au long du voyage' },
-                ]}
-                price={199}
-                icon="faShieldAlt"
-                ctaText="Choisir"
-                ctaHref="/checkout/services?type=voyage_serein_long"
-              />
+              {/* Droite — carte "méthode" */}
+              <div className="overflow-hidden rounded-2xl bg-card text-foreground shadow-mockup">
+                <div className="border-b border-border/60 bg-muted px-6 py-3.5">
+                  <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                    La méthode Philippin&apos;Easy
+                  </span>
+                </div>
+                <ul className="divide-y divide-border/60">
+                  {humanPillars.map((pillar) => (
+                    <li key={pillar.title} className="flex items-start gap-4 px-6 py-5">
+                      <span
+                        className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"
+                        aria-hidden="true"
+                      >
+                        {pillar.icon}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-[15px] font-semibold tracking-[-0.01em] text-foreground">
+                          {pillar.title}
+                        </span>
+                        <span className="mt-1 block text-[13px] leading-[1.5] text-muted-foreground">
+                          {pillar.text}
+                        </span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Section 3: Pack Ultime */}
-      <section className="py-16 px-4 bg-muted">
-        <div className="container mx-auto max-w-5xl">
-          <div className="text-center mb-12">
-            <FontAwesomeIcon icon={faCrown} className="text-5xl text-accent mb-4" />
-            <h2 className="text-3xl font-bold text-foreground mb-4">Pack Ultime</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Tout ce dont vous avez besoin pour réussir votre projet Philippines. Le pack le plus
-              complet du marché.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-card rounded-2xl shadow-lg p-8 border border-border">
-              <div className="text-center mb-6">
-                <p className="text-sm text-muted-foreground mb-2">Jusqu&apos;à 2 semaines</p>
-                <p className="text-4xl font-bold text-foreground">369€</p>
-              </div>
-              <ul className="space-y-3 mb-6">
-                <li className="flex items-start gap-2 text-sm">
-                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
-                  <span>Itinéraire Conciergerie <InfoTooltip content={TOOLTIPS.itineraireConciergerie} /></span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
-                  <span>Buddy System complet <InfoTooltip content={TOOLTIPS.buddySystem} /></span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
-                  <span>Suivi WhatsApp 2 sem. <InfoTooltip content={TOOLTIPS.suiviWhatsapp} /></span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
-                  <span>Easy+ 1 an <InfoTooltip content={TOOLTIPS.easyPlus} /></span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
-                  <span>Rencontre Premium 6 mois <InfoTooltip content={TOOLTIPS.rencontrePremium} /></span>
-                </li>
-              </ul>
-              <Link
-                href="/checkout/services?type=pack_ultime_medium"
-                className="block w-full py-3 bg-muted text-foreground rounded-lg text-center font-semibold hover:bg-muted/80"
-              >
-                Choisir
-              </Link>
-            </div>
-
-            <div className="bg-card rounded-2xl shadow-xl p-8 border-2 border-primary relative scale-105">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground px-4 py-1 rounded-full text-sm font-bold">
-                Best Value
-              </div>
-              <div className="text-center mb-6">
-                <p className="text-sm text-muted-foreground mb-2">3 semaines - 1 mois</p>
-                <p className="text-4xl font-bold text-primary">449€</p>
-              </div>
-              <ul className="space-y-3 mb-6">
-                <li className="flex items-start gap-2 text-sm">
-                  <FontAwesomeIcon icon={faCheck} className="text-primary mt-0.5 flex-shrink-0" />
-                  <span>Itinéraire Conciergerie <InfoTooltip content={TOOLTIPS.itineraireConciergerie} /></span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <FontAwesomeIcon icon={faCheck} className="text-primary mt-0.5 flex-shrink-0" />
-                  <span>Buddy System complet <InfoTooltip content={TOOLTIPS.buddySystem} /></span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <FontAwesomeIcon icon={faCheck} className="text-primary mt-0.5 flex-shrink-0" />
-                  <span>Suivi WhatsApp 4 sem. <InfoTooltip content={TOOLTIPS.suiviWhatsapp} /></span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <FontAwesomeIcon icon={faCheck} className="text-primary mt-0.5 flex-shrink-0" />
-                  <span>Easy+ 1 an <InfoTooltip content={TOOLTIPS.easyPlus} /></span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <FontAwesomeIcon icon={faCheck} className="text-primary mt-0.5 flex-shrink-0" />
-                  <span>Rencontre Premium 6 mois <InfoTooltip content={TOOLTIPS.rencontrePremium} /></span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <FontAwesomeIcon icon={faCheck} className="text-primary mt-0.5 flex-shrink-0" />
-                  <span>Accès à TOUS les guides PDF pendant ton pack <InfoTooltip content={TOOLTIPS.guidePdf} /></span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <FontAwesomeIcon icon={faCheck} className="text-primary mt-0.5 flex-shrink-0" />
-                  <span>Groupe privé à vie <InfoTooltip content={TOOLTIPS.groupePrive} /></span>
-                </li>
-              </ul>
-              <Link
-                href="/checkout/services?type=pack_ultime_long"
-                className="block w-full py-3 bg-primary text-primary-foreground rounded-lg text-center font-semibold hover:bg-primary/90"
-              >
-                Choisir
-              </Link>
-            </div>
-
-            <div className="bg-card rounded-2xl shadow-lg p-8 border border-border">
-              <div className="text-center mb-6">
-                <p className="text-sm text-muted-foreground mb-2">+1 mois / Expatriation</p>
-                <p className="text-4xl font-bold text-foreground">549€</p>
-              </div>
-              <ul className="space-y-3 mb-6">
-                <li className="flex items-start gap-2 text-sm">
-                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
-                  <span>Itinéraire Conciergerie <InfoTooltip content={TOOLTIPS.itineraireConciergerie} /></span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
-                  <span>Buddy System complet <InfoTooltip content={TOOLTIPS.buddySystem} /></span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
-                  <span>Suivi WhatsApp illimité <InfoTooltip content="Support WhatsApp sans limite de durée - idéal pour l'expatriation. On reste avec vous aussi longtemps que nécessaire" /></span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
-                  <span>Easy+ 1 an <InfoTooltip content={TOOLTIPS.easyPlus} /></span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
-                  <span>Rencontre Premium 6 mois <InfoTooltip content={TOOLTIPS.rencontrePremium} /></span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
-                  <span>Tous les Guides PDF <InfoTooltip content="Accès à l'intégralité de nos guides : Visa 2026, Coût de la vie, Destinations secrètes - valeur 50€ offerte" /></span>
-                </li>
-                <li className="flex items-start gap-2 text-sm">
-                  <FontAwesomeIcon icon={faCheck} className="text-green-500 mt-0.5 flex-shrink-0" />
-                  <span>Groupe privé à vie <InfoTooltip content={TOOLTIPS.groupePrive} /></span>
-                </li>
-              </ul>
-              <Link
-                href="/checkout/services?type=pack_ultime_expat"
-                className="block w-full py-3 bg-muted text-foreground rounded-lg text-center font-semibold hover:bg-muted/80"
-              >
-                Choisir
-              </Link>
-            </div>
-          </div>
+      {/* Section 3 — Buddy System (ancre #buddy) */}
+      <section id="buddy" className="scroll-mt-32 bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <CardGrid
+            eyebrow="Exclusif · Buddy System"
+            title="Un expat français devient votre"
+            titleAccent="buddy"
+            subtitle="Il vit aux Philippines. Calls, WhatsApp et bons plans testés sur place : un mentor rien que pour vous, avant, pendant et après le voyage."
+            columns={3}
+          >
+            <ServiceCard
+              name="Buddy Court Séjour"
+              description="3-5 jours"
+              features={[
+                { text: '2 calls de 30min', tooltip: 'Calls vidéo avec votre buddy expatrié : 1 avant le départ + 1 pendant le voyage' },
+                { text: 'WhatsApp 1 semaine', tooltip: TOOLTIPS.suiviWhatsapp },
+                { text: 'Conseils locaux personnalisés', tooltip: 'Recommandations basées sur vos goûts : restaurants, activités, bonnes adresses testées par votre buddy' },
+              ]}
+              price={79}
+              icon="faUsers"
+              ctaText="Choisir"
+              ctaHref="/checkout/services?type=buddy_short"
+            />
+            <ServiceCard
+              name="Buddy Standard"
+              description="1-2 semaines"
+              features={[
+                { text: '3 calls de 30min', tooltip: 'Calls vidéo avec votre buddy : 1 avant départ + 1 à mi-parcours + 1 debriefing' },
+                { text: 'WhatsApp 2 semaines', tooltip: TOOLTIPS.suiviWhatsapp },
+                { text: 'Conseils locaux personnalisés', tooltip: 'Recommandations basées sur vos goûts : restaurants, activités, bonnes adresses testées par votre buddy' },
+                { text: 'Support pendant le voyage', tooltip: 'Aide en cas de problème : traduction, négociation, urgences - votre buddy est joignable' },
+              ]}
+              price={119}
+              icon="faUsers"
+              badge="Populaire"
+              highlighted
+              ctaText="Choisir"
+              ctaHref="/checkout/services?type=buddy_medium"
+            />
+            <ServiceCard
+              name="Buddy Long Séjour"
+              description="3+ semaines"
+              features={[
+                { text: '4 calls de 30min', tooltip: 'Calls vidéo réguliers : préparation + pendant voyage + debriefing + suivi expatriation' },
+                { text: 'WhatsApp 1 mois', tooltip: TOOLTIPS.suiviWhatsapp },
+                { text: 'Conseils locaux personnalisés', tooltip: 'Recommandations basées sur vos goûts : restaurants, activités, bonnes adresses testées par votre buddy' },
+                { text: 'Support complet', tooltip: 'Accompagnement total : recherche logement, démarches administratives, intégration locale' },
+                { text: "Réseau d'entraide", tooltip: "Accès au réseau de contacts de votre buddy : autres expats, locaux de confiance, bons plans exclusifs" },
+              ]}
+              price={149}
+              icon="faUsers"
+              ctaText="Choisir"
+              ctaHref="/checkout/services?type=buddy_long"
+            />
+          </CardGrid>
         </div>
       </section>
 
-      {/* Section 4: Communauté */}
-      <section className="py-16 px-4 bg-card">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <FontAwesomeIcon icon={faHeart} className="text-4xl text-primary mb-4" />
-            <h2 className="text-3xl font-bold text-foreground mb-4">Communauté & Abonnements</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Rejoignez notre communauté francophone aux Philippines
-            </p>
-          </div>
+      {/* Section 4 — Pack Voyage Serein */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <CardGrid
+            eyebrow="Pack Voyage Serein"
+            title="Itinéraire Premium + accompagnement"
+            titleAccent="humain"
+            subtitle="Un plan sur-mesure, un call avec Hugo avant le départ, et un suivi WhatsApp pendant tout le séjour."
+            columns={3}
+          >
+            <ServiceCard
+              name="Serein Court"
+              description="3-5 jours"
+              features={[
+                { text: 'Itinéraire Premium inclus', tooltip: TOOLTIPS.itinerairePremium },
+                { text: 'Call 30min avant départ', tooltip: TOOLTIPS.callAvantDepart },
+                { text: 'Suivi WhatsApp 1 semaine', tooltip: TOOLTIPS.suiviWhatsapp },
+                { text: 'Checklist personnalisée', tooltip: TOOLTIPS.checklistPersonnalisee },
+              ]}
+              price={99}
+              icon="faShieldAlt"
+              ctaText="Choisir"
+              ctaHref="/checkout/services?type=voyage_serein_short"
+            />
+            <ServiceCard
+              name="Serein Standard"
+              description="1-2 semaines"
+              features={[
+                { text: 'Itinéraire Premium inclus', tooltip: TOOLTIPS.itinerairePremium },
+                { text: 'Call 30min avant départ', tooltip: TOOLTIPS.callAvantDepart },
+                { text: 'Suivi WhatsApp 2 semaines', tooltip: TOOLTIPS.suiviWhatsapp },
+                { text: 'Checklist personnalisée', tooltip: TOOLTIPS.checklistPersonnalisee },
+                { text: 'Support en cas de problème', tooltip: 'Assistance réactive si imprévu : annulation vol, problème hôtel, urgence médicale - on gère avec vous' },
+              ]}
+              price={149}
+              icon="faShieldAlt"
+              badge="Populaire"
+              highlighted
+              ctaText="Choisir"
+              ctaHref="/checkout/services?type=voyage_serein_medium"
+            />
+            <ServiceCard
+              name="Serein Long"
+              description="3+ semaines"
+              features={[
+                { text: 'Itinéraire Premium inclus', tooltip: TOOLTIPS.itinerairePremium },
+                { text: 'Call 30min avant départ', tooltip: TOOLTIPS.callAvantDepart },
+                { text: 'Suivi WhatsApp 3 semaines', tooltip: TOOLTIPS.suiviWhatsapp },
+                { text: 'Checklist personnalisée', tooltip: TOOLTIPS.checklistPersonnalisee },
+                { text: 'Support prioritaire', tooltip: "Réponse garantie sous 1h en cas d'urgence, assistance VIP tout au long du voyage" },
+              ]}
+              price={199}
+              icon="faShieldAlt"
+              ctaText="Choisir"
+              ctaHref="/checkout/services?type=voyage_serein_long"
+            />
+          </CardGrid>
+        </div>
+      </section>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+      {/* Section 5 — Pack Ultime (ancre #pack-ultime) */}
+      <section id="pack-ultime" className="scroll-mt-32 bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <CardGrid
+            eyebrow="Le plus complet"
+            title="Pack"
+            titleAccent="Ultime"
+            subtitle="Itinéraire conciergerie, Buddy System, Easy+, Rencontre Premium et accès à tous nos guides. Le pack le plus complet du marché."
+            columns={3}
+          >
+            <ServiceCard
+              name="Jusqu'à 2 semaines"
+              description="Le tout-inclus, format court"
+              features={[
+                { text: 'Itinéraire Conciergerie', tooltip: TOOLTIPS.itineraireConciergerie },
+                { text: 'Buddy System complet', tooltip: TOOLTIPS.buddySystem },
+                { text: 'Suivi WhatsApp 2 sem.', tooltip: TOOLTIPS.suiviWhatsapp },
+                { text: 'Easy+ 1 an', tooltip: TOOLTIPS.easyPlus },
+                { text: 'Rencontre Premium 6 mois', tooltip: TOOLTIPS.rencontrePremium },
+              ]}
+              price={369}
+              icon="faCrown"
+              ctaText="Choisir"
+              ctaHref="/checkout/services?type=pack_ultime_medium"
+            />
+            <ServiceCard
+              name="3 semaines – 1 mois"
+              description="Notre séjour complet"
+              features={[
+                { text: 'Itinéraire Conciergerie', tooltip: TOOLTIPS.itineraireConciergerie },
+                { text: 'Buddy System complet', tooltip: TOOLTIPS.buddySystem },
+                { text: 'Suivi WhatsApp 4 sem.', tooltip: TOOLTIPS.suiviWhatsapp },
+                { text: 'Easy+ 1 an', tooltip: TOOLTIPS.easyPlus },
+                { text: 'Rencontre Premium 6 mois', tooltip: TOOLTIPS.rencontrePremium },
+                { text: 'Accès à TOUS les guides PDF pendant ton pack', tooltip: TOOLTIPS.guidePdf },
+                { text: 'Groupe privé à vie', tooltip: TOOLTIPS.groupePrive },
+              ]}
+              price={449}
+              icon="faCrown"
+              badge="Best Value"
+              highlighted
+              ctaText="Choisir"
+              ctaHref="/checkout/services?type=pack_ultime_long"
+            />
+            <ServiceCard
+              name="Expatriation (+1 mois)"
+              description="Installation longue durée"
+              features={[
+                { text: 'Itinéraire Conciergerie', tooltip: TOOLTIPS.itineraireConciergerie },
+                { text: 'Buddy System complet', tooltip: TOOLTIPS.buddySystem },
+                { text: 'Suivi WhatsApp illimité', tooltip: "Support WhatsApp sans limite de durée - idéal pour l'expatriation. On reste avec vous aussi longtemps que nécessaire" },
+                { text: 'Easy+ 1 an', tooltip: TOOLTIPS.easyPlus },
+                { text: 'Rencontre Premium 6 mois', tooltip: TOOLTIPS.rencontrePremium },
+                { text: 'Tous les Guides PDF', tooltip: "Accès à l'intégralité de nos guides : Visa 2026, Coût de la vie, Destinations secrètes - valeur 50€ offerte" },
+                { text: 'Groupe privé à vie', tooltip: TOOLTIPS.groupePrive },
+              ]}
+              price={549}
+              icon="faCrown"
+              ctaText="Choisir"
+              ctaHref="/checkout/services?type=pack_ultime_expat"
+            />
+          </CardGrid>
+        </div>
+      </section>
+
+      {/* Section 6 — Communauté & abonnements */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <CardGrid
+            eyebrow="Communauté & abonnements"
+            title="Restez connecté à la communauté"
+            titleAccent="francophone"
+            subtitle="Rejoignez les voyageurs et expatriés francophones qui vivent les Philippines au quotidien."
+            columns={2}
+          >
             {/* Rencontre Premium */}
-            <div className="bg-card border border-border hover:border-primary/50 transition-colors rounded-2xl p-8">
-              <div className="flex items-center gap-3 mb-4">
-                <FontAwesomeIcon icon={faHeart} className="text-2xl text-primary" />
-                <h3 className="text-xl font-bold">Rencontre Premium</h3>
+            <div className="flex flex-col rounded-2xl border-[0.5px] border-border bg-card p-8 shadow-card-rest transition-all duration-200 hover:-translate-y-1 hover:border-primary/30 hover:shadow-card motion-reduce:hover:transform-none">
+              <div className="mb-4 flex items-center gap-3">
+                <span
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary"
+                  aria-hidden="true"
+                >
+                  <HeartIcon />
+                </span>
+                <h3 className="text-[19px] font-semibold tracking-[-0.01em] text-foreground">
+                  Rencontre Premium
+                </h3>
               </div>
-              <p className="text-muted-foreground mb-6">
-                Rencontrez des personnes partageant votre passion pour les Philippines
+              <p className="mb-6 text-[14px] leading-[1.6] text-muted-foreground">
+                Rencontrez des personnes qui partagent votre passion pour les Philippines.
               </p>
-              <div className="space-y-2 mb-6">
-                <p className="flex justify-between">
-                  <span>1 mois</span>
-                  <span className="font-bold">19.99€/mois</span>
-                </p>
-                <p className="flex justify-between">
-                  <span>3 mois</span>
-                  <span className="font-bold">14.99€/mois</span>
-                </p>
-                <p className="flex justify-between text-primary">
-                  <span>6 mois</span>
-                  <span className="font-bold">9.99€/mois</span>
-                </p>
-              </div>
+              <ul className="mb-6 space-y-2.5 border-t border-border/70 pt-5">
+                {rencontrePlans.map((p) => (
+                  <li key={p.label} className="flex items-baseline justify-between text-[14px]">
+                    <span className={p.best ? 'font-medium text-primary' : 'text-muted-foreground'}>
+                      {p.label}
+                    </span>
+                    <span className={cn('font-bold tabular-nums', p.best ? 'text-primary' : 'text-foreground')}>
+                      {p.price}
+                      <span className="text-[12px] font-normal text-muted-foreground">{p.unit}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
               <Link
                 href="/rencontre-philippines/premium"
-                className="block w-full py-3 bg-primary text-primary-foreground rounded-lg text-center font-semibold hover:bg-primary/90"
+                className="mt-auto block w-full rounded-lg bg-foreground px-6 py-3 text-center text-sm font-semibold text-background transition-all duration-200 hover:scale-[1.02] hover:opacity-90 motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 Découvrir
               </Link>
             </div>
 
             {/* Easy+ */}
-            <div className="bg-card border-2 border-accent rounded-2xl p-8 relative">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent text-accent-foreground text-xs px-3 py-1 rounded-full font-semibold">VIP</span>
-              <div className="flex items-center gap-3 mb-4">
-                <FontAwesomeIcon icon={faStar} className="text-2xl text-accent" />
-                <h3 className="text-xl font-bold">Easy+</h3>
+            <div className="relative flex flex-col rounded-2xl border-[1.5px] border-accent bg-card p-8 shadow-card transition-all duration-200 hover:-translate-y-1 motion-reduce:hover:transform-none">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-1 text-[10px] font-bold uppercase tracking-[0.06em] text-accent-foreground">
+                VIP
+              </span>
+              <div className="mb-4 flex items-center gap-3">
+                <span
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-accent/15 text-accent"
+                  aria-hidden="true"
+                >
+                  <StarIcon />
+                </span>
+                <h3 className="text-[19px] font-semibold tracking-[-0.01em] text-foreground">Easy+</h3>
               </div>
-              <p className="text-muted-foreground mb-6">
-                Abonnement privilège avec -20% partenaires, support prioritaire, guides premium
+              <p className="mb-6 text-[14px] leading-[1.6] text-muted-foreground">
+                Abonnement privilège : −20 % chez nos partenaires, support prioritaire et guides premium.
               </p>
-              <div className="space-y-2 mb-6">
-                <p className="flex justify-between">
-                  <span>Mensuel</span>
-                  <span className="font-bold">29.99€/mois</span>
-                </p>
-                <p className="flex justify-between text-primary">
-                  <span>Annuel (-31%)</span>
-                  <span className="font-bold">249€/an</span>
-                </p>
-              </div>
+              <ul className="mb-6 space-y-2.5 border-t border-border/70 pt-5">
+                {easyPlusPlans.map((p) => (
+                  <li key={p.label} className="flex items-baseline justify-between text-[14px]">
+                    <span className={p.best ? 'font-medium text-primary' : 'text-muted-foreground'}>
+                      {p.label}
+                    </span>
+                    <span className={cn('font-bold tabular-nums', p.best ? 'text-primary' : 'text-foreground')}>
+                      {p.price}
+                      <span className="text-[12px] font-normal text-muted-foreground">{p.unit}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
               <Link
                 href="/meilleurs-plans-aux-philippines"
-                className="block w-full py-3 bg-accent text-accent-foreground rounded-lg text-center font-semibold hover:bg-accent/90"
+                className="mt-auto block w-full rounded-lg bg-accent px-6 py-3 text-center text-sm font-semibold text-accent-foreground transition-all duration-200 hover:scale-[1.02] hover:bg-accent/90 motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 En savoir plus
               </Link>
             </div>
-          </div>
+          </CardGrid>
         </div>
       </section>
 
-      {/* CTA Final */}
-      <section id="contact" className="py-20 px-4 bg-primary text-primary-foreground">
-        <div className="container mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl font-bold mb-6">Prêt à commencer votre aventure ?</h2>
-          <p className="text-lg opacity-90 mb-8">
-            Contactez-nous pour discuter de votre projet et trouver l&apos;offre qui vous convient
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="https://wa.me/VOTRE_NUMERO"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-green-500 text-white px-8 py-4 rounded-lg font-semibold hover:bg-green-600 transition-colors"
-            >
-              <FontAwesomeIcon icon={faWhatsapp} className="text-xl" />
-              Discuter sur WhatsApp
-            </a>
-            <Link
-              href="/itineraire-personnalise-pour-les-philippines"
-              className="inline-flex items-center justify-center gap-2 bg-card text-primary px-8 py-4 rounded-lg font-semibold hover:bg-muted transition-colors"
-            >
-              Créer mon itinéraire
-            </Link>
+      {/* CTA final — panneau signature (ancre #contact) */}
+      <section id="contact" className="scroll-mt-32 bg-background py-10 md:py-16">
+        <div className="container mx-auto px-4">
+          <div
+            className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl text-center text-white"
+            style={{
+              background: 'linear-gradient(135deg, #1e3a8a 0%, #3B5BDB 100%)',
+              padding: 'clamp(3rem, 7vw, 4.5rem) clamp(1.5rem, 5vw, 2rem)',
+            }}
+          >
+            <span
+              className="pointer-events-none absolute rounded-full"
+              style={{
+                width: '280px',
+                height: '280px',
+                top: '-110px',
+                right: '-70px',
+                border: '2px dashed rgba(255,255,255,0.12)',
+              }}
+              aria-hidden="true"
+            />
+            <span
+              className="pointer-events-none absolute rounded-full"
+              style={{
+                width: '180px',
+                height: '180px',
+                bottom: '-56px',
+                left: '-36px',
+                border: '2px dashed rgba(255,255,255,0.12)',
+              }}
+              aria-hidden="true"
+            />
+
+            <div className="relative mx-auto max-w-3xl">
+              <h2
+                className="mb-5 font-bold text-white"
+                style={{ fontSize: 'clamp(1.875rem, 4vw, 2.375rem)', lineHeight: 1.1, letterSpacing: '-0.02em' }}
+              >
+                Prêt à préparer votre <span className="text-accent">aventure ?</span>
+              </h2>
+              <p
+                className="mx-auto mb-8 max-w-xl text-[16px]"
+                style={{ color: 'rgba(255,255,255,0.95)', lineHeight: 1.55 }}
+              >
+                Écrivez-nous pour trouver l&apos;offre qui colle à votre projet — voyage découverte,
+                grand tour ou installation longue durée.
+              </p>
+
+              <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <Link
+                  href="/itineraire-personnalise-pour-les-philippines"
+                  className="group inline-flex items-center gap-2 rounded-lg bg-accent px-8 py-3.5 text-base font-semibold text-accent-foreground shadow-cta transition-all duration-200 hover:scale-[1.02] hover:bg-accent/90 hover:shadow-xl active:scale-[0.99] motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+                >
+                  Créer mon itinéraire
+                  <span aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-0.5">
+                    →
+                  </span>
+                </Link>
+                <a
+                  href="https://wa.me/VOTRE_NUMERO"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/50 px-8 py-3.5 text-base font-medium text-white transition-colors duration-200 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+                >
+                  <FontAwesomeIcon icon={faWhatsapp} className="text-xl" />
+                  Discuter sur WhatsApp
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>

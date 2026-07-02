@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 const MentionsLegalesPage = () => {
   return (
-    <div className="bg-white">
+    <div className="bg-background">
       <WebPageJsonLd
         title={metadata.title as string}
         description={metadata.description as string}
@@ -20,7 +20,7 @@ const MentionsLegalesPage = () => {
           <h1 className="text-4xl font-bold text-center mb-10 text-primary">Mentions Légales</h1>
           
           <div className="article-content space-y-8">
-            <p className="text-center italic text-gray-600">Conformément aux dispositions des Articles 6-III et 19 de la Loi n°2004-575 du 21 juin 2004 pour la Confiance dans l’économie numérique, dite L.C.E.N., il est porté à la connaissance des utilisateurs et visiteurs du site Philippin'Easy les présentes mentions légales.</p>
+            <p className="text-center italic text-muted-foreground">Conformément aux dispositions des Articles 6-III et 19 de la Loi n°2004-575 du 21 juin 2004 pour la Confiance dans l’économie numérique, dite L.C.E.N., il est porté à la connaissance des utilisateurs et visiteurs du site Philippin'Easy les présentes mentions légales.</p>
             
             <section>
               <h2 className="text-2xl font-semibold text-primary/90 mb-4">Article 1 - L'éditeur</h2>
@@ -67,7 +67,7 @@ const MentionsLegalesPage = () => {
               </p>
             </section>
             
-            <p className="text-sm text-gray-500 mt-10">
+            <p className="text-sm text-muted-foreground mt-10">
               Dernière mise à jour : 3 Juillet 2025
             </p>
           </div>

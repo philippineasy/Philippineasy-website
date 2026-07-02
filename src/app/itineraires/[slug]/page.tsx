@@ -173,7 +173,7 @@ const InlineCTA = ({ destinationName }: { destinationName: string }) => (
       </div>
       <Link
         href="/itineraire-personnalise-pour-les-philippines"
-        className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-accent text-ink rounded-lg font-semibold text-[14px] shadow-cta transition-all duration-200 hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-primary shrink-0"
+        className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-accent text-accent-foreground rounded-lg font-semibold text-[14px] shadow-cta transition-all duration-200 hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-primary shrink-0"
       >
         Personnaliser
         <span aria-hidden="true">→</span>
@@ -525,7 +525,7 @@ export default async function ItinerairePage({ params }: PageProps) {
               <div className="flex flex-col sm:flex-row gap-3">
                 <Link
                   href="/itineraire-personnalise-pour-les-philippines"
-                  className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-accent text-ink rounded-lg font-semibold text-[15px] shadow-cta transition-all duration-200 hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+                  className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-accent text-accent-foreground rounded-lg font-semibold text-[15px] shadow-cta transition-all duration-200 hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
                 >
                   <svg
                     width="16"

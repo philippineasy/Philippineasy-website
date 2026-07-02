@@ -85,7 +85,7 @@ export default function MesGuidesPage() {
 
       {hasLibraryAccess && (
         <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 rounded-xl p-4 flex items-center gap-3">
-          <FontAwesomeIcon icon={faCheck} className="text-amber-600 text-xl" />
+          <FontAwesomeIcon icon={faCheck} className="text-amber-600 dark:text-amber-400 text-xl" />
           <div className="flex-1">
             <div className="font-semibold text-sm">Bibliothèque PDF complète activée</div>
             <div className="text-xs text-muted-foreground">
@@ -117,7 +117,7 @@ export default function MesGuidesPage() {
                   className={`text-2xl ${isOwned ? 'text-primary' : 'text-muted-foreground'}`}
                 />
                 {isOwned ? (
-                  <span className="flex items-center gap-1 text-xs font-medium text-emerald-600 bg-emerald-500/10 px-2 py-1 rounded-full">
+                  <span className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-full">
                     <FontAwesomeIcon icon={faCheck} />
                     {ownedVia === 'library' ? 'Inclus pack' : 'Acheté'}
                   </span>

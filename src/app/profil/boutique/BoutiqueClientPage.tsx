@@ -51,13 +51,13 @@ type BoutiqueClientPageProps = {
 const StatCard = ({ icon, title, value, color }: { icon: any, title: string, value: string | number, color: string }) => (
   <div
     className="bg-card rounded-2xl p-4 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-    style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+    style={{ border: '0.5px solid hsl(var(--border))', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
   >
     <div className={`w-11 h-11 flex items-center justify-center rounded-xl flex-shrink-0 ${color}`}>
       <FontAwesomeIcon icon={icon} className="text-white" style={{ fontSize: '16px' }} />
     </div>
     <div className="min-w-0">
-      <p style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#94a3b8', marginBottom: '2px' }}>
+      <p style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))', marginBottom: '2px' }}>
         {title}
       </p>
       <p className="text-foreground tabular-nums" style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1 }}>
@@ -70,7 +70,7 @@ const StatCard = ({ icon, title, value, color }: { icon: any, title: string, val
 const InfoWidget = ({ icon, title, children }: { icon: any, title: string, children: React.ReactNode }) => (
   <div
     className="bg-card rounded-2xl p-5"
-    style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+    style={{ border: '0.5px solid hsl(var(--border))', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
   >
     <h3
       className="text-foreground mb-3 flex items-center gap-2"
@@ -84,7 +84,7 @@ const InfoWidget = ({ icon, title, children }: { icon: any, title: string, child
       </span>
       {title}
     </h3>
-    <div style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.55 }} className="space-y-2">
+    <div style={{ fontSize: '13px', color: 'hsl(var(--muted-foreground))', lineHeight: 1.55 }} className="space-y-2">
       {children}
     </div>
   </div>
@@ -132,7 +132,7 @@ const VendorSettingsForm = ({ vendor }: { vendor: Vendor }) => {
             <div>
                 <label htmlFor="logo" className="block text-sm font-medium text-foreground mb-1">Logo de la boutique</label>
                 {vendor.logo_url && <Image src={vendor.logo_url} alt="Logo actuel" width={80} height={80} className="rounded-full my-2" />}
-                <input type="file" name="logo" accept="image/*" className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
+                <input type="file" name="logo" accept="image/*" className="w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" />
             </div>
             <button type="submit" disabled={loading} className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
                 {loading ? 'Enregistrement...' : 'Enregistrer les modifications'}
@@ -250,16 +250,16 @@ export function BoutiqueClientPage({ vendor, initialProducts, monthlySales, mont
                         <td className="p-4">{product.price} €</td>
                         <td className="p-4">
                             <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                            product.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                            product.status === 'published' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400'
                             }`}>
                             {product.status === 'published' ? 'Publié' : 'Brouillon'}
                             </span>
                         </td>
                         <td className="p-4 space-x-4">
-                            <Link href={`/profil/boutique/modifier-produit/${product.id}`} className="text-blue-500 hover:text-blue-700" title="Modifier">
+                            <Link href={`/profil/boutique/modifier-produit/${product.id}`} className="text-primary hover:text-primary/80" title="Modifier">
                                 <FontAwesomeIcon icon={faPencilAlt} />
                             </Link>
-                            <button onClick={() => handleDeleteRequest(product)} className="text-red-500 hover:text-red-700" title="Supprimer">
+                            <button onClick={() => handleDeleteRequest(product)} className="text-destructive hover:text-destructive/80" title="Supprimer">
                                 <FontAwesomeIcon icon={faTrash} />
                             </button>
                         </td>

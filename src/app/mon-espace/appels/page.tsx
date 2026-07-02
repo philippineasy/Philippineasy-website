@@ -67,7 +67,7 @@ export default function MesAppelsPage() {
                       })}
                     </p>
                   ) : (
-                    <p className="text-sm text-amber-600 mt-1">
+                    <p className="text-sm text-amber-600 dark:text-amber-400 mt-1">
                       Pas encore planifié — choisissez un créneau ci-dessous
                     </p>
                   )}

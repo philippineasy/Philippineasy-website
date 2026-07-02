@@ -88,7 +88,7 @@ const MessagesClientPage = ({ initialMatches, currentUserId }: { initialMatches:
                           className="rounded-full object-cover"
                         />
                         {isUnread && (
-                          <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-primary ring-2 ring-white" />
+                          <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-primary ring-2 ring-card" />
                         )}
                       </div>
                       <div className="flex-1 overflow-hidden">

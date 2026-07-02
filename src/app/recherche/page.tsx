@@ -91,7 +91,7 @@ const RecherchePage = () => {
                     {result.title}
                   </Link>
                 </h2>
-                <span className="text-xs font-semibold uppercase text-card-foreground bg-blue-500 px-2 py-1 rounded-full">
+                <span className="text-xs font-semibold uppercase text-primary-foreground bg-primary px-2 py-1 rounded-full">
                   {result.type === 'article' ? 'Article' : 'Forum'}
                 </span>
               </div>

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 const ConfidentialitePage = () => {
   return (
-    <div className="bg-white">
+    <div className="bg-background">
       <WebPageJsonLd
         title={metadata.title as string}
         description={metadata.description as string}
@@ -88,7 +88,7 @@ const ConfidentialitePage = () => {
               </p>
             </section>
 
-            <p className="text-sm text-gray-500 mt-10">
+            <p className="text-sm text-muted-foreground mt-10">
               Dernière mise à jour : 3 Juillet 2025
             </p>
           </div>

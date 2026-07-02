@@ -232,7 +232,17 @@ export default async function RootLayout({
   ];
 
   return (
-    <html lang="fr">
+    <html lang="fr" suppressHydrationWarning>
+      <head>
+        {/* Applique le thème AVANT l'hydratation pour éviter le flash clair→sombre.
+            localStorage.theme ('dark' | 'light') prime, sinon préférence système. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark')}}catch(e){}})()",
+          }}
+        />
+      </head>
       <body className={`${poppins.className} bg-muted`}>
         <GoogleAnalytics />
         <GoogleAdsTag />

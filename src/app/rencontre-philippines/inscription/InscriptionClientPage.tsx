@@ -538,7 +538,7 @@ const InscriptionClientPage = () => {
                     </div>
                     <span className={`text-sm font-medium px-3 py-1 rounded-full ${
                       selectedInterests.length >= 3
-                        ? 'bg-green-100 text-green-700'
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                         : 'bg-muted text-muted-foreground'
                     }`}>
                       {selectedInterests.length} / 3 min

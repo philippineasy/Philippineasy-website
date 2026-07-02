@@ -1,8 +1,7 @@
 'use client';
 
+import type { CSSProperties } from 'react';
 import { motion } from 'framer-motion';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import { Check, Sparkles } from 'lucide-react';
 import { fadeInUp, staggerContainer } from './animations';
 
@@ -22,20 +21,31 @@ interface ProposalCardsProps {
   onSelect: (variant: string) => void;
 }
 
+// Category chips are self-contained (own tint + readable text), so they hold in
+// both light and dark. Everything else on the card is driven by semantic tokens.
 const VARIANT_CONFIG = {
   relax: { label: 'Relax', dot: '#14B8A6', bg: '#F0FDFA', color: '#0F766E' },
   balanced: { label: 'Equilibre', dot: '#10B981', bg: '#ECFDF5', color: '#047857' },
   adventure: { label: 'Aventure', dot: '#F59E0B', bg: '#FEF3C7', color: '#B45309' },
 } as const;
 
+// Small labels reused across the card (uppercase micro-headers).
+const microLabel: CSSProperties = {
+  fontSize: '10px',
+  fontWeight: 700,
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  color: 'hsl(var(--muted-foreground))',
+};
+
 export function ProposalCards({ previews, selectedVariant, recommendedVariant, onSelect }: ProposalCardsProps) {
   return (
     <div>
-      <h2 className="text-2xl font-bold text-foreground mb-2">Choisissez Votre Itineraire</h2>
-      <p className="text-muted-foreground mb-8">3 propositions adaptees a vos preferences. Selectionnez celle qui vous plait !</p>
+      <h2 className="mb-2 text-2xl font-bold text-foreground">Choisissez Votre Itineraire</h2>
+      <p className="mb-8 text-muted-foreground">3 propositions adaptees a vos preferences. Selectionnez celle qui vous plait !</p>
 
       <motion.div
-        className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        className="grid grid-cols-1 gap-6 md:grid-cols-3"
         role="radiogroup"
         aria-label="Choix de l'itineraire"
         variants={staggerContainer}
@@ -56,35 +66,34 @@ export function ProposalCards({ previews, selectedVariant, recommendedVariant, o
               onClick={() => onSelect(preview.variant)}
               onKeyDown={(e) => e.key === 'Enter' && onSelect(preview.variant)}
               variants={fadeInUp}
-              className="bg-card rounded-2xl cursor-pointer transition-all duration-200 overflow-hidden relative hover:-translate-y-1"
+              className="relative cursor-pointer overflow-hidden rounded-2xl bg-card transition-all duration-200 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               style={{
-                border: isSelected ? '1.5px solid #3B5BDB' : '0.5px solid #e5e7eb',
+                border: isSelected ? '1.5px solid hsl(var(--primary))' : '0.5px solid hsl(var(--border))',
                 boxShadow: isSelected
-                  ? '0 8px 24px rgba(59,91,219,0.15)'
-                  : '0 1px 2px rgba(0,0,0,0.03)',
+                  ? '0 8px 24px hsl(var(--primary) / 0.18)'
+                  : '0 1px 2px rgba(0,0,0,0.04)',
               }}
             >
               {isRecommended && (
                 <div
-                  className="text-center py-2 flex items-center justify-center gap-1.5"
+                  className="flex items-center justify-center gap-1.5 py-2 text-white"
                   style={{
                     background: 'linear-gradient(135deg, #3B5BDB 0%, #1e40af 100%)',
-                    color: '#ffffff',
                     fontSize: '10px',
                     fontWeight: 700,
                     letterSpacing: '0.08em',
                     textTransform: 'uppercase',
                   }}
                 >
-                  <Sparkles className="w-3 h-3" />
+                  <Sparkles className="h-3 w-3" />
                   Recommandé pour vous
                 </div>
               )}
 
               <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
+                <div className="mb-4 flex items-center justify-between">
                   <span
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1"
                     style={{
                       backgroundColor: config.bg,
                       color: config.color,
@@ -94,10 +103,7 @@ export function ProposalCards({ previews, selectedVariant, recommendedVariant, o
                       textTransform: 'uppercase',
                     }}
                   >
-                    <span
-                      className="w-1.5 h-1.5 rounded-full"
-                      style={{ backgroundColor: config.dot }}
-                    />
+                    <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: config.dot }} />
                     {config.label}
                   </span>
                   {isSelected && (
@@ -105,49 +111,36 @@ export function ProposalCards({ previews, selectedVariant, recommendedVariant, o
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                      className="w-6 h-6 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: '#3B5BDB', color: '#ffffff' }}
+                      className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground"
                     >
-                      <Check className="w-3.5 h-3.5" />
+                      <Check className="h-3.5 w-3.5" />
                     </motion.div>
                   )}
                 </div>
 
                 <h3
-                  className="text-foreground mb-2"
+                  className="mb-2 text-foreground"
                   style={{ fontSize: '17px', fontWeight: 600, letterSpacing: '-0.01em', lineHeight: 1.3 }}
                 >
                   {preview.title}
                 </h3>
-                <p
-                  className="mb-5"
-                  style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.55 }}
-                >
+                <p className="mb-5 text-[13px] leading-[1.55] text-muted-foreground">
                   {preview.description}
                 </p>
 
                 <div className="mb-5">
-                  <p
-                    className="mb-2.5"
-                    style={{
-                      fontSize: '10px',
-                      fontWeight: 700,
-                      color: '#94a3b8',
-                      letterSpacing: '0.08em',
-                      textTransform: 'uppercase',
-                    }}
-                  >
+                  <p className="mb-2.5" style={microLabel}>
                     Points forts
                   </p>
                   <ul className="space-y-2">
                     {preview.highlights?.slice(0, 3).map((highlight, idx) => (
-                      <li key={idx} className="flex items-start gap-2" style={{ fontSize: '13px', color: '#334155', lineHeight: 1.5 }}>
+                      <li key={idx} className="flex items-start gap-2 text-[13px] leading-[1.5] text-foreground/80">
                         <span
-                          className="flex-shrink-0 inline-flex items-center justify-center rounded-full mt-0.5"
-                          style={{ width: '16px', height: '16px', backgroundColor: '#F4F7FE', color: '#3B5BDB' }}
+                          className="mt-0.5 inline-flex flex-shrink-0 items-center justify-center rounded-full"
+                          style={{ width: '16px', height: '16px', backgroundColor: 'hsl(var(--primary) / 0.12)', color: 'hsl(var(--primary))' }}
                           aria-hidden="true"
                         >
-                          <Check className="w-2.5 h-2.5" />
+                          <Check className="h-2.5 w-2.5" />
                         </span>
                         {highlight}
                       </li>
@@ -155,47 +148,29 @@ export function ProposalCards({ previews, selectedVariant, recommendedVariant, o
                   </ul>
                 </div>
 
-                <div className="pt-4" style={{ borderTop: '0.5px solid #f1f5f9' }}>
-                  <p
-                    className="mb-2.5"
-                    style={{
-                      fontSize: '10px',
-                      fontWeight: 700,
-                      color: '#94a3b8',
-                      letterSpacing: '0.08em',
-                      textTransform: 'uppercase',
-                    }}
-                  >
+                <div className="border-t border-border pt-4">
+                  <p className="mb-2.5" style={microLabel}>
                     Aperçu
                   </p>
                   <div className="space-y-1.5">
                     {preview.teaser_days?.map((day) => (
-                      <p key={day.day} style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.5 }}>
-                        <span style={{ fontWeight: 600, color: '#0f172a' }}>Jour {day.day} :</span> {day.summary}
+                      <p key={day.day} className="text-[13px] leading-[1.5] text-muted-foreground">
+                        <span className="font-semibold text-foreground">Jour {day.day} :</span> {day.summary}
                       </p>
                     ))}
                   </div>
-                  <p className="mt-2 italic" style={{ fontSize: '11px', color: '#94a3b8' }}>
+                  <p className="mt-2 text-[11px] italic text-muted-foreground">
                     … et plus encore après déblocage
                   </p>
                 </div>
 
-                <div className="mt-5 pt-4" style={{ borderTop: '0.5px solid #f1f5f9' }}>
-                  <p
-                    style={{
-                      fontSize: '10px',
-                      fontWeight: 600,
-                      color: '#94a3b8',
-                      letterSpacing: '0.06em',
-                      textTransform: 'uppercase',
-                      marginBottom: '2px',
-                    }}
-                  >
+                <div className="mt-5 border-t border-border pt-4">
+                  <p style={{ ...microLabel, letterSpacing: '0.06em', fontWeight: 600, marginBottom: '2px' }}>
                     Budget estimé
                   </p>
                   <p
-                    className="tabular-nums"
-                    style={{ fontSize: '20px', fontWeight: 700, color: '#3B5BDB', letterSpacing: '-0.01em', lineHeight: 1 }}
+                    className="tabular-nums text-primary"
+                    style={{ fontSize: '20px', fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1 }}
                   >
                     {preview.budget_estimate}
                   </p>

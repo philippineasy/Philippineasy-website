@@ -368,7 +368,7 @@ const ProfilPage = () => {
                     </p>
                   </div>
                 </div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-accent text-ink px-4 py-2 text-[13px] font-semibold shadow-cta">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-accent text-accent-foreground px-4 py-2 text-[13px] font-semibold shadow-cta">
                   <FontAwesomeIcon icon={faMapSigns} />
                   Voir tout →
                 </span>
