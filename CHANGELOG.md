@@ -5,6 +5,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Chore — Grand tri du dépôt : 49 fichiers obsolètes retirés, secrets détrackés (2026-07-02)
+
+Audit complet de la racine du projet (fichiers du 8-10 janvier + restes d'août 2025), croisé avec le code actuel, 218 commits d'historique et la base n8n locale. Rapport détaillé : `output/RAPPORT_TRI_FICHIERS_2026-07-02.md`.
+
+1. **Sécurité** : `.sentryclirc` (token Sentry en clair) et `.mcp.json` (config locale) détrackés + gitignorés — ils restent en local. ⚠️ Le repo étant public, le token Sentry reste visible dans l'historique git : révocation nécessaire côté sentry.io.
+2. **Doc workflow n8n du 8-10 janvier (30 fichiers supprimés)** : guides d'installation, rapports de validation/correction, checklists, scripts one-shot et SQL déjà appliqué. Les workflows vivants sont dans la base n8n (« Article Automation V2 copy » et « GPT Custom Import », actifs) ; les 3 exports JSON + la note de jonction sont archivés dans `n8n-workflows/` (local, gitignored).
+3. **Restes d'août 2025** : `debug-env.ts` (loggait les clés Supabase), `migrate-styles.mjs` (migration exécutée), `test-connexion.txt` (vide), `postcss.config.mjs` (config Tailwind v4 jamais chargée — le projet est en v3, `postcss.config.js` reste la config active).
+4. **Doublons/oublis** : `package-lock.json` supprimé (le projet est sous pnpm, `pnpm-lock.yaml` conservé — lève l'ambiguïté de détection du package manager sur Vercel) ; 3 captures d'écran trackées dans `src/app/` (zéro référence) ; `supabase/20250712162700_fix_warnings.sql.temp` (migration appliquée en février) ; `output/TODO.md` détracké (le dossier `output/` est gitignored).
+5. **Docs stratégiques obsolètes** : `AUDIT_UI_UX.md` (tout implémenté : pixel Meta, lead magnet, exit-intent, newsletter), `SEO_OPTIMIZATIONS.md` et `GOOGLE_INDEXING_SETUP.md` (features vivantes dans le code, news-sitemap supprimé en mai), `PLAN.md` déplacé vers `_handoff/` (redesign exécuté). Les 6 idées jamais réalisées sont préservées dans `output/BACKLOG_IDEES.md` (logo PNG 958 KB → WebP, redesign Article/Forum/Rencontres, onboarding email, A/B test CTAs, SSE itinéraire, Google News).
+
+Racine du projet : ~55 → ~20 fichiers. Aucun fichier applicatif touché.
+
 ### Contenu / SEO — Simulateur de visa interactif "Quel visa pour les Philippines ?" (2026-07-02)
 
 Premier "linkable asset" de la stratégie backlinks : un simulateur interactif intégré en haut de `/vivre-aux-philippines/s-installer/visas`. L'utilisateur choisit son objectif (voyager, retraite, travail, investir, télétravail, conjoint) puis répond à une question de suivi, et obtient le visa recommandé avec ses conditions clés, dépôt/durée, un encadré honnête "à vérifier" et un lien vers le comparatif SRRV vs 13(a).

@@ -33,6 +33,10 @@ yarn-error.log*
 
 # Sentry
 sentry-wizard-installation-error-*.log
+.sentryclirc
+
+# Local MCP config (machine-specific paths)
+.mcp.json
 
 # Archives
 *.zip
