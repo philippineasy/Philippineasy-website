@@ -143,8 +143,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const pageImages: SitemapEntry[] =
     (pages?.map(({ slug, created_at, hero_image_url, section }) => {
       if (!hero_image_url || !section) return null;
-      if (section === 'vivre-aux-philippines' && mergedVivrePageSlugs.has(slug)) return null;
       const sectionPath = getMainCategoryPath(section);
+      // La table `pages` stocke section='vivre' (format court) → tester sur le
+      // chemin converti, pas sur la valeur brute.
+      if (sectionPath === 'vivre-aux-philippines' && mergedVivrePageSlugs.has(slug)) return null;
       return {
         url: `${BASE_URL}/${sectionPath}/${slug}`,
         lastModified: new Date(created_at).toISOString(),
