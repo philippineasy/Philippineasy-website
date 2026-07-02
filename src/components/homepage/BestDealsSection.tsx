@@ -30,6 +30,8 @@ type Deal = {
   tagClass: TagClass;
 };
 
+// Exception: self-contained category tag chips (fixed light bg + dark text),
+// rendered on photos and cards — legible on any surface in either theme.
 const tagStyles: Record<TagClass, { bg: string; color: string }> = {
   amber: { bg: '#FEF3C7', color: '#854D0E' },
   emerald: { bg: '#D1FAE5', color: '#065F46' },

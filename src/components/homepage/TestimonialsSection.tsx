@@ -7,6 +7,9 @@ type Testimonial = {
   role: string;
 };
 
+// Exception: `avatarColor` is a decorative, self-contained avatar palette
+// (colored disc + white initials, aria-hidden). Both fg and bg are fixed so
+// the chips stay legible in either theme — not tokenised on purpose.
 const testimonials: Testimonial[] = [
   {
     initials: 'PD',
@@ -97,10 +100,7 @@ export const TestimonialsSection = () => {
 
               <StarRow count={t.stars} />
 
-              <p
-                className="text-[15px] italic leading-[1.6] mb-6"
-                style={{ color: '#334155' }}
-              >
+              <p className="text-[15px] italic leading-[1.6] mb-6 text-foreground/80">
                 « {t.quote} »
               </p>
 

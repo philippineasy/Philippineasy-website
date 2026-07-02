@@ -14,6 +14,9 @@ type Profile = {
 // TODO: brancher sur GET /api/rencontres/teaser-profiles
 // (4 profils verified=true AND show_in_teaser=true) une fois la migration
 // dating_profiles.show_in_teaser appliquee. Fallback statique en attendant.
+// Exception: `avatarColor` + `portraitGradient` are a decorative portrait
+// palette (colored discs / illustrated gradients), self-contained and
+// theme-safe — intentionally left un-tokenised.
 const profiles: Profile[] = [
   {
     name: 'Maria',
@@ -115,7 +118,8 @@ const PortraitSVG = ({ from, to, name }: { from: string; to: string; name: strin
       </linearGradient>
     </defs>
     <rect width="240" height="160" fill={`url(#grad-${name})`} />
-    {/* Stylized silhouette */}
+    {/* Stylized silhouette — exception: decorative white artwork on the
+        illustrated gradient portrait, identical in both themes. */}
     <g fill="#ffffff" opacity="0.18">
       <circle cx="120" cy="60" r="28" />
       <path d="M 60 160 Q 60 110, 120 105 Q 180 110, 180 160 Z" />
@@ -132,12 +136,7 @@ const PortraitSVG = ({ from, to, name }: { from: string; to: string; name: strin
 
 export const RencontresTeaser = () => {
   return (
-    <section
-      className="py-20 md:py-24"
-      style={{
-        background: 'linear-gradient(180deg, #ffffff 0%, #FDF4FF 100%)',
-      }}
-    >
+    <section className="py-20 md:py-24 bg-background">
       <div className="container mx-auto px-4">
         <div
           className="max-w-6xl mx-auto grid items-center gap-10 md:gap-[60px]"
@@ -146,10 +145,7 @@ export const RencontresTeaser = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-10 md:gap-[60px]">
             {/* Left — copy */}
             <div>
-              <span
-                className="inline-block text-[13px] font-medium uppercase tracking-[0.08em] mb-2.5"
-                style={{ color: '#BE185D' }}
-              >
+              <span className="inline-block text-[13px] font-medium uppercase tracking-[0.08em] mb-2.5 text-pink-700 dark:text-pink-400">
                 <span className="mr-1.5" aria-hidden="true">✦</span>
                 Rencontres · +40 000 membres
               </span>
@@ -159,7 +155,7 @@ export const RencontresTeaser = () => {
                 style={{ letterSpacing: '-0.02em', lineHeight: 1.1 }}
               >
                 Trouvez{' '}
-                <span style={{ color: '#EC4899' }}>l&apos;amour</span> aux
+                <span className="text-pink-500">l&apos;amour</span> aux
                 Philippines
               </h2>
 
@@ -177,12 +173,10 @@ export const RencontresTeaser = () => {
                 ].map((bullet) => (
                   <li
                     key={bullet}
-                    className="flex items-center gap-2.5 text-[15px]"
-                    style={{ color: '#334155' }}
+                    className="flex items-center gap-2.5 text-[15px] text-foreground/80"
                   >
                     <span
-                      className="inline-flex w-[22px] h-[22px] items-center justify-center rounded-full text-emerald-700 flex-shrink-0"
-                      style={{ backgroundColor: '#D1FAE5' }}
+                      className="inline-flex w-[22px] h-[22px] items-center justify-center rounded-full bg-success/15 text-success flex-shrink-0"
                       aria-hidden="true"
                     >
                       <CheckSmall />
@@ -302,10 +296,9 @@ const ProfileCard = ({ profile }: { profile: Profile }) => {
         <PortraitSVG from={from} to={to} name={profile.name} />
         {/* Avatar overlay bottom-left */}
         <span
-          className="relative z-10 inline-flex w-[42px] h-[42px] rounded-full items-center justify-center text-white font-bold text-[18px] flex-shrink-0"
+          className="relative z-10 inline-flex w-[42px] h-[42px] rounded-full items-center justify-center text-white font-bold text-[18px] flex-shrink-0 border-[3px] border-white"
           style={{
-            background: profile.avatarColor,
-            border: '3px solid #fff',
+            background: profile.avatarColor, // decorative avatar palette (see profiles[])
             boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)',
           }}
           aria-hidden="true"
@@ -319,11 +312,8 @@ const ProfileCard = ({ profile }: { profile: Profile }) => {
         >
           {isOnline && (
             <span
-              className="w-1.5 h-1.5 rounded-full"
-              style={{
-                background: '#10B981',
-                boxShadow: '0 0 0 2px rgba(16, 185, 129, 0.25)',
-              }}
+              className="w-1.5 h-1.5 rounded-full bg-success"
+              style={{ boxShadow: '0 0 0 2px rgba(16, 185, 129, 0.25)' }}
               aria-hidden="true"
             />
           )}
@@ -354,8 +344,7 @@ const ProfileCard = ({ profile }: { profile: Profile }) => {
           {profile.tags.map((t) => (
             <span
               key={t}
-              className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-              style={{ background: '#FDF4FF', color: '#9F1239' }}
+              className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-pink-50 text-pink-800 dark:bg-pink-500/15 dark:text-pink-300"
             >
               {t}
             </span>

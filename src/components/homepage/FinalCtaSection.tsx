@@ -1,5 +1,8 @@
 import Link from 'next/link';
 
+// Exception: DecorWaves / DecorCircles are decorative warm-yellow (#FCD34D,
+// = the `warm-yellow` token) artwork layered on the fixed signature blue
+// gradient below — they read identically in both themes.
 const DecorWaves = () => (
   <svg
     className="absolute inset-x-0 bottom-0 w-full pointer-events-none"
@@ -53,6 +56,7 @@ export const FinalCtaSection = ({
         <div
           className="relative overflow-hidden rounded-3xl mx-auto max-w-6xl text-center"
           style={{
+            // Exception: signature brand gradient (dark blue), white text on top.
             background:
               'linear-gradient(135deg, #1e3a8a 0%, #3B5BDB 100%)',
             padding: 'clamp(3rem, 7vw, 4.5rem) clamp(1.5rem, 5vw, 2rem)',
@@ -71,7 +75,7 @@ export const FinalCtaSection = ({
               }}
             >
               Prêt à écrire votre histoire{' '}
-              <span style={{ color: '#FCD34D' }}>philippine</span> ?
+              <span className="text-warm-yellow">philippine</span> ?
             </h2>
 
             <p
@@ -91,11 +95,7 @@ export const FinalCtaSection = ({
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 href={primaryHref}
-                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg font-semibold text-base shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
-                style={{
-                  backgroundColor: '#F59E0B',
-                  color: '#1a1a00',
-                }}
+                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg font-semibold text-base bg-accent text-accent-foreground shadow-lg transition-all duration-200 hover:scale-[1.02] hover:shadow-xl"
               >
                 {primaryLabel}
                 <span aria-hidden="true">→</span>

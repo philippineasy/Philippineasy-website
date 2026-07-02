@@ -4,6 +4,8 @@ import { createClient } from '@/utils/supabase/server';
 import { getCategoriesByMainCategory } from '@/services/categoryService';
 
 // TODO: remplacer par photo Supabase quand disponible (bucket articles, region Luzon & Manille)
+// Exception: self-contained decorative illustration (stands in for a photo);
+// its hex fills describe the drawing and render identically in both themes.
 const LuzonManillePlaceholder = () => (
   <svg
     viewBox="0 0 400 220"

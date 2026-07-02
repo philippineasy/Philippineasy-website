@@ -58,7 +58,7 @@ export const DropdownMenu = ({ label, items, isActive }: DropdownMenuProps) => {
       <div
         role="menu"
         aria-hidden={!isOpen}
-        className={`absolute left-0 mt-2 w-64 bg-card rounded-md shadow-lg border z-20 transition-all duration-150 motion-reduce:transition-none ${
+        className={`absolute left-0 mt-2 w-64 bg-card rounded-md shadow-lg border border-border z-20 transition-all duration-150 motion-reduce:transition-none ${
           isOpen
             ? 'opacity-100 visible translate-y-0 pointer-events-auto'
             : 'opacity-0 invisible -translate-y-1 pointer-events-none'

@@ -58,6 +58,8 @@ export const ItineraireIABlock = () => {
         <div
           className="relative overflow-hidden rounded-3xl mx-auto max-w-6xl text-white"
           style={{
+            // Exception: signature brand gradient (dark blue), white text on top —
+            // reads identically in both themes, kept fixed on purpose.
             background: 'linear-gradient(135deg, #3B5BDB 0%, #1e40af 100%)',
             padding: 'clamp(2.5rem, 5vw, 4rem)',
           }}
@@ -165,10 +167,9 @@ export const ItineraireIABlock = () => {
               aria-label="Aperçu d'un itinéraire 10 jours généré par l'IA — Manille, Palawan, El Nido — budget 1 900 à 2 400 €"
             >
               {/* Mac-style title bar */}
-              <div
-                className="flex items-center gap-1.5 px-4 py-3 border-b border-border/60"
-                style={{ background: '#F8FAFC' }}
-              >
+              <div className="flex items-center gap-1.5 px-4 py-3 border-b border-border/60 bg-muted">
+                {/* Exception: iconic macOS traffic-light dots — a recognisable UI
+                    metaphor (like an emoji), fixed in both themes. */}
                 <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#EF4444' }} aria-hidden="true" />
                 <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#F59E0B' }} aria-hidden="true" />
                 <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#10B981' }} aria-hidden="true" />
@@ -182,11 +183,10 @@ export const ItineraireIABlock = () => {
                 {mockupDays.map((day, idx) => (
                   <div
                     key={day.d}
-                    className={`flex gap-3.5 py-3 ${idx < mockupDays.length - 1 ? 'border-b border-slate-100' : ''}`}
+                    className={`flex gap-3.5 py-3 ${idx < mockupDays.length - 1 ? 'border-b border-border' : ''}`}
                   >
                     <div
-                      className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-primary text-[13px] font-bold"
-                      style={{ backgroundColor: 'rgba(59, 91, 219, 0.1)' }}
+                      className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center bg-primary/10 text-primary text-[13px] font-bold"
                       aria-hidden="true"
                     >
                       J{day.d}
@@ -212,7 +212,7 @@ export const ItineraireIABlock = () => {
                 ))}
 
                 {/* Footer */}
-                <div className="flex items-center justify-between pt-3.5 mt-2.5 border-t border-slate-100">
+                <div className="flex items-center justify-between pt-3.5 mt-2.5 border-t border-border">
                   <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                     Budget estimé
                   </span>

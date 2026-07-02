@@ -143,10 +143,7 @@ export const InstallerCards = () => {
               href={theme.href}
               className="group flex flex-col items-center text-center bg-card rounded-2xl px-[22px] py-7 border-[0.5px] border-border shadow-card-rest transition-all duration-300 hover:-translate-y-1 hover:shadow-card motion-reduce:hover:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              <div
-                className="w-16 h-16 mb-[18px] flex items-center justify-center rounded-2xl text-primary transition-transform duration-300 group-hover:scale-105 motion-reduce:group-hover:scale-100"
-                style={{ backgroundColor: 'rgba(59, 91, 219, 0.08)' }}
-              >
+              <div className="w-16 h-16 mb-[18px] flex items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform duration-300 group-hover:scale-105 motion-reduce:group-hover:scale-100">
                 {theme.icon}
               </div>
               <h3

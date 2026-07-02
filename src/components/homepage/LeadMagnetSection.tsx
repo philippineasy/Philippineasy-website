@@ -16,7 +16,11 @@ type Guide = {
   Cover: () => ReactElement;
 };
 
-/* --- SVG covers --- */
+/* --- SVG covers ---
+   Exception: the three cover components below are self-contained decorative
+   illustrations (like inline artwork). Their hex fills describe the drawing on
+   its own gradient backdrop and render identically in both themes — they are
+   not UI chrome and are intentionally left un-tokenised. */
 
 const PalawanCover = () => (
   <svg
@@ -223,6 +227,9 @@ const BudgetCover = () => (
   </svg>
 );
 
+// Exception: `badgeColor` is a decorative per-guide accent used for the badge
+// (colored text on an 8%-alpha tint of the same hue) and the selected-card
+// border. Self-contained and legible on the card in both themes.
 const guides: Guide[] = [
   {
     id: 'palawan',
@@ -362,19 +369,16 @@ export const LeadMagnetSection = () => {
             return (
               <article
                 key={guide.id}
-                className={`group bg-card rounded-2xl overflow-hidden flex flex-col transition-all duration-200 ${
+                className={`group bg-card rounded-2xl overflow-hidden flex flex-col border-[0.5px] transition-all duration-200 ${
                   isSelected
                     ? 'shadow-xl -translate-y-1'
-                    : 'hover:-translate-y-1 hover:shadow-lg'
+                    : 'border-border shadow-card-rest hover:-translate-y-1 hover:shadow-lg'
                 }`}
-                style={{
-                  border: isSelected
-                    ? `1px solid ${guide.badgeColor}`
-                    : '0.5px solid #e5e7eb',
-                  boxShadow: isSelected
-                    ? undefined
-                    : '0 1px 2px rgba(0,0,0,0.03)',
-                }}
+                style={
+                  isSelected
+                    ? { borderColor: guide.badgeColor } // decorative accent border on the selected card
+                    : undefined
+                }
               >
                 <div className="relative w-full h-[160px] overflow-hidden">
                   <guide.Cover />
@@ -403,8 +407,8 @@ export const LeadMagnetSection = () => {
                     {guide.title}
                   </h3>
                   <p
-                    className="text-[13px] mb-4 flex-1"
-                    style={{ color: '#64748b', lineHeight: 1.55 }}
+                    className="text-[13px] mb-4 flex-1 text-muted-foreground"
+                    style={{ lineHeight: 1.55 }}
                   >
                     {guide.description}
                   </p>
@@ -430,19 +434,16 @@ export const LeadMagnetSection = () => {
             className="mt-10 max-w-xl mx-auto"
           >
             {status === 'success' ? (
-              <div
-                className="text-center p-6 rounded-xl bg-card"
-                style={{ border: '1px solid #d1fae5' }}
-              >
-                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full mb-3" style={{ backgroundColor: '#d1fae5' }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <div className="text-center p-6 rounded-xl bg-card border border-success/40">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full mb-3 bg-success/15 text-success">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M20 6L9 17l-5-5" />
                   </svg>
                 </div>
                 <p className="font-semibold text-foreground">{message}</p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="bg-card rounded-xl p-5" style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+              <form onSubmit={handleSubmit} className="bg-card rounded-xl p-5 border-[0.5px] border-border shadow-card-rest">
                 <p className="text-[13px] text-muted-foreground mb-3">
                   Recevez <strong className="text-foreground font-semibold">{guides.find((g) => g.id === selectedGuide)?.title}</strong> gratuitement par email.
                 </p>

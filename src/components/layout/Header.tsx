@@ -202,7 +202,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
 
   return (
     <>
-      <nav className="w-full bg-card/94 backdrop-blur-md border-b border-border/50 supports-[backdrop-filter]:bg-card/94">
+      <nav className="w-full bg-card supports-[backdrop-filter]:bg-card/90 backdrop-blur-md border-b border-border">
         <div className="container mx-auto px-4">
           {/* Top row : wordmark left | actions right */}
           <div className="flex items-center justify-between py-3.5">

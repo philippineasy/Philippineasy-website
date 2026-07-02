@@ -50,8 +50,15 @@ module.exports = {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'
   			},
+  			success: {
+  				DEFAULT: 'hsl(var(--success))',
+  				foreground: 'hsl(var(--success-foreground))'
+  			},
   			'warm-yellow': '#FCD34D',
-  			'soft-blue': '#F4F7FE',
+  			// Tinted section band. Adaptive: light = #F4F7FE, dark = deep ink
+  			// surface sitting between --background (8%) and --card (11%) so cards
+  			// still lift off the band. See --soft-blue in globals.css.
+  			'soft-blue': 'hsl(var(--soft-blue))',
   			ink: 'hsl(var(--ink))',
   			'ink-dim': 'hsl(var(--ink-dim))',
   			// Surface sombre CONSTANTE (footer, ticker, scrims) — ne bascule pas en dark

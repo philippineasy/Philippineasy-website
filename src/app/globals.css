@@ -55,6 +55,10 @@
        le token `night` (tailwind) qui ne bascule jamais. */
     --ink: 222 47% 11%;               /* #0F172A */
     --ink-dim: 217 33% 17%;           /* #1E293B */
+    /* Tinted section band (Témoignages, Magazine, Guides, Régions…).
+       ≈ #F4F7FE — a hair of blue over white. Adaptive so those full-width
+       bands stop reading as bright patches once the theme flips. */
+    --soft-blue: 222 83% 98%;
   }
 
   /* Dark theme — anchored on the BRAND ink family (#0F172A slate-900 and its
@@ -89,6 +93,10 @@
     --success: 145 58% 52%;
     --success-foreground: 210 40% 98%;
     --warm-bg: 222 47% 10%;
+    /* Section band, dark: sits between --background (8%) and --card (11%) so
+       the band reads as a subtle tonal pause and cards still lift off it via
+       their border + shadow. Same ink hue family as the rest of the theme. */
+    --soft-blue: 222 47% 10%;
   }
 
   * {

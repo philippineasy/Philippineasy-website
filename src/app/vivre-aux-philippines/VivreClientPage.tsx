@@ -34,11 +34,7 @@ export const VivreClientPage = ({ initialCategories }: { initialCategories: Cate
   const renderCard = (cat: Category) => (
     <Link
       href={`/vivre-aux-philippines/${cat.slug}`}
-      className="group bg-card rounded-2xl overflow-hidden flex flex-col h-full transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
-      style={{
-        border: '0.5px solid #e5e7eb',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-      }}
+      className="group bg-card rounded-2xl overflow-hidden flex flex-col h-full border-[0.5px] border-border shadow-card-rest transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
     >
       <div className="relative w-full h-[180px] overflow-hidden">
         <Image
@@ -62,8 +58,8 @@ export const VivreClientPage = ({ initialCategories }: { initialCategories: Cate
           {cat.name}
         </h3>
         <p
-          className="mb-4 flex-1 line-clamp-3"
-          style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.55 }}
+          className="mb-4 flex-1 line-clamp-3 text-muted-foreground"
+          style={{ fontSize: '13px', lineHeight: 1.55 }}
         >
           {cat.description}
         </p>
@@ -95,19 +91,18 @@ export const VivreClientPage = ({ initialCategories }: { initialCategories: Cate
               <Link
                 key={guide.href}
                 href={guide.href}
-                className="group flex items-start gap-4 bg-card rounded-2xl px-5 py-5 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
-                style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+                className="group flex items-start gap-4 bg-card rounded-2xl px-5 py-5 border-[0.5px] border-border shadow-card-rest transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
               >
                 <span
-                  className="inline-flex shrink-0 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105"
-                  style={{ width: '44px', height: '44px', backgroundColor: '#F4F7FE', color: '#3B5BDB' }}
+                  className="inline-flex shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform duration-200 group-hover:scale-105"
+                  style={{ width: '44px', height: '44px' }}
                   aria-hidden="true"
                 >
                   <FontAwesomeIcon icon={guide.icon} style={{ fontSize: '18px' }} />
                 </span>
                 <span>
                   <h3 className="text-foreground mb-1" style={{ fontSize: '15px', fontWeight: 600, letterSpacing: '-0.01em' }}>{guide.title}</h3>
-                  <p style={{ fontSize: '12px', color: '#64748b', lineHeight: 1.55 }}>{guide.desc}</p>
+                  <p className="text-muted-foreground" style={{ fontSize: '12px', lineHeight: 1.55 }}>{guide.desc}</p>
                 </span>
               </Link>
             ))}

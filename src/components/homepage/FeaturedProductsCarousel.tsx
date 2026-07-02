@@ -70,10 +70,7 @@ export const FeaturedProductsCarousel = () => {
           <div className="flex gap-4 overflow-hidden">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="flex-shrink-0 w-full sm:w-1/2 md:w-1/3 lg:w-1/4 p-4">
-                <div
-                  className="bg-card rounded-2xl overflow-hidden"
-                  style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
-                >
+                <div className="bg-card rounded-2xl overflow-hidden border-[0.5px] border-border shadow-card-rest">
                   <div className="h-[180px] bg-muted animate-pulse" />
                   <div className="p-5 space-y-3">
                     <div className="h-4 bg-muted rounded animate-pulse w-3/4" />
@@ -131,12 +128,11 @@ export const FeaturedProductsCarousel = () => {
         <div className="mt-10 max-w-md mx-auto">
           <Link
             href="/marketplace-aux-philippines"
-            className="group flex items-center gap-4 bg-card rounded-2xl px-5 py-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-            style={{ border: '0.5px solid #e5e7eb', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
+            className="group flex items-center gap-4 bg-card rounded-2xl px-5 py-4 border-[0.5px] border-border shadow-card-rest transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
           >
             <span
-              className="flex-shrink-0 inline-flex items-center justify-center rounded-xl"
-              style={{ width: '40px', height: '40px', backgroundColor: '#F4F7FE', color: '#3B5BDB' }}
+              className="flex-shrink-0 inline-flex items-center justify-center rounded-xl bg-primary/10 text-primary"
+              style={{ width: '40px', height: '40px' }}
               aria-hidden="true"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -149,7 +145,7 @@ export const FeaturedProductsCarousel = () => {
               <span className="block text-foreground" style={{ fontSize: '15px', fontWeight: 600, letterSpacing: '-0.01em' }}>
                 Explorer la marketplace
               </span>
-              <span className="block mt-0.5" style={{ fontSize: '12px', color: '#64748b' }}>
+              <span className="block mt-0.5 text-muted-foreground" style={{ fontSize: '12px' }}>
                 Tous nos produits locaux &amp; vendeurs vérifiés.
               </span>
             </span>

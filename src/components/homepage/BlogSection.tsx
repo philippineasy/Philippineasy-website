@@ -5,6 +5,9 @@ import { generateArticleUrl } from '@/lib/utils';
 
 type CategoryClass = 'blue' | 'emerald' | 'purple' | 'amber' | 'teal';
 
+// Exception: editorial category badges. Each defines BOTH its own light bg and
+// dark text, so the chip is self-contained and legible on any surface in either
+// theme (they render on photos and on cards). Multi-hue variety is intentional.
 const categoryStyles: Record<CategoryClass, { bg: string; color: string }> = {
   blue: { bg: '#DBEAFE', color: '#1E40AF' },
   emerald: { bg: '#D1FAE5', color: '#065F46' },
@@ -262,6 +265,8 @@ export const BlogSection = async () => {
                 <span
                   className="inline-flex w-[38px] h-[38px] rounded-full items-center justify-center text-white font-bold text-[14px] flex-shrink-0"
                   style={{
+                    // Exception: decorative author avatar, sits on the dark photo
+                    // scrim of the featured card — reads the same in both themes.
                     background: 'linear-gradient(135deg, #F59E0B, #EA580C)',
                   }}
                   aria-hidden="true"
@@ -372,11 +377,7 @@ export const BlogSection = async () => {
           {/* "Tous les articles" CTA card — dashed border style */}
           <Link
             href="/actualites-sur-les-philippines"
-            className="group rounded-[14px] overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-0.5 motion-reduce:hover:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            style={{
-              background: 'linear-gradient(135deg, #F4F7FE 0%, #ffffff 100%)',
-              border: '1.5px dashed #C7D2FE',
-            }}
+            className="group rounded-[14px] overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-0.5 motion-reduce:hover:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-gradient-to-br from-soft-blue to-card border-[1.5px] border-dashed border-primary/30"
           >
             <div className="px-6 py-6 flex flex-col gap-2 justify-center min-h-[180px] h-full">
               <span className="text-[13px] font-medium uppercase tracking-[0.08em] text-primary">
