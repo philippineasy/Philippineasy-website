@@ -1,14 +1,63 @@
 import { Metadata } from 'next';
+import type { ReactNode } from 'react';
 import { PageHero, StatRow, SplitSection } from '@/components/sections';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStreetView, faStore, faCocktail } from '@fortawesome/free-solid-svg-icons';
+import { CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: 'Manger aux Philippines : Guide des Prix et de la Street Food',
   description: 'Découvrez le coût de la nourriture aux Philippines, de la street food savoureuse aux restaurants locaux. Ce guide vous aidera à bien manger sans vous ruiner.',
 };
+
+/* -------------------------------------------------------------------------- */
+/* Petits blocs éditoriaux locaux, repris de la recette validée sur           */
+/* visas-et-formalites : eyebrow + h2 à mot accentué, liste cochée.           */
+/* -------------------------------------------------------------------------- */
+
+const SectionHeader = ({
+  eyebrow,
+  title,
+  accent,
+  center = false,
+}: {
+  eyebrow: string;
+  title: string;
+  accent?: string;
+  center?: boolean;
+}) => (
+  <div className={cn('max-w-2xl', center && 'mx-auto text-center')}>
+    <span className="mb-3 inline-block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+      {eyebrow}
+    </span>
+    <h2
+      className="text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold text-foreground"
+      style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
+    >
+      {title}
+      {accent && (
+        <>
+          {' '}
+          <span className="text-accent">{accent}</span>
+        </>
+      )}
+    </h2>
+  </div>
+);
+
+const CheckList = ({ items }: { items: ReactNode[] }) => (
+  <div className="mt-4 grid gap-2.5" role="list">
+    {items.map((item, i) => (
+      <div key={i} role="listitem" className="flex items-start gap-2.5 text-[15px] leading-[1.55] text-foreground">
+        <CheckCircle className="mt-[3px] h-[18px] w-[18px] flex-shrink-0 text-primary" aria-hidden="true" />
+        <span>{item}</span>
+      </div>
+    ))}
+  </div>
+);
 
 const NourriturePage = () => {
   return (
@@ -24,29 +73,39 @@ const NourriturePage = () => {
 
       <section className="bg-muted py-16 md:py-20">
         <div className="container mx-auto px-4">
-          <h2
-            className="mb-10 text-center text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold text-foreground"
-            style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
-          >
-            La Cuisine Philippine en Bref
-          </h2>
-          <StatRow
-            className="justify-center"
-            stats={[
-              { icon: <FontAwesomeIcon icon={faStreetView} className="text-[18px]" />, value: 'Moins de 1€', label: 'Prix de la Street Food' },
-              { icon: <FontAwesomeIcon icon={faStore} className="text-[18px]" />, value: '2-4€', label: 'Repas en Carinderia' },
-              { icon: <FontAwesomeIcon icon={faCocktail} className="text-[18px]" />, value: '~1€', label: 'Bière Locale' },
-            ]}
-          />
+          <SectionHeader center eyebrow="Repères de base" title="Combien coûte un" accent="repas ?" />
+          <p className="mx-auto mt-5 max-w-2xl text-center text-[16px] leading-[1.7] text-muted-foreground">
+            Manger aux Philippines coûte rarement cher, quel que soit l&apos;endroit où vous posez
+            votre plateau. Une brochette achetée dans la rue revient à moins de 1 €, un repas
+            complet en carinderia se règle entre 2 et 4 €, et une bière locale accompagne le tout
+            pour à peine 1 € de plus.
+          </p>
+          <div className="mt-10">
+            <StatRow
+              className="justify-center"
+              stats={[
+                { icon: <FontAwesomeIcon icon={faStreetView} className="text-[18px]" />, value: 'Moins de 1€', label: 'Prix de la Street Food' },
+                { icon: <FontAwesomeIcon icon={faStore} className="text-[18px]" />, value: '2-4€', label: 'Repas en Carinderia' },
+                { icon: <FontAwesomeIcon icon={faCocktail} className="text-[18px]" />, value: '~1€', label: 'Bière Locale' },
+              ]}
+            />
+          </div>
         </div>
       </section>
 
       <SplitSection
+        eyebrow="Manger sur le pouce"
         imageUrl="/images/nourriture/street-food-philippine.webp"
         imageAlt="Assortiment coloré de brochettes philippine vendues dans un stand de rue en soirée"
-        title="La Street Food : Un Festin à Petit Prix"
+        title="La street food,"
+        titleAccent="à petit prix"
       >
-        <p>Vous marchez dans une ruelle animée, l’odeur de barbecue vous attire… Bienvenue dans l’univers inimitable de la street food philippine. Pour quelques pesos, vous pouvez déguster une variété de brochettes, de fritures et de douceurs locales.</p>
+        <p>
+          Vous marchez dans une ruelle animée, l&apos;odeur de barbecue vous attire… Bienvenue
+          dans l&apos;univers inimitable de la street food philippine. Pour quelques pesos, vous
+          pouvez déguster une variété de brochettes, de fritures et de douceurs locales, souvent
+          préparées sous vos yeux sur un simple charbon de bois.
+        </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6">
           {[
@@ -74,18 +133,27 @@ const NourriturePage = () => {
       <SplitSection
         tone="muted"
         reverse
+        eyebrow="Manger comme un local"
         imageUrl="/images/nourriture/carinderia-locale-animee.webp"
         imageAlt="Intérieur d'une carinderia philippine avec plats maison dans des marmites"
-        title="Les Carinderias : Manger comme un Local"
+        title="Le cœur battant de la"
+        titleAccent="cuisine locale"
       >
-        <p>Dans tous les barangays, les <b>carinderias</b> sont le cœur battant de la cuisine locale. Pas de menu papier, juste un comptoir en inox, une rangée de marmites et un grand sourire pour vous accueillir.</p>
-        <ul>
-          <li><b>Adobo :</b> Viande marinée dans du vinaigre, ail et sauce soja.</li>
-          <li><b>Sinigang :</b> Soupe aigre traditionnelle à base de tamarin.</li>
-          <li><b>Lechon :</b> Cochon de lait rôti croustillant à souhait.</li>
-          <li><b>Kare-Kare :</b> Ragoût de queue de bœuf et légumes dans une sauce aux cacahuètes.</li>
-          <li><b>Gulay :</b> Plats de légumes sautés, pour les végétariens.</li>
-        </ul>
+        <p>
+          Dans tous les barangays, les <b>carinderias</b> sont le cœur battant de la cuisine
+          locale. Pas de menu papier, juste un comptoir en inox, une rangée de marmites et un
+          grand sourire pour vous accueillir. On pointe du doigt ce qui nous fait envie, et on
+          s&apos;installe.
+        </p>
+        <CheckList
+          items={[
+            <><b>Adobo :</b> viande marinée dans du vinaigre, ail et sauce soja</>,
+            <><b>Sinigang :</b> soupe aigre traditionnelle à base de tamarin</>,
+            <><b>Lechon :</b> cochon de lait rôti croustillant à souhait</>,
+            <><b>Kare-Kare :</b> ragoût de queue de bœuf et légumes dans une sauce aux cacahuètes</>,
+            <><b>Gulay :</b> plats de légumes sautés, pour les végétariens</>,
+          ]}
+        />
         <p className="bg-accent/10 p-4 rounded-lg mt-4 text-sm italic">
           💬 Vous êtes végétarien ? Demandez “gulay lang” ou “no meat please”, certaines carinderias s’adaptent volontiers.
         </p>
@@ -93,23 +161,36 @@ const NourriturePage = () => {
       </SplitSection>
 
       <SplitSection
+        eyebrow="Sécurité alimentaire"
         imageUrl="/images/nourriture/street-food-philippine.webp"
         imageAlt="Touriste mangeant dans une échoppe locale"
-        title="Faut-il craindre la Street Food ? Pas tant que ça"
+        title="Street food,"
+        titleAccent="sans risque"
       >
-        <p>La plupart des voyageurs n’ont <b>aucun souci à manger local</b> aux Philippines. Quelques conseils simples suffisent :</p>
-        <ul>
-          <li>Choisissez des stands fréquentés, surtout aux heures de pointe</li>
-          <li>Privilégiez les plats bien cuits (grillés, frits)</li>
-          <li>Évitez l’eau du robinet : buvez en bouteille</li>
-        </ul>
-        <p>Et surtout, <b>ne passez pas à côté du plaisir de manger avec les locaux</b> ! C’est souvent autour d’un plat qu’on tisse les plus beaux souvenirs.</p>
+        <p>
+          La plupart des voyageurs n&apos;ont <b>aucun souci à manger local</b> aux Philippines.
+          Quelques conseils simples suffisent pour éviter les mauvaises surprises&nbsp;:
+        </p>
+        <CheckList
+          items={[
+            'Choisissez des stands fréquentés, surtout aux heures de pointe',
+            'Privilégiez les plats bien cuits (grillés, frits)',
+            "Évitez l'eau du robinet : buvez en bouteille",
+          ]}
+        />
+        <p>
+          Et surtout, <b>ne passez pas à côté du plaisir de manger avec les locaux</b> ! C&apos;est
+          souvent autour d&apos;un plat qu&apos;on tisse les plus beaux souvenirs.
+        </p>
       </SplitSection>
 
       <div className="bg-muted py-16">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-primary mb-4">📍 Où trouver les meilleures zones de Street Food ?</h2>
-          <p className="mb-6 text-base">Voici une carte interactive des quartiers réputés pour manger sur le pouce, à Manille, Cebu ou encore Davao :</p>
+          <SectionHeader center eyebrow="Sur le terrain" title="Cartographier les meilleures" accent="zones" />
+          <p className="mx-auto mt-5 mb-6 max-w-2xl text-base text-muted-foreground">
+            Voici une carte interactive des quartiers réputés pour manger sur le pouce, à Manille,
+            Cebu ou encore Davao :
+          </p>
           <iframe
             src="https://www.google.com/maps/d/u/0/embed?mid=1PDDWbcbSaYhcGshzTNoQCKblWc4uElE&ehbc=2E312F"
             width="100%"

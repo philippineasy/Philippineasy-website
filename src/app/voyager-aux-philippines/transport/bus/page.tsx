@@ -25,12 +25,17 @@ const BusPage = async () => {
       <BusClientPage initialRoutes={initialRoutes || []} />
 
       <SplitSection
+        eyebrow="Bon à savoir"
         title="Conseils pour Voyager en"
         titleAccent="Bus"
         imageUrl="/images/transport/jeepney-aux-philippines.webp"
         imageAlt="Bus coloré typique des Philippines"
       >
-        <p>Le bus est le roi des transports terrestres aux Philippines. C'est un moyen économique et efficace de parcourir de longues distances sur une même île.</p>
+        <p>
+          Au-delà des trajets partagés par la communauté ci-dessus, voici quelques repères avant
+          de monter à bord. Le bus reste le roi des transports terrestres aux Philippines : un
+          moyen économique et efficace de parcourir de longues distances sur une même île.
+        </p>
         <ul className="list-disc list-inside space-y-2 mt-4">
           <li><b>Types de bus :</b> Vous trouverez des bus climatisés (air-con) pour plus de confort, et des bus ordinaires (ordinary) pour une expérience plus locale et économique.</li>
           <li><b>Compagnies :</b> Ceres Liner est la compagnie la plus connue et la plus répandue, reconnaissable à ses bus jaunes.</li>

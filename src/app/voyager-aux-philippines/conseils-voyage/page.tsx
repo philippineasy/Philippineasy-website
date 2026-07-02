@@ -1,7 +1,5 @@
 import { Metadata } from 'next';
-import { PageHero, StatRow, SplitSection } from '@/components/sections';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlane, faHeart, faShieldHalved } from '@fortawesome/free-solid-svg-icons';
+import { PageHero, SplitSection } from '@/components/sections';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 import { getArticlesByCategorySlug } from '@/services/articleService';
@@ -40,6 +38,38 @@ export const metadata: Metadata = {
   },
 };
 
+/* -------------------------------------------------------------------------- */
+/* Pattern d'en-tête maison : eyebrow uppercase + h2 à mot(s) accentué(s).      */
+/* Repris tel quel de la page visas-et-formalites (page de référence).         */
+/* -------------------------------------------------------------------------- */
+const SectionHeader = ({
+  eyebrow,
+  title,
+  accent,
+}: {
+  eyebrow: string;
+  title: string;
+  accent?: string;
+}) => (
+  <div className="max-w-2xl">
+    <span className="mb-3 inline-block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+      {eyebrow}
+    </span>
+    <h2
+      className="text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold text-foreground"
+      style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
+    >
+      {title}
+      {accent && (
+        <>
+          {' '}
+          <span className="text-accent">{accent}</span>
+        </>
+      )}
+    </h2>
+  </div>
+);
+
 const ConseilsPratiquesPage = async () => {
   const supabase = await createClient();
   const { data: articles, error } = await getArticlesByCategorySlug(supabase, 'conseils-voyage');
@@ -59,68 +89,91 @@ const ConseilsPratiquesPage = async () => {
         imageAlt="Conseils Pratiques pour les Philippines"
       />
 
-      <div className="bg-muted py-20">
+      {/* Intro éditoriale — remplace l'ancienne bande de "stats" textuelles. */}
+      <section className="bg-muted py-16 md:py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">L'Essentiel pour Voyager Serein</h2>
-          <StatRow
-            tone="default"
-            stats={[
-              {
-                icon: <FontAwesomeIcon icon={faPlane} className="text-[18px]" />,
-                value: 'Bien se Préparer',
-                label: 'Avant de Partir',
-              },
-              {
-                icon: <FontAwesomeIcon icon={faShieldHalved} className="text-[18px]" />,
-                value: "Sécurité d'Abord",
-                label: 'Rester en Confiance',
-              },
-              {
-                icon: <FontAwesomeIcon icon={faHeart} className="text-[18px]" />,
-                value: 'Culture & Respect',
-                label: "S'immerger Localement",
-              },
-            ]}
+          <SectionHeader
+            eyebrow="L'essentiel avant de partir"
+            title="Papiers, santé, budget :"
+            accent="dans cet ordre"
           />
+          <div className="mt-5 max-w-2xl space-y-4 text-[16px] leading-[1.7] text-muted-foreground">
+            <p>
+              Un voyage aux Philippines qui démarre bien tient à trois choses réglées avant le
+              départ : les visas selon votre nationalité, les vaccins et la trousse de premiers
+              secours, et un peu de liquide en poche pour les premiers jours.
+            </p>
+            <p>
+              Une fois sur place, la donne change : il s&apos;agit surtout de comprendre les
+              codes locaux, de la langue aux transports en passant par le marchandage sur les
+              marchés. Les deux chapitres qui suivent couvrent d&apos;abord l&apos;avant-départ,
+              puis le quotidien sur l&apos;archipel.
+            </p>
+          </div>
         </div>
-      </div>
+      </section>
 
       <SplitSection
+        eyebrow="Avant de partir"
         imageUrl="/images/sante/vaccins-voyage-philippines.webp"
         imageAlt="Préparation de vaccins pour un voyage"
-        title="Préparation au Voyage :"
-        titleAccent="Ne Rien Oublier"
+        title="Préparation au voyage :"
+        titleAccent="ne rien oublier"
       >
-        <p>Une bonne préparation est la clé d'un voyage sans stress. Pensez aux aspects administratifs, sanitaires et logistiques avant de boucler vos valises.</p>
+        <p>
+          Trois cases à cocher avant de boucler la valise : les papiers, la santé, et de quoi
+          payer les premiers jours sans chercher un distributeur dès la sortie de
+          l&apos;aéroport.
+        </p>
         <ul className="list-disc list-inside space-y-2 mt-4">
           <li><b>Visas :</b> Vérifiez les exigences de visa pour votre nationalité.</li>
           <li><b>Santé :</b> Consultez votre médecin pour les vaccins et une trousse de premiers secours.</li>
           <li><b>Argent :</b> Prévoyez un mélange de liquide et de cartes de crédit.</li>
         </ul>
+        <p className="!mt-5">
+          Ces trois cases cochées, le vrai voyage commence — et avec lui, une autre logique.
+        </p>
         <Link href="/voyager-aux-philippines/sante-securite" className="text-accent font-bold hover:underline mt-4 inline-block">Plus de détails sur la santé et sécurité →</Link>
       </SplitSection>
 
       <SplitSection
+        eyebrow="Sur place"
         imageUrl="/images/communication/dialogue-interculturel.webp"
         imageAlt="Dialogue entre deux personnes de cultures différentes"
         reverse
         tone="muted"
-        title="Sur Place :"
-        titleAccent="Vivre l'Expérience Philippine"
+        title="Sur place,"
+        titleAccent="vivre à la philippine"
       >
-        <p>Une fois sur place, quelques astuces vous aideront à naviguer la culture locale et à profiter pleinement de votre séjour.</p>
+        <p>
+          S&apos;adapter au rythme local demande surtout de l&apos;observation : quelques mots
+          de la langue, les bons réflexes dans les transports, et une négociation qui reste
+          toujours bon enfant.
+        </p>
         <ul className="list-disc list-inside space-y-2 mt-4">
           <li><b>Communication :</b> Apprenez quelques mots de tagalog ou de bisaya.</li>
-          <li><b>Transport :</b> Maîtrisez l'art de voyager en jeepney ou en tricycle.</li>
+          <li><b>Transport :</b> Maîtrisez l&apos;art de voyager en jeepney ou en tricycle.</li>
           <li><b>Négociation :</b> Le marchandage est courant sur les marchés, mais restez respectueux.</li>
         </ul>
+        <p className="!mt-5">
+          Rien d&apos;insurmontable — juste des codes qui se prennent vite, surtout avec les
+          bons mots pour commencer.
+        </p>
         <Link href="/voyager-aux-philippines/communication" className="text-accent font-bold hover:underline mt-4 inline-block">Communiquer facilement aux Philippines →</Link>
       </SplitSection>
 
-      <div className="container mx-auto px-4 py-16">
-        <h2 className="mb-8 text-3xl font-bold tracking-[-0.01em] text-foreground">Nos Articles de Conseils Pratiques</h2>
-        {articles && <ArticleList articles={articles} basePath="voyager-aux-philippines" />}
-      </div>
+      {articles && articles.length > 0 && (
+        <section className="bg-background pb-16 md:pb-20">
+          <div className="container mx-auto px-4">
+            <div className="border-t border-border pt-14">
+              <SectionHeader eyebrow="À lire aussi" title="Nos articles de" accent="conseils pratiques" />
+              <div className="mt-8">
+                <ArticleList articles={articles} basePath="voyager-aux-philippines" />
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 };

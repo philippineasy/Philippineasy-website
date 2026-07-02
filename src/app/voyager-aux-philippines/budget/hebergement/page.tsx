@@ -1,14 +1,63 @@
 import { Metadata } from 'next';
+import type { ReactNode } from 'react';
 import { PageHero, StatRow, SplitSection } from '@/components/sections';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBed, faHotel, faHouseUser } from '@fortawesome/free-solid-svg-icons';
+import { CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: 'Hébergement aux Philippines : Guide des Prix et Conseils',
   description: 'Découvrez le coût de l\'hébergement aux Philippines, des auberges de jeunesse conviviales aux hôtels de luxe. Ce guide vous aidera à trouver le logement idéal pour votre budget.',
 };
+
+/* -------------------------------------------------------------------------- */
+/* Petits blocs éditoriaux locaux, repris de la recette validée sur           */
+/* visas-et-formalites : eyebrow + h2 à mot accentué, liste cochée.           */
+/* -------------------------------------------------------------------------- */
+
+const SectionHeader = ({
+  eyebrow,
+  title,
+  accent,
+  center = false,
+}: {
+  eyebrow: string;
+  title: string;
+  accent?: string;
+  center?: boolean;
+}) => (
+  <div className={cn('max-w-2xl', center && 'mx-auto text-center')}>
+    <span className="mb-3 inline-block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+      {eyebrow}
+    </span>
+    <h2
+      className="text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold text-foreground"
+      style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
+    >
+      {title}
+      {accent && (
+        <>
+          {' '}
+          <span className="text-accent">{accent}</span>
+        </>
+      )}
+    </h2>
+  </div>
+);
+
+const CheckList = ({ items, columns = 1 }: { items: ReactNode[]; columns?: 1 | 2 }) => (
+  <div className={cn('mt-4 grid gap-2.5', columns === 2 && 'sm:grid-cols-2 sm:gap-x-6')} role="list">
+    {items.map((item, i) => (
+      <div key={i} role="listitem" className="flex items-start gap-2.5 text-[15px] leading-[1.55] text-foreground">
+        <CheckCircle className="mt-[3px] h-[18px] w-[18px] flex-shrink-0 text-primary" aria-hidden="true" />
+        <span>{item}</span>
+      </div>
+    ))}
+  </div>
+);
 
 const HebergementPage = () => {
   return (
@@ -24,26 +73,34 @@ const HebergementPage = () => {
 
       <section className="bg-muted py-16 md:py-20">
         <div className="container mx-auto px-4">
-          <h2
-            className="mb-10 text-center text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold text-foreground"
-            style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
-          >
-            Prix Moyens par Nuit
-          </h2>
-          <StatRow
-            className="justify-center"
-            stats={[
-              { icon: <FontAwesomeIcon icon={faBed} className="text-[18px]" />, value: '8-15€', label: 'Dortoir en Auberge' },
-              { icon: <FontAwesomeIcon icon={faHouseUser} className="text-[18px]" />, value: '20-40€', label: 'Chambre Double Simple' },
-              { icon: <FontAwesomeIcon icon={faHotel} className="text-[18px]" />, value: '100€+', label: 'Hôtel de Luxe' },
-            ]}
-          />
+          <SectionHeader center eyebrow="Le poste qui pèse le plus" title="Prix moyens par" accent="nuit" />
+          <p className="mx-auto mt-5 max-w-2xl text-center text-[16px] leading-[1.7] text-muted-foreground">
+            Le logement absorbe souvent la plus grosse part d&apos;un budget voyage aux
+            Philippines, mais l&apos;écart entre les options reste immense. Un lit en dortoir se
+            loue entre 8 et 15 €, une chambre double confortable tourne entre 20 et 40 €, et les
+            hôtels haut de gamme démarrent au-delà de 100 € la nuit.
+          </p>
+          <div className="mt-10">
+            <StatRow
+              className="justify-center"
+              stats={[
+                { icon: <FontAwesomeIcon icon={faBed} className="text-[18px]" />, value: '8-15€', label: 'Dortoir en Auberge' },
+                { icon: <FontAwesomeIcon icon={faHouseUser} className="text-[18px]" />, value: '20-40€', label: 'Chambre Double Simple' },
+                { icon: <FontAwesomeIcon icon={faHotel} className="text-[18px]" />, value: '100€+', label: 'Hôtel de Luxe' },
+              ]}
+            />
+          </div>
         </div>
       </section>
 
       <div className="container mx-auto px-4 mt-16">
-        <h2 className="text-3xl font-bold text-accent text-center mb-10">Types d'Hébergement en un Coup d'œil</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        <SectionHeader center eyebrow="Vue d'ensemble" title="Quatre familles de" accent="logements" />
+        <p className="mx-auto mt-5 max-w-2xl text-center text-[15px] leading-[1.6] text-muted-foreground">
+          Du dortoir partagé au resort avec piscine, quatre formats reviennent sans cesse dans les
+          recherches de logement aux Philippines. Voici comment les repérer d&apos;un coup
+          d&apos;œil, avant d&apos;entrer dans le détail de chacun.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mt-10">
           {[
             { name: 'Dortoir', desc: '8–15€ / nuit', img: '/images/budget/dortoir-auberge-jeunesse.webp' },
             { name: 'Chambre double', desc: '20–40€', img: '/images/budget/chambre-vue-mer.webp' },
@@ -60,50 +117,78 @@ const HebergementPage = () => {
       </div>
 
       <SplitSection
+        eyebrow="Backpackers"
         imageUrl="/images/budget/dortoir-auberge-jeunesse.webp"
         imageAlt="Dortoir dans une auberge de jeunesse aux Philippines"
-        title="Les Auberges de Jeunesse : Convivialité et Économies"
+        title="Dormir en"
+        titleAccent="auberge"
       >
-        <p>Après quelques heures de bus sur les routes de montagne de Luzon, quoi de mieux qu’un lit en dortoir pour reposer son dos, et un rooftop pour siroter une bière avec d'autres voyageurs ? Les auberges philippines allient simplicité et rencontres inoubliables.</p>
-        <ul>
-          <li><b>Prix :</b> Très abordables, surtout en dortoir partagé.</li>
-          <li><b>Ambiance :</b> Idéales pour socialiser et partager des expériences.</li>
-          <li><b>Conseil :</b> Réservez à l'avance en haute saison.</li>
-          <li><b>Exemples :</b> Mad Monkey, Spin Hostel, The Circle Hostel.</li>
-        </ul>
+        <p>
+          Après quelques heures de bus sur les routes de montagne de Luzon, quoi de mieux
+          qu&apos;un lit en dortoir pour reposer le dos, et un rooftop pour siroter une bière avec
+          d&apos;autres voyageurs ? Les auberges philippines allient simplicité et rencontres
+          inoubliables, et restent la solution la moins chère pour dormir sur l&apos;archipel.
+        </p>
+        <CheckList
+          items={[
+            <><b>Prix :</b> très abordables, surtout en dortoir partagé</>,
+            <><b>Ambiance :</b> idéale pour socialiser et partager des expériences</>,
+            <><b>Conseil :</b> réservez à l&apos;avance en haute saison</>,
+            <><b>Exemples :</b> Mad Monkey, Spin Hostel, The Circle Hostel</>,
+          ]}
+        />
         <Link href="/voyager-aux-philippines/budget">Retour au budget →</Link>
       </SplitSection>
 
       <SplitSection
         tone="muted"
         reverse
+        eyebrow="Plus de confort"
         imageUrl="/images/budget/resort-de-luxe-philippines.webp"
         imageAlt="Resort de luxe aux Philippines"
-        title="Hôtels et Resorts : Confort et Services"
+        title="Hôtels et"
+        titleAccent="resorts"
       >
-        <p>Que vous soyez digital nomad ou en lune de miel, les hôtels philippins couvrent tous les besoins : climatisation, piscine, service de chambre… Le luxe reste accessible dans bien des provinces.</p>
-        <ul>
-          <li><b>Guesthouses :</b> Chambres simples et propres à prix doux.</li>
-          <li><b>Hôtels de gamme moyenne :</b> Bon rapport qualité/prix.</li>
-          <li><b>Resorts de luxe :</b> Vue mer, spa, salle de sport, tout y est.</li>
-        </ul>
+        <p>
+          Que vous soyez en télétravail ou en lune de miel, les hôtels philippins couvrent tous
+          les besoins : climatisation, piscine, service de chambre. Le confort reste accessible
+          dans la plupart des provinces, bien au-delà des seules stations balnéaires connues.
+        </p>
+        <CheckList
+          items={[
+            <><b>Guesthouses :</b> chambres simples et propres à prix doux</>,
+            <><b>Hôtels de gamme moyenne :</b> bon rapport qualité-prix</>,
+            <><b>Resorts de luxe :</b> vue mer, spa, salle de sport, tout y est</>,
+          ]}
+        />
         <Link href="/voyager-aux-philippines/budget/nourriture">Voir le guide de la nourriture →</Link>
       </SplitSection>
 
       <div className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-primary mb-6">Conseils Locaux & Astuces</h2>
-        <ul className="list-disc list-inside space-y-3 text-base">
-          <li><b>Sites à privilégier :</b> Booking.com, Agoda, Airbnb pour les séjours longs.</li>
-          <li><b>Internet :</b> Vérifiez la qualité du Wifi si vous travaillez en ligne.</li>
-          <li><b>Sécurité :</b> Préférez les quartiers centraux, surtout à Manille ou Cebu.</li>
-          <li><b>Électricité :</b> Certaines guesthouses n'ont pas de générateur lors des coupures. Demandez avant.</li>
-        </ul>
+        <SectionHeader eyebrow="Avant de réserver" title="Conseils et" accent="astuces" />
+        <p className="mt-5 max-w-2xl text-[15px] leading-[1.6] text-muted-foreground">
+          Quelques réflexes glanés sur le terrain, qui évitent les mauvaises surprises une fois
+          les valises posées.
+        </p>
+        <CheckList
+          columns={2}
+          items={[
+            <><b>Sites à privilégier :</b> Booking.com, Agoda, Airbnb pour les séjours longs</>,
+            <><b>Internet :</b> vérifiez la qualité du Wi-Fi si vous travaillez en ligne</>,
+            <><b>Sécurité :</b> préférez les quartiers centraux, surtout à Manille ou Cebu</>,
+            <><b>Électricité :</b> certaines guesthouses n&apos;ont pas de générateur lors des coupures — demandez avant</>,
+          ]}
+        />
       </div>
 
       <div className="bg-muted py-12">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-accent mb-6">Comparatif rapide</h2>
-          <div className="overflow-x-auto">
+          <SectionHeader center eyebrow="En un coup d'œil" title="Comparatif" accent="rapide" />
+          <p className="mx-auto mt-5 max-w-xl text-center text-[15px] leading-[1.6] text-muted-foreground">
+            De quoi trancher rapidement entre les trois formats les plus courants, selon votre
+            profil et votre budget.
+          </p>
+          <div className="overflow-x-auto mt-8">
             <table className="min-w-full bg-card text-left shadow-md rounded-xl overflow-hidden">
               <thead>
                 <tr className="bg-muted text-sm">

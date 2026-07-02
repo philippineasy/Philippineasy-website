@@ -1,14 +1,86 @@
 import { Metadata } from 'next';
+import type { ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Globe, Smartphone } from 'lucide-react';
+import { Globe, Smartphone, CheckCircle } from 'lucide-react';
 import { PageHero } from '@/components/sections';
 import { faSimCard } from '@fortawesome/free-solid-svg-icons';
 import { AffiliateRecommendation } from '@/components/affiliate/AffiliateRecommendation';
+import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: "Carte SIM aux Philippines | Guide pour les Touristes",
   description: "Restez connecté aux Philippines. Guide complet pour choisir votre carte SIM prépayée chez Globe ou Smart, et comparer les forfaits data.",
 };
+
+/* -------------------------------------------------------------------------- */
+/* Petits blocs éditoriaux locaux, repris de la recette validée sur           */
+/* visas-et-formalites : eyebrow + h2 à mot accentué, liste cochée, table.    */
+/* -------------------------------------------------------------------------- */
+
+const SectionHeader = ({
+  eyebrow,
+  title,
+  accent,
+}: {
+  eyebrow: string;
+  title: string;
+  accent?: string;
+}) => (
+  <div className="mx-auto max-w-2xl text-center">
+    <span className="mb-3 inline-block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+      {eyebrow}
+    </span>
+    <h2
+      className="text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold text-foreground"
+      style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
+    >
+      {title}
+      {accent && (
+        <>
+          {' '}
+          <span className="text-accent">{accent}</span>
+        </>
+      )}
+    </h2>
+  </div>
+);
+
+const CheckList = ({ items }: { items: ReactNode[] }) => (
+  <div className="grid gap-2.5" role="list">
+    {items.map((item, i) => (
+      <div key={i} role="listitem" className="flex items-start gap-2.5 text-[15px] leading-[1.55] text-foreground">
+        <CheckCircle className="mt-[3px] h-[18px] w-[18px] flex-shrink-0 text-primary" aria-hidden="true" />
+        <span>{item}</span>
+      </div>
+    ))}
+  </div>
+);
+
+// Table de repères prix compacte (recette visas-et-formalites / logement),
+// utilisée ici en paire pour comparer les deux forfaits promo.
+const DataTable = ({
+  caption,
+  rows,
+}: {
+  caption: string;
+  rows: { label: string; value: string }[];
+}) => (
+  <div className={cn('overflow-hidden rounded-xl border-[0.5px] border-border bg-card')}>
+    <div className="border-b border-border bg-muted px-4 py-2.5 text-[12px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+      {caption}
+    </div>
+    <dl className="divide-y divide-border">
+      {rows.map((r) => (
+        <div key={r.label} className="flex items-baseline justify-between gap-4 px-4 py-3">
+          <dt className="text-[14px] text-foreground">{r.label}</dt>
+          <dd className="whitespace-nowrap text-[14px] font-semibold tabular-nums text-foreground">
+            {r.value}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+);
 
 const CarteSimPage = () => {
   return (
@@ -22,9 +94,17 @@ const CarteSimPage = () => {
         imageAlt="Carte SIM Locale"
       />
       <div className="container mx-auto px-4 py-12">
-        <p className="text-lg text-center mb-12 max-w-3xl mx-auto">Acheter une carte SIM locale est la solution la plus simple et économique pour avoir internet et passer des appels aux Philippines. Voici comment faire.</p>
+        <p className="text-lg text-center mb-16 max-w-3xl mx-auto text-muted-foreground">
+          Acheter une carte SIM locale est la solution la plus simple et économique pour avoir
+          internet et passer des appels aux Philippines. Voici comment faire, opérateur par
+          opérateur.
+        </p>
 
-        <h2 className="text-3xl font-bold text-center mb-8">Les Principaux Opérateurs</h2>
+        <SectionHeader eyebrow="Deux réseaux dominent le marché" title="Globe ou" accent="Smart" />
+        <p className="mx-auto mt-5 mb-8 max-w-2xl text-center text-[15px] leading-[1.6] text-muted-foreground">
+          Les deux géants se disputent le marché depuis des années, et lequel choisir dépend
+          surtout des îles où vous comptez traîner vos valises.
+        </p>
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           <Card>
             <CardHeader>
@@ -44,32 +124,49 @@ const CarteSimPage = () => {
           </Card>
         </div>
 
-        <h2 className="text-3xl font-bold text-center mt-16 mb-8">Où Acheter et Comment S'enregistrer ?</h2>
+        <div className="mt-16">
+          <SectionHeader eyebrow="Simple et rapide" title="Où acheter, comment" accent="s'enregistrer" />
+          <p className="mx-auto mt-5 mb-8 max-w-2xl text-center text-[15px] leading-[1.6] text-muted-foreground">
+            Trois options s&apos;offrent à vous en arrivant, et une formalité administrative
+            incontournable avant de pouvoir surfer.
+          </p>
+        </div>
         <Card className="max-w-4xl mx-auto">
           <CardContent className="p-6">
-            <ul className="list-disc list-inside space-y-2">
-              <li><strong>A l'aéroport :</strong> Le plus simple. Des stands Globe et Smart vous attendent dès la sortie de la douane. Le personnel vous aidera à installer et enregistrer la SIM.</li>
-              <li><strong>En ville :</strong> Dans les boutiques officielles, les supermarchés (7-Eleven, etc.) ou chez les vendeurs de rue.</li>
-              <li><strong>Enregistrement obligatoire :</strong> Depuis 2023, il est obligatoire d'enregistrer sa SIM en ligne avec son passeport. C'est une procédure simple qui se fait via le site de l'opérateur.</li>
-            </ul>
+            <CheckList
+              items={[
+                <><strong>À l&apos;aéroport :</strong> le plus simple. Des stands Globe et Smart vous attendent dès la sortie de la douane. Le personnel vous aidera à installer et enregistrer la SIM.</>,
+                <><strong>En ville :</strong> dans les boutiques officielles, les supermarchés (7-Eleven, etc.) ou chez les vendeurs de rue.</>,
+                <><strong>Enregistrement obligatoire :</strong> depuis 2023, il est obligatoire d&apos;enregistrer sa SIM en ligne avec son passeport. C&apos;est une procédure simple qui se fait via le site de l&apos;opérateur.</>,
+              ]}
+            />
           </CardContent>
         </Card>
 
-        <h2 className="text-3xl font-bold text-center mt-16 mb-8">Exemples de Forfaits (Promo)</h2>
-        <p className="text-center mb-4">Les offres changent souvent, mais voici une idée des forfaits "promo" que vous pouvez charger :</p>
+        <div className="mt-16">
+          <SectionHeader eyebrow="Les offres évoluent souvent" title="Exemples de" accent="forfaits" />
+          <p className="mx-auto mt-5 mb-8 max-w-2xl text-center text-[15px] leading-[1.6] text-muted-foreground">
+            Les promos changent régulièrement, mais voici deux forfaits représentatifs de ce que
+            l&apos;on peut charger sur place, à titre de repère.
+          </p>
+        </div>
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          <Card>
-            <CardHeader><CardTitle>Globe "Go+"</CardTitle></CardHeader>
-            <CardContent>
-              <p><strong>Go+99 :</strong> 8 Go de data + 8 Go pour les applis de votre choix, valable 7 jours (environ 1.60€).</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader><CardTitle>Smart "Giga Power"</CardTitle></CardHeader>
-            <CardContent>
-              <p><strong>Giga Power 99 :</strong> 2 Go de data par jour + 6 Go de data, valable 7 jours (environ 1.60€).</p>
-            </CardContent>
-          </Card>
+          <DataTable
+            caption="Globe · Go+99"
+            rows={[
+              { label: 'Data', value: '8 Go + 8 Go apps' },
+              { label: 'Validité', value: '7 jours' },
+              { label: 'Prix', value: '~1,60 €' },
+            ]}
+          />
+          <DataTable
+            caption="Smart · Giga Power 99"
+            rows={[
+              { label: 'Data', value: '2 Go/jour + 6 Go' },
+              { label: 'Validité', value: '7 jours' },
+              { label: 'Prix', value: '~1,60 €' },
+            ]}
+          />
         </div>
       </div>
 

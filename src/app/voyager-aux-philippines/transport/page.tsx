@@ -1,7 +1,5 @@
 import { Metadata } from 'next';
-import { PageHero, SplitSection, StatRow } from '@/components/sections';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlane, faFerry, faBus } from '@fortawesome/free-solid-svg-icons';
+import { PageHero, SplitSection } from '@/components/sections';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 import { getPageBySlug } from '@/services/pageService';
@@ -54,6 +52,44 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+/* -------------------------------------------------------------------------- */
+/* En-tête de section : eyebrow uppercase + h2 avec UN mot en amber vif.       */
+/* Repris à l'identique du pattern validé sur                                  */
+/* /vivre-aux-philippines/visas-et-formalites.                                 */
+/* -------------------------------------------------------------------------- */
+const SectionHeader = ({
+  eyebrow,
+  title,
+  accent,
+  description,
+}: {
+  eyebrow: string;
+  title: string;
+  accent?: string;
+  description?: string;
+}) => (
+  <div className="max-w-2xl">
+    <span className="mb-3 inline-block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+      {eyebrow}
+    </span>
+    <h2
+      className="text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold text-foreground"
+      style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
+    >
+      {title}
+      {accent && (
+        <>
+          {' '}
+          <span className="text-accent">{accent}</span>
+        </>
+      )}
+    </h2>
+    {description && (
+      <p className="mt-4 text-[16px] leading-[1.7] text-muted-foreground">{description}</p>
+    )}
+  </div>
+);
+
 const TransportPage = async () => {
   const supabase = await createClient();
   const { data: page } = await getPageBySlug(supabase, 'transport');
@@ -73,28 +109,39 @@ const TransportPage = async () => {
         imageAlt="Se Déplacer aux Philippines"
       />
 
-      <section className="bg-muted py-20">
+      {/* Vue d'ensemble — bande muette remplaçant l'ancien StatRow non numérique */}
+      <section className="bg-muted py-16 md:py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Les Options de Transport</h2>
-          <div className="flex justify-center">
-            <StatRow
-              stats={[
-                { value: 'Vols', label: 'Rapide et efficace pour les longues distances', icon: <FontAwesomeIcon icon={faPlane} className="text-[18px]" /> },
-                { value: 'Ferries', label: "Économique et pittoresque pour l'inter-îles", icon: <FontAwesomeIcon icon={faFerry} className="text-[18px]" /> },
-                { value: 'Bus & Vans', label: 'Idéal pour explorer une île en profondeur', icon: <FontAwesomeIcon icon={faBus} className="text-[18px]" /> },
-              ]}
-            />
+          <SectionHeader eyebrow="Vue d'ensemble" title="Trois façons de" accent="voyager" />
+          <div className="mt-5 max-w-2xl space-y-4 text-[16px] leading-[1.7] text-muted-foreground">
+            <p>
+              Se déplacer aux Philippines demande un peu de méthode : l'archipel s'étend sur des
+              milliers d'îles, et aucun mode de transport ne les dessert toutes à lui seul. Pour
+              les longues distances entre régions, l'avion reste le plus rapide.
+            </p>
+            <p>
+              Sur l'eau, les ferries prennent le relais à un rythme plus lent mais plus
+              pittoresque. Et une fois posé sur une île, place aux bus et aux vans pour
+              l'explorer en profondeur.
+            </p>
           </div>
         </div>
       </section>
 
+      {/* Chapitre 1 — Vols intérieurs */}
       <SplitSection
+        eyebrow="Par les airs"
         title="Les Vols"
         titleAccent="Intérieurs"
         imageUrl="/images/transport/vue-aerienne-nuageuse.webp"
         imageAlt="Avion en vol au-dessus des nuages"
       >
-        <p>Avec des compagnies comme Cebu Pacific, Philippine Airlines ou AirAsia, relier les îles principales est un jeu d'enfant. Les aéroports de Manille (MNL) et Cebu (CEB) sont les principaux hubs.</p>
+        <p>
+          Pour couvrir de grandes distances entre les principales régions de l'archipel, l'avion
+          reste la solution la plus rapide. Cebu Pacific, Philippine Airlines ou AirAsia
+          multiplient les liaisons entre les îles, avec Manille (MNL) et Cebu (CEB) comme
+          principaux hubs.
+        </p>
         <ul className="list-disc list-inside space-y-2 mt-4">
           <li><b>Conseil :</b> Réservez à l'avance pour les meilleurs tarifs.</li>
           <li><b>Bagages :</b> Attention aux franchises de bagages, souvent limitées.</li>
@@ -102,14 +149,21 @@ const TransportPage = async () => {
         <Link href="/voyager-aux-philippines/transport/vols" className="text-accent font-bold hover:underline mt-4 inline-block">Comparer les compagnies aériennes →</Link>
       </SplitSection>
 
+      {/* Chapitre 2 — Ferries et bateaux */}
       <SplitSection
+        eyebrow="Sur l'eau"
         title="Les Ferries et Bateaux"
         imageUrl="/images/transport/ferry-sur-mer-calme.webp"
         imageAlt="Ferry naviguant sur une mer calme"
         reverse
         tone="muted"
       >
-        <p>Pour une expérience plus locale et économique, les ferries sont une excellente option. Des compagnies comme 2GO Travel desservent de nombreuses destinations. Pour les trajets plus courts, les "bangkas" (bateaux à balancier) sont omniprésentes.</p>
+        <p>
+          Une fois redescendu sur terre, direction la mer : pour une expérience plus locale et
+          économique, les ferries sont une excellente option. Des compagnies comme 2GO Travel
+          desservent de nombreuses destinations, et pour les trajets plus courts, les "bangkas"
+          (bateaux à balancier) sont omniprésentes.
+        </p>
         <ul className="list-disc list-inside space-y-2 mt-4">
           <li><b>Types :</b> Ferries rapides, RORO (Roll-on/Roll-off), bateaux lents.</li>
           <li><b>Sécurité :</b> Choisissez des compagnies réputées.</li>
@@ -117,13 +171,19 @@ const TransportPage = async () => {
         <Link href="/voyager-aux-philippines/transport/ferries" className="text-accent font-bold hover:underline mt-4 inline-block">Guide des voyages en ferry →</Link>
       </SplitSection>
 
+      {/* Chapitre 3 — Bus et vans */}
       <SplitSection
+        eyebrow="Sur la route"
         title="Les Bus et"
         titleAccent="Vans"
         imageUrl="/images/transport/jeepney-aux-philippines.webp"
         imageAlt="Bus de voyage sur une route de campagne"
       >
-        <p>Pour explorer une île en profondeur, les bus et les vans sont incontournables. Les bus "Ceres" sont célèbres dans tout le pays. Pour plus de confort et de rapidité, les vans (V-Hire) sont une excellente alternative.</p>
+        <p>
+          Dernière étape une fois sur une île : la route. Les bus et les vans sont incontournables
+          pour l'explorer en profondeur. Les bus "Ceres" sont célèbres dans tout le pays ; pour
+          plus de confort et de rapidité, les vans (V-Hire) sont une excellente alternative.
+        </p>
         <ul className="list-disc list-inside space-y-2 mt-4">
           <li><b>Types :</b> Bus climatisés ou non, vans partagés.</li>
           <li><b>Conseil :</b> Arrivez un peu en avance, les départs se font souvent quand le véhicule est plein.</li>

@@ -1,7 +1,5 @@
 import { Metadata } from 'next';
-import { PageHero, StatRow, SplitSection } from '@/components/sections';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faWater, faMoneyBillWave, faUmbrellaBeach } from '@fortawesome/free-solid-svg-icons';
+import { PageHero, SplitSection } from '@/components/sections';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 import { getArticlesByCategorySlug } from '@/services/articleService';
@@ -42,6 +40,38 @@ export const metadata: Metadata = {
   },
 };
 
+/* -------------------------------------------------------------------------- */
+/* Pattern d'en-tête maison : eyebrow uppercase + h2 à mot(s) accentué(s).      */
+/* Repris tel quel de la page visas-et-formalites (page de référence).         */
+/* -------------------------------------------------------------------------- */
+const SectionHeader = ({
+  eyebrow,
+  title,
+  accent,
+}: {
+  eyebrow: string;
+  title: string;
+  accent?: string;
+}) => (
+  <div className="max-w-2xl">
+    <span className="mb-3 inline-block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+      {eyebrow}
+    </span>
+    <h2
+      className="text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold text-foreground"
+      style={{ letterSpacing: '-0.02em', lineHeight: 1.15 }}
+    >
+      {title}
+      {accent && (
+        <>
+          {' '}
+          <span className="text-accent">{accent}</span>
+        </>
+      )}
+    </h2>
+  </div>
+);
+
 const SiargaoPage = async () => {
   const supabase = await createClient();
   const { data: articles, error } = await getArticlesByCategorySlug(supabase, 'siargao');
@@ -62,61 +92,77 @@ const SiargaoPage = async () => {
         imageAlt="Siargao Capitale du Surf"
       />
 
-      <div className="bg-muted py-20">
+      {/* Intro éditoriale — remplace l'ancienne bande de "stats" textuelles. */}
+      <section className="bg-muted py-16 md:py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Siargao en un Clin d'Œil</h2>
-          <StatRow
-            tone="default"
-            stats={[
-              {
-                icon: <FontAwesomeIcon icon={faWater} className="text-[18px]" />,
-                value: 'Surf & Lagons',
-                label: 'Activités Principales',
-              },
-              {
-                icon: <FontAwesomeIcon icon={faUmbrellaBeach} className="text-[18px]" />,
-                value: 'Mars - Juin',
-                label: 'Meilleure Période',
-              },
-              {
-                icon: <FontAwesomeIcon icon={faMoneyBillWave} className="text-[18px]" />,
-                value: 'Argent Liquide',
-                label: 'Conseil Essentiel',
-              },
-            ]}
+          <SectionHeader
+            eyebrow="Siargao en un coup d'œil"
+            title="Surf, lagons et"
+            accent="îles secrètes"
           />
+          <div className="mt-5 max-w-2xl space-y-4 text-[16px] leading-[1.7] text-muted-foreground">
+            <p>
+              Siargao doit sa réputation à ses vagues, mais l&apos;île ne s&apos;arrête pas à
+              Cloud 9. Entre le surf, les lagons turquoise et les piscines naturelles creusées
+              dans la roche, il y a largement de quoi remplir un séjour sans jamais s&apos;éloigner
+              beaucoup de la côte.
+            </p>
+            <p>
+              La haute saison de surf tombe pendant la saison des pluies, de juin à octobre —
+              contre-intuitif, mais c&apos;est la réalité de l&apos;île. Un conseil avant de
+              partir : prévoyez du liquide, les distributeurs ne courent pas les rues une fois
+              loin des zones touristiques.
+            </p>
+          </div>
         </div>
-      </div>
+      </section>
 
       <SplitSection
+        eyebrow="Quand partir"
         imageUrl="/images/siargao/surf-a-siargao.webp"
         imageAlt="Surfeur sur une vague à Siargao"
-        title="La Saison Verte :"
-        titleAccent="Une Nature Luxuriante"
+        title="La saison verte :"
+        titleAccent="une nature luxuriante"
       >
-        <p>La saison des pluies, de juin à octobre, transforme Siargao en un paradis verdoyant. Les averses sont souvent courtes et intenses, laissant place à de belles éclaircies. C'est une période idéale pour profiter de l'île avec moins de touristes et des prix plus bas.</p>
+        <p>
+          De juin à octobre, les pluies transforment Siargao en île du vert le plus intense —
+          averses courtes et généreuses, suivies de belles éclaircies. C&apos;est aussi la
+          période où l&apos;île se fait plus calme, avec moins de monde et des prix plus doux.
+        </p>
         <ul className="list-disc list-inside space-y-2 mt-4">
           <li><b>Paysages :</b> Une végétation luxuriante et des cascades abondantes.</li>
-          <li><b>Surf :</b> C'est la meilleure période pour le surf, avec les vagues les plus impressionnantes.</li>
+          <li><b>Surf :</b> C&apos;est la meilleure période pour le surf, avec les vagues les plus impressionnantes.</li>
           <li><b>Ambiance :</b> Une atmosphère plus calme et authentique.</li>
         </ul>
+        <p className="!mt-5">
+          Le mauvais temps n&apos;empêche donc rien — il redessine juste le programme. Reste à
+          savoir où aller une fois les vagues dominées.
+        </p>
         <Link href="/voyager-aux-philippines/quand-partir" className="text-accent font-bold hover:underline mt-4 inline-block">En savoir plus sur le climat →</Link>
       </SplitSection>
 
       <SplitSection
+        eyebrow="Au-delà du surf"
         imageUrl="/images/siargao/piscines-naturelles-magpupungko.webp"
         imageAlt="Piscines naturelles de Magpupungko"
         reverse
         tone="muted"
-        title="Les Trésors de"
+        title="Les trésors de"
         titleAccent="Siargao"
       >
-        <p>Au-delà du surf, Siargao offre une multitude de merveilles naturelles à explorer :</p>
+        <p>
+          Posez la planche, et Siargao a encore beaucoup à montrer : des îles désertes à
+          quelques minutes de bateau jusqu&apos;aux piscines creusées à même la roche.
+        </p>
         <ul className="list-disc list-inside space-y-2 mt-4">
           <li><b>Island Hopping :</b> Découvrez les îles de Naked Island, Daku et Guyam.</li>
           <li><b>Sugba Lagoon :</b> Nagez et faites du paddle dans un lagon aux eaux turquoise.</li>
           <li><b>Magpupungko Rock Pools :</b> Baignez-vous dans des piscines naturelles creusées dans la roche.</li>
         </ul>
+        <p className="!mt-5">
+          De quoi construire un programme complet, sans jamais s&apos;éloigner beaucoup de la
+          côte.
+        </p>
         <Link href="/voyager-aux-philippines/transport" className="text-accent font-bold hover:underline mt-4 inline-block">Comment se déplacer à Siargao →</Link>
       </SplitSection>
 
@@ -129,10 +175,18 @@ const SiargaoPage = async () => {
         />
       </div>
 
-      <div className="container mx-auto px-4 py-16">
-        <h2 className="mb-8 text-3xl font-bold tracking-[-0.01em] text-foreground">Nos Articles sur Siargao</h2>
-        {articles && <ArticleList articles={articles} basePath="voyager-aux-philippines" />}
-      </div>
+      {articles && articles.length > 0 && (
+        <section className="bg-background pb-16 md:pb-20">
+          <div className="container mx-auto px-4">
+            <div className="border-t border-border pt-14">
+              <SectionHeader eyebrow="À lire aussi" title="Nos articles sur" accent="Siargao" />
+              <div className="mt-8">
+                <ArticleList articles={articles} basePath="voyager-aux-philippines" />
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 };

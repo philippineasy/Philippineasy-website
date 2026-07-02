@@ -25,12 +25,17 @@ const VolsPage = async () => {
       <VolsClientPage initialFlights={initialFlights || []} />
 
       <SplitSection
+        eyebrow="Bon à savoir"
         title="Conseils pour les"
         titleAccent="Vols"
         imageUrl="/images/transport/vue-aerienne-nuageuse.webp"
         imageAlt="Tableau d'affichage des départs dans un aéroport"
       >
-        <p>Prendre l'avion est souvent indispensable pour voyager entre les principaux archipels des Philippines (Luzon, Visayas, Mindanao).</p>
+        <p>
+          Au-delà des vols partagés par la communauté ci-dessus, l'avion reste souvent
+          indispensable pour voyager entre les principaux archipels des Philippines (Luzon,
+          Visayas, Mindanao).
+        </p>
         <ul className="list-disc list-inside space-y-2 mt-4">
           <li><b>Compagnies Principales :</b> Cebu Pacific, Philippine Airlines (PAL), et AirAsia sont les acteurs majeurs du marché.</li>
           <li><b>Hubs :</b> Manille (MNL), Cebu (CEB), et Clark (CRK) sont les aéroports les plus importants avec le plus de connexions.</li>
