@@ -16,7 +16,7 @@ export const BRAND = {
   error: '#EF4444',
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://philippineasy.com',
   siteName: "Philippin'Easy",
-  logoUrl: 'https://philippineasy.com/logo-philippineasy.png',
+  logoUrl: 'https://philippineasy.com/logo-512.png',
 } as const;
 
 export const EMAIL_FROM = {

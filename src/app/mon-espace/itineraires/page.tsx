@@ -181,12 +181,12 @@ export default async function MonEspaceItinerairesPage() {
                       </a>
                       <ResendItineraryButton generationId={g.id} email={g.delivery_email} />
                       {hasMods && (
-                        <span
-                          className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border bg-muted/40 text-muted-foreground px-4 py-2 text-[12.5px] font-medium cursor-help"
-                          title="Modifications via le support — bientôt accessible en self-service"
+                        <Link
+                          href={`/mon-espace/itineraires/${g.id}/modifier`}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border bg-muted/40 text-muted-foreground px-4 py-2 text-[12.5px] font-medium hover:border-primary/40 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
                         >
                           {g.modifications_remaining} modification{g.modifications_remaining > 1 ? 's' : ''} restante{g.modifications_remaining > 1 ? 's' : ''}
-                        </span>
+                        </Link>
                       )}
                     </div>
                     <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground/80">

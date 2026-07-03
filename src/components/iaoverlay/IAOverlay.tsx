@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useIAOverlay } from '@/contexts/IAOverlayContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { metaTrackItineraryStarted } from '@/lib/meta-pixel';
 import {
   PRICING_GRID,
   DURATION_LABELS,
@@ -252,6 +253,7 @@ export function IAOverlay() {
       if (typeof window !== 'undefined' && (window as any).gtag) {
         (window as any).gtag('event', 'ia_itinerary_generated');
       }
+      metaTrackItineraryStarted();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Une erreur est survenue');
     } finally {

@@ -15,6 +15,26 @@ import dynamic from 'next/dynamic';
 import { OutputData, BlockToolData } from '@editorjs/editorjs';
 import Modal from '@/components/layout/Modal';
 import toast from 'react-hot-toast';
+import sanitizeHtml from 'sanitize-html';
+
+// Contenu redige par les membres (EditorJS jsonb) : meme politique de
+// sanitization que les articles (src/components/articles/EditorialRenderer.tsx)
+// pour neutraliser tout XSS stocke (ex: <img src=x onerror=...>) avant tout
+// dangerouslySetInnerHTML.
+const sanitize = (html: string) =>
+  sanitizeHtml(html, {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+      'img', 'figure', 'figcaption', 'iframe', 'mark', 'del', 'ins', 'sup', 'sub',
+    ]),
+    allowedAttributes: {
+      ...sanitizeHtml.defaults.allowedAttributes,
+      '*': ['class', 'id', 'style'],
+      a: ['href', 'target', 'rel', 'title'],
+      img: ['src', 'alt', 'width', 'height', 'loading'],
+      iframe: ['src', 'frameborder', 'allow', 'allowfullscreen', 'title'],
+    },
+    allowedSchemes: ['http', 'https', 'mailto'],
+  });
 
 const Editor = dynamic(() => import('@/components/Editor'), { ssr: false });
 
@@ -65,22 +85,22 @@ const renderPostContent = (content: string) => {
         switch (block.type) {
           case 'header':
             switch (block.data.level) {
-              case 1: return <h1 key={index} dangerouslySetInnerHTML={{ __html: block.data.text }} />;
-              case 2: return <h2 key={index} dangerouslySetInnerHTML={{ __html: block.data.text }} />;
-              case 3: return <h3 key={index} dangerouslySetInnerHTML={{ __html: block.data.text }} />;
-              case 4: return <h4 key={index} dangerouslySetInnerHTML={{ __html: block.data.text }} />;
-              case 5: return <h5 key={index} dangerouslySetInnerHTML={{ __html: block.data.text }} />;
-              case 6: return <h6 key={index} dangerouslySetInnerHTML={{ __html: block.data.text }} />;
+              case 1: return <h1 key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
+              case 2: return <h2 key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
+              case 3: return <h3 key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
+              case 4: return <h4 key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
+              case 5: return <h5 key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
+              case 6: return <h6 key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
               default: return null;
             }
           case 'paragraph':
-            return <p key={index} dangerouslySetInnerHTML={{ __html: block.data.text }} />;
+            return <p key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
           case 'list':
             if (block.data.style === 'ordered') {
               return (
                 <ol key={index} className="list-decimal list-inside">
                   {block.data.items.map((item: string, i: number) => (
-                    <li key={i} dangerouslySetInnerHTML={{ __html: item }} />
+                    <li key={i} dangerouslySetInnerHTML={{ __html: sanitize(item) }} />
                   ))}
                 </ol>
               );
@@ -88,7 +108,7 @@ const renderPostContent = (content: string) => {
             return (
               <ul key={index} className="list-disc list-inside">
                 {block.data.items.map((item: string, i: number) => (
-                  <li key={i} dangerouslySetInnerHTML={{ __html: item }} />
+                  <li key={i} dangerouslySetInnerHTML={{ __html: sanitize(item) }} />
                 ))}
               </ul>
             );
@@ -96,7 +116,7 @@ const renderPostContent = (content: string) => {
             return (
               <blockquote key={index}>
                 {block.data.caption && <p className="font-bold text-accent-strong">{block.data.caption}</p>}
-                <div dangerouslySetInnerHTML={{ __html: block.data.text }} />
+                <div dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />
               </blockquote>
             );
           case 'image':
@@ -112,7 +132,7 @@ const renderPostContent = (content: string) => {
                   {block.data.content.map((row: string[], i: number) => (
                     <tr key={i} className="border-b border-border">
                       {row.map((cell: string, j: number) => (
-                        <td key={j} className="p-2 border border-border" dangerouslySetInnerHTML={{ __html: cell }} />
+                        <td key={j} className="p-2 border border-border" dangerouslySetInnerHTML={{ __html: sanitize(cell) }} />
                       ))}
                     </tr>
                   ))}

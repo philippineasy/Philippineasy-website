@@ -19,7 +19,7 @@ const WebPageJsonLd = ({ title, description, path }: WebPageJsonLdProps) => {
       name: "Philippin'Easy",
       logo: {
         '@type': 'ImageObject',
-        url: `${siteUrl}/logo-philippineasy.png`,
+        url: `${siteUrl}/logo-512.png`,
       },
     },
   };

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSpinner, faFileDownload, faCheck, faLock } from '@fortawesome/free-solid-svg-icons';
+import { faSpinner, faFileDownload, faCheck, faLock, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/utils/supabase/client';
 import Link from 'next/link';
@@ -12,21 +12,26 @@ const GUIDES = [
     type: 'guide_pdf_visa',
     name: 'Guide Visa Philippines 2026',
     description: 'Tout savoir sur les visas : touriste, business, retraite, SRRV, 13(a)...',
-    downloadUrl: '/guides/visa-philippines-2026.pdf',
   },
   {
     type: 'guide_pdf_cout_vie',
     name: 'Guide Coût de la Vie',
     description: 'Budget détaillé : logement, nourriture, transport, santé, loisirs...',
-    downloadUrl: '/guides/cout-vie-philippines.pdf',
   },
   {
     type: 'guide_pdf_destinations',
     name: 'Guide Destinations Secrètes',
     description: 'Îles et spots méconnus des touristes, testés par notre équipe',
-    downloadUrl: '/guides/destinations-secretes-philippines.pdf',
   },
 ];
+
+const GUIDES_CONTACT_EMAIL = 'contact@philippineasy.com';
+
+function guideMailtoUrl(guideName: string): string {
+  const subject = `Envoi de mon guide acheté — ${guideName}`;
+  const body = `Bonjour,\n\nJ'ai acheté le guide "${guideName}" et je souhaiterais le recevoir par e-mail.\n\nMerci !`;
+  return `mailto:${GUIDES_CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
 
 export default function MesGuidesPage() {
   const { user } = useAuth();
@@ -131,12 +136,11 @@ export default function MesGuidesPage() {
 
               {isOwned ? (
                 <a
-                  href={guide.downloadUrl}
-                  download
+                  href={guideMailtoUrl(guide.name)}
                   className="block w-full py-2.5 bg-primary text-primary-foreground rounded-lg text-center text-sm font-medium hover:bg-primary/90 transition-colors"
                 >
-                  <FontAwesomeIcon icon={faFileDownload} className="mr-1.5" />
-                  Télécharger
+                  <FontAwesomeIcon icon={faEnvelope} className="mr-1.5" />
+                  Recevoir par e-mail
                 </a>
               ) : (
                 <Link

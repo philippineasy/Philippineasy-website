@@ -100,24 +100,19 @@ export const metadata: Metadata = {
   // toutes comme duplicates de la home (bug ressenti pendant des mois,
   // identique a celui detecte sur Ondayvaluemoney). Chaque page declare son
   // propre canonical via metadata/generateMetadata.
+  // Favicons dédiés (~0,5-16 Ko) — ne PAS repointer vers logo-philippineasy.png :
+  // ce PNG 1024px/958 Ko était téléchargé sur chaque page en tant qu'icône.
   icons: {
-    icon: '/logo-philippineasy.png',
-    shortcut: '/logo-philippineasy.png',
-    apple: '/logo-philippineasy.png',
+    icon: [
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    shortcut: '/favicon-32x32.png',
+    apple: '/apple-touch-icon.png',
     other: [
       {
         rel: 'apple-touch-icon-precomposed',
-        url: '/logo-philippineasy.png',
-      },
-      {
-        rel: 'icon',
-        url: '/logo-philippineasy.png',
-        sizes: '32x32',
-      },
-      {
-        rel: 'icon',
-        url: '/logo-philippineasy.png',
-        sizes: '16x16',
+        url: '/apple-touch-icon.png',
       },
     ],
   },

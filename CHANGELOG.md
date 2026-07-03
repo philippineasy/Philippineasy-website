@@ -5,6 +5,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fix — Lot quick wins post-audit site complet (2026-07-03)
+
+Suite à l'audit des 4 zones (forum/communauté, marketplace, compte/itinéraires, home/SEO/perf), correction des points à plus fort ROI :
+
+- **Sécurité : faille XSS stockée du forum fermée.** Le contenu des messages (EditorJS, rédigé par les membres) était injecté via `dangerouslySetInnerHTML` sans sanitization — 11 points d'injection (headers h1-h6, paragraphes, listes, citations, cellules de table) passent désormais par `sanitize-html` avec la config des articles. Aperçus et JSON-LD vérifiés sains.
+- **Perf : le logo 1024px/958 Ko n'est plus servi comme favicon sur chaque page.** Favicons dédiés (favicon-16/32 ~0,5-0,8 Ko, apple-touch-icon 16 Ko) + logo-512 (214 Ko) et logo-192 pour JSON-LD/sitemap/emails/webmanifest. Corrige aussi les dimensions mensongères du logo Organization (250×60 déclaré pour un fichier 1024×1024).
+- **Itinéraires : boutons « Modifier » enfin câblés.** Le bouton par activité (détail) faisait `alert("à venir")` et le pill « modifications restantes » (liste) était statique — alors que la page self-service `/mon-espace/itineraires/[id]/modifier` existe et fonctionne. Les deux pointent dessus.
+- **Guides : plus de 404 sur un produit payé.** `mon-espace/guides` pointait vers `public/guides/*.pdf` inexistants — remplacé par un CTA honnête « Recevoir par e-mail » (mailto pré-rempli avec le nom du guide).
+- **Ads : Meta Pixel branché sur la génération d'itinéraire** (`metaTrackItineraryStarted` au même endroit que l'event GA4 `ia_itinerary_generated`) — Meta Ads peut enfin optimiser sur la micro-conversion clé du funnel.
+- **Marketplace : les emails de confirmation affichent le nom du produit** au lieu de « Produit #12 » (le `name` manquait dans les metadata Stripe ; troncature intelligente pour rester sous la limite 500 chars).
+- **Vérifié, fausse alerte** : l'event Stripe `payment_intent.succeeded` du marketplace EST activé en prod et des commandes existent en base — le commentaire du code laissant croire l'inverse était périmé. Pipeline commandes sain.
+
 ### Fix/Ops — Incident inbound email résolu + surveillance automatique (2026-07-03)
 
 **Incident découvert pendant l'audit email demandé par Hugo** : Resend avait cessé de livrer les webhooks `email.received` depuis le 27 avril (statut « enabled » trompeur, route prod et secret parfaitement fonctionnels — prouvé par appel signé forgé). Conséquence : plus AUCUN email vers `contact@philippineasy.com` (y compris le formulaire contact) n'atteignait Gmail depuis 2 mois. **2 emails perdus récupérés par replay signé** (dont la réponse partenariat du 10 mai) et forwardés vers Gmail. **Fix : toggle du webhook (disabled→enabled) via l'API Resend**, vérifié par test E2E autonome (livraison en 15 s).

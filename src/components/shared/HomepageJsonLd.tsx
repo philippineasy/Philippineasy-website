@@ -5,7 +5,7 @@ const HomepageJsonLd = () => {
     '@id': `${siteUrl}/#organization`,
     name: "Philippin'Easy",
     url: siteUrl,
-    logo: `${siteUrl}/logo-philippineasy.png`,
+    logo: `${siteUrl}/logo-512.png`,
     description: "La communauté francophone des Philippines - Guide complet pour voyager, vivre et s'épanouir dans l'archipel.",
     sameAs: [
       "https://www.facebook.com/philippineasy",

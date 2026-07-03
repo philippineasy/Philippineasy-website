@@ -8,6 +8,41 @@ type CartItem = {
   quantity: number;
 };
 
+// Stripe metadata: each value is capped at 500 characters. `cartItems` is a
+// single JSON-stringified value, so product names must be truncated to keep
+// the whole payload under that limit even with several items in the cart.
+const MAX_METADATA_VALUE_LENGTH = 500;
+const MAX_PRODUCT_NAME_LENGTH = 80;
+
+function truncateName(name: string, maxLength: number): string {
+  if (maxLength <= 0) return '';
+  return name.length > maxLength ? `${name.slice(0, maxLength - 1)}…` : name;
+}
+
+/**
+ * Serializes cart items to fit Stripe's 500-char metadata value limit.
+ * Progressively shortens product names (then drops them entirely) until
+ * the JSON payload fits — the webhook already falls back to `Produit #${id}`
+ * when `name` is missing.
+ */
+function buildCartItemsMetadata(
+  items: Array<{ id: number; qty: number; price: number; vendor_id: number | null; name: string }>
+): string {
+  for (let nameLength = MAX_PRODUCT_NAME_LENGTH; nameLength >= 0; nameLength -= 10) {
+    const payload = items.map((item) => ({
+      id: item.id,
+      qty: item.qty,
+      price: item.price,
+      vendor_id: item.vendor_id,
+      ...(nameLength > 0 ? { name: truncateName(item.name, nameLength) } : {}),
+    }));
+    const json = JSON.stringify(payload);
+    if (json.length <= MAX_METADATA_VALUE_LENGTH) return json;
+  }
+  // Extreme fallback (should not happen in practice): drop names entirely.
+  return JSON.stringify(items.map((item) => ({ id: item.id, qty: item.qty, price: item.price, vendor_id: item.vendor_id })));
+}
+
 export async function POST(request: Request) {
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -42,23 +77,23 @@ export async function POST(request: Request) {
     const admin = createServiceRoleClient();
     const { data: products, error: prodErr } = await admin
       .from('products')
-      .select('id, price, vendor_id')
+      .select('id, name, price, vendor_id')
       .in('id', productIds);
 
     if (prodErr || !products || products.length !== productIds.length) {
       return NextResponse.json({ error: 'Some products not found.' }, { status: 400 });
     }
 
-    const priceById = new Map<number, { price: number; vendor_id: number | null }>();
+    const priceById = new Map<number, { name: string; price: number; vendor_id: number | null }>();
     for (const p of products) {
-      priceById.set(p.id, { price: Number(p.price), vendor_id: p.vendor_id });
+      priceById.set(p.id, { name: p.name || '', price: Number(p.price), vendor_id: p.vendor_id });
     }
 
     let totalAmount = 0;
     const simplifiedCart = items.map((item) => {
       const p = priceById.get(item.product.id)!;
       totalAmount += p.price * item.quantity;
-      return { id: item.product.id, qty: item.quantity, price: p.price, vendor_id: p.vendor_id };
+      return { id: item.product.id, qty: item.quantity, price: p.price, vendor_id: p.vendor_id, name: p.name };
     });
 
     if (totalAmount <= 0) {
@@ -73,7 +108,7 @@ export async function POST(request: Request) {
       automatic_payment_methods: { enabled: true },
       metadata: {
         userId: user.id,
-        cartItems: JSON.stringify(simplifiedCart),
+        cartItems: buildCartItemsMetadata(simplifiedCart),
       },
     });
 

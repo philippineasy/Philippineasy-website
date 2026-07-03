@@ -189,9 +189,9 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
       name: "Philippin'Easy",
       logo: {
         '@type': 'ImageObject',
-        url: `${siteUrl}/logo-philippineasy.png`,
-        width: 250,
-        height: 60,
+        url: `${siteUrl}/logo-512.png`,
+        width: 512,
+        height: 512,
       },
       url: siteUrl,
     },
@@ -275,7 +275,7 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
                 name: "Philippin'Easy",
                 logo: {
                   '@type': 'ImageObject',
-                  url: `${siteUrl}/logo-philippineasy.png`,
+                  url: `${siteUrl}/logo-512.png`,
                 },
               },
             }),

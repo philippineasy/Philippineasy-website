@@ -393,15 +393,14 @@ export default function ItineraryPage({ params }: PageProps) {
                                         )}
                                       </div>
                                       {canModify && (
-                                        <button
-                                          type="button"
-                                          onClick={() => alert('Fonctionnalité de modification à venir')}
+                                        <Link
+                                          href={`/mon-espace/itineraires/${itinerary.id}/modifier`}
                                           aria-label={`Demander une modification pour ${activity.name}`}
                                           className="shrink-0 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[12px] text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                         >
                                           <Pencil className="w-3 h-3" aria-hidden="true" />
                                           <span className="hidden sm:inline">Modifier</span>
-                                        </button>
+                                        </Link>
                                       )}
                                     </div>
                                     <div className="flex items-center gap-3 mt-1.5 text-[12px]">

@@ -39,7 +39,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 1,
       images: [
-        toSeoImage(`${BASE_URL}/logo-philippineasy.png`, 'hero'),
+        toSeoImage(`${BASE_URL}/logo-512.png`, 'hero'),
         toSeoImage(`${BASE_URL}/imagesHero/comment-voyager-aux-philippines.webp`, 'hero'),
       ],
     },
