@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { AFFILIATE_LINKS } from '@/config/affiliates';
 import type { ReactNode } from 'react';
 import { CheckCircle, ExternalLink, ArrowRight, AlertTriangle } from 'lucide-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -600,7 +601,7 @@ const CarteSimPage = () => {
             name: 'Airalo eSIM',
             description: "Alternative aux SIM physiques : l'eSIM Airalo s'active AVANT votre depart. Plus besoin de faire la queue a l'aeroport. Votre numero francais reste actif en parallele.",
             advantage: 'A partir de 5 USD pour 1 GB — activation en 2 minutes',
-            url: 'https://www.airalo.com/philippines-esim',
+            url: AFFILIATE_LINKS.airalo,
             recommended: true,
           },
         ]}

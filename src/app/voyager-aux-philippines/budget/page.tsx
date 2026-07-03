@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { AFFILIATE_LINKS } from '@/config/affiliates';
 import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, FaqAccordion } from '@/components/sections';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faWallet, faBed, faUtensils, faHotel } from '@fortawesome/free-solid-svg-icons';
@@ -279,7 +280,7 @@ const BudgetPage = async () => {
             description:
               "Reservez a l'avance en haute saison (decembre-mai). Les meilleurs hotels partent vite, surtout a El Nido et Siargao. Annulation gratuite sur la plupart des reservations.",
             advantage: 'Prix negocie + annulation gratuite',
-            url: 'https://www.booking.com/country/ph.fr.html',
+            url: AFFILIATE_LINKS.booking,
             recommended: true,
           },
           {
@@ -287,7 +288,7 @@ const BudgetPage = async () => {
             description:
               "Ne changez PAS a l'aeroport (taux horrible). Avec la carte Wise, vous payez au taux de change reel sans frais de conversion. Compte multi-devises EUR + PHP.",
             advantage: 'Economisez 3-5% sur chaque transaction EUR → PHP',
-            url: 'https://wise.com/fr/send-money/send-money-to-philippines',
+            url: AFFILIATE_LINKS.wise,
             recommended: true,
           },
         ]}

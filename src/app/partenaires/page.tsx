@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { AFFILIATE_LINKS } from '@/config/affiliates';
 import Image from 'next/image'
 import { AffiliateLink } from '@/components/affiliate/AffiliateLink'
 import { KlookCarousel } from '@/components/affiliate/KlookCarousel'
@@ -90,7 +91,7 @@ const partnerSections: PartnerSection[] = [
         description:
           "Le plus grand choix d'hotels, resorts et auberges aux Philippines. Annulation gratuite sur la plupart des reservations.",
         advantage: 'Prix negocie + annulation gratuite',
-        url: 'https://www.booking.com/country/ph.fr.html',
+        url: AFFILIATE_LINKS.booking,
         recommended: true,
       },
     ],
@@ -106,7 +107,7 @@ const partnerSections: PartnerSection[] = [
         description:
           "L'assurance voyage preferee des Francais a l'etranger. Rapatriement, frais medicaux, bagages et responsabilite civile.",
         advantage: 'A partir de 22 EUR/mois — couverture monde entier',
-        url: 'https://www.chapkadirect.fr/assurance-voyage.html',
+        url: AFFILIATE_LINKS.chapka,
         recommended: true,
       },
       {
@@ -129,7 +130,7 @@ const partnerSections: PartnerSection[] = [
         description:
           "Transferez en PHP au taux reel du marche. Compte multi-devises EUR + PHP + USD. Utilise par 16 millions de personnes.",
         advantage: 'Economisez 3-5% sur chaque transfert EUR → PHP',
-        url: 'https://wise.com/fr/send-money/send-money-to-philippines',
+        url: AFFILIATE_LINKS.wise,
         recommended: true,
       },
     ],
@@ -145,7 +146,7 @@ const partnerSections: PartnerSection[] = [
         description:
           "eSIM data pour les Philippines. Achetez et activez AVANT de partir. Plus besoin de faire la queue a l'aeroport.",
         advantage: "A partir de 5 USD pour 1 GB — activation en 2 minutes",
-        url: 'https://www.airalo.com/philippines-esim',
+        url: AFFILIATE_LINKS.airalo,
         recommended: true,
       },
     ],
@@ -160,7 +161,7 @@ const partnerSections: PartnerSection[] = [
         description:
           "Chiffrez votre connexion sur les Wi-Fi d'hotels et cafes. Accedez a Netflix France, Canal+ et la TV francaise depuis les Philippines.",
         advantage: 'A partir de 3 EUR/mois — Netflix France depuis les Philippines',
-        url: 'https://nordvpn.com/fr/',
+        url: AFFILIATE_LINKS.nordvpn,
         recommended: true,
       },
     ],

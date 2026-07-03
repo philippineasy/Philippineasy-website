@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { AFFILIATE_LINKS } from '@/config/affiliates';
 import type { ReactNode } from 'react';
 import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, FaqAccordion } from '@/components/sections';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -462,7 +463,7 @@ const CommunicationPage = async () => {
             description:
               "eSIM data pour les Philippines. Achetez et activez AVANT de partir — internet disponible des l'atterrissage. Plus besoin de chercher un shop SIM a l'aeroport.",
             advantage: "A partir de 5 USD pour 1 GB — internet des l'atterrissage",
-            url: 'https://www.airalo.com/philippines-esim',
+            url: AFFILIATE_LINKS.airalo,
             recommended: true,
           },
           {
@@ -470,7 +471,7 @@ const CommunicationPage = async () => {
             description:
               "Securisez votre connexion sur les Wi-Fi d'hotels et cafes aux Philippines. Accedez aussi a Netflix France, Canal+ et la TV francaise depuis l'etranger.",
             advantage: 'A partir de 3 EUR/mois — Netflix France depuis les Philippines',
-            url: 'https://nordvpn.com/fr/',
+            url: AFFILIATE_LINKS.nordvpn,
             recommended: true,
           },
         ]}

@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { AFFILIATE_LINKS } from '@/config/affiliates';
 import type { ReactNode } from 'react';
 import { Landmark, Clock, Smartphone, FileText, CheckCircle, ExternalLink, AlertTriangle, HeartPulse } from 'lucide-react';
 import { faMoneyBillTransfer } from '@fortawesome/free-solid-svg-icons';
@@ -384,7 +385,7 @@ const BanqueFinancesPage = async () => {
                 name: 'Wise',
                 description: 'Compte multi-devises EUR + PHP + USD. Recevez votre salaire en euros, convertissez au taux reel, et payez en PHP avec la carte Wise. 16 millions d\'utilisateurs.',
                 advantage: 'Economisez 3-5% vs banques traditionnelles — 0 frais mensuels',
-                url: 'https://wise.com/fr/send-money/send-money-to-philippines',
+                url: AFFILIATE_LINKS.wise,
                 recommended: true,
               },
             ]}

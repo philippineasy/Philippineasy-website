@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { AFFILIATE_LINKS } from '@/config/affiliates';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { Shield, Hospital, Heart, Globe, CheckCircle, AlertTriangle, ExternalLink, ArrowRight, Landmark, Syringe } from 'lucide-react';
@@ -596,7 +597,7 @@ const SanteAssurancesPage = async () => {
                   name: 'Chapka',
                   description: "Pour les expats: Cap Expatrie couvre les frais medicaux, hospitalisation et rapatriement aux Philippines. Alternative aux HMO locales pour une couverture complete.",
                   advantage: 'Couverture monde entier — rapatriement inclus',
-                  url: 'https://www.chapkadirect.fr/assurance-voyage.html',
+                  url: AFFILIATE_LINKS.chapka,
                   recommended: true,
                 },
               ]}

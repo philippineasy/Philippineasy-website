@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { AFFILIATE_LINKS } from '@/config/affiliates';
 import { PageHero, SplitSection, FaqAccordion } from '@/components/sections';
 import { faShieldHalved } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
@@ -210,7 +211,7 @@ const SanteSecuritePage = async () => {
             description:
               "L'assurance voyage n'est pas obligatoire pour les Philippines (visa touriste 30 jours), mais elle est fortement recommandee. Les frais medicaux ne sont pas couverts par la Secu — une hospitalisation peut couter plusieurs milliers d'euros. Souscrivez AVANT de partir.",
             advantage: 'A partir de 22 EUR/mois — rapatriement, frais medicaux, bagages inclus',
-            url: 'https://www.chapkadirect.fr/assurance-voyage.html',
+            url: AFFILIATE_LINKS.chapka,
             recommended: true,
           },
           {
@@ -218,7 +219,7 @@ const SanteSecuritePage = async () => {
             description:
               "Les Wi-Fi des hotels et cafes aux Philippines sont rarement securises. Un VPN chiffre votre connexion et protege vos donnees bancaires et mots de passe sur les reseaux publics.",
             advantage: 'A partir de 3 EUR/mois — protegez vos donnees bancaires',
-            url: 'https://nordvpn.com/fr/',
+            url: AFFILIATE_LINKS.nordvpn,
             recommended: false,
           },
         ]}
