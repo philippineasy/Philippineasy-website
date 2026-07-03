@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { OpenChatButton } from './OpenChatButton';
 
 // Exception: DecorWaves / DecorCircles are decorative warm-yellow (#FCD34D,
 // = the `warm-yellow` token) artwork layered on the fixed signature blue
@@ -101,17 +102,7 @@ export const FinalCtaSection = ({
                 <span aria-hidden="true">→</span>
               </Link>
 
-              <button
-                id="open-chatbot"
-                type="button"
-                className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg font-medium text-base text-white transition-all duration-200 hover:bg-white/15"
-                style={{
-                  backgroundColor: 'transparent',
-                  border: '1px solid rgba(255,255,255,0.5)',
-                }}
-              >
-                Discuter avec l&apos;équipe
-              </button>
+              <OpenChatButton />
             </div>
           </div>
         </div>

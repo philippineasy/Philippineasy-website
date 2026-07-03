@@ -25,10 +25,11 @@ export async function notifyNewArticle(
   const categorySlug = category?.slug || 'actualites';
   const articleUrl = `${BRAND.siteUrl}/${mainPath}/${categorySlug}/${slug}`;
 
-  // Get all newsletter subscribers
+  // Get confirmed newsletter subscribers only (double opt-in)
   const { data: subscribers } = await supabase
     .from('newsletter_subscribers')
-    .select('email');
+    .select('email')
+    .not('confirmed_at', 'is', null);
 
   if (!subscribers || subscribers.length === 0) return;
 

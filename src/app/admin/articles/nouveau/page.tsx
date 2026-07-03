@@ -7,6 +7,8 @@ import { getAllCategories } from '@/services/categoryService';
 import { createArticleAction } from '@/app/actions/articleActions';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faImage } from '@fortawesome/free-solid-svg-icons';
 import { CustomSelect, SelectOption } from '@/components/shared/CustomSelect';
 import dynamic from 'next/dynamic';
 import { OutputData } from '@editorjs/editorjs';
@@ -26,7 +28,7 @@ const NewArticlePage = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [previewImage, setPreviewImage] = useState('https://via.placeholder.com/300x200');
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [status, setStatus] = useState('draft');
   const [content, setContent] = useState<OutputData>({ blocks: [] });
 
@@ -141,8 +143,12 @@ const NewArticlePage = () => {
         </div>
         <div className="bg-card p-6 rounded-lg shadow-lg">
           <h2 className="text-xl font-semibold mb-4">Image à la une</h2>
-          <div className="relative w-full h-48 mb-4">
-            <Image src={previewImage} alt="Aperçu" fill className="object-cover rounded-md" />
+          <div className="relative w-full h-48 mb-4 rounded-md overflow-hidden bg-muted flex items-center justify-center">
+            {previewImage ? (
+              <Image src={previewImage} alt="Aperçu" fill className="object-cover" />
+            ) : (
+              <FontAwesomeIcon icon={faImage} className="text-muted-foreground text-3xl" />
+            )}
           </div>
           <input type="file" id="image-upload" name="image-upload" onChange={handleImageChange} required className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary/90 hover:file:bg-primary/10" />
         </div>

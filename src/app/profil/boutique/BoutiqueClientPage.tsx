@@ -242,8 +242,12 @@ export function BoutiqueClientPage({ vendor, initialProducts, monthlySales, mont
                     products.map((product) => (
                         <tr key={product.id} className="border-b last:border-b-0 hover:bg-muted/20">
                         <td className="p-2">
-                            <div className="w-12 h-12 relative rounded-md overflow-hidden">
-                            <Image src={product.image_urls?.[0] || 'https://via.placeholder.com/150'} alt={product.name} fill className="object-cover" />
+                            <div className="w-12 h-12 relative rounded-md overflow-hidden bg-muted flex items-center justify-center">
+                            {product.image_urls?.[0] ? (
+                              <Image src={product.image_urls[0]} alt={product.name} fill className="object-cover" />
+                            ) : (
+                              <FontAwesomeIcon icon={faBoxOpen} className="text-muted-foreground text-sm" />
+                            )}
                             </div>
                         </td>
                         <td className="p-4 font-medium">{product.name}</td>

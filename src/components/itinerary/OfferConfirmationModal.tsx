@@ -578,7 +578,10 @@ export function OfferConfirmationModal({
                     {offerLabel.name}
                   </strong>{' '}
                   et j&apos;accepte que Philippin&apos;Easy soit un guide
-                  d&apos;accompagnement, pas une agence de voyage.
+                  d&apos;accompagnement, pas une agence de voyage, et je
+                  demande l&apos;exécution immédiate&nbsp;: je renonce
+                  expressément à mon droit de rétractation de 14 jours (art.
+                  L221-28 du Code de la consommation).
                 </span>
               </label>
             </div>

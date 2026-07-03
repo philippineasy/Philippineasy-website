@@ -28,14 +28,13 @@ const poppins = Poppins({
 
 const siteConfig = {
   name: "Philippin'Easy",
-  title: "Voyage & Expatriation Philippines 2026 | Guide Complet - Philippin'Easy",
+  // Année calculée au build plutôt que codée en dur, pour ne pas se figer.
+  title: `Voyage & Expatriation Philippines ${new Date().getFullYear()} | Guide Complet - Philippin'Easy`,
   url: "https://philippineasy.com",
   description: "Le guide francophone #1 pour voyager et vivre aux Philippines. Itinéraires IA personnalisés, visas, coût de la vie, forum communautaire. Des conseils de Français installés sur place.",
-  ogImage: "https://philippineasy.com/imagesHero/couple-rencontre-aux-philippines.webp",
-  links: {
-    twitter: "https://twitter.com/philippineasy",
-    // github: "https://github.com/user/repo",
-  },
+  // Image OG par défaut neutre (voyage), pas une photo dating : elle s'affiche
+  // sur TOUT le site quand une page ne définit pas son propre openGraph.images.
+  ogImage: "https://philippineasy.com/imagesHero/comment-voyager-aux-philippines.webp",
   keywords: [
     "Philippines",
     "voyage Philippines 2026",
@@ -93,7 +92,8 @@ export const metadata: Metadata = {
     title: siteConfig.title,
     description: siteConfig.description,
     images: [siteConfig.ogImage],
-    creator: "@philippineasy",
+    // Pas de `creator` : aucun compte Twitter/X n'existe (@philippineasy est
+    // fantôme, cf. audit SEO 2026-07).
   },
   // PAS de `canonical` ici. Sinon Next propage cette valeur a TOUTES les pages
   // enfants qui ne declarent pas leur propre canonical, et Google les voit

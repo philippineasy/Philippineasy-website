@@ -22,7 +22,42 @@ export const metadata: Metadata = {
   title: 'Nos Partenaires de Confiance',
   description:
     'Les meilleurs outils et services pour votre voyage aux Philippines. Hotels, assurance, eSIM, VPN, activites — selectionnes par notre equipe.',
-  alternates: { canonical: '/partenaires' },
+  alternates: { canonical: 'https://philippineasy.com/partenaires' },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  openGraph: {
+    title: 'Nos Partenaires de Confiance',
+    description:
+      'Les outils et services que nous utilisons pour voyager et vivre aux Philippines : hebergement, assurance, eSIM, VPN, transferts.',
+    url: 'https://philippineasy.com/partenaires',
+    siteName: "Philippin'Easy",
+    locale: 'fr_FR',
+    type: 'website',
+    images: [
+      {
+        url: '/imagesHero/hero-home.webp',
+        width: 1200,
+        height: 630,
+        alt: 'Partenaires de confiance de Philippin’Easy',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Nos Partenaires de Confiance',
+    description:
+      'Les outils et services testes par notre equipe pour voyager et vivre aux Philippines.',
+    site: '@philippineasy',
+  },
 }
 
 // ── Partner data ────────────────────────────────────────────
@@ -33,7 +68,6 @@ interface Partner {
   advantage: string
   url: string
   recommended?: boolean
-  accentColor?: string
 }
 
 interface PartnerSection {
@@ -58,7 +92,6 @@ const partnerSections: PartnerSection[] = [
         advantage: 'Prix negocie + annulation gratuite',
         url: 'https://www.booking.com/country/ph.fr.html',
         recommended: true,
-        accentColor: 'from-blue-600 to-blue-500',
       },
     ],
   },
@@ -75,7 +108,6 @@ const partnerSections: PartnerSection[] = [
         advantage: 'A partir de 22 EUR/mois — couverture monde entier',
         url: 'https://www.chapkadirect.fr/assurance-voyage.html',
         recommended: true,
-        accentColor: 'from-rose-600 to-rose-500',
       },
       {
         name: 'AVI International',
@@ -83,7 +115,6 @@ const partnerSections: PartnerSection[] = [
           'Specialiste assurance voyage longue duree. Ideal pour les expats et digital nomads installes aux Philippines.',
         advantage: 'Plans longue duree avantageux (6-12 mois)',
         url: 'https://www.avi-international.com/assurance-voyage/',
-        accentColor: 'from-purple-600 to-purple-500',
       },
     ],
   },
@@ -100,7 +131,6 @@ const partnerSections: PartnerSection[] = [
         advantage: 'Economisez 3-5% sur chaque transfert EUR → PHP',
         url: 'https://wise.com/fr/send-money/send-money-to-philippines',
         recommended: true,
-        accentColor: 'from-green-600 to-emerald-500',
       },
     ],
   },
@@ -117,7 +147,6 @@ const partnerSections: PartnerSection[] = [
         advantage: "A partir de 5 USD pour 1 GB — activation en 2 minutes",
         url: 'https://www.airalo.com/philippines-esim',
         recommended: true,
-        accentColor: 'from-orange-600 to-amber-500',
       },
     ],
   },
@@ -133,7 +162,6 @@ const partnerSections: PartnerSection[] = [
         advantage: 'A partir de 3 EUR/mois — Netflix France depuis les Philippines',
         url: 'https://nordvpn.com/fr/',
         recommended: true,
-        accentColor: 'from-indigo-600 to-blue-500',
       },
     ],
   },
@@ -282,8 +310,6 @@ function PartnerCard({
   hero: boolean
   bgImage?: string
 }) {
-  const accent = partner.accentColor || 'from-primary to-primary/70'
-
   if (hero) {
     return (
       <div className="relative overflow-hidden rounded-2xl border bg-card shadow-sm hover:shadow-lg transition-shadow group">
@@ -298,7 +324,8 @@ function PartnerCard({
                 sizes="(max-width: 768px) 100vw, 40vw"
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div className={`absolute inset-0 bg-gradient-to-br ${accent} opacity-20 mix-blend-multiply`} />
+              {/* Single signature blue wash for every partner (anti-rainbow). */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/70 opacity-20 mix-blend-multiply" />
             </div>
           )}
 
@@ -313,8 +340,8 @@ function PartnerCard({
             <h3 className="text-2xl md:text-3xl font-bold mb-3">{partner.name}</h3>
             <p className="text-muted-foreground leading-relaxed mb-4">{partner.description}</p>
 
-            <div className="flex items-center gap-2 mb-5 text-sm font-medium text-green-700 dark:text-green-400">
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-600" />
+            <div className="mb-5 inline-flex items-center gap-2 self-start rounded-lg bg-success/10 px-3 py-1.5 text-sm font-medium text-foreground">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
               {partner.advantage}
             </div>
 
@@ -322,7 +349,7 @@ function PartnerCard({
               href={partner.url}
               partner={partner.name.toLowerCase().replace(/\s/g, '-')}
               location="partenaires_page"
-              className={`inline-flex items-center gap-2 rounded-xl bg-gradient-to-r ${accent} px-6 py-3 text-white text-sm font-semibold shadow-md hover:shadow-lg hover:scale-[1.02] transition-all self-start`}
+              className="inline-flex items-center gap-2 self-start rounded-xl bg-gradient-to-r from-primary to-primary/80 px-6 py-3 text-sm font-semibold text-primary-foreground shadow-md transition-all hover:scale-[1.02] hover:shadow-lg motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               Decouvrir {partner.name}
               <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-xs" />
@@ -345,8 +372,8 @@ function PartnerCard({
       <h3 className="text-xl font-bold mb-2">{partner.name}</h3>
       <p className="text-sm text-muted-foreground leading-relaxed mb-4">{partner.description}</p>
 
-      <div className="flex items-center gap-2 mb-4 text-xs font-medium text-green-700 dark:text-green-400">
-        <span className="inline-block w-1 h-1 rounded-full bg-green-600" />
+      <div className="mb-4 inline-flex items-center gap-2 rounded-lg bg-success/10 px-3 py-1.5 text-xs font-medium text-foreground">
+        <span className="inline-block h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
         {partner.advantage}
       </div>
 
@@ -354,7 +381,7 @@ function PartnerCard({
         href={partner.url}
         partner={partner.name.toLowerCase().replace(/\s/g, '-')}
         location="partenaires_page"
-        className={`inline-flex items-center gap-2 rounded-xl bg-gradient-to-r ${accent} px-5 py-2.5 text-white text-sm font-semibold hover:shadow-lg hover:scale-[1.02] transition-all`}
+        className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-primary/80 px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:scale-[1.02] hover:shadow-lg motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
         Decouvrir
         <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px]" />

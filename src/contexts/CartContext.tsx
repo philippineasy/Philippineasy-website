@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from './AuthContext';
 
@@ -29,36 +29,83 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+// Clé localStorage du panier invité — conservée telle quelle (compat avec
+// les paniers déjà stockés chez les visiteurs avant ce fix).
+const GUEST_CART_KEY = 'philippineasy_cart_guest';
+
+function readCartFromStorage(key: string): CartItem[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? (JSON.parse(saved) as CartItem[]) : [];
+  } catch (error) {
+    console.error('Failed to parse cart from localStorage', error);
+    return [];
+  }
+}
+
+// Fusionne le panier invité dans le panier du compte : additionne les
+// quantités quand un même produit est present des deux côtés. Pas de cap
+// de quantité existant ailleurs dans le codebase (addToCart/updateQuantity
+// n'en imposent pas non plus) — on reste cohérent avec ce comportement.
+function mergeCarts(accountCart: CartItem[], guestCart: CartItem[]): CartItem[] {
+  const merged = accountCart.map((item) => ({ ...item }));
+  for (const guestItem of guestCart) {
+    const existing = merged.find((item) => item.product.id === guestItem.product.id);
+    if (existing) {
+      existing.quantity += guestItem.quantity;
+    } else {
+      merged.push({ ...guestItem });
+    }
+  }
+  return merged;
+}
+
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const { user } = useAuth();
+  // Empêche l'effet de persistance (ci-dessous) d'écrire la valeur `cart`
+  // encore périmée dans localStorage juste avant que ce même effet de
+  // chargement/fusion applique sa mise à jour d'état (les deux effets
+  // tournent dans le même commit React quand `user` change).
+  const isSyncingRef = useRef(false);
 
   useEffect(() => {
-    const cartKey = user ? `philippineasy_cart_${user.id}` : 'philippineasy_cart_guest';
-    // Load cart from localStorage on user change
+    isSyncingRef.current = true;
+
     if (user) {
-      try {
-        const savedCart = localStorage.getItem(cartKey);
-        if (savedCart) {
-          setCart(JSON.parse(savedCart));
-        } else {
-          setCart([]);
+      const userKey = `philippineasy_cart_${user.id}`;
+      const accountCart = readCartFromStorage(userKey);
+      const guestCart = readCartFromStorage(GUEST_CART_KEY);
+
+      if (guestCart.length > 0) {
+        // Connexion (ou reprise de session) avec un panier invité en attente
+        // -> fusion dans le panier du compte, puis nettoyage du panier invité.
+        const merged = mergeCarts(accountCart, guestCart);
+        setCart(merged);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(userKey, JSON.stringify(merged));
+          localStorage.removeItem(GUEST_CART_KEY);
         }
-      } catch (error) {
-        console.error("Failed to parse cart from localStorage", error);
-        setCart([]);
+      } else {
+        setCart(accountCart);
       }
     } else {
-      // User is logged out, clear the cart
-      setCart([]);
-      // Optionally, clear guest cart from local storage if you don't want to persist it
-      // localStorage.removeItem('philippineasy_cart_guest');
+      // Anonyme (ou déconnexion) : on recharge le panier invité existant au
+      // lieu de le vider — sinon il est perdu au reload (bug corrigé 2026-07-03).
+      setCart(readCartFromStorage(GUEST_CART_KEY));
     }
   }, [user]);
 
   useEffect(() => {
+    if (isSyncingRef.current) {
+      // Skip : ce passage correspond au `cart` pré-chargement/fusion, déjà
+      // géré (et persisté si besoin) par l'effet ci-dessus.
+      isSyncingRef.current = false;
+      return;
+    }
     // Save cart to localStorage whenever it changes, specific to user or guest
-    const cartKey = user ? `philippineasy_cart_${user.id}` : 'philippineasy_cart_guest';
+    const cartKey = user ? `philippineasy_cart_${user.id}` : GUEST_CART_KEY;
     if (cart.length > 0) {
       localStorage.setItem(cartKey, JSON.stringify(cart));
     } else {

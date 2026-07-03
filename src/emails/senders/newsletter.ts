@@ -1,11 +1,45 @@
 // ---------------------------------------------------------------------------
-// Newsletter welcome email — sent after subscription
+// Newsletter emails — double opt-in confirmation + welcome (post-confirmation)
 // ---------------------------------------------------------------------------
 import { buildEmailHtml } from '../templates/base';
 import { emailHighlightBox, emailMutedText } from '../templates/components';
 import { sendEmail } from '../send';
 import { BRAND } from '../config';
 import { getNewsletterUnsubscribeUrl } from '../unsubscribe';
+
+/** Double opt-in confirmation email — sent immediately after signup, before the subscriber is active. */
+export async function sendNewsletterConfirmation(to: string, token: string) {
+  const confirmUrl = `${BRAND.siteUrl}/api/newsletter/confirm?token=${token}`;
+
+  const bodyHtml = `
+    <p style="font-size:14px;line-height:1.7;margin:0 0 16px;">
+      Vous venez de demander votre inscription a la newsletter <strong>Philippin'Easy</strong>.
+    </p>
+
+    <p style="font-size:14px;line-height:1.7;margin:0 0 16px;">
+      Pour confirmer votre adresse et recevoir nos conseils, bons plans et actualites sur les Philippines,
+      cliquez sur le bouton ci-dessous.
+    </p>
+
+    ${emailHighlightBox("Ce lien de confirmation expire au bout de 7 jours. Si vous n'etes pas a l'origine de cette demande, ignorez simplement cet email — aucune inscription ne sera activee.", 'info')}
+  `;
+
+  const html = buildEmailHtml({
+    title: 'Confirmez votre inscription',
+    preheader: 'Un clic pour confirmer votre inscription a la newsletter Philippin\'Easy.',
+    bodyHtml,
+    ctaText: 'Confirmer mon inscription',
+    ctaUrl: confirmUrl,
+  });
+
+  return sendEmail({
+    to,
+    from: 'newsletter',
+    subject: 'Confirmez votre inscription a la newsletter',
+    html,
+    category: 'transactional',
+  });
+}
 
 export async function sendNewsletterWelcome(to: string) {
   const unsubscribeUrl = await getNewsletterUnsubscribeUrl(to);

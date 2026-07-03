@@ -197,7 +197,10 @@ export default async function ArticlePage({
           {parsedContent && <ArticleTOC blocks={parsedContent.blocks || []} />}
 
           <article className="min-w-0">
-            <EditorialRenderer content={parsedContent || { blocks: [], time: 0, version: '' }} />
+            <EditorialRenderer
+              content={parsedContent || { blocks: [], time: 0, version: '' }}
+              articleTitle={stripTitleAccent(typedArticle.title)}
+            />
 
             <ArticleFooter
               article={typedArticle}

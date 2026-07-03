@@ -363,7 +363,6 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'byxjlsbmhixdehbisvjp.supabase.co', pathname: '/storage/**' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
-      { protocol: 'https', hostname: 'via.placeholder.com' },
       { protocol: 'https', hostname: 'randomuser.me' },
       { protocol: 'https', hostname: 'storage.googleapis.com' },
       { protocol: 'https', hostname: 'ui-avatars.com' },

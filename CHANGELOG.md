@@ -5,6 +5,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Feature/Fix — Vague finale du backlog post-audit (2026-07-03)
+
+**Bandeau en direct — vol Amadeus + change** : le prix de vol « Paris → MNL » n'est plus codé en dur sous un badge « En direct ». Nouveau module `src/lib/flight-price.ts` : prix le moins cher réel via l'API officielle Amadeus (gratuite, cache 6 h ~4 appels/jour), affiché seulement si un vrai prix revient — sinon l'item est masqué (jamais de valeur figée). Le taux EUR→PHP était déjà live (frankfurter). ⚠️ ACTION HUGO : créer une clé gratuite sur developers.amadeus.com et poser `AMADEUS_API_KEY`/`AMADEUS_API_SECRET` dans Vercel pour activer l'item vol.
+
+**Application mobile — « Bientôt disponible » honnête** : fini le mensonge (boutons stores morts + « disponible sur les stores » + features inventées RA/traducteur offline + image placeholder externe). PageHero, badges stores non cliquables estampillés « Prochainement », roadmap ancrée sur ce que le site fait déjà, et formulaire de pré-inscription branché sur la newsletter (`source: 'app_launch'`). Metadata corrigées.
+
+**Actualités refondue** (dernière page « ancienne interface ») : PageHero, breadcrumb + JSON-LD, intro éditoriale, maillage CTABand, `robots index` ajouté, `error.tsx` corrigé. **Partenaires anti-rainbow** : fin des 6 dégradés multicolores → dégradé signature unique, verts hardcodés → token `success`, canonical absolu + OG.
+
+**Fixes transverses** : page `/a-propos` créée (liens footer morts réparés, « Témoignages » retiré) ; CTA « Discuter avec l'équipe » branché sur Tawk (`window.Tawk_API.maximize()`) ; item vol figé retiré du ticker ; `sameAs` JSON-LD alignés sur les vrais réseaux (Twitter fantôme retiré) ; année du title calculée (fin du « 2026 » figé) ; OG par défaut = image voyage neutre (plus la photo dating sur tout le site) ; `global-error` stylé FR ; alt d'images d'articles enrichi du titre + iframes `loading=lazy` ; `via.placeholder.com` mort remplacé par des fallbacks locaux (+ retiré de next.config).
+
+**Conversion** : les 2 flux « Créer Itinéraire » unifiés (tout pointe vers la page funnel canonique, events analytics conservés ; l'IAOverlay reste monté mais dormant) ; ExitIntentPopup restreint à la home (fin de la cannibalisation des pages de vente) ; **panier invité persistant + fusionné à la connexion** (protection anti-écrasement au changement de session) ; phrase de renonciation expresse au droit de rétractation (L221-28) ajoutée à la checkbox du checkout itinéraire.
+
+**Newsletter double opt-in** : inscription → email de confirmation → clic → page `/newsletter-confirmee` (PDF + liens) → welcome. Colonnes `confirmed_at`/`confirmation_token`/`confirmation_sent_at` (migration appliquée, 15 abonnés existants backfillés confirmés), renvoi rate-limité 1/10 min, blast « nouvel article » ciblant les confirmés uniquement. **Sécu** : le `confirmation_token` (bearer) a son SELECT révoqué en anon/authenticated (la table est lisible publiquement) — tous les accès passent en service_role. Messages front → « vérifiez votre boîte mail ».
+
 ### Feature — FAQ généralisées : 31 pages de contenu supplémentaires (2026-07-03)
 
 Déploiement du `FaqAccordion` (pattern canvas) sur tout le contenu éditorial, ~150 Q/R formulées comme de vraies recherches utilisateur, chaque réponse dérivée EXCLUSIVEMENT du contenu fact-checké déjà présent sur la page (fidélité stricte sur le médical vaccins et le réglementaire visas/investissement) :

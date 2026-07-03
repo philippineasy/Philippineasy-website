@@ -44,7 +44,6 @@ const footerCols: { title: string; links: FooterLink[] }[] = [
     links: [
       { label: 'Forum', href: '/forum-sur-les-philippines' },
       { label: 'Rencontres', href: '/rencontre-philippines' },
-      { label: 'Témoignages', href: '/' },
       { label: 'Buddy System', href: '/services#buddy' },
       { label: 'Pack Ultime', href: '/services#pack-ultime' },
     ],
@@ -52,10 +51,9 @@ const footerCols: { title: string; links: FooterLink[] }[] = [
   {
     title: "Philippin'Easy",
     links: [
-      // TODO: page /a-propos a creer
-      { label: 'À propos', href: '/' },
+      { label: 'À propos', href: '/a-propos' },
       { label: 'Contact', href: '/contact' },
-      // TODO: page /presse a creer
+      // Pas de page /presse dediee : redirige vers le contact (acceptable).
       { label: 'Presse', href: '/contact' },
       { label: 'Partenaires', href: '/partenaires' },
       { label: 'Mentions légales', href: '/mentions-legales' },
@@ -85,7 +83,7 @@ const Footer = () => {
       const data = await res.json();
       if (res.ok) {
         setNewsletterStatus('success');
-        setNewsletterMessage(data.message || 'Inscription confirmée. Vérifiez votre boîte mail.');
+        setNewsletterMessage(data.message || 'Vérifiez votre boîte mail pour confirmer votre inscription.');
         setNewsletterEmail('');
         trackNewsletterSignup({ source: 'footer' });
         metaTrackLead({ content_name: 'Newsletter Footer' });

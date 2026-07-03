@@ -112,6 +112,7 @@ export const ExitIntentPopup = () => {
             <div className="p-4 bg-green-50 rounded-xl border border-green-200">
               <FontAwesomeIcon icon={faCheck} className="text-2xl text-green-500 mb-2" />
               <p className="font-semibold text-green-700">Telechargement en cours !</p>
+              <p className="text-sm text-green-700/80 mt-1">Verifiez votre boite mail pour confirmer votre inscription.</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-3">

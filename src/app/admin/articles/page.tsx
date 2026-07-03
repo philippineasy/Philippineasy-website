@@ -8,7 +8,7 @@ import { getAllArticlesForAdmin, deleteArticle } from '@/services/articleService
 import { getAllCategories } from '@/services/categoryService';
 import { generateArticleUrl } from '@/lib/utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faSpinner, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faSpinner, faEdit, faTrash, faImage } from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 import { CustomSelect, SelectOption } from '@/components/shared/CustomSelect';
 import ConfirmationModal from '@/components/shared/ConfirmationModal';
@@ -145,12 +145,16 @@ const AdminArticlesPage = () => {
 
                   const imageUrl = article.image && (article.image.startsWith('http://') || article.image.startsWith('https://'))
                     ? article.image
-                    : 'https://via.placeholder.com/300x200';
+                    : null;
 
                   return (
                   <div key={article.id} className="bg-card rounded-2xl border border-border/60 shadow-card-rest overflow-hidden hover:border-primary/40 hover:shadow-card transition-all">
-                    <div className="relative w-full h-44">
-                      <Image src={imageUrl} alt={article.title || 'Image non disponible'} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
+                    <div className="relative w-full h-44 bg-muted flex items-center justify-center">
+                      {imageUrl ? (
+                        <Image src={imageUrl} alt={article.title || 'Image non disponible'} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
+                      ) : (
+                        <FontAwesomeIcon icon={faImage} className="text-muted-foreground text-2xl" />
+                      )}
                     </div>
                     <div className="p-4">
                       <h3 className="text-[15px] font-semibold leading-snug mb-1">

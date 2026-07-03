@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faImage } from '@fortawesome/free-solid-svg-icons';
 import { EditHeroModal } from './EditHeroModal';
 
 interface Page {
@@ -22,13 +22,17 @@ export const HeroCard = ({ page }: HeroCardProps) => {
 
     return (
         <div className="bg-card rounded-lg shadow-lg overflow-hidden">
-            <div className="relative w-full h-48">
-                <Image
-                    src={page.hero_image_url || 'https://via.placeholder.com/600x400'}
-                    alt={page.title}
-                    fill
-                    className="object-cover"
-                />
+            <div className="relative w-full h-48 bg-muted flex items-center justify-center">
+                {page.hero_image_url ? (
+                    <Image
+                        src={page.hero_image_url}
+                        alt={page.title}
+                        fill
+                        className="object-cover"
+                    />
+                ) : (
+                    <FontAwesomeIcon icon={faImage} className="text-muted-foreground text-3xl" />
+                )}
             </div>
             <div className="p-4 flex justify-between items-center">
                 <h3 className="font-bold">{page.title}</h3>

@@ -12,7 +12,6 @@ import { UserMenu } from './UserMenu';
 import { Cart } from './Cart';
 import { DropdownMenu } from './DropdownMenu';
 import { ThemeToggle } from './ThemeToggle';
-import { useIAOverlay } from '@/contexts/IAOverlayContext';
 
 interface NavLink {
   href: string;
@@ -48,7 +47,6 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const { user, isAdmin, loading } = useAuth();
-  const iaOverlay = useIAOverlay();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -137,13 +135,14 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
       return null;
     }
 
-    // Special CTA "+ Créer Itinéraire" opens the IA overlay instead of navigating.
+    // Special CTA "+ Créer Itinéraire" navigates to the canonical itinerary
+    // funnel page (unified with the Hero CTA — single set of analytics
+    // signals instead of an overlay, audit 2026-07-03).
     if (special) {
       return (
-        <button
-          type="button"
+        <Link
+          href="/itineraire-personnalise-pour-les-philippines"
           onClick={() => {
-            iaOverlay.open();
             if (typeof window !== 'undefined' && (window as any).gtag) {
               (window as any).gtag('event', 'ia_overlay_opened', { source: 'header' });
             }
@@ -152,7 +151,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
         >
           <span aria-hidden="true">+</span>
           <span className="relative inline-flex items-center">{label}</span>
-        </button>
+        </Link>
       );
     }
 
@@ -365,10 +364,9 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
                   }
                   return <MobileNavLink key={link.href} {...link} />;
                 })}
-                <button
-                  type="button"
+                <Link
+                  href="/itineraire-personnalise-pour-les-philippines"
                   onClick={() => {
-                    iaOverlay.open();
                     setIsMenuOpen(false);
                     if (typeof window !== 'undefined' && (window as any).gtag) {
                       (window as any).gtag('event', 'ia_overlay_opened', { source: 'header_mobile' });
@@ -377,7 +375,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
                   className="px-3 py-2 rounded-md bg-accent text-accent-foreground shadow-cta font-semibold hover:bg-accent/90 transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                 >
                   + Créer Itinéraire
-                </button>
+                </Link>
                 <button
                   onClick={() => { setIsSearchModalOpen(true); setIsMenuOpen(false); }}
                   className="px-3 py-2 rounded-md text-foreground hover:text-primary hover:bg-primary/10 transition-colors duration-200 flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"

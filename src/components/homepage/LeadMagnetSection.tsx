@@ -325,7 +325,7 @@ export const LeadMagnetSection = () => {
           document.body.removeChild(link);
         }
         setTimeout(() => {
-          setMessage('Guide téléchargé ! Vérifiez aussi votre boîte mail.');
+          setMessage('Guide téléchargé ! Vérifiez votre boîte mail pour confirmer votre inscription à la newsletter.');
           setEmail('');
         }, 1500);
       } else {

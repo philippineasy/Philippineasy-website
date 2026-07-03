@@ -7,11 +7,13 @@ const HomepageJsonLd = () => {
     url: siteUrl,
     logo: `${siteUrl}/logo-512.png`,
     description: "La communauté francophone des Philippines - Guide complet pour voyager, vivre et s'épanouir dans l'archipel.",
+    // Aligné sur les liens réels du Footer (src/components/layout/Footer.tsx) —
+    // pas de Twitter/X, aucun compte n'existe.
     sameAs: [
-      "https://www.facebook.com/philippineasy",
-      "https://twitter.com/philippineasy",
-      "https://www.instagram.com/philippineasy",
-      "https://www.youtube.com/@philippineasy",
+      "https://www.facebook.com/share/1RfoyAcYFU/?mibextid=wwXIfr",
+      "https://www.instagram.com/philippineseasy",
+      "https://t.me/philippineasy",
+      "https://youtube.com/@philippineasy",
     ],
   };
 

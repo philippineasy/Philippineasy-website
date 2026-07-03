@@ -25,7 +25,15 @@ interface Block {
 
 type Props = {
   content: { blocks: Block[]; time?: number; version?: string };
+  /** Titre de l'article, utilisé pour construire un alt de secours sur les
+   * images sans légende (ex. "Illustration — Visa Philippines"). Optionnel :
+   * si absent, on retombe sur un alt générique 'Illustration'. */
+  articleTitle?: string;
 };
+
+// Retire la convention **accent** utilisée dans les titres (cf. ArticleHero)
+// avant de la réutiliser en texte brut pour un attribut alt.
+const stripTitleAccent = (title: string) => title.replace(/\*\*([^*]+)\*\*/g, '$1');
 
 // Hash links inside paragraph/list HTML get the editorial link style.
 // Bold / italic remain as-is.
@@ -191,13 +199,22 @@ function Delimiter() {
   );
 }
 
-function ImgBlock({ url, caption }: { url: string; caption?: string }) {
+function ImgBlock({
+  url,
+  caption,
+  articleTitle,
+}: {
+  url: string;
+  caption?: string;
+  articleTitle?: string;
+}) {
+  const alt = caption || (articleTitle ? `Illustration — ${articleTitle}` : 'Illustration');
   return (
     <figure className="my-10">
       <div className="relative w-full rounded-[14px] overflow-hidden shadow-card-rest aspect-[16/10]">
         <Image
           src={url}
-          alt={caption || 'Illustration'}
+          alt={alt}
           fill
           sizes="(max-width: 1024px) 100vw, 720px"
           className="object-cover"
@@ -221,6 +238,7 @@ function Embed({ src, caption }: { src: string; caption?: string }) {
           className="absolute inset-0 w-full h-full"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
+          loading="lazy"
           title={caption || 'Vidéo intégrée'}
         />
       </div>
@@ -233,8 +251,10 @@ function Embed({ src, caption }: { src: string; caption?: string }) {
   );
 }
 
-export function EditorialRenderer({ content }: Props) {
+export function EditorialRenderer({ content, articleTitle }: Props) {
   if (!content?.blocks) return null;
+
+  const cleanArticleTitle = articleTitle ? stripTitleAccent(articleTitle) : undefined;
 
   return (
     <div className="editorial-content">
@@ -280,7 +300,14 @@ export function EditorialRenderer({ content }: Props) {
           case 'delimiter':
             return <Delimiter key={idx} />;
           case 'image':
-            return <ImgBlock key={idx} url={block.data.file?.url || ''} caption={block.data.caption} />;
+            return (
+              <ImgBlock
+                key={idx}
+                url={block.data.file?.url || ''}
+                caption={block.data.caption}
+                articleTitle={cleanArticleTitle}
+              />
+            );
           case 'embed':
             return <Embed key={idx} src={block.data.embed || ''} caption={block.data.caption} />;
           default:
