@@ -1,40 +1,40 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faComments,
-  faEye,
-  faStar,
-  faClone,
-  faVenus,
-  faMars,
-} from '@fortawesome/free-solid-svg-icons';
+import { faClone } from '@fortawesome/free-solid-svg-icons';
 
 import { DatingProfile, DatingQuestionAnswer, Interest } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePremium } from '@/hooks/usePremium';
 import { PageHero, CTABand } from '@/components/sections';
 import { checkHasProfile, getUserExtras, getProfiles } from '@/services/datingService';
+import { MemberCard } from './MemberCard';
 
 const premiumFeatures = [
   {
-    icon: faComments,
     title: 'Messages illimités',
     description: 'Échangez sans compter avec toutes les personnes qui vous intéressent.',
   },
   {
-    icon: faEye,
     title: 'Visibilité accrue',
     description: 'Votre profil est mis en avant et vu par davantage de membres.',
   },
   {
-    icon: faStar,
     title: 'Super Likes',
     description: 'Sortez du lot et montrez un intérêt sincère avant même le match.',
   },
+];
+
+// Rencontre Premium — displayed tariffs. Canonical source of truth for these
+// values is src/app/rencontre-philippines/premium/page.tsx (there is no shared
+// dating-pricing config; services-pricing.ts is unrelated visa/guide pricing).
+// Verified equal to the validated canvas: 19,99 / 14,99 / 9,99 €/mois.
+const premiumPlans = [
+  { label: '1 mois', price: '19,99 €', recommended: false },
+  { label: '3 mois', price: '14,99 €', recommended: false },
+  { label: '6 mois — recommandé', price: '9,99 €', recommended: true },
 ];
 
 const RencontreClientPage = () => {
@@ -99,7 +99,7 @@ const RencontreClientPage = () => {
     if (profileStatus.hasProfile) {
       return profileStatus.isValidated ? 'Voir mon profil' : 'Profil en attente de validation';
     }
-    return "Créer mon profil gratuit";
+    return 'Créer mon profil gratuit';
   };
 
   const loadMoreProfiles = async () => {
@@ -120,8 +120,11 @@ const RencontreClientPage = () => {
   const isRecent = (createdAt: string) =>
     new Date(createdAt).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000;
 
+  const showDiscovery = profileStatus.hasProfile && profileStatus.isValidated;
+
   return (
     <div className="bg-background">
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <PageHero
         eyebrow="Rencontre · Communauté vérifiée"
         title="Rencontres aux"
@@ -129,34 +132,23 @@ const RencontreClientPage = () => {
         subtitle="Des profils vérifiés à la main, des conversations qui comptent. Faites de belles rencontres au sein d'une communauté francophone et philippine."
         imageUrl="/imagesHero/couple-rencontre-aux-philippines.webp"
         imageAlt="Couple heureux au coucher du soleil aux Philippines"
-        stats={[
-          { value: 'Vérifiés', label: 'Profils validés à la main' },
-          { value: 'Gratuit', label: 'Pour les femmes' },
-          { value: 'FR', label: 'Communauté francophone' },
-        ]}
       />
 
-      {/* Intro + primary CTA */}
-      <section className="py-16 md:py-20">
+      {/* Hero CTA + trust line — the canvas anchors these in the hero; PageHero
+          has no post-subtitle slot, so they sit in a snug band right below it. */}
+      <section className="bg-background pt-12 pb-6 md:pt-16">
         <div className="container mx-auto max-w-3xl px-4 text-center">
-          <h2 className="text-[clamp(1.875rem,4vw,2.375rem)] font-bold leading-tight tracking-[-0.02em] text-foreground">
-            Bienvenue dans l&apos;espace rencontre
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-[17px] leading-relaxed text-muted-foreground">
-            Un lieu pensé pour des échanges authentiques et des connexions qui ont du sens — loin des
-            applications impersonnelles.
-          </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
               href={getButtonLink()}
-              className="group inline-flex min-h-[48px] items-center gap-2 rounded-lg bg-accent px-8 text-base font-semibold text-ink shadow-cta transition-all duration-200 hover:bg-accent/90 hover:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="group inline-flex min-h-[48px] items-center gap-2 rounded-lg bg-accent px-8 text-base font-semibold text-accent-foreground shadow-cta transition-all duration-200 hover:bg-accent/90 hover:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               {getButtonText()}
-              <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">
+              <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none">
                 →
               </span>
             </Link>
-            {profileStatus.hasProfile && profileStatus.isValidated && (
+            {showDiscovery && (
               <Link
                 href="/rencontre-philippines/swipe"
                 className="inline-flex min-h-[48px] items-center gap-2 rounded-lg border border-border bg-card px-8 text-base font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -166,40 +158,49 @@ const RencontreClientPage = () => {
               </Link>
             )}
           </div>
+
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+            <span>
+              Profils <strong className="font-semibold text-foreground">validés à la main</strong>
+            </span>
+            <span aria-hidden="true" className="text-border">·</span>
+            <span>
+              <strong className="font-semibold text-foreground">Gratuit</strong> pour les femmes
+            </span>
+            <span aria-hidden="true" className="text-border">·</span>
+            <span>
+              Communauté <strong className="font-semibold text-foreground">francophone</strong>
+            </span>
+          </div>
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="bg-muted py-16 md:py-20">
+      {/* ── Comment ça marche ────────────────────────────────────────────── */}
+      <section className="bg-background pt-10 pb-20 md:pb-24">
         <div className="container mx-auto max-w-5xl px-4">
           <div className="mx-auto mb-12 max-w-2xl text-center">
             <span className="text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
               Comment ça marche
             </span>
             <h2 className="mt-3 text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold tracking-[-0.02em] text-foreground">
-              Simple, transparent, respectueux
+              Simple, transparent, <span className="text-accent">respectueux</span>
             </h2>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="rounded-2xl border border-border/70 bg-card p-7 shadow-sm">
-              <span className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-pink-500/10 text-pink-500">
-                <FontAwesomeIcon icon={faVenus} className="text-xl" />
-              </span>
-              <h3 className="text-xl font-semibold text-foreground">Pour les femmes</h3>
-              <p className="mt-2 leading-relaxed text-muted-foreground">
-                L&apos;expérience est <strong className="font-semibold text-foreground">100&nbsp;% gratuite</strong>.
-                Discutez, partagez et rencontrez sans aucune limite.
+          <div className="mx-auto grid max-w-[880px] gap-6 md:grid-cols-2">
+            <div className="rounded-2xl border border-border bg-card p-7 shadow-sm">
+              <h3 className="text-xl font-semibold tracking-[-0.01em] text-foreground">Pour les femmes</h3>
+              <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
+                L&apos;expérience est{' '}
+                <strong className="font-semibold text-foreground">100&nbsp;% gratuite</strong>. Discutez,
+                partagez et rencontrez sans aucune limite.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-border/70 bg-card p-7 shadow-sm">
-              <span className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <FontAwesomeIcon icon={faMars} className="text-xl" />
-              </span>
-              <h3 className="text-xl font-semibold text-foreground">Pour les hommes</h3>
-              <p className="mt-2 leading-relaxed text-muted-foreground">
-                L&apos;inscription est gratuite et vous permet d&apos;envoyer{' '}
+            <div className="rounded-2xl border border-border bg-card p-7 shadow-sm">
+              <h3 className="text-xl font-semibold tracking-[-0.01em] text-foreground">Pour les hommes</h3>
+              <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
+                L&apos;inscription est gratuite et permet d&apos;envoyer{' '}
                 <strong className="font-semibold text-foreground">2 messages par jour</strong>. Pour des
                 conversations illimitées, passez Premium.
               </p>
@@ -208,15 +209,16 @@ const RencontreClientPage = () => {
         </div>
       </section>
 
-      {/* Premium */}
-      <section className="py-16 md:py-20">
+      {/* ── Premium ──────────────────────────────────────────────────────── */}
+      <section className="bg-muted py-20 md:py-24">
         <div className="container mx-auto max-w-5xl px-4">
           <div className="mx-auto mb-12 max-w-2xl text-center">
-            <span className="text-[13px] font-medium uppercase tracking-[0.08em] text-accent-strong">
-              ★ Premium
+            <span className="inline-flex items-center gap-1.5 text-[13px] font-medium uppercase tracking-[0.08em] text-accent-strong">
+              <span aria-hidden="true">★</span>
+              Premium
             </span>
             <h2 className="mt-3 text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold tracking-[-0.02em] text-foreground">
-              Passez à la vitesse supérieure
+              Passez à la vitesse <span className="text-accent">supérieure</span>
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-[17px] leading-relaxed text-muted-foreground">
               Débloquez tout le potentiel de vos rencontres avec des fonctionnalités pensées pour aller
@@ -224,39 +226,71 @@ const RencontreClientPage = () => {
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="mx-auto grid max-w-[960px] gap-6 md:grid-cols-3">
             {premiumFeatures.map((feature) => (
-              <div
-                key={feature.title}
-                className="group rounded-2xl border border-border/70 bg-card p-7 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg motion-reduce:hover:translate-y-0"
-              >
-                <span className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <FontAwesomeIcon icon={feature.icon} className="text-xl" />
-                </span>
-                <h3 className="text-xl font-semibold text-foreground">{feature.title}</h3>
-                <p className="mt-2 leading-relaxed text-muted-foreground">{feature.description}</p>
+              <div key={feature.title} className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+                <h3 className="text-[17px] font-semibold tracking-[-0.01em] text-foreground">
+                  {feature.title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>
 
+          {/* Tarifs Premium — même patron que les packs Services. */}
           {!isPremium && (
-            <div className="mt-10 text-center">
-              <Link
-                href="/rencontre-philippines/premium"
-                className="group inline-flex min-h-[48px] items-center gap-2 rounded-lg bg-primary px-8 text-base font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              >
-                Découvrir nos offres Premium
-                <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">
-                  →
-                </span>
-              </Link>
+            <div className="relative mx-auto mt-10 max-w-[720px] rounded-2xl border-[1.5px] border-primary bg-card px-6 py-8 shadow-md sm:px-8">
+              <span className="absolute -top-[11px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-[0.06em] text-primary-foreground">
+                Rencontre Premium
+              </span>
+
+              <div className="grid grid-cols-3">
+                {premiumPlans.map((plan, i) => (
+                  <div
+                    key={plan.label}
+                    className={`px-1.5 py-2.5 text-center sm:px-3 ${
+                      i < premiumPlans.length - 1 ? 'border-r border-border' : ''
+                    }`}
+                  >
+                    <span
+                      className={`mb-1.5 block text-[11px] leading-tight sm:text-[13px] ${
+                        plan.recommended ? 'font-medium text-primary' : 'text-muted-foreground'
+                      }`}
+                    >
+                      {plan.label}
+                    </span>
+                    <span
+                      className={`block text-[22px] font-bold tabular-nums tracking-[-0.02em] sm:text-2xl ${
+                        plan.recommended ? 'text-primary' : 'text-foreground'
+                      }`}
+                    >
+                      {plan.price}
+                      <span className="text-[11px] font-normal text-muted-foreground sm:text-xs">/mois</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-5 border-t border-border pt-4 text-center">
+                <Link
+                  href="/rencontre-philippines/premium"
+                  className="group inline-flex min-h-[48px] items-center gap-2 rounded-lg bg-primary px-8 text-base font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  Découvrir nos offres Premium
+                  <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none">
+                    →
+                  </span>
+                </Link>
+              </div>
             </div>
           )}
         </div>
       </section>
 
-      {/* Latest members */}
-      <section className="bg-muted py-16 md:py-20">
+      {/* ── Nos derniers membres inscrits ────────────────────────────────── */}
+      <section className="bg-background py-20 md:py-24">
         <div className="container mx-auto max-w-6xl px-4">
           <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -264,10 +298,10 @@ const RencontreClientPage = () => {
                 La communauté
               </span>
               <h2 className="mt-2 text-[clamp(1.75rem,3.5vw,2.25rem)] font-bold tracking-[-0.02em] text-foreground">
-                Nos derniers membres inscrits
+                Nos derniers membres <span className="text-accent">inscrits</span>
               </h2>
             </div>
-            {profileStatus.hasProfile && profileStatus.isValidated && (
+            {showDiscovery && (
               <Link
                 href="/rencontre-philippines/swipe"
                 className="inline-flex min-h-[44px] items-center gap-2 self-start rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:self-auto"
@@ -279,80 +313,15 @@ const RencontreClientPage = () => {
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {profiles.map((profile) => {
-              const canView = isPremium || (user && user.id === profile.user_id); // Can always view own profile
-              const Wrapper: any = canView ? Link : 'div';
-              const wrapperProps: any = canView
-                ? { href: `/rencontre-philippines/profil/${profile.user_id}` }
-                : {};
-
-              return (
-                <Wrapper key={profile.user_id} {...wrapperProps} className="group block">
-                  <article className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg motion-reduce:hover:translate-y-0">
-                    <div className="relative aspect-[4/5] w-full overflow-hidden">
-                      <Image
-                        src={profile.profile_picture_url || '/default-avatar.webp'}
-                        alt={profile.username ? `Photo de ${profile.username}` : 'Photo de profil'}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                        className={`object-cover transition-transform duration-500 group-hover:scale-[1.05] ${
-                          !canView ? 'blur-md' : ''
-                        }`}
-                      />
-                      <div
-                        aria-hidden="true"
-                        className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent"
-                      />
-
-                      {isRecent(profile.created_at) && (
-                        <span className="absolute right-3 top-3 rounded-full bg-accent px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.06em] text-ink shadow-sm">
-                          Nouveau
-                        </span>
-                      )}
-
-                      {!canView && (
-                        <div className="absolute inset-0 flex items-center justify-center p-4">
-                          <p className="text-center text-sm font-semibold text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.5)]">
-                            Inscrivez-vous pour voir les profils
-                          </p>
-                        </div>
-                      )}
-
-                      <div className="absolute inset-x-0 bottom-0 p-4 text-white">
-                        <h3 className="text-xl font-bold leading-tight [text-shadow:0_1px_6px_rgba(0,0,0,0.45)]">
-                          {canView ? `${profile.username}, ${profile.age}` : 'Membre'}
-                        </h3>
-                        <p className="text-sm text-white/85">
-                          {canView ? profile.city : 'Ville masquée'}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="p-4">
-                      <div className="flex min-h-[28px] flex-wrap gap-1.5">
-                        {(profile.interests ?? []).slice(0, 3).map((interest) => (
-                          <span
-                            key={interest.id}
-                            className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground"
-                          >
-                            {interest.name}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="mt-4 flex items-center justify-between text-sm font-semibold text-primary">
-                        {canView ? 'Voir le profil' : 'Inscription requise'}
-                        <span
-                          aria-hidden="true"
-                          className="transition-transform group-hover:translate-x-0.5"
-                        >
-                          →
-                        </span>
-                      </div>
-                    </div>
-                  </article>
-                </Wrapper>
-              );
-            })}
+            {profiles.map((profile, index) => (
+              <MemberCard
+                key={profile.user_id}
+                profile={profile}
+                index={index}
+                canView={Boolean(isPremium || (user && user.id === profile.user_id))}
+                isNew={isRecent(profile.created_at)}
+              />
+            ))}
           </div>
 
           {loadingProfiles && (
@@ -363,7 +332,7 @@ const RencontreClientPage = () => {
             <div className="mt-12 text-center">
               <button
                 onClick={loadMoreProfiles}
-                className="inline-flex min-h-[44px] items-center rounded-full border border-border bg-card px-8 text-sm font-semibold text-foreground transition-colors hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="inline-flex min-h-[44px] items-center rounded-full border border-border bg-card px-8 text-sm font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 Voir plus de profils
               </button>
@@ -372,6 +341,7 @@ const RencontreClientPage = () => {
         </div>
       </section>
 
+      {/* ── CTA final ────────────────────────────────────────────────────── */}
       <CTABand
         title="Prêt à faire une"
         titleAccent="belle rencontre ?"

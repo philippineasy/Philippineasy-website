@@ -201,27 +201,29 @@ export default function ServicesPage() {
               <div
                 key={tier.name}
                 className={cn(
-                  'relative flex flex-col rounded-2xl bg-card p-6 text-center transition-all duration-200 hover:-translate-y-1 motion-reduce:hover:transform-none',
+                  'relative flex h-full flex-col rounded-2xl bg-card px-[26px] py-7 transition-all duration-200 hover:-translate-y-1 motion-reduce:hover:transform-none',
                   tier.popular
-                    ? 'border-[1.5px] border-primary shadow-card'
-                    : 'border-[0.5px] border-border shadow-card-rest hover:border-primary/30 hover:shadow-card'
+                    ? 'border-[1.5px] border-primary shadow-[0_4px_6px_rgba(0,0,0,0.07)]'
+                    : 'border-[0.5px] border-border shadow-card-rest hover:border-primary/30 hover:shadow-[0_4px_6px_rgba(0,0,0,0.07)]'
                 )}
               >
                 {tier.popular && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-[0.06em] text-primary-foreground">
+                  <span className="absolute -top-[11px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-[0.06em] text-primary-foreground">
                     Populaire
                   </span>
                 )}
-                <h3 className="mt-1 text-[17px] font-semibold text-foreground">{tier.name}</h3>
+                <h3 className="text-[17px] font-semibold tracking-[-0.01em] text-foreground">{tier.name}</h3>
+                <p className="mt-[3px] text-[13px] leading-[1.4] text-muted-foreground">{tier.desc}</p>
+                {/* Price ranges kept at 26px (a full 32px overflows on small mobile). */}
                 <p
                   className={cn(
-                    'mt-3 text-[26px] font-bold tabular-nums tracking-[-0.02em]',
+                    'mt-[18px] text-[26px] font-bold leading-none tabular-nums tracking-[-0.02em]',
                     tier.popular ? 'text-primary' : 'text-foreground'
                   )}
                 >
                   {tier.price}
                 </p>
-                <p className="mt-2 text-[13px] leading-[1.5] text-muted-foreground">{tier.desc}</p>
+                <p className="mt-[6px] text-[12px] text-muted-foreground">Paiement unique</p>
               </div>
             ))}
           </CardGrid>
@@ -368,7 +370,6 @@ export default function ServicesPage() {
                 { text: 'Conseils locaux personnalisés', tooltip: 'Recommandations basées sur vos goûts : restaurants, activités, bonnes adresses testées par votre buddy' },
               ]}
               price={79}
-              icon="faUsers"
               ctaText="Choisir"
               ctaHref="/checkout/services?type=buddy_short"
             />
@@ -382,7 +383,6 @@ export default function ServicesPage() {
                 { text: 'Support pendant le voyage', tooltip: 'Aide en cas de problème : traduction, négociation, urgences - votre buddy est joignable' },
               ]}
               price={119}
-              icon="faUsers"
               badge="Populaire"
               highlighted
               ctaText="Choisir"
@@ -399,7 +399,6 @@ export default function ServicesPage() {
                 { text: "Réseau d'entraide", tooltip: "Accès au réseau de contacts de votre buddy : autres expats, locaux de confiance, bons plans exclusifs" },
               ]}
               price={149}
-              icon="faUsers"
               ctaText="Choisir"
               ctaHref="/checkout/services?type=buddy_long"
             />
@@ -427,7 +426,6 @@ export default function ServicesPage() {
                 { text: 'Checklist personnalisée', tooltip: TOOLTIPS.checklistPersonnalisee },
               ]}
               price={99}
-              icon="faShieldAlt"
               ctaText="Choisir"
               ctaHref="/checkout/services?type=voyage_serein_short"
             />
@@ -442,7 +440,6 @@ export default function ServicesPage() {
                 { text: 'Support en cas de problème', tooltip: 'Assistance réactive si imprévu : annulation vol, problème hôtel, urgence médicale - on gère avec vous' },
               ]}
               price={149}
-              icon="faShieldAlt"
               badge="Populaire"
               highlighted
               ctaText="Choisir"
@@ -459,7 +456,6 @@ export default function ServicesPage() {
                 { text: 'Support prioritaire', tooltip: "Réponse garantie sous 1h en cas d'urgence, assistance VIP tout au long du voyage" },
               ]}
               price={199}
-              icon="faShieldAlt"
               ctaText="Choisir"
               ctaHref="/checkout/services?type=voyage_serein_long"
             />
@@ -488,7 +484,6 @@ export default function ServicesPage() {
                 { text: 'Rencontre Premium 6 mois', tooltip: TOOLTIPS.rencontrePremium },
               ]}
               price={369}
-              icon="faCrown"
               ctaText="Choisir"
               ctaHref="/checkout/services?type=pack_ultime_medium"
             />
@@ -505,7 +500,6 @@ export default function ServicesPage() {
                 { text: 'Groupe privé à vie', tooltip: TOOLTIPS.groupePrive },
               ]}
               price={449}
-              icon="faCrown"
               badge="Best Value"
               highlighted
               ctaText="Choisir"
@@ -524,7 +518,6 @@ export default function ServicesPage() {
                 { text: 'Groupe privé à vie', tooltip: TOOLTIPS.groupePrive },
               ]}
               price={549}
-              icon="faCrown"
               ctaText="Choisir"
               ctaHref="/checkout/services?type=pack_ultime_expat"
             />
@@ -542,9 +535,12 @@ export default function ServicesPage() {
             subtitle="Rejoignez les voyageurs et expatriés francophones qui vivent les Philippines au quotidien."
             columns={2}
           >
-            {/* Rencontre Premium */}
-            <div className="flex flex-col rounded-2xl border-[0.5px] border-border bg-card p-8 shadow-card-rest transition-all duration-200 hover:-translate-y-1 hover:border-primary/30 hover:shadow-card motion-reduce:hover:transform-none">
-              <div className="mb-4 flex items-center gap-3">
+            {/* Rencontre Premium — subscription variant of the price-card pattern:
+                same card chrome + bordered CTA, but keeps the multi-tier price
+                table (monthly/quarterly/half-yearly) and its per-row units, which
+                stand in for the payment mention. Icon retained for product identity. */}
+            <div className="group relative flex h-full flex-col rounded-2xl border-[0.5px] border-border bg-card px-[26px] py-7 shadow-card-rest transition-all duration-200 hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_4px_6px_rgba(0,0,0,0.07)] motion-reduce:hover:transform-none">
+              <div className="flex items-center gap-3">
                 <span
                   className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary"
                   aria-hidden="true"
@@ -555,10 +551,10 @@ export default function ServicesPage() {
                   Rencontre Premium
                 </h3>
               </div>
-              <p className="mb-6 text-[14px] leading-[1.6] text-muted-foreground">
+              <p className="mt-3 text-[14px] leading-[1.6] text-muted-foreground">
                 Rencontrez des personnes qui partagent votre passion pour les Philippines.
               </p>
-              <ul className="mb-6 space-y-2.5 border-t border-border/70 pt-5">
+              <ul className="mt-[18px] flex flex-1 flex-col gap-2.5 border-t-[0.5px] border-border pt-4">
                 {rencontrePlans.map((p) => (
                   <li key={p.label} className="flex items-baseline justify-between text-[14px]">
                     <span className={p.best ? 'font-medium text-primary' : 'text-muted-foreground'}>
@@ -573,18 +569,20 @@ export default function ServicesPage() {
               </ul>
               <Link
                 href="/rencontre-philippines/premium"
-                className="mt-auto block w-full rounded-lg bg-foreground px-6 py-3 text-center text-sm font-semibold text-background transition-all duration-200 hover:scale-[1.02] hover:opacity-90 motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="mt-[22px] block rounded-lg border border-border bg-card px-[18px] py-[11px] text-center text-sm font-semibold text-foreground transition-all duration-200 hover:border-primary/40 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
               >
                 Découvrir
               </Link>
             </div>
 
-            {/* Easy+ */}
-            <div className="relative flex flex-col rounded-2xl border-[1.5px] border-accent bg-card p-8 shadow-card transition-all duration-200 hover:-translate-y-1 motion-reduce:hover:transform-none">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-accent px-3 py-1 text-[10px] font-bold uppercase tracking-[0.06em] text-accent-foreground">
+            {/* Easy+ — highlighted subscription variant: pattern highlight chrome
+                (1.5px primary border + primary badge) and solid-accent CTA. Keeps
+                the monthly/annual tiers; per-row units are the payment mention. */}
+            <div className="relative flex h-full flex-col rounded-2xl border-[1.5px] border-primary bg-card px-[26px] py-7 shadow-[0_4px_6px_rgba(0,0,0,0.07)] transition-all duration-200 hover:-translate-y-1 motion-reduce:hover:transform-none">
+              <span className="absolute -top-[11px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-[0.06em] text-primary-foreground">
                 VIP
               </span>
-              <div className="mb-4 flex items-center gap-3">
+              <div className="flex items-center gap-3">
                 <span
                   className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-accent/15 text-accent"
                   aria-hidden="true"
@@ -593,10 +591,10 @@ export default function ServicesPage() {
                 </span>
                 <h3 className="text-[19px] font-semibold tracking-[-0.01em] text-foreground">Easy+</h3>
               </div>
-              <p className="mb-6 text-[14px] leading-[1.6] text-muted-foreground">
+              <p className="mt-3 text-[14px] leading-[1.6] text-muted-foreground">
                 Abonnement privilège : −20 % chez nos partenaires, support prioritaire et guides premium.
               </p>
-              <ul className="mb-6 space-y-2.5 border-t border-border/70 pt-5">
+              <ul className="mt-[18px] flex flex-1 flex-col gap-2.5 border-t-[0.5px] border-border pt-4">
                 {easyPlusPlans.map((p) => (
                   <li key={p.label} className="flex items-baseline justify-between text-[14px]">
                     <span className={p.best ? 'font-medium text-primary' : 'text-muted-foreground'}>
@@ -611,7 +609,7 @@ export default function ServicesPage() {
               </ul>
               <Link
                 href="/meilleurs-plans-aux-philippines"
-                className="mt-auto block w-full rounded-lg bg-accent px-6 py-3 text-center text-sm font-semibold text-accent-foreground transition-all duration-200 hover:scale-[1.02] hover:bg-accent/90 motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="mt-[22px] block rounded-lg bg-accent px-[18px] py-[11px] text-center text-sm font-semibold text-accent-foreground shadow-[0_10px_15px_rgba(0,0,0,0.08)] transition-all duration-200 hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
               >
                 En savoir plus
               </Link>

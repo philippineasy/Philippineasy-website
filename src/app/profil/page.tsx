@@ -7,11 +7,24 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/utils/supabase/client';
 import { getTopicsByUserId, getPostsByUserId } from '@/services/forumService';
 import { getOrdersByUserId } from '@/services/orderService';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserCircle, faEdit, faRoute, faPlus, faComments, faStar, faMapSigns, faPencilAlt, faTags, faSignOutAlt, faSave, faTrash, faReceipt } from '@fortawesome/free-solid-svg-icons';
+import {
+  Pencil,
+  Route,
+  ArrowRight,
+  Receipt,
+  MessageSquare,
+  Sparkles,
+  LogOut,
+  MapPin,
+  ChevronRight,
+  Loader2,
+  PlusCircle,
+  Tags,
+  LayoutGrid,
+  Save,
+} from 'lucide-react';
 import Modal from '@/components/layout/Modal';
 import toast from 'react-hot-toast';
-import ConfirmationModal from '@/components/shared/ConfirmationModal';
 import ProfileJsonLd from '@/components/shared/ProfileJsonLd';
 
 interface PostContent {
@@ -40,7 +53,7 @@ const getPostPreview = (content: string): { text: string, type: string | null } 
       }
       return { text, type: firstTextBlock.type };
     }
-    
+
     return { text: "Pas d'aperçu disponible.", type: null };
   } catch (e) {
     return { text: "Impossible de générer l'aperçu.", type: 'error' };
@@ -78,11 +91,29 @@ interface ItineraryGeneration {
 }
 
 interface Order {
-    id: number;
-    created_at: string;
-    total_amount: number;
-    status: string;
+  id: number;
+  created_at: string;
+  total_amount: number;
+  status: string;
 }
+
+// Order status pills — dark-aware, aligned with /profil/commandes.
+const ORDER_STATUS: Record<string, { label: string; bg: string; text: string }> = {
+  pending: { label: 'En attente', bg: 'bg-amber-500/10', text: 'text-amber-700 dark:text-amber-400' },
+  paid: { label: 'Payée', bg: 'bg-emerald-500/10', text: 'text-emerald-700 dark:text-emerald-400' },
+  shipped: { label: 'Expédiée', bg: 'bg-sky-500/10', text: 'text-sky-700 dark:text-sky-400' },
+  delivered: { label: 'Livrée', bg: 'bg-emerald-500/10', text: 'text-emerald-700 dark:text-emerald-400' },
+  cancelled: { label: 'Annulée', bg: 'bg-rose-500/10', text: 'text-rose-700 dark:text-rose-400' },
+  refunded: { label: 'Remboursée', bg: 'bg-violet-500/10', text: 'text-violet-700 dark:text-violet-400' },
+};
+
+const QUICK_LINKS = [
+  { href: '/mon-espace', label: 'Mon espace services', Icon: LayoutGrid },
+  { href: '/mon-espace/itineraires', label: 'Mes itinéraires achetés', Icon: Route },
+  { href: '/itineraire-personnalise-pour-les-philippines', label: 'Créer un itinéraire', Icon: PlusCircle },
+  { href: '/forum-sur-les-philippines/nouveau-sujet', label: 'Poser une question au forum', Icon: MessageSquare },
+  { href: '/meilleurs-plans-aux-philippines', label: 'Voir les bons plans', Icon: Tags },
+];
 
 const ProfilPage = () => {
   const { user, profile, loading, signOut, updateLocalProfile } = useAuth();
@@ -92,8 +123,6 @@ const ProfilPage = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [savedItineraries, setSavedItineraries] = useState<ItineraryGeneration[]>([]);
-  const [itineraryToDelete, setItineraryToDelete] = useState<ItineraryGeneration | null>(null);
-  const [isRedelivering, setIsRedelivering] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -137,7 +166,7 @@ const ProfilPage = () => {
       fetchOrders();
       fetchItineraries();
     }
-  }, [user, supabase]);
+  }, [user]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -216,83 +245,13 @@ const ProfilPage = () => {
 
     setIsSavingProfile(false);
   };
-  
-  const handleDeleteRequest = (itinerary: ItineraryGeneration) => {
-    setItineraryToDelete(itinerary);
-  };
-
-  const confirmDeleteItinerary = () => {
-    // This is a placeholder as itinerary logic is not fully implemented
-    toast.error("La suppression d'itinéraire n'est pas encore fonctionnelle.");
-    setItineraryToDelete(null);
-  };
-
-  const handleRedeliverItinerary = async (itineraryId: string) => {
-    if (!user?.email) {
-      toast.error("Email non disponible");
-      return;
-    }
-    setIsRedelivering(itineraryId);
-    try {
-      const response = await fetch('/api/itinerary/deliver', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          generation_id: itineraryId,
-          delivery_method: 'email',
-          email: user.email,
-        }),
-      });
-      const data = await response.json();
-      if (data.success) {
-        toast.success("Itinéraire renvoyé par email !");
-      } else {
-        toast.error(data.error || "Erreur lors de l'envoi");
-      }
-    } catch (err) {
-      toast.error("Erreur lors de l'envoi");
-    } finally {
-      setIsRedelivering(null);
-    }
-  };
-
-  const getDurationLabel = (duration: string): string => {
-    const labels: Record<string, string> = {
-      '3-days': '3-5 jours',
-      '1-week': '1 semaine',
-      '10-days': '10 jours',
-      '2-weeks': '2 semaines',
-      '3-weeks': '3 semaines',
-      '1-month': '1 mois',
-      'more': '+1 mois',
-    };
-    return labels[duration] || duration;
-  };
-
-  const getOfferLabel = (offer: string): string => {
-    const labels: Record<string, string> = {
-      'express': 'Express',
-      'premium': 'Premium',
-      'conciergerie': 'Conciergerie',
-    };
-    return labels[offer] || offer;
-  };
-
-  const getVariantLabel = (variant: string): string => {
-    const labels: Record<string, string> = {
-      'relax': 'Relax',
-      'balanced': 'Équilibré',
-      'adventure': 'Aventure',
-    };
-    return labels[variant] || variant;
-  };
 
   if (loading) {
     return (
-      <main className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <i className="fas fa-spinner fa-spin text-primary text-4xl"></i>
-          <p className="mt-4 text-lg text-muted-foreground">Chargement du profil...</p>
+      <main className="min-h-screen bg-muted/40 pt-24">
+        <div className="mx-auto max-w-[1200px] px-6 py-24 text-center">
+          <Loader2 className="mx-auto h-9 w-9 animate-spin text-primary" aria-hidden="true" />
+          <p className="mt-4 text-[15px] text-muted-foreground">Chargement du profil…</p>
         </div>
       </main>
     );
@@ -300,233 +259,378 @@ const ProfilPage = () => {
 
   if (!profile || !user) {
     return (
-      <main className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-destructive">Profil non trouvé</h1>
-          <p className="mt-4 text-muted-foreground">Impossible de charger les informations du profil.</p>
-          <Link href="/" className="mt-6 inline-block px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
-            Retour à l'accueil
+      <main className="min-h-screen bg-muted/40 pt-24">
+        <div className="mx-auto max-w-[1200px] px-6 py-24 text-center">
+          <h1 className="text-2xl font-bold text-destructive">Profil non trouvé</h1>
+          <p className="mt-3 text-muted-foreground">Impossible de charger les informations du profil.</p>
+          <Link
+            href="/"
+            className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            Retour à l&apos;accueil
           </Link>
         </div>
       </main>
     );
   }
 
+  const initial = (profile.username?.charAt(0) || '?').toUpperCase();
+  const memberSince = new Date(profile.created_at).toLocaleDateString('fr-FR', {
+    month: 'long',
+    year: 'numeric',
+  });
+  const easyPlusActive = !!profile.easy_plus_expires_at && new Date(profile.easy_plus_expires_at) > new Date();
+  const easyPlusExpiry = profile.easy_plus_expires_at
+    ? new Date(profile.easy_plus_expires_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    : null;
+
+  const cardBase = 'rounded-2xl border border-border/60 bg-card shadow-card-rest';
+  const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background';
+
   return (
     <>
       <ProfileJsonLd profile={profile} />
-      <main className="container mx-auto px-4 py-16 pt-32">
-        <h1 className="text-3xl md:text-4xl font-bold mb-10">
-          Bienvenue sur votre Espace, <span className="text-primary">{profile.username}</span> !
-        </h1>
+      <main className="min-h-screen bg-muted/40 pt-24">
+        <div className="mx-auto max-w-[1200px] px-6 pb-20 pt-4">
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
-            <div className="bg-card p-6 rounded-2xl border border-border/60 shadow-card-rest">
-              <h2 className="text-2xl font-semibold mb-6 border-b pb-3 flex items-center">
-                <FontAwesomeIcon icon={faUserCircle} className="text-primary mr-3 text-2xl" /> Informations du Compte
-              </h2>
-              <div className="flex items-center mb-6">
-                <div className="relative w-24 h-24 rounded-full mr-6 border-2 border-primary/20">
-                  <Image src={profile.avatar_url || `https://ui-avatars.com/api/?name=${profile.username}&background=random`} alt="Avatar" fill className="rounded-full object-cover" />
-                </div>
-                <div className="space-y-2 text-foreground flex-grow">
-                  <p><span className="font-medium w-32 inline-block">Nom d'utilisateur:</span> {profile.username}</p>
-                  <p><span className="font-medium w-32 inline-block">Email:</span> {user.email}</p>
-                  <p><span className="font-medium w-32 inline-block">Membre depuis:</span> {new Date(profile.created_at).toLocaleDateString('fr-FR')}</p>
-                  <p><span className="font-medium w-32 inline-block">Localisation:</span> {profile.location || 'Non spécifié'}</p>
-                </div>
-              </div>
-              <div className="mt-6">
-                <h3 className="text-lg font-medium text-foreground mb-2">Bio :</h3>
-                <p className="text-muted-foreground italic">{profile.bio || 'Aucune biographie.'}</p>
-              </div>
-              <div className="mt-4 pt-4 border-t flex space-x-4">
-                <button onClick={() => setIsEditModalOpen(true)} className="text-sm text-primary hover:underline">
-                  <FontAwesomeIcon icon={faEdit} className="mr-1" /> Modifier le profil
-                </button>
-              </div>
-            </div>
+          {/* Header */}
+          <header className="mb-8">
+            <span className="mb-2 block text-[11px] font-semibold uppercase tracking-[0.12em] text-accent-strong">
+              Mon compte
+            </span>
+            <h1 className="text-[clamp(1.75rem,3.5vw,2.375rem)] font-bold leading-[1.1] tracking-[-0.02em] text-ink">
+              Bonjour, <span className="text-accent-strong">{profile.username}</span>
+            </h1>
+            <p className="mt-2 text-[15px] text-muted-foreground">
+              Votre profil, vos commandes et votre activité — tout au même endroit.
+            </p>
+          </header>
 
-            <Link
-              href="/mon-espace/itineraires"
-              className="block bg-card p-6 rounded-2xl border border-border/60 shadow-card-rest hover:border-primary/40 hover:shadow-card transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-4 min-w-0">
-                  <span className="shrink-0 w-12 h-12 rounded-2xl bg-accent/15 text-accent flex items-center justify-center" aria-hidden="true">
-                    <FontAwesomeIcon icon={faRoute} className="text-xl" />
+          <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+
+            {/* Main column */}
+            <div className="flex flex-col gap-5 lg:col-span-2">
+
+              {/* Account information */}
+              <section className={`${cardBase} p-6 sm:p-7`}>
+                <div className="mb-6 flex items-center justify-between gap-4">
+                  <h2 className="text-[17px] font-semibold tracking-[-0.01em] text-ink">Informations du compte</h2>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditModalOpen(true)}
+                    className={`inline-flex items-center gap-1.5 rounded-md text-[13px] font-medium text-primary transition-colors hover:text-primary/80 ${focusRing}`}
+                  >
+                    <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                    Modifier
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-5">
+                  {profile.avatar_url ? (
+                    <span className="relative h-[72px] w-[72px] shrink-0 overflow-hidden rounded-full ring-1 ring-border">
+                      <Image
+                        src={profile.avatar_url}
+                        alt={`Avatar de ${profile.username}`}
+                        fill
+                        sizes="72px"
+                        className="object-cover"
+                      />
+                    </span>
+                  ) : (
+                    <span
+                      className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-blue-800 text-[26px] font-bold text-primary-foreground"
+                      aria-hidden="true"
+                    >
+                      {initial}
+                    </span>
+                  )}
+
+                  <dl className="grid min-w-0 flex-1 grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+                    <div className="min-w-0">
+                      <dt className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Nom d&apos;utilisateur</dt>
+                      <dd className="truncate text-[14.5px] font-medium text-ink">{profile.username}</dd>
+                    </div>
+                    <div className="min-w-0">
+                      <dt className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">E-mail</dt>
+                      <dd className="truncate text-[14.5px] font-medium text-ink">{user.email}</dd>
+                    </div>
+                    <div className="min-w-0">
+                      <dt className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Membre depuis</dt>
+                      <dd className="text-[14.5px] font-medium capitalize text-ink">{memberSince}</dd>
+                    </div>
+                    {profile.location && (
+                      <div className="min-w-0">
+                        <dt className="mb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Localisation</dt>
+                        <dd className="flex items-center gap-1.5 truncate text-[14.5px] font-medium text-ink">
+                          <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+                          {profile.location}
+                        </dd>
+                      </div>
+                    )}
+                  </dl>
+                </div>
+
+                {profile.bio && (
+                  <p className="mt-5 border-t border-border/60 pt-4 text-[14px] leading-relaxed text-muted-foreground">
+                    {profile.bio}
+                  </p>
+                )}
+              </section>
+
+              {/* Purchased itineraries — banner link */}
+              <Link
+                href="/mon-espace/itineraires"
+                className={`${cardBase} block p-6 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-card ${focusRing}`}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex min-w-0 items-center gap-4">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-accent/15 text-accent-strong" aria-hidden="true">
+                      <Route className="h-5 w-5" />
+                    </span>
+                    <div className="min-w-0">
+                      <h2 className="mb-0.5 text-[17px] font-semibold leading-tight text-ink">Mes itinéraires achetés</h2>
+                      <p className="text-[13px] text-muted-foreground">
+                        {savedItineraries.length > 0
+                          ? `${savedItineraries.length} itinéraire${savedItineraries.length > 1 ? 's' : ''} débloqué${savedItineraries.length > 1 ? 's' : ''} · carte, photos et détails dans Mon Espace`
+                          : "Aucun itinéraire débloqué pour l'instant"}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-[13px] font-semibold text-accent-foreground shadow-cta">
+                    Voir tout
+                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
                   </span>
-                  <div className="min-w-0">
-                    <h2 className="text-[18px] font-bold text-ink leading-tight mb-0.5">
-                      Mes Itinéraires Achetés
-                    </h2>
-                    <p className="text-[13px] text-muted-foreground">
-                      {savedItineraries.length > 0
-                        ? `${savedItineraries.length} itinéraire${savedItineraries.length > 1 ? 's' : ''} débloqué${savedItineraries.length > 1 ? 's' : ''} · carte, photos et détails dans Mon Espace`
-                        : 'Aucun itinéraire débloqué pour l\'instant'}
-                    </p>
-                  </div>
                 </div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-accent text-accent-foreground px-4 py-2 text-[13px] font-semibold shadow-cta">
-                  <FontAwesomeIcon icon={faMapSigns} />
-                  Voir tout →
-                </span>
-              </div>
-            </Link>
-
-            <div className="bg-card p-6 rounded-2xl border border-border/60 shadow-card-rest">
-                <h2 className="text-2xl font-semibold mb-6 border-b pb-3 flex items-center">
-                    <FontAwesomeIcon icon={faReceipt} className="text-green-500 mr-3 text-2xl" /> Mes Commandes
-                </h2>
-                <div className="space-y-3">
-                    {orders.length > 0 ? (
-                        orders.map((order) => (
-                            <div key={order.id} className="border p-3 rounded-md hover:bg-muted flex justify-between items-center">
-                                <div>
-                                    <p className="font-medium">Commande du {new Date(order.created_at).toLocaleDateString('fr-FR')}</p>
-                                    <p className="text-sm text-muted-foreground">Total: {order.total_amount.toFixed(2)} € - Statut: {order.status}</p>
-                                </div>
-                                <Link href={`/profil/commandes/${order.id}`} className="text-primary hover:underline text-sm">Voir détails</Link>
-                            </div>
-                        ))
-                    ) : (
-                        <p className="text-muted-foreground italic">Vous n'avez aucune commande pour le moment.</p>
-                    )}
-                </div>
-            </div>
-
-            <div className="bg-card p-6 rounded-2xl border border-border/60 shadow-card-rest">
-              <h2 className="text-2xl font-semibold mb-6 border-b pb-3 flex items-center">
-                <FontAwesomeIcon icon={faComments} className="text-primary mr-3 text-2xl" /> Mon Activité sur le Forum
-              </h2>
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-medium text-foreground mb-2">Mes Derniers Sujets Créés :</h3>
-                  <div className="space-y-2">
-                    {recentTopics.length > 0 ? (
-                      recentTopics.map((topic) => (
-                        <Link key={topic.slug} href={`/forum-sur-les-philippines/sujet/${topic.slug}`} className="block text-primary hover:underline">{topic.title}</Link>
-                      ))
-                    ) : (
-                      <p className="text-muted-foreground italic">Aucun sujet créé récemment.</p>
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium text-foreground mb-2">Mes Dernières Réponses :</h3>
-                  <div className="space-y-2">
-                    {recentPosts.length > 0 ? (
-                      recentPosts.map((post) => {
-                        const preview = getPostPreview(post.content);
-                        const topic = post.topic && post.topic.length > 0 ? post.topic[0] : null;
-
-                        return (
-                          <div key={post.id} className="text-sm text-foreground mb-3 pb-3 border-b border-border last:border-b-0">
-                            {preview.type === 'quote' ? (
-                              <p className="preview-quote-orange">"{preview.text}"</p>
-                            ) : (
-                              <p className="italic">"{preview.text}"</p>
-                            )}
-                            {topic ? (
-                              <Link href={`/forum-sur-les-philippines/sujet/${topic.slug}#post-${post.id}`} className="text-xs text-primary hover:underline mt-1 inline-block">
-                                Voir le message dans "{topic.title}"
-                              </Link>
-                            ) : (
-                              <p className="text-xs text-muted-foreground mt-1">Message dans un sujet non disponible</p>
-                            )}
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <p className="text-muted-foreground italic">Aucune réponse récente.</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <Link href="/forum-sur-les-philippines" className="mt-6 inline-block px-5 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition duration-300 font-semibold text-sm">
-                Aller aux Forums
               </Link>
+
+              {/* Orders */}
+              <section className={`${cardBase} p-6 sm:p-7`}>
+                <div className="mb-5 flex items-center justify-between gap-4">
+                  <h2 className="flex items-center gap-2 text-[17px] font-semibold tracking-[-0.01em] text-ink">
+                    <Receipt className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    Mes commandes
+                  </h2>
+                  {orders.length > 0 && (
+                    <Link
+                      href="/profil/commandes"
+                      className={`inline-flex items-center gap-1 rounded-md text-[13px] font-medium text-primary transition-colors hover:text-primary/80 ${focusRing}`}
+                    >
+                      Historique
+                      <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                    </Link>
+                  )}
+                </div>
+
+                {orders.length > 0 ? (
+                  <ul className="m-0 list-none p-0">
+                    {orders.map((order) => {
+                      const status = ORDER_STATUS[order.status] || { label: order.status, bg: 'bg-muted', text: 'text-foreground' };
+                      return (
+                        <li
+                          key={order.id}
+                          className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 py-3.5 last:border-0"
+                        >
+                          <div className="min-w-0">
+                            <p className="text-[14px] font-medium text-ink">Commande #{order.id}</p>
+                            <p className="text-[12.5px] text-muted-foreground">
+                              {new Date(order.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className={['inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.05em]', status.bg, status.text].join(' ')}>
+                              <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
+                              {status.label}
+                            </span>
+                            <span className="text-[14px] font-bold tabular-nums text-ink">
+                              {Number(order.total_amount).toFixed(2)} €
+                            </span>
+                            <Link
+                              href={`/profil/commandes/${order.id}`}
+                              className={`rounded-md text-[13px] font-medium text-primary transition-colors hover:text-primary/80 ${focusRing}`}
+                            >
+                              Détails
+                            </Link>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : (
+                  <p className="text-[14px] italic text-muted-foreground">Vous n&apos;avez aucune commande pour le moment.</p>
+                )}
+              </section>
+
+              {/* Forum activity */}
+              <section className={`${cardBase} p-6 sm:p-7`}>
+                <div className="mb-5 flex items-center justify-between gap-4">
+                  <h2 className="flex items-center gap-2 text-[17px] font-semibold tracking-[-0.01em] text-ink">
+                    <MessageSquare className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                    Mon activité sur le forum
+                  </h2>
+                  <Link
+                    href="/forum-sur-les-philippines"
+                    className={`inline-flex items-center gap-1 rounded-md text-[13px] font-medium text-primary transition-colors hover:text-primary/80 ${focusRing}`}
+                  >
+                    Aller aux forums
+                    <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                  </Link>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                      Derniers sujets créés
+                    </h3>
+                    {recentTopics.length > 0 ? (
+                      <ul className="space-y-1.5">
+                        {recentTopics.map((topic) => (
+                          <li key={topic.slug}>
+                            <Link
+                              href={`/forum-sur-les-philippines/sujet/${topic.slug}`}
+                              className={`inline-block rounded text-[14px] font-medium text-primary transition-colors hover:text-primary/80 ${focusRing}`}
+                            >
+                              {topic.title}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-[14px] italic text-muted-foreground">Aucun sujet créé récemment.</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <h3 className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                      Dernières réponses
+                    </h3>
+                    {recentPosts.length > 0 ? (
+                      <div className="space-y-3">
+                        {recentPosts.map((post) => {
+                          const preview = getPostPreview(post.content);
+                          const topic = post.topic && post.topic.length > 0 ? post.topic[0] : null;
+                          return (
+                            <div key={post.id} className="border-b border-border/60 pb-3 last:border-0 last:pb-0">
+                              {preview.type === 'quote' ? (
+                                <p className="preview-quote-orange">&laquo;&nbsp;{preview.text}&nbsp;&raquo;</p>
+                              ) : (
+                                <p className="text-[13.5px] italic leading-relaxed text-muted-foreground">
+                                  &laquo;&nbsp;{preview.text}&nbsp;&raquo;
+                                </p>
+                              )}
+                              {topic ? (
+                                <Link
+                                  href={`/forum-sur-les-philippines/sujet/${topic.slug}#post-${post.id}`}
+                                  className={`mt-1 inline-block rounded text-[12px] font-medium text-primary transition-colors hover:text-primary/80 ${focusRing}`}
+                                >
+                                  Voir le message dans «&nbsp;{topic.title}&nbsp;»
+                                </Link>
+                              ) : (
+                                <p className="mt-1 text-[12px] text-muted-foreground">Message dans un sujet non disponible</p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-[14px] italic text-muted-foreground">Aucune réponse récente.</p>
+                    )}
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            {/* Side column */}
+            <div className="flex flex-col gap-5 lg:col-span-1">
+
+              {/* Easy+ status — warm amber card */}
+              <section className="rounded-2xl border border-[#F4D38E] bg-[#FFFBF2] p-6 dark:border-accent/30 dark:bg-accent/10">
+                <span className="mb-2.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#B45309] dark:text-accent">
+                  <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                  Statut Easy+
+                </span>
+                <p className="mb-1 text-[14.5px] text-ink">
+                  Statut actuel : <strong className="font-semibold">{easyPlusActive ? 'Membre Easy+' : 'Membre Standard'}</strong>
+                </p>
+                <p className="mb-4 text-[13px] leading-[1.55] text-muted-foreground">
+                  {easyPlusActive && easyPlusExpiry
+                    ? `Avantages actifs jusqu'au ${easyPlusExpiry}.`
+                    : '−20 % chez nos partenaires, support prioritaire et guides premium.'}
+                </p>
+                <Link
+                  href="/services"
+                  className={`inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-4 py-2.5 text-[14px] font-semibold text-accent-foreground shadow-cta transition-colors hover:bg-accent/90 ${focusRing}`}
+                >
+                  Découvrir Easy+
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              </section>
+
+              {/* Quick actions */}
+              <section className={`${cardBase} p-6`}>
+                <h2 className="mb-3 text-[15px] font-semibold text-ink">Actions rapides</h2>
+                <ul className="m-0 list-none p-0">
+                  {QUICK_LINKS.map(({ href, label, Icon }) => (
+                    <li key={href}>
+                      <Link
+                        href={href}
+                        className={`group flex items-center gap-3 border-b border-border/60 py-3 text-[14px] font-medium text-foreground transition-colors last:border-0 hover:text-primary ${focusRing}`}
+                      >
+                        <Icon className="h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary" aria-hidden="true" />
+                        <span className="min-w-0 flex-1 truncate">{label}</span>
+                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+
+              {/* Sign out */}
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className={`flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-card py-3 text-[14px] font-semibold text-red-700 transition-colors hover:border-red-200 hover:bg-red-50 dark:text-red-400 dark:hover:border-red-500/40 dark:hover:bg-red-500/10 ${focusRing}`}
+              >
+                <LogOut className="h-4 w-4" aria-hidden="true" />
+                Se déconnecter
+              </button>
             </div>
           </div>
+        </div>
+      </main>
 
-          <div className="lg:col-span-1 space-y-8">
-            <div className="bg-gradient-to-br from-accent/5 to-accent/10 p-6 rounded-2xl border border-accent/20">
-          <h3 className="text-xl font-semibold mb-4 text-primary/90 flex items-center">
-            <FontAwesomeIcon icon={faStar} className="text-accent/90 mr-2" /> Statut Philippin'Easy+
-          </h3>
+      <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Modifier mon profil">
+        <form onSubmit={handleProfileUpdate} className="space-y-4">
           <div>
-            <p className="text-foreground mb-1">Statut actuel: <span className="font-bold text-foreground">Membre Standard</span></p>
-            <p className="text-sm text-muted-foreground mb-4">Passez Premium pour des avantages exclusifs !</p>
+            <label htmlFor="modal-username" className="block text-sm font-medium text-foreground">Nom d&apos;utilisateur</label>
+            <input type="text" id="modal-username" name="modal-username" defaultValue={profile.username} className="mt-1 block w-full rounded-md border border-border px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-ring sm:text-sm" required />
           </div>
-          <Link href="/meilleurs-plans#premium" className="inline-block w-full text-center px-4 py-2 bg-accent text-accent-foreground rounded-lg shadow hover:bg-accent/90 transition duration-300 font-semibold">
-            Découvrir Easy+
-          </Link>
-        </div>
-        <div className="bg-card p-6 rounded-2xl border border-border/60 shadow-card-rest">
-          <h3 className="text-xl font-semibold mb-4">Actions Rapides</h3>
-          <ul className="space-y-2">
-            <li><Link href="/mon-espace" className="flex items-center text-primary hover:underline font-medium"><FontAwesomeIcon icon={faRoute} className="w-5 mr-2 text-center" /> Mon Espace Services</Link></li>
-            <li><Link href="/mon-espace/itineraires" className="flex items-center text-primary hover:underline"><FontAwesomeIcon icon={faMapSigns} className="w-5 mr-2 text-center" /> Mes itinéraires achetés</Link></li>
-            <li><Link href="/itineraire-personnalise-pour-les-philippines" className="flex items-center text-primary hover:underline"><FontAwesomeIcon icon={faMapSigns} className="w-5 mr-2 text-center" /> Créer un itinéraire</Link></li>
-            <li><Link href="/forum-sur-les-philippines/nouveau-sujet" className="flex items-center text-primary hover:underline"><FontAwesomeIcon icon={faPencilAlt} className="w-5 mr-2 text-center" /> Poser une question</Link></li>
-            <li><Link href="/meilleurs-plans" className="flex items-center text-primary hover:underline"><FontAwesomeIcon icon={faTags} className="w-5 mr-2 text-center" /> Voir les bons plans</Link></li>
-          </ul>
-        </div>
-
-        <div className="bg-card p-6 rounded-2xl border border-border/60 shadow-card-rest text-center">
-          <button onClick={handleSignOut} className="w-full px-5 py-2 bg-destructive text-destructive-foreground rounded-lg hover:bg-destructive/90 transition duration-300 font-medium">
-            <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" /> Se Déconnecter
-          </button>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <Modal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} title="Modifier mon profil">
-    <form onSubmit={handleProfileUpdate} className="space-y-4">
-      <div>
-        <label htmlFor="modal-username" className="block text-sm font-medium text-foreground">Nom d'utilisateur</label>
-        <input type="text" id="modal-username" name="modal-username" defaultValue={profile.username} className="mt-1 block w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-primary sm:text-sm" required />
-      </div>
-      <div>
-        <label htmlFor="modal-bio" className="block text-sm font-medium text-foreground">Bio</label>
-        <textarea id="modal-bio" name="modal-bio" rows={3} defaultValue={profile.bio || ''} placeholder="Aucune biographie." className="mt-1 block w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-primary sm:text-sm"></textarea>
-      </div>
-      <div>
-        <label htmlFor="modal-location" className="block text-sm font-medium text-foreground">Localisation</label>
-        <input type="text" id="modal-location" name="modal-location" defaultValue={profile.location || ''} placeholder="Non spécifié" className="mt-1 block w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-primary sm:text-sm" />
-      </div>
-      <div>
-        <label htmlFor="modal-whatsapp" className="block text-sm font-medium text-foreground">Numéro WhatsApp <span className="text-muted-foreground font-normal">(format international)</span></label>
-        <input type="tel" id="modal-whatsapp" name="modal-whatsapp" defaultValue={profile.whatsapp_number || ''} placeholder="+33 6 12 34 56 78" className="mt-1 block w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-primary sm:text-sm" />
-        <p className="mt-1 text-xs text-muted-foreground">Requis si vous avez acheté un service avec support WhatsApp.</p>
-      </div>
-      <div>
-        <label htmlFor="modal-avatar-file" className="block text-sm font-medium text-foreground">Changer l'avatar</label>
-        <input type="file" id="modal-avatar-file" name="modal-avatar-file" className="mt-1 block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20" accept="image/*" />
-      </div>
-          <div className="mt-6 flex justify-end space-x-3">
-            <button type="button" onClick={() => setIsEditModalOpen(false)} className="px-4 py-2 text-sm font-medium text-foreground bg-muted hover:bg-muted/80 rounded-md">Annuler</button>
-            <button type="submit" disabled={isSavingProfile} className="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-md disabled:bg-muted">
-              <FontAwesomeIcon icon={faSave} className="mr-1" /> {isSavingProfile ? 'Enregistrement...' : 'Enregistrer'}
+          <div>
+            <label htmlFor="modal-bio" className="block text-sm font-medium text-foreground">Bio</label>
+            <textarea id="modal-bio" name="modal-bio" rows={3} defaultValue={profile.bio || ''} placeholder="Aucune biographie." className="mt-1 block w-full rounded-md border border-border px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-ring sm:text-sm"></textarea>
+          </div>
+          <div>
+            <label htmlFor="modal-location" className="block text-sm font-medium text-foreground">Localisation</label>
+            <input type="text" id="modal-location" name="modal-location" defaultValue={profile.location || ''} placeholder="Non spécifié" className="mt-1 block w-full rounded-md border border-border px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-ring sm:text-sm" />
+          </div>
+          <div>
+            <label htmlFor="modal-whatsapp" className="block text-sm font-medium text-foreground">Numéro WhatsApp <span className="font-normal text-muted-foreground">(format international)</span></label>
+            <input type="tel" id="modal-whatsapp" name="modal-whatsapp" defaultValue={profile.whatsapp_number || ''} placeholder="+33 6 12 34 56 78" className="mt-1 block w-full rounded-md border border-border px-3 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-ring sm:text-sm" />
+            <p className="mt-1 text-xs text-muted-foreground">Requis si vous avez acheté un service avec support WhatsApp.</p>
+          </div>
+          <div>
+            <label htmlFor="modal-avatar-file" className="block text-sm font-medium text-foreground">Changer l&apos;avatar</label>
+            <input type="file" id="modal-avatar-file" name="modal-avatar-file" className="mt-1 block w-full text-sm text-muted-foreground file:mr-4 file:rounded-full file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20" accept="image/*" />
+          </div>
+          <div className="mt-6 flex justify-end gap-3">
+            <button type="button" onClick={() => setIsEditModalOpen(false)} className="rounded-md bg-muted px-4 py-2 text-sm font-medium text-foreground hover:bg-muted/80">Annuler</button>
+            <button type="submit" disabled={isSavingProfile} className="inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:bg-muted">
+              <Save className="h-3.5 w-3.5" aria-hidden="true" /> {isSavingProfile ? 'Enregistrement…' : 'Enregistrer'}
             </button>
           </div>
         </form>
-  </Modal>
-
-  {itineraryToDelete && (
-    <ConfirmationModal
-      isOpen={!!itineraryToDelete}
-      onClose={() => setItineraryToDelete(null)}
-      onConfirm={confirmDeleteItinerary}
-      title="Confirmer la suppression"
-    >
-      <p>Êtes-vous sûr de vouloir supprimer cet itinéraire {getVariantLabel(itineraryToDelete.selected_variant)} ({getOfferLabel(itineraryToDelete.offer_type)}) ?</p>
-    </ConfirmationModal>
-  )}
-</>
-);
+      </Modal>
+    </>
+  );
 };
 
 export default ProfilPage;
