@@ -4,9 +4,8 @@ import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import ServiceCard from '@/components/services/ServiceCard';
-import FAQSchema from '@/components/shared/FAQSchema';
 import ServicesJsonLd from '@/components/shared/ServicesJsonLd';
-import { PageHero, CardGrid, type StatItem } from '@/components/sections';
+import { PageHero, CardGrid, FaqAccordion, type StatItem } from '@/components/sections';
 import { cn } from '@/lib/utils';
 
 // Descriptions détaillées pour les infobulles
@@ -33,26 +32,28 @@ const TOOLTIPS = {
     "Liste complète et personnalisée : documents, vaccins, applications à télécharger, objets à emporter, budget à prévoir",
 };
 
+// Single source of truth for the Services FAQ — feeds BOTH the visible
+// <FaqAccordion> and its FAQPage JSON-LD (via withSchema). The 4 canvas Q/R
+// and the historical serviceFAQs are identical, so no de-dup merge is needed;
+// the Pack Ultime answer was cross-checked against the real pack features
+// (Conciergerie, Buddy, WhatsApp, Easy+ 1 an, Rencontre Premium 6 mois, guides
+// PDF pendant le pack, groupe privé à vie).
 const serviceFAQs = [
   {
-    question: "Qu'est-ce que le Buddy System ?",
-    answer:
-      "Le Buddy System vous met en relation avec un expatrié français vivant aux Philippines. Vous bénéficiez de calls avant, pendant et après votre voyage, ainsi qu'un contact WhatsApp direct pour des conseils personnalisés et locaux.",
+    q: "Qu'est-ce que le Buddy System ?",
+    a: "Le Buddy System vous met en relation avec un expatrié français vivant aux Philippines. Vous bénéficiez de calls avant, pendant et après votre voyage, ainsi qu'un contact WhatsApp direct pour des conseils personnalisés et locaux.",
   },
   {
-    question: 'Comment fonctionne le suivi WhatsApp ?',
-    answer:
-      "Pendant votre voyage, vous avez un accès direct à notre équipe via WhatsApp. Problème de transport, question sur un restaurant, besoin d'aide en urgence ? Nous sommes là pour vous répondre rapidement.",
+    q: 'Comment fonctionne le suivi WhatsApp ?',
+    a: "Pendant votre voyage, vous avez un accès direct à notre équipe via WhatsApp. Problème de transport, question sur un restaurant, besoin d'aide en urgence ? Nous sommes là pour vous répondre rapidement.",
   },
   {
-    question: 'Le Pack Ultime inclut-il vraiment tout ?',
-    answer:
-      "Oui ! Le Pack Ultime comprend l'itinéraire Conciergerie, le Buddy System complet, le suivi WhatsApp pendant tout votre séjour, l'abonnement Easy+ 1 an, Rencontre Premium 6 mois, l'accès à TOUS nos guides PDF (existants et à venir) pendant la durée de ton pack, et l'accès à vie au groupe privé.",
+    q: 'Le Pack Ultime inclut-il vraiment tout ?',
+    a: "Oui : itinéraire Conciergerie, Buddy System complet, suivi WhatsApp pendant tout le séjour, Easy+ 1 an, Rencontre Premium 6 mois, tous nos guides PDF pendant la durée du pack, et l'accès à vie au groupe privé.",
   },
   {
-    question: 'Puis-je payer en plusieurs fois ?',
-    answer:
-      'Pour les packs supérieurs à 200€, nous proposons le paiement en 2 ou 3 fois sans frais. Contactez-nous pour en discuter.',
+    q: 'Puis-je payer en plusieurs fois ?',
+    a: 'Pour les packs supérieurs à 200 €, nous proposons le paiement en 2 ou 3 fois sans frais. Contactez-nous pour en discuter.',
   },
 ];
 
@@ -173,7 +174,6 @@ const easyPlusPlans = [
 export default function ServicesPage() {
   return (
     <div className="min-h-screen">
-      <FAQSchema faqs={serviceFAQs} />
       <ServicesJsonLd />
 
       {/* Hero — editorial photo + stats (H1 unique) */}
@@ -615,6 +615,20 @@ export default function ServicesPage() {
               </Link>
             </div>
           </CardGrid>
+        </div>
+      </section>
+
+      {/* Section 7 — FAQ (visible + FAQPage schema, source unique serviceFAQs) */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <FaqAccordion
+            eyebrow="Questions fréquentes"
+            title="Tout est"
+            titleAccent="clair ?"
+            faqs={serviceFAQs}
+            footnote="Paiement en 2 ou 3 fois sans frais pour les packs supérieurs à 200 € — écrivez-nous."
+            withSchema
+          />
         </div>
       </section>
 

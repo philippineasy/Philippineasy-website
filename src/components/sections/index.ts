@@ -5,6 +5,7 @@ export { PageHero } from './PageHero';
 export { StatRow, type StatItem } from './StatRow';
 export { SplitSection } from './SplitSection';
 export { CardGrid } from './CardGrid';
+export { FaqAccordion } from './FaqAccordion';
 export { LinkCard } from './LinkCard';
 export { AppWindowPanel } from './AppWindowPanel';
 export { CTABand } from './CTABand';

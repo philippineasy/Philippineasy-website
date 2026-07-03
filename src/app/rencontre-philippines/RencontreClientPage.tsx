@@ -8,7 +8,7 @@ import { faClone } from '@fortawesome/free-solid-svg-icons';
 import { DatingProfile, DatingQuestionAnswer, Interest } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePremium } from '@/hooks/usePremium';
-import { PageHero, CTABand } from '@/components/sections';
+import { PageHero, CTABand, FaqAccordion } from '@/components/sections';
 import { checkHasProfile, getUserExtras, getProfiles } from '@/services/datingService';
 import { MemberCard } from './MemberCard';
 
@@ -37,7 +37,14 @@ const premiumPlans = [
   { label: '6 mois — recommandé', price: '9,99 €', recommended: true },
 ];
 
-const RencontreClientPage = () => {
+interface RencontreFaq {
+  q: string;
+  a: string;
+}
+
+// Schema is emitted server-side by the parent page.tsx (see RENCONTRE_FAQS) to
+// keep the FAQPage JSON-LD out of this client bundle — so here withSchema=false.
+const RencontreClientPage = ({ faqs }: { faqs: RencontreFaq[] }) => {
   const [profiles, setProfiles] = useState<DatingProfile[]>([]);
   const [profileStatus, setProfileStatus] = useState({ hasProfile: false, isValidated: false, loading: true });
   const { user } = useAuth();
@@ -338,6 +345,18 @@ const RencontreClientPage = () => {
               </button>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* ── FAQ (visible ; schema émis par la page serveur parente) ──────── */}
+      <section className="bg-muted py-20 md:py-24">
+        <div className="container mx-auto px-4">
+          <FaqAccordion
+            eyebrow="Questions fréquentes"
+            title="Tout est"
+            titleAccent="clair ?"
+            faqs={faqs}
+          />
         </div>
       </section>
 

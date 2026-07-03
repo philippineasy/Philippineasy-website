@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
+import { FaqAccordion } from '@/components/sections';
 import { ItineraryHero } from '@/components/itinerary/ItineraryHero';
 import { HowItWorks } from '@/components/itinerary/HowItWorks';
 import { PreferencesForm } from '@/components/itinerary/PreferencesForm';
@@ -25,6 +26,32 @@ interface ItineraryPreview {
   highlights: string[];
   teaser_days: { day: number; summary: string }[];
 }
+
+// FAQ 100 % factuelle — tirée de src/config/itinerary-pricing.ts (offres,
+// modifications, livraison) et des CGV (droit de rétractation, article L221-28).
+// Feed le visible ET le FAQPage schema via <FaqAccordion withSchema>.
+const ITINERARY_FAQS = [
+  {
+    q: 'Quelle différence entre Express, Premium et Conciergerie ?',
+    a: "L'Express est 100 % IA, livré instantanément : itinéraire jour par jour, hébergements recommandés, liens Google Maps et budget détaillé. Le Premium ajoute des modifications gratuites, un PDF professionnel et un support par e-mail sous 48 h. La Conciergerie, c'est du sur-mesure : échange préalable personnalisé, contact WhatsApp direct et validité de 60 jours.",
+  },
+  {
+    q: 'En combien de temps je reçois mon itinéraire ?',
+    a: "Votre itinéraire est généré instantanément par notre IA et disponible dès la validation du paiement. Avec le Premium et la Conciergerie, cette base est ensuite affinée par notre équipe (retouches, support e-mail sous 48 h, et pour la Conciergerie un échange préalable).",
+  },
+  {
+    q: 'Puis-je modifier mon itinéraire après réception ?',
+    a: "Oui. L'Express n'inclut pas de modification gratuite, mais vous pouvez en ajouter à l'unité (à partir de 9,99 €). Le Premium et la Conciergerie incluent des modifications gratuites — de 1 à 10 selon la durée et l'offre — pour ajuster un hôtel, une journée entière ou toute une étape.",
+  },
+  {
+    q: 'Comment mon itinéraire est-il livré ?',
+    a: "Par e-mail, instantanément après le paiement sécurisé par Stripe. Les offres Premium et Conciergerie ajoutent un PDF professionnel téléchargeable ; la Conciergerie inclut en plus un contact direct sur WhatsApp.",
+  },
+  {
+    q: "Puis-je me rétracter après l'achat ?",
+    a: "L'itinéraire est un contenu numérique fourni immédiatement. Au moment du paiement, vous consentez à son exécution immédiate et renoncez à votre droit de rétractation de 14 jours, conformément à l'article L221-28 du Code de la consommation. Le détail figure dans nos CGV.",
+  },
+];
 
 const getRecommendedVariant = (style: string): 'relax' | 'balanced' | 'adventure' => {
   switch (style) {
@@ -457,6 +484,19 @@ function ItineraireContent() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* FAQ — visible + FAQPage schema (source unique ITINERARY_FAQS) */}
+      <section className="border-t border-border bg-card py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <FaqAccordion
+            eyebrow="Questions fréquentes"
+            title="Tout est"
+            titleAccent="clair ?"
+            faqs={ITINERARY_FAQS}
+            withSchema
+          />
+        </div>
+      </section>
 
       {/* Modal de confirmation/consentement de l'offre — etape 1 du checkout */}
       {pendingOffer && duration && (

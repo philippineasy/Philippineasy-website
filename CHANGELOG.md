@@ -5,6 +5,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Feature — FAQ visibles au pattern du canvas Design (2026-07-03)
+
+Nouveau composant `FaqAccordion` (Section Kit) fidèle au canvas Services de Hugo : accordéons natifs details/summary à filets hairline, eyebrow « Questions fréquentes », h2 « Tout est *clair ?* », footnote optionnelle, chevron CSS, dark-ready. Déployé avec schema FAQPage (1 seul par page, dédupliqué) :
+- `/services` : la page émettait le schema SANS FAQ visible — les 4 Q/R du canvas (Buddy System, WhatsApp, Pack Ultime, paiement 2-3×) sont désormais affichées, schema et visible sur la même source.
+- `/itineraire-personnalise-pour-les-philippines` : 5 Q/R factuelles (Express/Premium/Conciergerie, délai instantané, modifications 0/1-4/3-10 selon l'offre, canaux réels e-mail/PDF/WhatsApp — Telegram retiré car inexistant dans l'offre, rétractation cf. CGV).
+- `/rencontre-philippines` : 4 Q/R (gratuit femmes, validation < 24 h, prix premium par durée, traduction 10/jour gratuit) — schema émis côté serveur.
+- `/itineraires/[slug]` : l'ancienne FAQSection destinations restylée sur le pattern (mêmes données/schema).
+
 ### Feature — Traduction FR ↔ EN ↔ Tagalog dans la messagerie Rencontres (2026-07-03)
 
 La promesse retirée lors de l'assainissement de la preuve sociale redevient vraie : traduction intégrée au chat, sur l'architecture IA existante (webhook n8n `dating-translate` → GPT-4o-mini, credential OpenAI déjà en place, même pattern que la génération d'itinéraires).
