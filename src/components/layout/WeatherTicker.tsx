@@ -1,5 +1,4 @@
 import { LiveManilaTime } from './LiveManilaTime';
-import { getCheapestFlightPrice } from '@/lib/flight-price';
 
 // 4 villes phares (handoff). On garde les coords pour la précision API.
 const featuredCities = [
@@ -75,11 +74,7 @@ async function getEurPhpRate(): Promise<number | null> {
 }
 
 export default async function WeatherTicker() {
-  const [weatherData, fxRate, flightPrice] = await Promise.all([
-    getWeatherData(),
-    getEurPhpRate(),
-    getCheapestFlightPrice(),
-  ]);
+  const [weatherData, fxRate] = await Promise.all([getWeatherData(), getEurPhpRate()]);
 
   if (!weatherData || weatherData.length === 0) return null;
 
@@ -119,22 +114,11 @@ export default async function WeatherTicker() {
 
         {/* FX en direct (frankfurter.app) */}
         {fxRate !== null && (
-          <span className="inline-flex items-center gap-1.5 px-4 py-[9px] border-r border-white/10 whitespace-nowrap">
+          <span className="inline-flex items-center gap-1.5 px-4 py-[9px] whitespace-nowrap">
             <span>1 €</span>
             <b className="text-warm-yellow font-semibold tabular-nums">
               = {fxRate.toFixed(2)} ₱
             </b>
-          </span>
-        )}
-
-        {/* Prix de vol en direct (Amadeus) — masqué si l'API/les clés sont absentes */}
-        {flightPrice !== null && (
-          <span className="inline-flex items-center gap-1.5 px-4 py-[9px] whitespace-nowrap">
-            <span className="text-[13px]" aria-hidden="true">
-              ✈
-            </span>
-            <span>Paris → MNL</span>
-            <b className="text-sky-300 font-semibold tabular-nums">dès {flightPrice} €</b>
           </span>
         )}
       </div>
