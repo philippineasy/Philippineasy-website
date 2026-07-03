@@ -86,9 +86,10 @@ export default async function HomePage() {
       <HeroSection />
 
       {/* Trust signals — sous le hero, avant la decouverte du contenu.
-          4 badges : autorite (depuis 2020) + preuve sociale (10k voyageurs)
-          + reduction du risque (paiement securise) + support reactif.
-          On evite "Satisfait ou remboursé" ici : la home n'est pas transactionnelle. */}
+          4 badges REELS : autorite (depuis 2020) + preuve produit (47 guides
+          gratuits) + itineraires valides a la main + support WhatsApp humain.
+          Aucun compteur invente. On evite "Satisfait ou remboursé" ici : la
+          home n'est pas transactionnelle. */}
       <section className="bg-background pt-8 pb-2 md:pt-12 md:pb-4">
         <div className="container mx-auto px-4 max-w-5xl">
           <TrustBadgeBar

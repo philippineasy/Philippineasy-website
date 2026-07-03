@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: "Services Premium Philippines : Buddy System, Itinéraires IA & Conciergerie",
   description:
-    "Accompagnement IA + humain pour préparer votre voyage ou expatriation aux Philippines. Buddy System avec expats français, itinéraires sur-mesure, suivi WhatsApp 24/7, Pack Ultime tout-inclus. +10 000 voyageurs accompagnés.",
+    "Accompagnement IA + humain pour préparer votre voyage ou expatriation aux Philippines. Buddy System avec expats français, itinéraires sur-mesure, suivi WhatsApp 24/7, Pack Ultime tout-inclus. Un guide francophone indépendant depuis 2020.",
   keywords: [
     'services voyage philippines',
     'conciergerie philippines',
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     url: 'https://philippineasy.com/services',
     title: "Services Premium Philippines : Buddy System & Conciergerie",
     description:
-      "IA + Humain : itinéraires sur-mesure, expat français en relais 24/7, suivi WhatsApp pendant le séjour. +10 000 voyageurs accompagnés.",
+      "IA + Humain : itinéraires sur-mesure, expat français en relais 24/7, suivi WhatsApp pendant le séjour, par de vrais Français sur place.",
     siteName: "Philippin'Easy",
     images: [
       {

@@ -46,37 +46,25 @@ export default function EntitlementCard({
   return (
     <div
       className={cn(
-        'bg-card rounded-2xl p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
+        'bg-card rounded-2xl border border-border/60 shadow-card-rest p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card',
         entitlement.status === 'fully_used' && 'opacity-60',
         entitlement.status === 'expired' && 'opacity-40',
         className
       )}
-      style={{
-        border: '0.5px solid #e5e7eb',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-      }}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2.5">
           <div
             className={cn(
               'w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0',
-              entitlement.status === 'fully_used' ? 'bg-neutral-100 text-neutral-400 dark:bg-neutral-800' :
-              entitlement.status === 'expired' ? 'bg-red-50 text-red-400 dark:bg-red-900/20' :
-              ''
+              entitlement.status === 'fully_used' ? 'bg-muted text-muted-foreground' :
+              entitlement.status === 'expired' ? 'bg-destructive/10 text-destructive' :
+              'bg-primary/10 text-primary'
             )}
-            style={
-              entitlement.status !== 'fully_used' && entitlement.status !== 'expired'
-                ? { backgroundColor: '#F4F7FE', color: '#3B5BDB' }
-                : undefined
-            }
           >
             <FontAwesomeIcon icon={icon} style={{ fontSize: '14px' }} />
           </div>
-          <span
-            className="text-foreground"
-            style={{ fontSize: '13px', fontWeight: 600, letterSpacing: '-0.01em' }}
-          >
+          <span className="text-foreground text-[13px] font-semibold tracking-[-0.01em]">
             {display.label}
           </span>
         </div>
@@ -108,7 +96,7 @@ export default function EntitlementCard({
 
       {/* Download indicator for guides */}
       {entitlement.feature_type.startsWith('guide_pdf_') && entitlement.status === 'fully_used' && (
-        <div className="flex items-center gap-1.5 text-xs text-emerald-600">
+        <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
           <FontAwesomeIcon icon={faCheck} />
           <span>Téléchargé</span>
         </div>

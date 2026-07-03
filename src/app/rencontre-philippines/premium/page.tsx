@@ -70,12 +70,18 @@ const FREE_SUPER_LIKES =
     ? `${DATING_CONFIG.free_plan.super_likes_per_day} par jour`
     : 'dash';
 const PREMIUM_SUPER_LIKES = `${DATING_CONFIG.premium_plan.super_likes_per_day} par jour`;
+const FREE_TRANSLATION_LIMIT = `${DATING_CONFIG.free_plan.translation_daily_limit}/jour`;
+const PREMIUM_TRANSLATION_LIMIT =
+  DATING_CONFIG.premium_plan.translation_daily_limit === -1
+    ? 'Illimitée'
+    : `${DATING_CONFIG.premium_plan.translation_daily_limit}/jour`;
 
 const COMPARISON: { label: string; free: React.ReactNode; premium: React.ReactNode }[] = [
   { label: 'Inscription & Création de profil', free: 'check', premium: 'check' },
   { label: 'Recherche de profils', free: 'check', premium: 'check' },
   { label: 'Messages par jour (hommes)', free: FREE_MESSAGE_LIMIT, premium: PREMIUM_MESSAGE_LIMIT },
   { label: 'Messages (femmes)', free: 'Illimités', premium: 'Illimités' },
+  { label: 'Traduction FR ↔ EN ↔ Tagalog', free: FREE_TRANSLATION_LIMIT, premium: PREMIUM_TRANSLATION_LIMIT },
   { label: 'Voir qui a aimé votre profil', free: 'dash', premium: 'check' },
   { label: 'Super Likes', free: FREE_SUPER_LIKES, premium: PREMIUM_SUPER_LIKES },
   { label: 'Visibilité accrue', free: 'dash', premium: 'check' },

@@ -2,12 +2,12 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRightToBracket, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { CardGrid } from '@/components/sections';
+import { GradientAvatar } from '@/components/forum/GradientAvatar';
 
 export interface ForumCategory {
   id: number;
@@ -176,15 +176,13 @@ export const ForumListClient = ({ initialCategories }: ForumListClientProps) => 
                       <span className="font-medium text-foreground">{category.last_topic_title}</span>
                     </p>
                     <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                      <span className="relative h-4 w-4 flex-shrink-0 overflow-hidden rounded-full">
-                        <Image
-                          src={category.last_post_author_avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(category.last_post_author_username)}&background=random&size=24&font-size=0.5&length=1&color=fff`}
-                          alt=""
-                          fill
-                          className="object-cover"
-                          sizes="16px"
-                        />
-                      </span>
+                      <GradientAvatar
+                        src={category.last_post_author_avatar_url}
+                        name={category.last_post_author_username}
+                        className="h-4 w-4 rounded-full"
+                        imgSizes="16px"
+                        textClassName="text-[8px]"
+                      />
                       <span className="font-medium text-muted-foreground">{category.last_post_author_username}</span>
                       <span aria-hidden="true">·</span>
                       <span>{formatRelativeTime(category.last_post_timestamp)}</span>

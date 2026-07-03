@@ -30,7 +30,7 @@ const siteConfig = {
   name: "Philippin'Easy",
   title: "Voyage & Expatriation Philippines 2026 | Guide Complet - Philippin'Easy",
   url: "https://philippineasy.com",
-  description: "Le guide francophone #1 pour voyager et vivre aux Philippines. Itinéraires IA personnalisés, visas, coût de la vie, forum communautaire. +10 000 voyageurs accompagnés.",
+  description: "Le guide francophone #1 pour voyager et vivre aux Philippines. Itinéraires IA personnalisés, visas, coût de la vie, forum communautaire. Des conseils de Français installés sur place.",
   ogImage: "https://philippineasy.com/imagesHero/couple-rencontre-aux-philippines.webp",
   links: {
     twitter: "https://twitter.com/philippineasy",

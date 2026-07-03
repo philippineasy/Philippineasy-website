@@ -2,16 +2,8 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
+import { CheckCircle2, Loader2, Mail, FileText, Send, ArrowRight, TriangleAlert } from 'lucide-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faCheckCircle,
-  faSpinner,
-  faEnvelope,
-  faFilePdf,
-  faPaperPlane,
-  faArrowRight,
-  faExclamationTriangle,
-} from '@fortawesome/free-solid-svg-icons';
 import { faTelegram } from '@fortawesome/free-brands-svg-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
@@ -157,10 +149,10 @@ function CompletionContent() {
 
   if (authLoading || isConfirming) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <FontAwesomeIcon icon={faSpinner} className="animate-spin text-4xl text-primary mb-4" />
+      <div className="flex min-h-[400px] flex-col items-center justify-center">
+        <Loader2 className="mb-4 h-10 w-10 animate-spin text-primary" aria-hidden="true" />
         <p className="text-muted-foreground">
-          {isConfirming ? 'Confirmation du paiement...' : 'Chargement...'}
+          {isConfirming ? 'Confirmation du paiement…' : 'Chargement…'}
         </p>
       </div>
     );
@@ -171,15 +163,18 @@ function CompletionContent() {
   // Payment failed
   if (redirectStatus !== 'succeeded') {
     return (
-      <div className="container mx-auto px-4 py-16 max-w-2xl">
-        <div className="bg-card p-8 rounded-2xl border border-destructive/20 shadow-lg text-center">
-          <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FontAwesomeIcon icon={faExclamationTriangle} className="text-destructive text-2xl" />
+      <div className="container mx-auto max-w-2xl px-4 py-16">
+        <div className="rounded-2xl border border-destructive/20 bg-card p-8 text-center shadow-card">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+            <TriangleAlert className="h-7 w-7 text-destructive" aria-hidden="true" />
           </div>
-          <h1 className="text-2xl font-bold text-destructive mb-4">Echec du paiement</h1>
-          <p className="text-muted-foreground mb-6">Le paiement n&apos;a pas pu etre traite.</p>
-          <Link href="/itineraire-personnalise-pour-les-philippines" className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
-            Reessayer
+          <h1 className="mb-4 text-2xl font-bold text-destructive">Échec du paiement</h1>
+          <p className="mb-6 text-muted-foreground">Le paiement n&apos;a pas pu être traité.</p>
+          <Link
+            href="/itineraire-personnalise-pour-les-philippines"
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+          >
+            Réessayer
           </Link>
         </div>
       </div>
@@ -187,62 +182,62 @@ function CompletionContent() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-16 max-w-2xl">
+    <div className="container mx-auto max-w-2xl px-4 py-16">
       {/* Main CTA: Itinerary is ready in profile */}
-      <div className="bg-card p-8 rounded-2xl border border-border shadow-lg text-center mb-8">
-        <div className="w-20 h-20 bg-[hsl(var(--success)/0.15)] rounded-full flex items-center justify-center mx-auto mb-6">
-          <FontAwesomeIcon icon={faCheckCircle} className="text-[hsl(var(--success))] text-4xl" />
+      <div className="mb-8 rounded-2xl border border-border/60 bg-card p-8 text-center shadow-card">
+        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[hsl(var(--success)/0.15)]">
+          <CheckCircle2 className="h-9 w-9 text-[hsl(var(--success))]" aria-hidden="true" />
         </div>
-        <h1 className="text-2xl font-bold text-foreground mb-2">
-          Votre itineraire est pret !
+        <h1 className="mb-2 text-[clamp(1.5rem,3vw,2rem)] font-bold tracking-[-0.02em] text-ink">
+          Votre itinéraire est prêt !
         </h1>
-        <p className="text-muted-foreground mb-6">
+        <p className="mb-6 text-muted-foreground">
           Il est disponible dans votre espace personnel. Bon voyage aux Philippines !
         </p>
         <Link
           href={`/itineraire/${generationId}`}
-          className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-semibold text-lg rounded-xl hover:bg-primary/90 transition-all shadow-lg hover:shadow-xl"
+          className="inline-flex items-center gap-2 rounded-full bg-accent px-8 py-4 text-[16px] font-semibold text-accent-foreground shadow-cta transition-colors hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         >
-          Voir mon itineraire
-          <FontAwesomeIcon icon={faArrowRight} />
+          Voir mon itinéraire
+          <ArrowRight className="h-4 w-4" aria-hidden="true" />
         </Link>
       </div>
 
       {/* Optional external delivery */}
       {!sent ? (
-        <div className="bg-card p-6 rounded-2xl border border-border shadow-sm">
-          <h2 className="font-bold text-foreground mb-1">Recevoir aussi par...</h2>
-          <p className="text-sm text-muted-foreground mb-4">Optionnel — votre itineraire est deja accessible dans votre profil</p>
+        <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-card-rest">
+          <h2 className="mb-1 text-[16px] font-bold text-ink">Recevoir aussi par…</h2>
+          <p className="mb-4 text-[13px] text-muted-foreground">Optionnel — votre itinéraire est déjà accessible dans votre profil</p>
 
-          <div className="space-y-3 mb-6">
+          <div className="mb-6 space-y-3">
             {/* Email */}
-            <label className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${deliveryEmail ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'}`}>
-              <input type="checkbox" checked={deliveryEmail} onChange={() => setDeliveryEmail(!deliveryEmail)} className="mt-1 w-4 h-4 accent-primary" />
+            <label className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors ${deliveryEmail ? 'border-primary bg-primary/5' : 'border-border/60 hover:border-primary/30'}`}>
+              <input type="checkbox" checked={deliveryEmail} onChange={() => setDeliveryEmail(!deliveryEmail)} className="mt-1 h-4 w-4 accent-[hsl(var(--primary))]" />
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <FontAwesomeIcon icon={faEnvelope} className="text-primary w-4 h-4" />
-                  <span className="font-medium text-sm">Par email</span>
+                  <Mail className="h-4 w-4 text-primary" aria-hidden="true" />
+                  <span className="text-[14px] font-medium text-foreground">Par email</span>
                 </div>
                 {deliveryEmail && (
                   <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="votre@email.com"
-                    className="mt-2 w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+                    className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-[14px] text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:border-primary" />
                 )}
               </div>
             </label>
 
             {/* Telegram */}
-            <label className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${deliveryTelegram ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'}`}>
-              <input type="checkbox" checked={deliveryTelegram} onChange={() => setDeliveryTelegram(!deliveryTelegram)} className="mt-1 w-4 h-4 accent-primary" />
+            <label className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors ${deliveryTelegram ? 'border-primary bg-primary/5' : 'border-border/60 hover:border-primary/30'}`}>
+              <input type="checkbox" checked={deliveryTelegram} onChange={() => setDeliveryTelegram(!deliveryTelegram)} className="mt-1 h-4 w-4 accent-[hsl(var(--primary))]" />
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <FontAwesomeIcon icon={faTelegram} className="text-[#0088cc] w-4 h-4" />
-                  <span className="font-medium text-sm">Par Telegram</span>
+                  <FontAwesomeIcon icon={faTelegram} className="w-4 text-[#0088cc]" />
+                  <span className="text-[14px] font-medium text-foreground">Par Telegram</span>
                 </div>
                 {deliveryTelegram && (
                   <div className="mt-2">
                     <input type="text" value={telegramChatId} onChange={(e) => setTelegramChatId(e.target.value)} placeholder="Votre Chat ID Telegram"
-                      className="w-full px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary" />
-                    <p className="text-xs text-muted-foreground mt-1">Envoyez /start a @philippineasy_bot pour obtenir votre Chat ID</p>
+                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-[14px] text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:border-primary" />
+                    <p className="mt-1 text-[12px] text-muted-foreground">Envoyez /start à @philippineasy_bot pour obtenir votre Chat ID</p>
                   </div>
                 )}
               </div>
@@ -250,21 +245,21 @@ function CompletionContent() {
 
             {/* PDF — reserve aux offres Premium et Conciergerie */}
             {hasPdfAccess ? (
-              <label className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${deliveryPdf ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'}`}>
-                <input type="checkbox" checked={deliveryPdf} onChange={() => setDeliveryPdf(!deliveryPdf)} className="mt-1 w-4 h-4 accent-primary" />
+              <label className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors ${deliveryPdf ? 'border-primary bg-primary/5' : 'border-border/60 hover:border-primary/30'}`}>
+                <input type="checkbox" checked={deliveryPdf} onChange={() => setDeliveryPdf(!deliveryPdf)} className="mt-1 h-4 w-4 accent-[hsl(var(--primary))]" />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <FontAwesomeIcon icon={faFilePdf} className="text-red-500 w-4 h-4" />
-                    <span className="font-medium text-sm">Telecharger en PDF</span>
+                    <FileText className="h-4 w-4 text-red-500" aria-hidden="true" />
+                    <span className="text-[14px] font-medium text-foreground">Télécharger en PDF</span>
                   </div>
                 </div>
               </label>
             ) : offerType === 'express' ? (
-              <div className="flex items-start gap-3 p-3 rounded-xl border border-dashed border-border bg-muted/30">
-                <FontAwesomeIcon icon={faFilePdf} className="text-muted-foreground w-4 h-4 mt-1" />
+              <div className="flex items-start gap-3 rounded-xl border border-dashed border-border/60 bg-muted/30 p-3">
+                <FileText className="mt-0.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
                 <div className="flex-1">
-                  <p className="font-medium text-sm text-muted-foreground">PDF professionnel</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <p className="text-[14px] font-medium text-muted-foreground">PDF professionnel</p>
+                  <p className="mt-0.5 text-[12px] text-muted-foreground">
                     Disponible avec les offres Premium et Conciergerie
                   </p>
                 </div>
@@ -273,27 +268,27 @@ function CompletionContent() {
           </div>
 
           {error && (
-            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm mb-4">{error}</div>
+            <div className="mb-4 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-[14px] text-destructive">{error}</div>
           )}
 
           {(deliveryEmail || deliveryTelegram || deliveryPdf) && (
             <button onClick={handleSendExternal} disabled={isSending}
-              className="w-full py-3 bg-primary text-primary-foreground font-semibold rounded-xl hover:bg-primary/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-[15px] font-semibold text-accent-foreground shadow-cta transition-colors hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:opacity-50">
               {isSending ? (
-                <><FontAwesomeIcon icon={faSpinner} className="animate-spin" /> Envoi en cours...</>
+                <><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Envoi en cours…</>
               ) : (
-                <><FontAwesomeIcon icon={faPaperPlane} /> Envoyer</>
+                <><Send className="h-4 w-4" aria-hidden="true" /> Envoyer</>
               )}
             </button>
           )}
         </div>
       ) : (
-        <div className="bg-card p-6 rounded-2xl border border-[hsl(var(--success)/0.3)] shadow-sm text-center">
-          <FontAwesomeIcon icon={faCheckCircle} className="text-[hsl(var(--success))] text-2xl mb-2" />
-          <p className="text-foreground font-medium">Envoye avec succes !</p>
-          {deliveryEmail && <p className="text-sm text-muted-foreground">Email envoye a {email}</p>}
-          {deliveryTelegram && <p className="text-sm text-muted-foreground">Message Telegram envoye</p>}
-          {deliveryPdf && <p className="text-sm text-muted-foreground">PDF telecharge</p>}
+        <div className="rounded-2xl border border-[hsl(var(--success)/0.3)] bg-card p-6 text-center shadow-card-rest">
+          <CheckCircle2 className="mx-auto mb-2 h-7 w-7 text-[hsl(var(--success))]" aria-hidden="true" />
+          <p className="text-[15px] font-medium text-foreground">Envoyé avec succès !</p>
+          {deliveryEmail && <p className="text-[13px] text-muted-foreground">Email envoyé à {email}</p>}
+          {deliveryTelegram && <p className="text-[13px] text-muted-foreground">Message Telegram envoyé</p>}
+          {deliveryPdf && <p className="text-[13px] text-muted-foreground">PDF téléchargé</p>}
         </div>
       )}
     </div>
@@ -303,8 +298,8 @@ function CompletionContent() {
 export default function ItineraryCompletionPage() {
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center min-h-[400px]">
-        <FontAwesomeIcon icon={faSpinner} className="animate-spin text-4xl text-primary" />
+      <div className="flex min-h-[400px] items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" aria-hidden="true" />
       </div>
     }>
       <CompletionContent />

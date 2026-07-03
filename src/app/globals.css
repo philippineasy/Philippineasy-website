@@ -208,35 +208,35 @@ body {
     font-size: 0.9em; /* Un peu plus petit pour mobile */
 }
 
-.article-content h2, .post-content h2 { 
+.article-content h2 { 
     @apply text-2xl font-semibold mt-6 mb-3 text-primary;
 }
-.article-content h3, .post-content h3 { 
+.article-content h3 { 
     @apply text-xl font-semibold mt-5 mb-2 text-primary/90;
 }
-.article-content p, .post-content p { 
+.article-content p { 
     margin-bottom: 1em; 
     line-height: 1.7; 
 }
-.article-content ul, .article-content ol, .post-content ul, .post-content ol { 
+.article-content ul, .article-content ol { 
     margin-left: 1.5rem; 
     margin-bottom: 1em; 
 }
-.article-content ul li, .post-content ul li { 
+.article-content ul li { 
     list-style: disc; 
     margin-bottom: 0.5em; 
 }
-.article-content ol li, .post-content ol li { 
+.article-content ol li { 
     list-style: decimal; 
     margin-bottom: 0.5em; 
 }
-.article-content a, .post-content a { 
+.article-content a { 
     @apply text-primary underline; 
 }
-.article-content blockquote, .post-content blockquote {
+.article-content blockquote {
     @apply border-l-4 border-accent bg-accent/10 text-accent-foreground p-4 my-6 rounded-r-lg font-normal;
 }
-.article-content img, .post-content img { 
+.article-content img { 
     @apply shadow-md;
     max-width: 100%; 
     height: auto; 
@@ -262,15 +262,7 @@ body {
     @apply text-sm text-primary/80 italic font-semibold mt-3 text-left;
 }
 
-.preview-header-blue {
-    @apply text-primary text-base font-semibold mb-1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; /* Max 2 lines */
-    -webkit-box-orient: vertical;
-}
-
+/* .preview-quote-orange is still used by /profil (last activity preview). */
 .preview-quote-orange {
     @apply bg-accent/10 text-accent-foreground border-l-4 border-accent p-2 my-1 italic text-sm;
     overflow: hidden;
@@ -278,22 +270,6 @@ body {
     display: -webkit-box;
     -webkit-line-clamp: 3; /* Max 3 lines */
     -webkit-box-orient: vertical;
-}
-
-.preview-text {
-    @apply text-muted-foreground text-sm leading-tight;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 3; /* Max 3 lines */
-    -webkit-box-orient: vertical;
-}
-
-.topic-preview-container .italic.text-gray-400 { /* For "Pas d'aperçu disponible" */
-    @apply text-sm text-muted-foreground;
-}
-.topic-preview-container .italic.text-red-400 { /* For "Erreur de format d'aperçu" */
-    @apply text-sm text-destructive;
 }
 
 .topic-row.flex-col {
@@ -312,6 +288,74 @@ body {
 .toggle-topics-button i.fa-chevron-down {
     @apply text-accent;
 }
+
+/* ------------------------------------------------------------------------- */
+/* Forum post prose (.forum-prose)                                            */
+/* Member-authored EditorJS content, styled to match the editorial article    */
+/* renderer (amber check bullets, amber-barred quote, primary/amber links)     */
+/* but at a compact forum scale. Fully token-driven — dark-mode ready.         */
+/* Replaces the legacy .post-content (blue headings / dated blockquote).       */
+/* ------------------------------------------------------------------------- */
+.forum-prose {
+    @apply text-[15px] leading-[1.7] text-foreground/90;
+}
+.forum-prose > :first-child { margin-top: 0; }
+.forum-prose h2 {
+    @apply mt-8 mb-3 text-[20px] font-bold leading-snug tracking-[-0.01em] text-ink;
+}
+.forum-prose h3 {
+    @apply mt-6 mb-2 text-[17px] font-semibold tracking-[-0.01em] text-ink;
+}
+.forum-prose h4, .forum-prose h5, .forum-prose h6 {
+    @apply mt-5 mb-2 text-[15px] font-semibold text-ink;
+}
+.forum-prose p { @apply mb-4; }
+.forum-prose a {
+    @apply font-medium text-accent underline underline-offset-[3px] transition-colors;
+    text-decoration-color: hsl(var(--accent) / 0.35);
+}
+.forum-prose a:hover { text-decoration-color: hsl(var(--accent)); }
+.forum-prose strong, .forum-prose b { @apply font-semibold text-foreground; }
+.forum-prose em, .forum-prose i { @apply italic; }
+.forum-prose mark { @apply rounded bg-accent/20 px-1 text-foreground; }
+.forum-prose code {
+    @apply rounded bg-muted px-1.5 py-0.5 font-mono text-[0.95em];
+}
+.forum-prose ul, .forum-prose ol {
+    @apply my-4 list-none space-y-2 p-0;
+}
+.forum-prose ul > li { @apply relative pl-7; }
+.forum-prose ul > li::before {
+    content: '\2713'; /* ✓ */
+    @apply absolute left-0 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-accent/15 text-[13px] font-bold text-accent;
+}
+.forum-prose ol { counter-reset: forum-item; }
+.forum-prose ol > li {
+    @apply relative pl-8;
+    counter-increment: forum-item;
+}
+.forum-prose ol > li::before {
+    content: counter(forum-item);
+    @apply absolute left-0 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-accent/15 text-[12px] font-bold tabular-nums text-accent;
+}
+.forum-prose li > ul, .forum-prose li > ol { @apply mb-0 mt-2 ml-1; }
+.forum-prose blockquote {
+    @apply my-5 rounded-r-xl border-l-4 border-accent bg-accent/5 px-5 py-4 text-[16px] font-medium italic text-ink;
+}
+.forum-prose blockquote p { @apply mb-0; }
+.forum-prose blockquote cite { @apply not-italic; }
+.forum-prose table {
+    @apply my-5 w-full border-collapse overflow-hidden rounded-xl text-[14px];
+}
+.forum-prose td, .forum-prose th {
+    @apply border border-border px-3 py-2 align-top;
+}
+.forum-prose img {
+    @apply my-5 rounded-xl shadow-card-rest;
+    max-width: 100%;
+    height: auto;
+}
+.forum-prose hr { @apply my-8 border-0 border-t border-border; }
 
 .toggle-topics-button:hover i.fa-chevron-right,
 .toggle-topics-button:hover i.fa-chevron-down {

@@ -26,16 +26,16 @@ export default function CheckoutForm() {
     stripe.retrievePaymentIntent(clientSecret).then(({ paymentIntent }) => {
       switch (paymentIntent?.status) {
         case "succeeded":
-          setMessage("Payment succeeded!");
+          setMessage("Paiement réussi !");
           break;
         case "processing":
-          setMessage("Your payment is processing.");
+          setMessage("Votre paiement est en cours de traitement.");
           break;
         case "requires_payment_method":
-          setMessage("Your payment was not successful, please try again.");
+          setMessage("Votre paiement n'a pas abouti, veuillez réessayer.");
           break;
         default:
-          setMessage("Something went wrong.");
+          setMessage("Une erreur est survenue.");
           break;
       }
     });
@@ -86,7 +86,7 @@ export default function CheckoutForm() {
           {isLoading ? <div className="spinner" id="spinner"></div> : "Payer maintenant"}
         </span>
       </button>
-      {message && <div id="payment-message" className="mt-4 text-center text-red-500">{message}</div>}
+      {message && <div id="payment-message" className="mt-4 text-center text-sm text-destructive">{message}</div>}
     </form>
   );
 }

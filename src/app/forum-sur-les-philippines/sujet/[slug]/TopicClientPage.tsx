@@ -16,6 +16,7 @@ import { OutputData, BlockToolData } from '@editorjs/editorjs';
 import Modal from '@/components/layout/Modal';
 import toast from 'react-hot-toast';
 import sanitizeHtml from 'sanitize-html';
+import { GradientAvatar } from '@/components/forum/GradientAvatar';
 
 // Contenu redige par les membres (EditorJS jsonb) : meme politique de
 // sanitization que les articles (src/components/articles/EditorialRenderer.tsx)
@@ -78,61 +79,74 @@ interface Profile {
   role: string;
 }
 
+// EditorJS lists can be nested and their items can be objects ({ content, items })
+// rather than plain strings — render the text (and any nested list) instead of
+// leaking "[object Object]". sanitize() is applied to every item exactly like the
+// other blocks, so the XSS policy stays untouched.
+const renderForumList = (items: unknown[], style: string, keyPrefix: string) => {
+  const Tag = style === 'ordered' ? 'ol' : 'ul';
+  return (
+    <Tag key={keyPrefix}>
+      {(items || []).map((item, i) => {
+        const isObj = typeof item === 'object' && item !== null;
+        const text = isObj ? ((item as { content?: string }).content ?? '') : String(item ?? '');
+        const nestedRaw = isObj ? (item as { items?: unknown[] }).items : undefined;
+        const nested = Array.isArray(nestedRaw) && nestedRaw.length > 0 ? nestedRaw : null;
+        return (
+          <li key={`${keyPrefix}-${i}`}>
+            <span dangerouslySetInnerHTML={{ __html: sanitize(text) }} />
+            {nested && renderForumList(nested, style, `${keyPrefix}-${i}`)}
+          </li>
+        );
+      })}
+    </Tag>
+  );
+};
+
 const renderPostContent = (content: string) => {
     try {
       const parsedContent = JSON.parse(content);
       return parsedContent.blocks.map((block: BlockToolData, index: number) => {
         switch (block.type) {
-          case 'header':
-            switch (block.data.level) {
-              case 1: return <h1 key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
-              case 2: return <h2 key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
-              case 3: return <h3 key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
-              case 4: return <h4 key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
-              case 5: return <h5 key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
-              case 6: return <h6 key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
-              default: return null;
-            }
+          case 'header': {
+            // Clamp H1 to H2: the only <h1> on the page is the topic title, so a
+            // member-entered H1 must not become a second page <h1> (SEO).
+            const level = block.data.level;
+            if (level === 3) return <h3 key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
+            if (level === 4) return <h4 key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
+            if (level === 5) return <h5 key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
+            if (level === 6) return <h6 key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
+            return <h2 key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
+          }
           case 'paragraph':
             return <p key={index} dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />;
           case 'list':
-            if (block.data.style === 'ordered') {
-              return (
-                <ol key={index} className="list-decimal list-inside">
-                  {block.data.items.map((item: string, i: number) => (
-                    <li key={i} dangerouslySetInnerHTML={{ __html: sanitize(item) }} />
-                  ))}
-                </ol>
-              );
-            }
-            return (
-              <ul key={index} className="list-disc list-inside">
-                {block.data.items.map((item: string, i: number) => (
-                  <li key={i} dangerouslySetInnerHTML={{ __html: sanitize(item) }} />
-                ))}
-              </ul>
-            );
+            return renderForumList(block.data.items, block.data.style, `list-${index}`);
           case 'quote':
             return (
               <blockquote key={index}>
-                {block.data.caption && <p className="font-bold text-accent-strong">{block.data.caption}</p>}
                 <div dangerouslySetInnerHTML={{ __html: sanitize(block.data.text) }} />
+                {block.data.caption && (
+                  <cite className="mt-2 block text-[12px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                    — {block.data.caption}
+                  </cite>
+                )}
               </blockquote>
             );
           case 'image':
             return (
-              <div key={index} className="relative w-full h-auto my-4" style={{ aspectRatio: '16/9' }}>
-                <Image src={block.data.file.url} alt={block.data.caption || 'Image du post'} fill className="max-w-full h-auto rounded-lg shadow-md object-contain" sizes="(max-width: 768px) 100vw, 700px" />
+              <div key={index} className="relative my-5 w-full overflow-hidden rounded-xl shadow-card-rest" style={{ aspectRatio: '16/9' }}>
+                <Image src={block.data.file.url} alt={block.data.caption || 'Image du post'} fill className="object-cover" sizes="(max-width: 768px) 100vw, 700px" />
               </div>
             );
           case 'table':
             return (
-              <table key={index} className="w-full border-collapse border border-border my-4">
+              <table key={index}>
                 <tbody>
                   {block.data.content.map((row: string[], i: number) => (
-                    <tr key={i} className="border-b border-border">
+                    <tr key={i}>
                       {row.map((cell: string, j: number) => (
-                        <td key={j} className="p-2 border border-border" dangerouslySetInnerHTML={{ __html: sanitize(cell) }} />
+                        <td key={j} dangerouslySetInnerHTML={{ __html: sanitize(cell) }} />
                       ))}
                     </tr>
                   ))}
@@ -140,7 +154,7 @@ const renderPostContent = (content: string) => {
               </table>
             );
           case 'delimiter':
-            return <hr key={index} className="my-4" />;
+            return <hr key={index} />;
           default:
             return null;
         }
@@ -209,9 +223,13 @@ const renderPostContent = (content: string) => {
             {isOp ? `Message original de ${post.author?.username || 'Utilisateur'}` : `Réponse de ${post.author?.username || 'Utilisateur'}`}
           </h2>
           <div className="flex flex-shrink-0 flex-row items-center gap-3 border-b-[0.5px] border-border p-5 text-left md:w-[180px] md:flex-col md:items-start md:border-b-0 md:border-r-[0.5px]">
-            <span className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-full ring-1 ring-border">
-              <Image src={post.author?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author?.username || '?')}`} alt="" fill className="object-cover" sizes="56px" />
-            </span>
+            <GradientAvatar
+              src={post.author?.avatar_url}
+              name={post.author?.username}
+              className="h-14 w-14 rounded-full ring-1 ring-border"
+              imgSizes="56px"
+              textClassName="text-[20px]"
+            />
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-1.5">
                 <p className="truncate font-semibold text-foreground">{post.author?.username || 'Utilisateur'}</p>
@@ -257,7 +275,7 @@ const renderPostContent = (content: string) => {
               </div>
             ) : (
               <>
-                <div className="post-content max-w-none text-[15px] leading-relaxed text-foreground">{renderPostContent(post.content)}</div>
+                <div className="forum-prose">{renderPostContent(post.content)}</div>
                 {post.updated_at && new Date(post.updated_at) > new Date(post.created_at) && (
                   <p className="mt-4 border-t-[0.5px] border-border pt-2 text-xs italic text-muted-foreground">Modifié le {new Date(post.updated_at).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}</p>
                 )}
@@ -498,9 +516,13 @@ export const TopicClientPage = ({ initialTopic, initialPosts }: TopicClientPageP
         ) : user ? (
           <form onSubmit={handleReplySubmit} aria-label="Votre réponse" className="rounded-2xl border-[0.5px] border-border bg-card p-6 shadow-card-rest">
             <div className="mb-4 flex items-center gap-3">
-              <span className="relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-full ring-1 ring-border">
-                <Image src={profile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.username || user.email || 'Vous')}&background=random`} alt="" fill className="object-cover" sizes="40px" />
-              </span>
+              <GradientAvatar
+                src={profile?.avatar_url}
+                name={profile?.username || user.email}
+                className="h-10 w-10 rounded-full ring-1 ring-border"
+                imgSizes="40px"
+                textClassName="text-[15px]"
+              />
               <div>
                 <p className="text-sm font-semibold text-foreground">Vous répondez à ce sujet</p>
                 <p className="text-xs text-muted-foreground">Membre connecté</p>

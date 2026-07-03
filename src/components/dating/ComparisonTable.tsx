@@ -15,6 +15,11 @@ const FREE_SUPER_LIKES =
     ? `${DATING_CONFIG.free_plan.super_likes_per_day} par jour`
     : null;
 const PREMIUM_SUPER_LIKES = `${DATING_CONFIG.premium_plan.super_likes_per_day} par jour`;
+const FREE_TRANSLATION_LIMIT = `${DATING_CONFIG.free_plan.translation_daily_limit}/jour`;
+const PREMIUM_TRANSLATION_LIMIT =
+  DATING_CONFIG.premium_plan.translation_daily_limit === -1
+    ? 'Illimitée'
+    : `${DATING_CONFIG.premium_plan.translation_daily_limit}/jour`;
 
 const ComparisonTable = () => {
   return (
@@ -50,6 +55,11 @@ const ComparisonTable = () => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">Messages (femmes)</td>
                 <td className="px-6 py-4 text-center text-sm font-semibold text-primary">Illimités</td>
                 <td className="px-6 py-4 text-center bg-primary/10 text-sm font-semibold text-primary">Illimités</td>
+              </tr>
+              <tr>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">Traduction FR ↔ EN ↔ Tagalog</td>
+                <td className="px-6 py-4 text-center text-sm text-muted-foreground">{FREE_TRANSLATION_LIMIT}</td>
+                <td className="px-6 py-4 text-center bg-primary/10 text-sm font-semibold text-primary">{PREMIUM_TRANSLATION_LIMIT}</td>
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">Voir qui a aimé votre profil</td>

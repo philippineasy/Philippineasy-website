@@ -4,25 +4,24 @@ type Profile = {
   name: string;
   age: number;
   city: string;
-  distance: string;
   tags: string[];
   avatarColor: string;
   initial: string;
   portraitGradient: [string, string];
 };
 
-// TODO: brancher sur GET /api/rencontres/teaser-profiles
-// (4 profils verified=true AND show_in_teaser=true) une fois la migration
-// dating_profiles.show_in_teaser appliquee. Fallback statique en attendant.
-// Exception: `avatarColor` + `portraitGradient` are a decorative portrait
-// palette (colored discs / illustrated gradients), self-contained and
-// theme-safe — intentionally left un-tokenised.
+// NOTE : ces cartes sont des ILLUSTRATIONS, pas de vrais membres (le service
+// vient d'être relancé). Aucun badge « vérifié », aucun compteur d'activité
+// (distance, « en ligne », nombre de matchs) : rien qui laisse croire à une
+// activité réelle. Une mention « Exemples illustratifs » est affichée sous la
+// pile. Exception : `avatarColor` + `portraitGradient` sont une palette de
+// portraits décorative (disques colorés / dégradés dessinés), volontairement
+// non tokenisée et identique dans les deux thèmes.
 const profiles: Profile[] = [
   {
     name: 'Maria',
     age: 26,
     city: 'Cebu',
-    distance: '2 km',
     tags: ['Café', 'Plage'],
     avatarColor: '#F59E0B',
     initial: 'M',
@@ -32,7 +31,6 @@ const profiles: Profile[] = [
     name: 'Andrea',
     age: 29,
     city: 'Manille',
-    distance: '12 km',
     tags: ['Voyage', 'Musique'],
     avatarColor: '#EC4899',
     initial: 'A',
@@ -42,7 +40,6 @@ const profiles: Profile[] = [
     name: 'Sofia',
     age: 24,
     city: 'Palawan',
-    distance: 'En ligne',
     tags: ['Nature', 'Photo'],
     avatarColor: '#10B981',
     initial: 'S',
@@ -52,7 +49,6 @@ const profiles: Profile[] = [
     name: 'Gabriela',
     age: 31,
     city: 'Davao',
-    distance: '8 km',
     tags: ['Yoga', 'Arts'],
     avatarColor: '#3B5BDB',
     initial: 'G',
@@ -147,7 +143,7 @@ export const RencontresTeaser = () => {
             <div>
               <span className="inline-block text-[13px] font-medium uppercase tracking-[0.08em] mb-2.5 text-pink-700 dark:text-pink-400">
                 <span className="mr-1.5" aria-hidden="true">✦</span>
-                Rencontres · +40 000 membres
+                Rencontres · Communauté francophone
               </span>
 
               <h2
@@ -160,16 +156,17 @@ export const RencontresTeaser = () => {
               </h2>
 
               <p className="text-[17px] text-muted-foreground leading-[1.6]">
-                La première communauté francophone pour faire des rencontres
-                sérieuses avec des Philippines et Philippins. Profils vérifiés,
-                modération humaine, matchs basés sur la compatibilité culturelle.
+                Une communauté francophone pour faire des rencontres sérieuses
+                avec des Philippines et Philippins. Chaque profil est validé à la
+                main par un humain — pas de bots, pas de faux comptes.
               </p>
 
               <ul className="flex flex-col gap-2.5 mt-5" role="list">
                 {[
-                  'Profils vérifiés manuellement (ID + selfie)',
-                  'Traduction automatique FR ↔ EN ↔ Tagalog',
-                  'Conseils culturels pour les premières conversations',
+                  'Chaque profil validé à la main, un par un',
+                  'Gratuit pour les femmes',
+                  'Messagerie privée et sécurisée',
+                  'Traduction intégrée FR ↔ EN ↔ Tagalog dans la messagerie',
                 ].map((bullet) => (
                   <li
                     key={bullet}
@@ -202,80 +199,73 @@ export const RencontresTeaser = () => {
                 </Link>
               </div>
 
-              <div className="flex flex-wrap gap-x-8 gap-y-3 mt-8 pt-6 border-t border-border/60">
-                {[
-                  { value: '40k+', label: 'membres actifs' },
-                  { value: '1 800', label: 'couples formés' },
-                  { value: '4,8 ★', label: 'App Store' },
-                ].map((s) => (
-                  <div key={s.label} className="flex flex-col">
-                    <strong
-                      className="text-[26px] font-bold text-foreground tabular-nums"
-                      style={{ letterSpacing: '-0.02em' }}
-                    >
-                      {s.value}
-                    </strong>
-                    <span
-                      className="text-[12px] text-muted-foreground uppercase"
-                      style={{ letterSpacing: '0.06em' }}
-                    >
-                      {s.label}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              <p className="mt-6 pt-5 border-t border-border/60 text-[13px] text-muted-foreground leading-[1.5]">
+                Communauté francophone récente et grandissante. Ici, on préfère
+                quelques profils réels et validés à des milliers de comptes
+                fantômes.
+              </p>
             </div>
 
-            {/* Right — visual stack */}
-            <div className="relative min-h-[520px] md:min-h-[520px]">
-              {/* Mobile: grid 2×2 fallback (no rotation per a11y) */}
-              <div className="grid grid-cols-2 gap-3 md:hidden">
-                {profiles.map((p) => (
-                  <ProfileCard key={p.name} profile={p} />
-                ))}
-              </div>
+            {/* Right — visual stack (illustration only, no fake activity) */}
+            <div>
+              <div className="relative min-h-[520px] md:min-h-[520px]">
+                {/* Illustration disclosure */}
+                <span className="absolute top-0 right-0 z-30 inline-flex items-center gap-1.5 rounded-full bg-foreground/70 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.05em] text-background backdrop-blur-sm">
+                  Exemples illustratifs
+                </span>
 
-              {/* Desktop: fanned absolute stack */}
-              <div
-                className="hidden md:block relative w-full max-w-[460px] mx-auto h-[480px]"
-                role="presentation"
-              >
-                {profiles.map((p, i) => {
-                  const pos = cardPositions[i];
-                  const transformParts = [];
-                  if (pos.translateX) transformParts.push(`translateX(${pos.translateX})`);
-                  transformParts.push(`rotate(${pos.rotate}deg)`);
+                {/* Mobile: grid 2×2 fallback (no rotation per a11y) */}
+                <div className="grid grid-cols-2 gap-3 md:hidden pt-8">
+                  {profiles.map((p) => (
+                    <ProfileCard key={p.name} profile={p} />
+                  ))}
+                </div>
 
-                  return (
-                    <div
-                      key={p.name}
-                      className="absolute w-[240px] motion-reduce:!rotate-0 motion-reduce:!translate-x-0 motion-reduce:relative motion-reduce:!top-0 motion-reduce:!left-0 motion-reduce:!right-0 hover:[&]:!rotate-0 hover:!-translate-y-1.5 hover:z-30 transition-transform duration-300 ease-out motion-reduce:transition-none"
-                      style={{
-                        top: pos.top,
-                        left: pos.left,
-                        right: pos.right,
-                        zIndex: pos.z,
-                        transform: transformParts.join(' '),
-                      }}
-                    >
-                      <ProfileCard profile={p} />
-                    </div>
-                  );
-                })}
-              </div>
+                {/* Desktop: fanned absolute stack */}
+                <div
+                  className="hidden md:block relative w-full max-w-[460px] mx-auto h-[480px]"
+                  role="presentation"
+                >
+                  {profiles.map((p, i) => {
+                    const pos = cardPositions[i];
+                    const transformParts = [];
+                    if (pos.translateX) transformParts.push(`translateX(${pos.translateX})`);
+                    transformParts.push(`rotate(${pos.rotate}deg)`);
 
-              {/* Floating "matches" badge */}
-              <div
-                className="absolute bottom-2 left-0 md:-left-2 z-20 max-w-[220px] flex items-center gap-2.5 bg-card rounded-[14px] px-4 py-3 shadow-hero"
-              >
-                <span className="text-[22px]" aria-hidden="true">💬</span>
-                <div className="min-w-0">
-                  <strong className="block text-[13px] font-bold text-foreground">
-                    23 nouveaux matchs
-                  </strong>
-                  <span className="text-[11px] text-muted-foreground leading-[1.4] block">
-                    aujourd&apos;hui dans votre région
+                    return (
+                      <div
+                        key={p.name}
+                        className="absolute w-[240px] motion-reduce:!rotate-0 motion-reduce:!translate-x-0 motion-reduce:relative motion-reduce:!top-0 motion-reduce:!left-0 motion-reduce:!right-0 hover:[&]:!rotate-0 hover:!-translate-y-1.5 hover:z-30 transition-transform duration-300 ease-out motion-reduce:transition-none"
+                        style={{
+                          top: pos.top,
+                          left: pos.left,
+                          right: pos.right,
+                          zIndex: pos.z,
+                          transform: transformParts.join(' '),
+                        }}
+                      >
+                        <ProfileCard profile={p} />
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Floating badge — REAL value prop (manual validation) */}
+                <div className="absolute bottom-2 left-0 md:-left-2 z-20 max-w-[230px] flex items-center gap-2.5 bg-card rounded-[14px] px-4 py-3 shadow-hero">
+                  <span
+                    className="inline-flex w-[30px] h-[30px] items-center justify-center rounded-full bg-success/15 text-success flex-shrink-0"
+                    aria-hidden="true"
+                  >
+                    <CheckSmall />
                   </span>
+                  <div className="min-w-0">
+                    <strong className="block text-[13px] font-bold text-foreground">
+                      Validés à la main
+                    </strong>
+                    <span className="text-[11px] text-muted-foreground leading-[1.4] block">
+                      chaque profil, par un humain
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -288,10 +278,9 @@ export const RencontresTeaser = () => {
 
 const ProfileCard = ({ profile }: { profile: Profile }) => {
   const [from, to] = profile.portraitGradient;
-  const isOnline = profile.distance === 'En ligne';
 
   return (
-    <div className="bg-card rounded-[20px] overflow-hidden shadow-[0_20px_50px_rgba(236,72,153,0.18),0_4px_12px_rgba(0,0,0,0.08)] cursor-pointer">
+    <div className="bg-card rounded-[20px] overflow-hidden shadow-[0_20px_50px_rgba(236,72,153,0.18),0_4px_12px_rgba(0,0,0,0.08)]">
       <div className="relative h-[160px] flex items-end justify-between p-2.5">
         <PortraitSVG from={from} to={to} name={profile.name} />
         {/* Avatar overlay bottom-left */}
@@ -305,37 +294,14 @@ const ProfileCard = ({ profile }: { profile: Profile }) => {
         >
           {profile.initial}
         </span>
-        {/* Distance/online pill bottom-right */}
-        <span
-          className="relative z-10 inline-flex items-center gap-1.5 backdrop-blur-md text-white text-[10px] font-semibold px-2 py-1 rounded-full"
-          style={{ background: 'rgba(0, 0, 0, 0.78)' }}
-        >
-          {isOnline && (
-            <span
-              className="w-1.5 h-1.5 rounded-full bg-success"
-              style={{ boxShadow: '0 0 0 2px rgba(16, 185, 129, 0.25)' }}
-              aria-hidden="true"
-            />
-          )}
-          {profile.distance}
-        </span>
       </div>
       <div className="px-3.5 pt-3 pb-3.5">
-        <div className="flex items-center gap-1.5">
-          <strong
-            className="text-[15px] font-bold text-foreground"
-            style={{ letterSpacing: '-0.01em' }}
-          >
-            {profile.name}, {profile.age}
-          </strong>
-          <span
-            className="inline-flex w-4 h-4 rounded-full items-center justify-center bg-primary text-white text-[10px] font-bold"
-            title="Profil vérifié"
-            aria-label="Profil vérifié"
-          >
-            ✓
-          </span>
-        </div>
+        <strong
+          className="text-[15px] font-bold text-foreground"
+          style={{ letterSpacing: '-0.01em' }}
+        >
+          {profile.name}, {profile.age}
+        </strong>
         <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-1 mb-2">
           <PinIcon />
           {profile.city}

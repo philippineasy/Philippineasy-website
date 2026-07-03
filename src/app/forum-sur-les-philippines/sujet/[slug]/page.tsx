@@ -1,14 +1,37 @@
-import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 import { createBuildClient } from '@/utils/supabase/build-client';
 import { getTopicBySlug, getPostsByTopicId } from '@/services/forumService';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { TopicClientPage } from '@/app/forum-sur-les-philippines/sujet/[slug]/TopicClientPage';
+import { ForumHeroCompact } from '@/components/forum/ForumHeroCompact';
+import { ForumCommunityLinks } from '@/components/forum/ForumCommunityLinks';
+import { ForumStatePanel } from '@/components/forum/ForumStatePanel';
+import { CTABand } from '@/components/sections';
+import { MessageSquareOff } from 'lucide-react';
 import type { Metadata } from 'next';
 import ForumJsonLd from '@/components/shared/ForumJsonLd';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
 import { ForumTopic, ForumPost } from '@/types';
 import { generateForumTopicMetaDescription } from '@/utils/seo/metaDescriptionGenerator';
+
+const HERO_IMAGE = '/imagesHero/hutte-philippines.webp';
+const HERO_ALT = 'Maison traditionnelle philippine (bahay kubo) nichée dans la végétation tropicale';
+
+const TopicErrorState = ({ title, description }: { title: string; description: string }) => (
+  <div className="bg-background">
+    <ForumHeroCompact eyebrow="Forum communauté" title={title} imageUrl={HERO_IMAGE} imageAlt={HERO_ALT} />
+    <section className="bg-background py-16 md:py-24">
+      <div className="container mx-auto px-4">
+        <ForumStatePanel
+          icon={<MessageSquareOff className="h-6 w-6" aria-hidden="true" />}
+          title={title}
+          description={description}
+          actions={[{ label: 'Retour au forum', href: '/forum-sur-les-philippines', variant: 'primary' }]}
+        />
+      </div>
+    </section>
+  </div>
+);
 
 export async function generateStaticParams() {
   const supabase = createBuildClient();
@@ -109,22 +132,22 @@ export default async function ForumTopicPage({
 
   if (topicError || !topic) {
     return (
-      <main className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-destructive">Sujet non trouvé</h1>
-          <p className="mt-4 text-muted-foreground">Le sujet que vous cherchez n'existe pas ou a été déplacé.</p>
-          <Link href="/forum-sur-les-philippines" className="mt-6 inline-block px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
-            Retour aux forums
-          </Link>
-        </div>
-      </main>
+      <TopicErrorState
+        title="Ce sujet est introuvable"
+        description="Le sujet que vous cherchez n'existe pas, a été déplacé ou supprimé. Explorez les discussions en cours de la communauté."
+      />
     );
   }
 
   const { data: initialPosts, error: postsError } = await getPostsByTopicId(supabase, topic.id);
 
   if (postsError) {
-    return <p className="text-center text-destructive">Impossible de charger les messages pour ce sujet.</p>;
+    return (
+      <TopicErrorState
+        title="Messages indisponibles"
+        description="Les messages de ce sujet n'ont pas pu être chargés pour l'instant. Réessayez dans un moment."
+      />
+    );
   }
 
   const breadcrumbItems = [
@@ -142,13 +165,35 @@ export default async function ForumTopicPage({
   ];
 
   return (
-    <main className="container mx-auto px-4 py-16 pt-32">
+    <div className="bg-background">
       <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
       <ForumJsonLd topic={topic as ForumTopic} posts={initialPosts as ForumPost[] || []} />
-      <Breadcrumb items={breadcrumbItems} />
-      <div className="mx-auto max-w-4xl">
-        <TopicClientPage initialTopic={topic} initialPosts={initialPosts || []} />
-      </div>
-    </main>
+
+      <ForumHeroCompact
+        eyebrow="Forum communauté"
+        title={topic.category?.name || 'Discussion'}
+        imageUrl={HERO_IMAGE}
+        imageAlt={HERO_ALT}
+      />
+
+      <section className="bg-background pt-8 md:pt-10">
+        <div className="container mx-auto px-4">
+          <Breadcrumb items={breadcrumbItems} />
+          <div className="mx-auto max-w-4xl">
+            <TopicClientPage initialTopic={topic} initialPosts={initialPosts || []} />
+          </div>
+        </div>
+      </section>
+
+      <ForumCommunityLinks />
+
+      <CTABand
+        title="Prêt à explorer"
+        titleAccent="les Philippines ?"
+        subtitle="Transformez ces conseils en voyage : composez un itinéraire sur mesure en quelques minutes avec notre assistant."
+        primary={{ label: 'Créer mon itinéraire', href: '/itineraire-personnalise-pour-les-philippines' }}
+        secondary={{ label: 'Parcourir le forum', href: '/forum-sur-les-philippines' }}
+      />
+    </div>
   );
 }

@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { createBuildClient } from '@/utils/supabase/build-client';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ProductCard } from '@/components/shared/ProductCard';
 import { getProductsByCategorySlug } from '@/services/productService';
@@ -85,30 +86,19 @@ export default async function MarketplaceCategoryPage({
 }) {
   const { slug } = await params;
   const supabase = await createClient();
-  const { data: products, error } = await getProductsByCategorySlug(supabase, slug);
 
-  if (error || !products || products.length === 0) {
-    return (
-      <div className="container mx-auto px-4 py-24 text-center">
-        <div className="mx-auto max-w-md rounded-2xl border-[0.5px] border-border bg-card px-6 py-14 shadow-card-rest">
-          <h1 className="text-2xl font-bold text-foreground">Catégorie non trouvée</h1>
-          <p className="mt-2 text-muted-foreground">
-            Aucun produit n&apos;est disponible dans cette catégorie pour le moment.
-          </p>
-          <Link
-            href="/marketplace-aux-philippines"
-            className="mt-6 inline-flex h-11 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            Retour à la marketplace
-            <span aria-hidden="true">→</span>
-          </Link>
-        </div>
-      </div>
-    );
+  // A slug that maps to no category is a genuine 404 (true not-found status),
+  // distinct from an existing category that simply has no products yet.
+  const { data: category } = await getProductCategoryBySlug(supabase, slug);
+  if (!category) {
+    notFound();
   }
 
-  const categoryName = products[0].product_categories?.[0]?.name || 'Catégorie';
-  const productCount = products.length;
+  const { data: products } = await getProductsByCategorySlug(supabase, slug);
+  const productList = products ?? [];
+
+  const categoryName = category.name;
+  const productCount = productList.length;
 
   const breadcrumbItems = [
     { href: '/', label: 'Accueil' },
@@ -140,8 +130,9 @@ export default async function MarketplaceCategoryPage({
             {categoryName}
           </h1>
           <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
-            {productCount} {productCount > 1 ? 'produits sélectionnés' : 'produit sélectionné'} dans
-            la catégorie {categoryName.toLowerCase()} — paiement sécurisé, vendeurs vérifiés.
+            {productCount > 0
+              ? `${productCount} ${productCount > 1 ? 'produits sélectionnés' : 'produit sélectionné'} dans la catégorie ${categoryName.toLowerCase()} — paiement sécurisé, vendeurs vérifiés.`
+              : `Paiement sécurisé et vendeurs vérifiés pour la catégorie ${categoryName.toLowerCase()}.`}
           </p>
         </div>
       </section>
@@ -149,23 +140,42 @@ export default async function MarketplaceCategoryPage({
       {/* Products grid */}
       <section className="bg-background py-12 md:py-16">
         <div className="container mx-auto px-4">
-          <div className="mx-auto grid max-w-6xl grid-cols-2 gap-5 md:grid-cols-3 md:gap-6 xl:grid-cols-4">
-            {products.map((product: any) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          {productCount > 0 ? (
+            <div className="mx-auto grid max-w-6xl grid-cols-2 gap-5 md:grid-cols-3 md:gap-6 xl:grid-cols-4">
+              {productList.map((product: any) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <div className="mx-auto max-w-md rounded-2xl border-[0.5px] border-border bg-card px-6 py-14 text-center shadow-card-rest">
+              <h2 className="text-lg font-bold text-foreground">Aucun produit pour le moment</h2>
+              <p className="mt-2 text-[15px] text-muted-foreground">
+                Cette catégorie ne contient pas encore de produits. Revenez bientôt ou explorez le
+                reste de la marketplace.
+              </p>
+              <Link
+                href="/marketplace-aux-philippines"
+                className="mt-6 inline-flex h-11 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                Explorer la marketplace
+                <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          )}
 
-          <div className="mx-auto mt-12 max-w-6xl text-center">
-            <Link
-              href="/marketplace-aux-philippines"
-              className="group inline-flex items-center gap-2 text-sm font-medium text-primary transition-colors hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              <span aria-hidden="true" className="transition-transform duration-200 group-hover:-translate-x-0.5">
-                ←
-              </span>
-              Voir toute la marketplace
-            </Link>
-          </div>
+          {productCount > 0 && (
+            <div className="mx-auto mt-12 max-w-6xl text-center">
+              <Link
+                href="/marketplace-aux-philippines"
+                className="group inline-flex items-center gap-2 text-sm font-medium text-primary transition-colors hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <span aria-hidden="true" className="transition-transform duration-200 group-hover:-translate-x-0.5">
+                  ←
+                </span>
+                Voir toute la marketplace
+              </Link>
+            </div>
+          )}
         </div>
       </section>
     </div>

@@ -1,5 +1,3 @@
-import { Product } from '@/types'; // Assuming a detailed Product type exists
-
 interface ProductJsonLdProps {
   product: any; // Using 'any' for now to match the structure from the page
 }
@@ -10,6 +8,7 @@ const ProductJsonLd = ({ product }: ProductJsonLdProps) => {
     ? reviews.reduce((acc: number, review: any) => acc + review.rating, 0) / reviews.length
     : null;
   const reviewCount = reviews.length;
+  const vendorName: string | undefined = product.vendor?.name;
 
   const jsonLd: any = {
     '@context': 'https://schema.org',
@@ -19,26 +18,20 @@ const ProductJsonLd = ({ product }: ProductJsonLdProps) => {
     image: product.image_urls?.[0] || '',
     sku: product.id,
     mpn: product.id,
-    brand: {
-        '@type': 'Brand',
-        name: product.vendor.name,
-    },
     offers: {
       '@type': 'Offer',
       price: product.price,
       priceCurrency: 'EUR', // Assuming EUR, adjust if dynamic
       availability: 'https://schema.org/InStock', // Assuming in stock
-      seller: {
-        '@type': 'Organization',
-        name: product.vendor.name,
-      },
       url: `https://philippineasy.com/marketplace-aux-philippines/produit/${product.slug}`,
       priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0], // Valid for one year
+      // The checkout charges no shipping fee, so advertise free shipping to keep
+      // the announced price equal to the price actually paid.
       shippingDetails: {
         '@type': 'OfferShippingDetails',
         shippingRate: {
           '@type': 'MonetaryAmount',
-          value: '5.00',
+          value: '0.00',
           currency: 'EUR',
         },
         shippingDestination: {
@@ -72,6 +65,17 @@ const ProductJsonLd = ({ product }: ProductJsonLdProps) => {
     },
   };
 
+  if (vendorName) {
+    jsonLd.brand = {
+      '@type': 'Brand',
+      name: vendorName,
+    };
+    jsonLd.offers.seller = {
+      '@type': 'Organization',
+      name: vendorName,
+    };
+  }
+
   if (reviewCount > 0 && averageRating) {
     jsonLd.aggregateRating = {
       '@type': 'AggregateRating',
@@ -86,7 +90,7 @@ const ProductJsonLd = ({ product }: ProductJsonLdProps) => {
       },
       author: {
         '@type': 'Person',
-        name: review.profiles.username,
+        name: review.profiles?.username || 'Client vérifié',
       },
       reviewBody: review.comment,
       datePublished: review.created_at,

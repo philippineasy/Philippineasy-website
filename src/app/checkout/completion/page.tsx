@@ -67,41 +67,118 @@ function CompletionContent() {
   }, [searchParams, clearCart]);
 
   if (status === 'loading') {
-    return <div className="text-center py-16">Chargement...</div>;
+    return (
+      <div className="container mx-auto flex min-h-[50vh] items-center justify-center px-4 py-16 text-muted-foreground">
+        Chargement...
+      </div>
+    );
   }
 
+  const primaryBtn =
+    'inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
+  const ghostBtn =
+    'inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-border bg-card px-5 text-sm font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
+
   return (
-    <div className="container mx-auto px-4 py-16 text-center">
-      {status === 'succeeded' && (
-        <div>
-          <h1 className="text-3xl font-bold text-green-500 mb-4">Paiement Réussi !</h1>
-          <p className="text-lg mb-8">Merci pour votre commande. Vous recevrez bientôt une confirmation par e-mail.</p>
-          <Link href="/marketplace-aux-philippines" className="text-primary hover:underline">
-            Continuer vos achats
-          </Link>
-        </div>
-      )}
-      {status === 'processing' && (
-        <div>
-          <h1 className="text-3xl font-bold text-yellow-500 mb-4">Paiement en cours...</h1>
-          <p className="text-lg mb-8">Votre paiement est en cours de traitement. Nous vous informerons de son statut.</p>
-          <Link href="/" className="text-primary hover:underline">Retour à l'accueil</Link>
-        </div>
-      )}
-      {status === 'failed' && (
-        <div>
-          <h1 className="text-3xl font-bold text-red-500 mb-4">Échec du Paiement</h1>
-          <p className="text-lg mb-8">Votre paiement n&apos;a pas pu être traité. Veuillez réessayer ou contacter le support.</p>
-          <Link href="/checkout" className="text-primary hover:underline">Réessayer le paiement</Link>
-        </div>
-      )}
+    <div className="container mx-auto px-4 py-16 md:py-24">
+      <div className="mx-auto max-w-lg rounded-2xl border-[0.5px] border-border bg-card p-8 text-center shadow-card-rest md:p-10">
+        {status === 'succeeded' && (
+          <>
+            <span className="mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-success/10 text-success">
+              <CheckIcon />
+            </span>
+            <h1 className="text-2xl font-bold text-foreground md:text-3xl">Commande confirmée</h1>
+            <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-muted-foreground">
+              Merci pour votre achat ! Votre paiement a bien été reçu. Un e-mail de confirmation
+              avec le détail de votre commande vous a été envoyé.
+            </p>
+            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+              <Link href="/profil/commandes" className={primaryBtn}>
+                Voir mes commandes
+                <span aria-hidden="true">→</span>
+              </Link>
+              <Link href="/marketplace-aux-philippines" className={ghostBtn}>
+                Retour à la marketplace
+              </Link>
+            </div>
+          </>
+        )}
+
+        {status === 'processing' && (
+          <>
+            <span className="mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 text-accent-strong">
+              <ClockIcon />
+            </span>
+            <h1 className="text-2xl font-bold text-foreground md:text-3xl">Paiement en cours de traitement</h1>
+            <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-muted-foreground">
+              Votre paiement est en cours de validation. Dès qu&apos;il sera confirmé, vous
+              recevrez un e-mail et votre commande apparaîtra dans votre espace.
+            </p>
+            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+              <Link href="/profil/commandes" className={primaryBtn}>
+                Voir mes commandes
+                <span aria-hidden="true">→</span>
+              </Link>
+              <Link href="/marketplace-aux-philippines" className={ghostBtn}>
+                Retour à la marketplace
+              </Link>
+            </div>
+          </>
+        )}
+
+        {status === 'failed' && (
+          <>
+            <span className="mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+              <CrossIcon />
+            </span>
+            <h1 className="text-2xl font-bold text-foreground md:text-3xl">Le paiement n&apos;a pas abouti</h1>
+            <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-muted-foreground">
+              Votre paiement n&apos;a pas pu être traité. Aucun montant n&apos;a été débité.
+              Vous pouvez réessayer ou contacter notre support si le problème persiste.
+            </p>
+            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+              <Link href="/checkout" className={primaryBtn}>
+                Réessayer le paiement
+              </Link>
+              <Link href="/contact" className={ghostBtn}>
+                Contacter le support
+              </Link>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
 
+const CheckIcon = () => (
+  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M20 6 9 17l-5-5" />
+  </svg>
+);
+
+const ClockIcon = () => (
+  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 7v5l3 2" />
+  </svg>
+);
+
+const CrossIcon = () => (
+  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M18 6 6 18M6 6l12 12" />
+  </svg>
+);
+
 export default function CompletionPage() {
   return (
-    <Suspense fallback={<div className="text-center py-16">Chargement...</div>}>
+    <Suspense
+      fallback={
+        <div className="container mx-auto flex min-h-[50vh] items-center justify-center px-4 py-16 text-muted-foreground">
+          Chargement...
+        </div>
+      }
+    >
       <CompletionContent />
     </Suspense>
   );

@@ -75,36 +75,23 @@ export default function PackProgressCard({
   return (
     <div
       className={cn(
-        'bg-card rounded-2xl p-5 transition-all duration-200',
-        onClick && 'cursor-pointer hover:-translate-y-0.5 hover:shadow-lg',
+        'bg-card rounded-2xl border border-border/60 shadow-card-rest p-5 transition-all duration-200',
+        onClick && 'cursor-pointer hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-card',
         className
       )}
-      style={{
-        border: '0.5px solid #e5e7eb',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-      }}
       onClick={onClick}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div
-            className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-            style={{ backgroundColor: '#F4F7FE', color: '#3B5BDB' }}
-          >
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 bg-primary/10 text-primary">
             <FontAwesomeIcon icon={icon} style={{ fontSize: '16px' }} />
           </div>
           <div className="min-w-0">
-            <h3
-              className="text-foreground truncate"
-              style={{ fontSize: '14px', fontWeight: 600, letterSpacing: '-0.01em' }}
-            >
+            <h3 className="text-foreground truncate text-[14px] font-semibold tracking-[-0.01em]">
               {name}
             </h3>
-            <p
-              className="mt-0.5 tabular-nums"
-              style={{ fontSize: '11px', color: '#94a3b8' }}
-            >
+            <p className="mt-0.5 tabular-nums text-[11px] text-muted-foreground">
               {formattedDate} &middot; {purchase.amount_paid}€
             </p>
           </div>

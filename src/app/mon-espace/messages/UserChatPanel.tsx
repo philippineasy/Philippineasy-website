@@ -1,17 +1,20 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPaperPlane, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { ArrowLeft, Send, Loader2 } from 'lucide-react';
 import { supabase } from '@/utils/supabase/client';
 import { getMessages, sendMessage, markMessagesAsRead } from '@/services/crmService';
+import StatusBadge from '@/components/crm/StatusBadge';
 
 interface UserChatPanelProps {
   conversationId: string;
   userId: string;
+  subject?: string;
+  status?: string;
+  onBack?: () => void;
 }
 
-export default function UserChatPanel({ conversationId, userId }: UserChatPanelProps) {
+export default function UserChatPanel({ conversationId, userId, subject, status, onBack }: UserChatPanelProps) {
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -68,27 +71,48 @@ export default function UserChatPanel({ conversationId, userId }: UserChatPanelP
   };
 
   return (
-    <div className="flex-1 border border-border rounded-lg flex flex-col">
-      <div className="flex-1 overflow-auto p-4 space-y-3">
+    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-card-rest">
+      {/* Header */}
+      <div className="flex items-center gap-2.5 border-b border-border/60 px-4 py-3">
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            className="-ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent md:hidden"
+            aria-label="Retour à la liste des conversations"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          </button>
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[14px] font-semibold text-ink">{subject || 'Conversation'}</p>
+        </div>
+        {status && <StatusBadge status={status} />}
+      </div>
+
+      {/* Messages */}
+      <div className="min-h-0 flex-1 space-y-3 overflow-auto p-4">
         {messages.map((msg: any) => (
           <div
             key={msg.id}
             className={`flex ${msg.is_admin_message ? 'justify-start' : 'justify-end'}`}
           >
             <div
-              className={`max-w-[70%] rounded-xl px-4 py-2.5 text-sm ${
+              className={`max-w-[78%] rounded-2xl px-4 py-2.5 text-[14px] leading-relaxed ${
                 msg.is_admin_message
-                  ? 'bg-muted text-foreground'
-                  : 'bg-primary text-primary-foreground'
+                  ? 'rounded-tl-sm bg-muted text-foreground'
+                  : 'rounded-tr-sm bg-primary text-primary-foreground'
               }`}
             >
               {msg.is_admin_message && (
-                <p className="text-xs font-medium text-primary mb-1">Philippin&apos;Easy</p>
+                <p className="mb-1 text-[11px] font-semibold text-primary">Philippin&apos;Easy</p>
               )}
               <p className="whitespace-pre-wrap">{msg.content}</p>
-              <p className={`text-[10px] mt-1 ${
-                msg.is_admin_message ? 'text-muted-foreground' : 'text-primary-foreground/60'
-              }`}>
+              <p
+                className={`mt-1 text-[10px] ${
+                  msg.is_admin_message ? 'text-muted-foreground' : 'text-primary-foreground/60'
+                }`}
+              >
                 {new Date(msg.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
               </p>
             </div>
@@ -97,25 +121,27 @@ export default function UserChatPanel({ conversationId, userId }: UserChatPanelP
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="border-t border-border p-3">
-        <div className="flex gap-2">
+      {/* Composer */}
+      <div className="border-t border-border/60 p-3">
+        <div className="flex items-end gap-2">
           <textarea
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Écrire un message..."
+            placeholder="Écrire un message…"
             rows={1}
-            className="flex-1 resize-none bg-muted rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="flex-1 resize-none rounded-xl border border-border bg-background px-4 py-2.5 text-[14px] text-foreground placeholder:text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:border-primary"
           />
           <button
             onClick={handleSend}
             disabled={sending || !newMessage.trim()}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent text-accent-foreground shadow-cta transition-colors hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:opacity-50"
+            aria-label="Envoyer le message"
           >
             {sending ? (
-              <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
             ) : (
-              <FontAwesomeIcon icon={faPaperPlane} />
+              <Send className="h-4 w-4" aria-hidden="true" />
             )}
           </button>
         </div>

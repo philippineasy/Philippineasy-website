@@ -1,8 +1,4 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import type { Product } from '@/types';
-import { supabase } from '@/utils/supabase/client';
+import { createClient } from '@/utils/supabase/server';
 import { getRelatedProducts } from '@/services/productService';
 import { ProductCard } from './ProductCard';
 
@@ -11,35 +7,41 @@ interface RelatedProductsProps {
   currentProductId: number;
 }
 
-const RelatedProducts = ({ categoryId, currentProductId }: RelatedProductsProps) => {
-  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+const RelatedProducts = async ({ categoryId, currentProductId }: RelatedProductsProps) => {
+  const supabase = await createClient();
+  const { data } = await getRelatedProducts(supabase, categoryId, currentProductId);
 
-  useEffect(() => {
-    const fetchRelated = async () => {
-      const { data } = await getRelatedProducts(supabase, categoryId, currentProductId);
-      if (data) {
-        setRelatedProducts(data as any);
-      }
-    };
+  const products = (data ?? []).map((p: any) => ({
+    ...p,
+    vendors: Array.isArray(p.vendors) ? p.vendors[0] : p.vendors,
+  }));
 
-    fetchRelated();
-  }, [supabase, categoryId, currentProductId]);
-
-  if (relatedProducts.length === 0) {
+  if (products.length === 0) {
     return null;
   }
 
   return (
-    <div className="mt-16 py-12 bg-muted -mx-6 md:-mx-10 px-6 md:px-10">
-      <h2 className="text-2xl font-bold mb-8 text-center">Produits similaires</h2>
-      <div className="flex overflow-x-auto space-x-8 pb-4 snap-x snap-mandatory">
-        {relatedProducts.map(product => (
-          <div key={product.id} className="snap-center flex-shrink-0 w-full md:w-1/3 lg:w-1/4">
-            <ProductCard product={product} />
-          </div>
-        ))}
+    <section className="mt-16 -mx-6 bg-muted px-6 py-12 md:-mx-10 md:px-10 md:py-14">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-8 text-center">
+          <span className="text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
+            À découvrir aussi
+          </span>
+          <h2
+            className="mt-2 text-[clamp(1.375rem,2.5vw,1.75rem)] font-bold text-foreground"
+            style={{ letterSpacing: '-0.01em' }}
+          >
+            Produits similaires
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-2 gap-5 md:grid-cols-3 md:gap-6 xl:grid-cols-4">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
 

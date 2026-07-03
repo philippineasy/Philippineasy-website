@@ -1,11 +1,17 @@
-import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 import { createBuildClient } from '@/utils/supabase/build-client';
 import { getTopicsByCategorySlug, getForumCategoryBySlug } from '@/services/forumService';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import { TopicListClient } from '@/app/forum-sur-les-philippines/[slug]/TopicListClient';
+import { ForumCommunityLinks } from '@/components/forum/ForumCommunityLinks';
+import { ForumStatePanel } from '@/components/forum/ForumStatePanel';
+import { PageHero, CTABand } from '@/components/sections';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
+import { AlertTriangle, Compass, MessagesSquare } from 'lucide-react';
 import type { Metadata } from 'next';
+
+const HERO_IMAGE = '/imagesHero/hutte-philippines.webp';
+const HERO_ALT = 'Maison traditionnelle philippine (bahay kubo) nichée dans la végétation tropicale';
 
 export async function generateStaticParams() {
   const supabase = createBuildClient();
@@ -85,45 +91,65 @@ export default async function ForumCategoryPage({
 }) {
   const { slug } = await params;
   const supabase = await createClient();
-  const { data: initialTopics, error } = await getTopicsByCategorySlug(supabase, slug, 1);
 
+  const [{ data: category }, { data: initialTopics, error }] = await Promise.all([
+    getForumCategoryBySlug(supabase, slug),
+    getTopicsByCategorySlug(supabase, slug, 1),
+  ]);
+
+  // Hard error fetching the topic list (RPC failure) — a proper design-language state.
   if (error) {
     return (
-      <main className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-destructive">Erreur</h1>
-          <p className="mt-4 text-muted-foreground">Impossible de charger les sujets pour cette catégorie.</p>
-          <Link href="/forum-sur-les-philippines" className="mt-6 inline-block px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
-            Retour aux forums
-          </Link>
-        </div>
-      </main>
-    );
-  }
-
-  if (!initialTopics || initialTopics.length === 0) {
-    return (
-      <main className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold">Catégorie non trouvée ou vide</h1>
-          <p className="mt-4 text-muted-foreground">La catégorie que vous cherchez n'existe pas ou ne contient aucun sujet.</p>
-          <div className="mt-6 flex justify-center gap-4">
-            <Link href="/forum-sur-les-philippines" className="inline-block px-6 py-3 bg-muted text-muted-foreground rounded-lg hover:bg-muted/80">
-              Retour aux forums
-            </Link>
-            <Link href={`/forum-sur-les-philippines/nouveau-sujet?category_slug=${slug}`} className="inline-block px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
-              Créer un nouveau sujet
-            </Link>
+      <div className="bg-background">
+        <PageHero
+          eyebrow="Forum communauté"
+          title="Une erreur est"
+          titleAccent="survenue"
+          subtitle="Impossible de charger les discussions de cette catégorie pour l'instant."
+          imageUrl={HERO_IMAGE}
+          imageAlt={HERO_ALT}
+        />
+        <section className="bg-background py-16 md:py-24">
+          <div className="container mx-auto px-4">
+            <ForumStatePanel
+              icon={<AlertTriangle className="h-6 w-6" aria-hidden="true" />}
+              title="Chargement impossible"
+              description="Les sujets de cette catégorie n'ont pas pu être récupérés. Réessayez dans un moment."
+              actions={[{ label: 'Retour au forum', href: '/forum-sur-les-philippines', variant: 'primary' }]}
+            />
           </div>
-        </div>
-      </main>
+        </section>
+      </div>
     );
   }
 
-  const category = {
-    name: initialTopics[0].category_name,
-    description: initialTopics[0].category_description,
-  };
+  // The category slug doesn't exist at all.
+  if (!category) {
+    return (
+      <div className="bg-background">
+        <PageHero
+          eyebrow="Forum communauté"
+          title="Catégorie"
+          titleAccent="introuvable"
+          subtitle="Cette catégorie n'existe pas ou a été déplacée."
+          imageUrl={HERO_IMAGE}
+          imageAlt={HERO_ALT}
+        />
+        <section className="bg-background py-16 md:py-24">
+          <div className="container mx-auto px-4">
+            <ForumStatePanel
+              icon={<Compass className="h-6 w-6" aria-hidden="true" />}
+              title="Cette catégorie n'existe pas"
+              description="Le lien est peut-être erroné. Retrouvez toutes les catégories actives depuis l'accueil du forum."
+              actions={[{ label: 'Voir toutes les catégories', href: '/forum-sur-les-philippines', variant: 'primary' }]}
+            />
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  const topics = initialTopics || [];
 
   const breadcrumbItems = [
     { href: '/', label: 'Accueil' },
@@ -138,26 +164,55 @@ export default async function ForumCategoryPage({
   ];
 
   return (
-    <main className="container mx-auto px-4 py-16 pt-32">
+    <div className="bg-background">
       <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
-      <Breadcrumb items={breadcrumbItems} />
 
-      <div className="mb-8">
-        <span className="mb-2 inline-block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
-          Forum
-        </span>
-        <h1
-          className="font-bold text-foreground"
-          style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', lineHeight: 1.15, letterSpacing: '-0.02em' }}
-        >
-          {category.name}
-        </h1>
-        {category.description && (
-          <p className="mt-3 max-w-2xl text-[16px] leading-relaxed text-muted-foreground">{category.description}</p>
-        )}
-      </div>
+      <PageHero
+        eyebrow="Forum communauté"
+        title={category.name}
+        subtitle={
+          category.description ||
+          `Discussions et entraide autour de « ${category.name} » avec la communauté francophone des Philippines.`
+        }
+        imageUrl={HERO_IMAGE}
+        imageAlt={HERO_ALT}
+      />
 
-      <TopicListClient slug={slug} initialTopics={initialTopics || []} />
-    </main>
+      <section className="bg-background pt-10 md:pt-12">
+        <div className="container mx-auto px-4">
+          <Breadcrumb items={breadcrumbItems} />
+
+          {topics.length > 0 ? (
+            <TopicListClient slug={slug} initialTopics={topics} />
+          ) : (
+            <div className="py-8">
+              <ForumStatePanel
+                icon={<MessagesSquare className="h-6 w-6" aria-hidden="true" />}
+                title="Aucun sujet pour l'instant"
+                description="Cette catégorie n'a pas encore de discussion. Lancez la première et ouvrez le bal !"
+                actions={[
+                  {
+                    label: 'Créer le premier sujet',
+                    href: `/forum-sur-les-philippines/nouveau-sujet?category_slug=${slug}`,
+                    variant: 'primary',
+                  },
+                  { label: 'Retour au forum', href: '/forum-sur-les-philippines', variant: 'secondary' },
+                ]}
+              />
+            </div>
+          )}
+        </div>
+      </section>
+
+      <ForumCommunityLinks />
+
+      <CTABand
+        title="Vous avez vécu"
+        titleAccent="cette expérience ?"
+        subtitle="Ouvrez un sujet pour partager vos conseils, ou préparez votre voyage avec notre assistant d'itinéraire."
+        primary={{ label: 'Ouvrir un sujet', href: `/forum-sur-les-philippines/nouveau-sujet?category_slug=${slug}` }}
+        secondary={{ label: 'Créer mon itinéraire IA', href: '/itineraire-personnalise-pour-les-philippines' }}
+      />
+    </div>
   );
 }

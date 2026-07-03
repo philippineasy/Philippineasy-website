@@ -87,9 +87,9 @@ export const FinalCtaSection = ({
                 maxWidth: '36rem',
               }}
             >
-              Rejoignez une communauté francophone de plus de 10 000 voyageurs
-              et expatriés, et laissez-vous guider vers une expérience
-              inoubliable.
+              Rejoignez une communauté francophone de voyageurs et
+              d&apos;expatriés, et laissez-vous guider par des Français qui
+              vivent l&apos;archipel au quotidien.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

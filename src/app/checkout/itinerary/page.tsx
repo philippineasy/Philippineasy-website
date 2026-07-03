@@ -4,8 +4,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useState, useEffect, Suspense } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLock, faSpinner, faCheckCircle, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { Lock, Loader2, CheckCircle2, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { trackBeginCheckout } from '@/lib/analytics';
@@ -56,30 +55,30 @@ function ItineraryPaymentForm({ generationId }: PaymentFormProps) {
       <button
         type="submit"
         disabled={isLoading || !stripe || !elements}
-        className="w-full py-4 bg-accent text-primary font-bold text-lg rounded-lg hover:bg-accent/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-4 text-[16px] font-bold text-accent-foreground shadow-cta transition-colors hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isLoading ? (
           <>
-            <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
-            Traitement en cours...
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            Traitement en cours…
           </>
         ) : (
           <>
-            <FontAwesomeIcon icon={faLock} />
+            <Lock className="h-4 w-4" aria-hidden="true" />
             Payer maintenant
           </>
         )}
       </button>
 
       {message && (
-        <div className="p-4 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive text-center">
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-center text-[14px] text-destructive">
           {message}
         </div>
       )}
 
-      <p className="text-xs text-center text-muted-foreground">
-        <FontAwesomeIcon icon={faLock} className="mr-1" />
-        Paiement securise par Stripe
+      <p className="flex items-center justify-center gap-1.5 text-center text-[12px] text-muted-foreground">
+        <Lock className="h-3 w-3" aria-hidden="true" />
+        Paiement sécurisé par Stripe
       </p>
     </form>
   );
@@ -110,8 +109,8 @@ function CheckoutContent() {
 
   if (authLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <FontAwesomeIcon icon={faSpinner} className="animate-spin text-4xl text-primary" />
+      <div className="flex min-h-[400px] items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" aria-hidden="true" />
       </div>
     );
   }
@@ -122,18 +121,18 @@ function CheckoutContent() {
 
   if (!clientSecret || !generationId) {
     return (
-      <div className="container mx-auto px-4 py-16 max-w-2xl">
-        <div className="bg-card p-8 rounded-xl border-2 border-destructive/30 text-center">
-          <h1 className="text-2xl font-bold text-destructive mb-4">Erreur</h1>
-          <p className="text-muted-foreground mb-6">
-            Parametres de paiement manquants. Veuillez recommencer la procedure.
+      <div className="container mx-auto max-w-2xl px-4 py-16">
+        <div className="rounded-2xl border border-destructive/30 bg-card p-8 text-center shadow-card">
+          <h1 className="mb-4 text-2xl font-bold text-destructive">Erreur</h1>
+          <p className="mb-6 text-muted-foreground">
+            Paramètres de paiement manquants. Veuillez recommencer la procédure.
           </p>
           <Link
             href="/itineraire-personnalise-pour-les-philippines"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
           >
-            <FontAwesomeIcon icon={faArrowLeft} />
-            Retour au generateur
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Retour au générateur
           </Link>
         </div>
       </div>
@@ -149,31 +148,36 @@ function CheckoutContent() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 max-w-2xl">
+    <div className="container mx-auto max-w-2xl px-4 py-16">
       <div className="mb-8">
         <Link
           href="/itineraire-personnalise-pour-les-philippines"
-          className="text-primary hover:underline flex items-center gap-2 text-sm"
+          className="inline-flex items-center gap-2 rounded text-[14px] font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
-          <FontAwesomeIcon icon={faArrowLeft} />
-          Retour au generateur
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Retour au générateur
         </Link>
       </div>
 
-      <div className="bg-card p-8 rounded-xl border-2 border-primary shadow-lg">
-        <h1 className="text-2xl font-bold text-primary mb-6 text-center">
+      <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-card sm:p-8">
+        <span className="block text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-accent-strong">
+          Paiement sécurisé
+        </span>
+        <h1 className="mb-6 mt-1.5 text-center text-[clamp(1.5rem,3vw,2rem)] font-bold tracking-[-0.02em] text-ink">
           Finaliser votre commande
         </h1>
 
         {/* Resume de l'achat */}
-        <div className="bg-primary/10 p-4 rounded-lg mb-8">
-          <h2 className="font-semibold text-primary mb-2">Votre achat :</h2>
+        <div className="mb-8 rounded-xl border border-border/60 bg-muted/40 p-4">
+          <h2 className="mb-2 text-[13px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
+            Votre achat
+          </h2>
           <div className="flex items-center gap-2 text-foreground">
-            <FontAwesomeIcon icon={faCheckCircle} className="text-[hsl(var(--success))]" />
-            <span>Itineraire personnalise aux Philippines</span>
+            <CheckCircle2 className="h-4 w-4 text-[hsl(var(--success))]" aria-hidden="true" />
+            <span className="text-[15px] font-medium">Itinéraire personnalisé aux Philippines</span>
           </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            Programme complet jour par jour, hebergements recommandes, liens Google Maps, budget detaille.
+          <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
+            Programme complet jour par jour, hébergements recommandés, liens Google Maps, budget détaillé.
           </p>
         </div>
 
@@ -201,8 +205,8 @@ function CheckoutContent() {
 export default function ItineraryCheckoutPage() {
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center min-h-[400px]">
-        <FontAwesomeIcon icon={faSpinner} className="animate-spin text-4xl text-primary" />
+      <div className="flex min-h-[400px] items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" aria-hidden="true" />
       </div>
     }>
       <CheckoutContent />

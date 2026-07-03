@@ -43,7 +43,7 @@ export const HeroSection = () => {
           style={{ color: 'rgba(255,255,255,0.95)', letterSpacing: '0.08em' }}
         >
           <span className="text-warm-yellow" aria-hidden="true">★</span>
-          +10 000 voyageurs accompagnés depuis 2020
+          Guide francophone indépendant · Depuis 2020
         </span>
         <h1
           className="text-white font-semibold mb-6"
@@ -102,10 +102,10 @@ export const HeroSection = () => {
           style={{ color: 'rgba(255,255,255,0.94)' }}
         >
           <span>
-            <strong className="text-white">4,9/5</strong> · 1 200+ avis
+            <strong className="text-white">47</strong> guides gratuits · <strong className="text-white">93</strong> itinéraires générés
           </span>
           <span aria-hidden="true" className="opacity-50">·</span>
-          <span>Gratuit · Sans inscription</span>
+          <span>Sans inscription</span>
         </div>
       </div>
     </section>

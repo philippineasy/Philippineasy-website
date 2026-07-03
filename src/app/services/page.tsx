@@ -57,8 +57,8 @@ const serviceFAQs = [
 ];
 
 const heroStats: StatItem[] = [
-  { value: '10 000+', label: 'Voyageurs accompagnés' },
-  { value: '98 %', label: 'Satisfaction' },
+  { value: '47', label: 'Guides gratuits' },
+  { value: '93', label: 'Itinéraires générés' },
   { value: '100 %', label: 'Francophone' },
   { value: '7j/7', label: 'Support WhatsApp' },
 ];
@@ -75,7 +75,7 @@ const diffBullets = [
   "IA + humain : la technologie prépare, un vrai Français vous guide.",
   "Pas une agence : un guide francophone qui vit l'archipel au quotidien.",
   "Des conseils testés sur le terrain, jamais recopiés d'un guide touristique.",
-  '+10 000 voyageurs accompagnés depuis 2020.',
+  'Un accompagnement humain par des Français installés aux Philippines depuis 2020.',
 ];
 
 // --- Icônes inline (feather, stroke 1.8) ---

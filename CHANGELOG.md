@@ -5,6 +5,32 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Feature — Traduction FR ↔ EN ↔ Tagalog dans la messagerie Rencontres (2026-07-03)
+
+La promesse retirée lors de l'assainissement de la preuve sociale redevient vraie : traduction intégrée au chat, sur l'architecture IA existante (webhook n8n `dating-translate` → GPT-4o-mini, credential OpenAI déjà en place, même pattern que la génération d'itinéraires).
+
+- **Route `/api/dating/translate`** : auth + profil dating validé requis, texte ≤ 900 chars, **quota 10 traductions/jour en gratuit, illimité premium** (claim atomique via RPC `increment_dating_translation_usage`, table `dating_translation_usage` RLS service-role only, migration appliquée), proxy n8n avec timeout 15 s et erreurs douces.
+- **UI** (les 2 interfaces de chat, hook partagé `useMessageTranslation`) : lien « Traduire » sous chaque message reçu → traduction dans la bulle (« Traduit du tagalog »), toggle avec cache par message ; bouton « Traduire mon message » dans le composer → chips Anglais/Tagalog qui traduisent le brouillon avant envoi. Quota atteint → incitation premium.
+- **Marketing aligné sur le réel** : bullet réintégrée sur le teaser homepage, ligne « Traduction » ajoutée à la page premium et au comparatif (Gratuit 10/jour · Premium illimitée), chiffres lus depuis `DATING_CONFIG`.
+
+### Feature/Fix — Les 4 autres chantiers de la roadmap post-audit (2026-07-03)
+
+**Preuve sociale 100 % honnête** : suppression de tous les chiffres inventés (« 10 000 voyageurs », « 40 000 membres », « 1 800 couples », « 4,9/5 · 1 200 avis », « 23 matchs aujourd'hui », badges « Profil vérifié » sur profils fictifs, promesse de traduction alors inexistante) au profit du réel : 47 guides publiés, 93 itinéraires générés, validation humaine des profils, gratuit pour les femmes. Témoignages fictifs remplacés par « Ce que vous trouvez ici » (3 preuves réelles). **Suppression de l'AggregateRating fabriqué (4,9/10 000 avis) du JSON-LD services** — c'était un risque de pénalité Google Review Snippet.
+
+**Forum fini** : PageHero photographique (bahay kubo) sur les 4 pages, prose des messages alignée sur le style éditorial des articles (`.forum-prose`, sanitization XSS intacte), aperçus réparés (plus de JSON brut si le 1er bloc n'est pas du texte), listes imbriquées EditorJS corrigées, avatars dégradé/initiale (fin de la dépendance ui-avatars.com), breadcrumb partagé + JSON-LD sur nouveau-sujet, maillage ForumCommunityLinks + CTABand en pied, états vides/erreur du design system.
+
+**CRM Mon espace harmonisé + auth réparée** : dashboard/services/appels/guides/messages au langage validé (lucide, KPI hairline, empty states), chat responsive mobile (bascule liste/conversation, fin du h-500px fixe), PackProgressCard/EntitlementCard dark-ready (hex inline → tokens), checkout itinéraire modernisé (tracking et Stripe intacts). Auth : **flux mot de passe oublié créé** (`/mot-de-passe-oublie` + `/reinitialiser-mot-de-passe`, message neutre anti-énumération), `?redirect=` enfin respecté après login (garde anti open-redirect), OAuth Google transmet `next` au callback, page auth-code-error stylée en français.
+
+**Tunnel marketplace modernisé** : ProductCard tokenisé (réparait le dark mode sur tout le marketplace + fix latent du badge vendeur), panier (placeholder via.placeholder.com mort remplacé, stepper quantité, liens vers les fiches), completion avec vrai récap et liens commandes, RelatedProducts converti en Server Component (grid propre), pages vendeur (hero, état vide à 0 produit, formulaires tokenisés, message de succès de candidature enfin affiché, typo « Veuille_z » corrigée), catégorie inexistante → vrai 404 `notFound()`, JSON-LD livraison honnête (0 € au lieu de 5 € jamais facturés au checkout), messages checkout Stripe traduits en français, image OG ajoutée au hub.
+
+### Legal — Conformité RGPD / LCEN / Code conso : confidentialité, mentions légales, CGV (2026-07-03)
+
+- **`/confidentialite` réécrite en politique RGPD complète** : responsable de traitement (Hugo Duarte Fontes, contact@philippineasy.com), inventaire des traitements par finalité avec base légale (compte, profil rencontre, messages, commandes Stripe, accompagnement/WhatsApp, newsletter, support/Tawk, analytics GA4/Meta Pixel, logs/Sentry), section dédiée données sensibles art. 9 (orientation sexuelle, religion — consentement explicite, champ facultatif, retrait possible), durées de conservation énoncées, liste des sous-traitants, transferts hors UE (CCT + Data Privacy Framework), droits RGPD + exercice par email + réclamation CNIL, renvoi au bandeau cookies.
+- **`/mentions-legales` restructurées** : éditeur avec placeholder `[Statut juridique / n° d'immatriculation — à compléter]`, directeur de publication, hébergeur Vercel Inc. (adresse corrigée : 440 N Barranca Ave #4133, Covina, CA 91723), transparence liens d'affiliation (commissions Klook/partenaires, sans surcoût), médiation de la consommation (placeholder médiateur à désigner), renvois confidentialité/CGU/CGV.
+- **`/cgv` créées** (nouvelle page) : champ d'application, prix EUR TTC, commande, paiement Stripe (aucune carte stockée), livraison (numérique immédiat / marketplace expédiée par vendeurs tiers — rôle de plateforme explicité), **droit de rétractation 14 jours avec exception L221-28 13°** (renonciation expresse pour itinéraires/guides livrés immédiatement, adossée à la case à cocher de la modal récap au checkout) + L221-25/L221-28 1° pour services et abonnements, formulaire type de rétractation, abonnements (Rencontre Premium 19,99 €/mois, 44,97 €/3 mois, 59,94 €/6 mois ; Easy+ 29,99 €/mois — reconduction tacite, résiliation à tout moment via portail Stripe ou email, effet fin de période), garanties légales (L217-3 s., L224-25-12 s., 1641 C. civ.), responsabilité (guide, pas agence), médiation, droit français.
+- **Footer** : lien CGV ajouté dans la colonne légale ; metadata propres (title/description/canonical + robots index) sur les 3 pages.
+- ⚠️ Placeholders à compléter par Hugo : statut juridique/immatriculation (mentions légales + CGV art. 2) et médiateur de la consommation à désigner (mentions légales art. 8 + CGV art. 14). Recommandé : ajouter la mention explicite de renonciation au droit de rétractation dans le texte de la checkbox de `OfferConfirmationModal`.
+
 ### Fix — Lot quick wins post-audit site complet (2026-07-03)
 
 Suite à l'audit des 4 zones (forum/communauté, marketplace, compte/itinéraires, home/SEO/perf), correction des points à plus fort ROI :

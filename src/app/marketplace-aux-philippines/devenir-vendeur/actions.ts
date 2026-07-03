@@ -49,7 +49,7 @@ export async function handleVendorApplication(formData: FormData) {
   const vendorDescription = formData.get('vendorDescription') as string;
 
   if (!vendorName || !vendorDescription) {
-    return { success: false, message: 'Veuille_z remplir tous les champs de la boutique.' };
+    return { success: false, message: 'Veuillez remplir tous les champs de la boutique.' };
   }
 
   const supabaseAdmin = createAdminClient(

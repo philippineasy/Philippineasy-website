@@ -5,9 +5,11 @@ import { supabase } from '@/utils/supabase/client';
 import { Message, Profile, Reaction } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import Image from 'next/image';
+import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane, faCheckDouble, faSmile } from '@fortawesome/free-solid-svg-icons';
 import { RealtimeChannel } from '@supabase/supabase-js';
+import { useMessageTranslation, useDraftTranslation, getLanguageLabel } from '@/hooks/useMessageTranslation';
 
 interface ConversationPanelProps {
   otherUser: Profile;
@@ -21,6 +23,24 @@ const ConversationPanel = ({ otherUser }: ConversationPanelProps) => {
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState<number | null>(null);
+  const {
+    translations,
+    visibleTranslations,
+    loadingMessageId,
+    translationErrors,
+    toggleTranslation,
+  } = useMessageTranslation();
+  const { translateDraft, translatingTo, draftError } = useDraftTranslation();
+  const [showTranslateChips, setShowTranslateChips] = useState(false);
+
+  const handleTranslateDraft = async (target: 'en' | 'tl') => {
+    if (!newMessage.trim()) return;
+    const translated = await translateDraft(newMessage.trim(), target);
+    if (translated) {
+      setNewMessage(translated);
+      setShowTranslateChips(false);
+    }
+  };
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -188,6 +208,47 @@ const ConversationPanel = ({ otherUser }: ConversationPanelProps) => {
               <div className={`relative flex items-center ${isMyMessage ? 'flex-row-reverse' : 'flex-row'}`}>
                 <div className={`relative rounded-lg px-3 py-2 max-w-xs lg:max-w-md ${isMyMessage ? 'bg-primary text-primary-foreground' : 'bg-muted text-foreground'}`}>
                   <p>{message.content}</p>
+
+                  {!isMyMessage && visibleTranslations[message.id] && translations[message.id] && (
+                    <div className="mt-2 border-t border-border/60 pt-2">
+                      <p className="italic text-foreground/90">{translations[message.id].translation}</p>
+                      <span className="mt-1 block text-[10px] text-muted-foreground">
+                        Traduit du {getLanguageLabel(translations[message.id].detected)}
+                      </span>
+                    </div>
+                  )}
+
+                  {!isMyMessage && translationErrors[message.id] && (
+                    <div className="mt-2 border-t border-border/60 pt-2 text-[11px] leading-snug text-muted-foreground">
+                      {translationErrors[message.id].type === 'quota' ? (
+                        <>
+                          Limite quotidienne atteinte —{' '}
+                          <Link href="/rencontre-philippines/premium" className="font-medium underline underline-offset-2">
+                            Premium
+                          </Link>{' '}
+                          pour traduire sans limite
+                        </>
+                      ) : (
+                        'Traduction indisponible pour le moment.'
+                      )}
+                    </div>
+                  )}
+
+                  {!isMyMessage && (
+                    <button
+                      type="button"
+                      onClick={() => toggleTranslation(message.id, message.content)}
+                      disabled={loadingMessageId === message.id}
+                      className="-my-1 mt-1.5 block py-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground disabled:cursor-wait disabled:opacity-60"
+                    >
+                      {loadingMessageId === message.id
+                        ? 'Traduction…'
+                        : visibleTranslations[message.id]
+                          ? 'Masquer la traduction'
+                          : 'Traduire'}
+                    </button>
+                  )}
+
                   {message.reactions && message.reactions.length > 0 && (
                     <div className="absolute -bottom-3.5 bg-card px-1.5 py-0.5 rounded-full shadow flex items-center space-x-1">
                       {message.reactions.slice(0, 3).map(r => <span key={r.user_id} className="text-xs">{r.emoji}</span>)}
@@ -223,6 +284,51 @@ const ConversationPanel = ({ otherUser }: ConversationPanelProps) => {
         )}
       </div>
       <div className="p-4 border-t flex-shrink-0">
+        <div className="mb-2 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowTranslateChips((v) => !v)}
+            disabled={!newMessage.trim()}
+            className="inline-flex min-h-[44px] items-center py-1 text-[12px] font-medium text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Traduire mon message
+          </button>
+          {showTranslateChips && newMessage.trim() !== '' && (
+            <>
+              <button
+                type="button"
+                onClick={() => handleTranslateDraft('en')}
+                disabled={translatingTo !== null}
+                className="inline-flex min-h-[44px] items-center rounded-full border border-border px-4 text-[13px] font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-wait disabled:opacity-50"
+              >
+                {translatingTo === 'en' ? '…' : 'Anglais'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleTranslateDraft('tl')}
+                disabled={translatingTo !== null}
+                className="inline-flex min-h-[44px] items-center rounded-full border border-border px-4 text-[13px] font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-wait disabled:opacity-50"
+              >
+                {translatingTo === 'tl' ? '…' : 'Tagalog'}
+              </button>
+            </>
+          )}
+        </div>
+        {draftError && (
+          <p className="mb-2 text-[11px] text-muted-foreground">
+            {draftError.type === 'quota' ? (
+              <>
+                Limite quotidienne atteinte —{' '}
+                <Link href="/rencontre-philippines/premium" className="font-medium underline underline-offset-2">
+                  Premium
+                </Link>{' '}
+                pour traduire sans limite
+              </>
+            ) : (
+              'Traduction indisponible pour le moment.'
+            )}
+          </p>
+        )}
         <form onSubmit={handleSendMessage} className="flex items-center">
           <input
             type="text"

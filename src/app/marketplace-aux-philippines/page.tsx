@@ -26,12 +26,21 @@ export const metadata: Metadata = {
     siteName: "Philippin'Easy",
     locale: 'fr_FR',
     type: 'website',
+    images: [
+      {
+        url: 'https://philippineasy.com/images/budget/marche-fruits-locaux.webp',
+        width: 1536,
+        height: 1024,
+        alt: 'Étal coloré d’un marché local aux Philippines',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Marketplace Philippines',
     description: 'Achat et vente de produits Philippines',
     site: '@philippineasy',
+    images: ['https://philippineasy.com/images/budget/marche-fruits-locaux.webp'],
   },
 };
 

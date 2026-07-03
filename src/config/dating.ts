@@ -94,9 +94,11 @@ export const DATING_CONFIG = {
   free_plan: {
     daily_message_limit: 2,
     super_likes_per_day: 0,
+    translation_daily_limit: 10,
   },
   premium_plan: {
     daily_message_limit: -1, // -1 means unlimited
     super_likes_per_day: 1,
+    translation_daily_limit: -1, // -1 means unlimited
   },
 };

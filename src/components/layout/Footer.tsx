@@ -60,6 +60,7 @@ const footerCols: { title: string; links: FooterLink[] }[] = [
       { label: 'Partenaires', href: '/partenaires' },
       { label: 'Mentions légales', href: '/mentions-legales' },
       { label: 'Confidentialité', href: '/confidentialite' },
+      { label: 'CGV', href: '/cgv' },
     ],
   },
 ];

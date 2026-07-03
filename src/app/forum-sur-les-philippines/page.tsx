@@ -1,8 +1,12 @@
 import { createClient } from '@/utils/supabase/server';
 import { getForumCategories } from '@/services/forumService';
 import { ForumListClient } from '@/app/forum-sur-les-philippines/ForumListClient';
+import { ForumCommunityLinks } from '@/components/forum/ForumCommunityLinks';
+import { ForumStatePanel } from '@/components/forum/ForumStatePanel';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
+import { PageHero, CTABand } from '@/components/sections';
+import { AlertTriangle } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -38,62 +42,93 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600; // Revalidate every hour
 
-// This is now a Server Component
+const HERO_IMAGE = '/imagesHero/hutte-philippines.webp';
+const HERO_ALT = 'Maison traditionnelle philippine (bahay kubo) nichée dans la végétation tropicale';
+
+const breadcrumbItems = [
+  { href: '/', label: 'Accueil' },
+  { label: 'Forum' },
+];
+
+const breadcrumbJsonLdItems = [
+  { name: 'Accueil', item: '/' },
+  { name: 'Forum', item: '/forum-sur-les-philippines' },
+];
+
+// This is a Server Component
 const ForumsPage = async () => {
   const supabase = await createClient();
-  // Fetch data on the server
   const { data: forumCategories, error } = await getForumCategories(supabase);
 
   if (error) {
-    return <p className="text-center text-destructive">Impossible de charger les catégories du forum.</p>;
+    return (
+      <div className="bg-background">
+        <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
+        <PageHero
+          eyebrow="Communauté francophone"
+          title="Forum des"
+          titleAccent="Philippines"
+          subtitle="La communauté francophone des Philippines : voyage, expatriation et vie sur l'archipel."
+          imageUrl={HERO_IMAGE}
+          imageAlt={HERO_ALT}
+        />
+        <section className="bg-background py-16 md:py-24">
+          <div className="container mx-auto px-4">
+            <ForumStatePanel
+              icon={<AlertTriangle className="h-6 w-6" aria-hidden="true" />}
+              title="Le forum est momentanément indisponible"
+              description="Impossible de charger les catégories pour l'instant. Réessayez dans un moment ou revenez à l'accueil."
+              actions={[{ label: "Retour à l'accueil", href: '/', variant: 'primary' }]}
+            />
+          </div>
+        </section>
+      </div>
+    );
   }
 
   const categories = forumCategories || [];
   const totalTopics = categories.reduce((sum, category) => sum + (category.topic_count || 0), 0);
 
-  const breadcrumbItems = [
-    { href: '/', label: 'Accueil' },
-    { label: 'Forum' },
-  ];
-
-  const breadcrumbJsonLdItems = [
-    { name: 'Accueil', item: '/' },
-    { name: 'Forum', item: '/forum-sur-les-philippines' },
-  ];
+  const stats =
+    totalTopics > 0
+      ? [
+          { value: totalTopics.toLocaleString('fr-FR'), label: 'sujets ouverts' },
+          { value: String(categories.length), label: 'catégories' },
+          { value: '100%', label: 'francophone' },
+        ]
+      : undefined;
 
   return (
-    <main className="container mx-auto px-4 py-16 pt-32">
+    <div className="bg-background">
       <BreadcrumbJsonLd items={breadcrumbJsonLdItems} />
-      <Breadcrumb items={breadcrumbItems} />
 
-      <div className="mx-auto mb-10 max-w-2xl text-center">
-        <span className="mb-3 inline-block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
-          Communauté
-        </span>
-        <h1
-          className="font-bold text-foreground"
-          style={{
-            fontSize: 'clamp(2rem, 4.5vw, 2.75rem)',
-            lineHeight: 1.1,
-            letterSpacing: '-0.02em',
-          }}
-        >
-          Forum Philippin&apos;<span className="text-accent">Easy</span>
-        </h1>
-        <p className="mt-4 text-[17px] leading-relaxed text-muted-foreground text-pretty">
-          La communauté francophone des Philippines. Posez vos questions, partagez vos
-          expériences et trouvez des conseils auprès de voyageurs et d&apos;expatriés.
-          {totalTopics > 0 && (
-            <>
-              {' '}Déjà <strong className="text-foreground">{totalTopics.toLocaleString('fr-FR')}</strong> sujet{totalTopics !== 1 ? 's' : ''} ouvert{totalTopics !== 1 ? 's' : ''} par la communauté.
-            </>
-          )}
-        </p>
-      </div>
+      <PageHero
+        eyebrow="Communauté francophone"
+        title="Forum des"
+        titleAccent="Philippines"
+        subtitle="Posez vos questions, partagez vos expériences et trouvez des conseils auprès de voyageurs et d'expatriés installés sur place."
+        imageUrl={HERO_IMAGE}
+        imageAlt={HERO_ALT}
+        stats={stats}
+      />
 
-      <ForumListClient initialCategories={categories} />
+      <section className="bg-background pt-10 md:pt-12">
+        <div className="container mx-auto px-4">
+          <Breadcrumb items={breadcrumbItems} />
+          <ForumListClient initialCategories={categories} />
+        </div>
+      </section>
 
-    </main>
+      <ForumCommunityLinks />
+
+      <CTABand
+        title="Une question sur"
+        titleAccent="les Philippines ?"
+        subtitle="Créez votre compte gratuit pour ouvrir un sujet, ou laissez notre assistant composer votre itinéraire sur mesure."
+        primary={{ label: 'Rejoindre la communauté', href: '/connexion#register' }}
+        secondary={{ label: 'Créer mon itinéraire IA', href: '/itineraire-personnalise-pour-les-philippines' }}
+      />
+    </div>
   );
 };
 

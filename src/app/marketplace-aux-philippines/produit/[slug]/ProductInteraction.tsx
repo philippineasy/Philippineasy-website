@@ -6,6 +6,7 @@ import { useCart } from '@/contexts/CartContext';
 type Product = {
   id: number;
   name: string;
+  slug?: string;
   price: number;
   image_urls: string[] | null;
   // Add other fields that might be needed by the cart

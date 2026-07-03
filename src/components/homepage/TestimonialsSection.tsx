@@ -1,76 +1,89 @@
-type Testimonial = {
-  initials: string;
-  avatarColor: string;
-  stars: number;
-  quote: string;
-  name: string;
-  role: string;
+// Cette section remplace d'anciens « témoignages » fictifs (noms et notes
+// inventés). Un site jeune avec de VRAIS arguments vaut mieux que de faux avis :
+// on met donc en avant 3 preuves concrètes et vérifiables, avec le même soin
+// visuel. Aucun chiffre inventé, aucune note fabriquée.
+
+type Proof = {
+  stat: string;
+  statLabel: string;
+  title: string;
+  text: string;
+  icon: 'guides' | 'route' | 'community';
+  tone: {
+    bg: string;
+    fg: string;
+  };
 };
 
-// Exception: `avatarColor` is a decorative, self-contained avatar palette
-// (colored disc + white initials, aria-hidden). Both fg and bg are fixed so
-// the chips stay legible in either theme — not tokenised on purpose.
-const testimonials: Testimonial[] = [
+// Exception : `tone.bg` / `tone.fg` sont une petite palette d'accents pour les
+// pastilles d'icônes (fond doux + icône), lisible dans les deux thèmes —
+// volontairement non tokenisée, comme les pastilles TrustBadge.
+const proofs: Proof[] = [
   {
-    initials: 'PD',
-    avatarColor: '#3B5BDB',
-    stars: 5,
-    quote:
-      "M'installer à Cebu a été la meilleure décision. Le coût de la vie, le climat, la gentillesse des gens… mon entreprise en ligne me permet d'en profiter pleinement.",
-    name: 'Pierre D., 42 ans',
-    role: 'Entrepreneur digital à Cebu',
+    stat: '47',
+    statLabel: 'guides gratuits',
+    title: 'Sourcés et sans paywall',
+    text: "Voyage, visa, coût de la vie, logement, travail : nos guides sont en accès libre et mis à jour depuis le terrain, pas recopiés d'un guide touristique.",
+    icon: 'guides',
+    tone: { bg: '#FEF3C7', fg: '#B45309' },
   },
   {
-    initials: 'MC',
-    avatarColor: '#F59E0B',
-    stars: 5,
-    quote:
-      "L'itinéraire IA nous a fait gagner deux semaines de préparation. Tout était parfait, même la météo à Palawan.",
-    name: 'Marie & Camille',
-    role: 'Couple en voyage de noces',
+    stat: '93',
+    statLabel: 'itinéraires générés',
+    title: 'IA + validation humaine',
+    text: "L'IA compose votre programme jour par jour en quelques secondes, puis un Français installé aux Philippines vérifie que chaque étape tient la route.",
+    icon: 'route',
+    tone: { bg: '#F4F7FE', fg: '#3B5BDB' },
   },
   {
-    initials: 'SL',
-    avatarColor: '#0EA5E9',
-    stars: 5,
-    quote:
-      "Trois mois en coliving à Siargao grâce aux bons plans du forum. J'ai enfin trouvé ma communauté francophone.",
-    name: 'Sophie L., 28 ans',
-    role: 'Digital nomade à Siargao',
+    stat: '100 %',
+    statLabel: 'francophone',
+    title: 'Une vraie communauté',
+    text: "Forum d'entraide et support WhatsApp : posez vos questions à des expatriés francophones qui vivent l'archipel, jamais à un centre d'appels ni à un bot.",
+    icon: 'community',
+    tone: { bg: '#ECFDF5', fg: '#059669' },
   },
 ];
 
-const QuoteGlyph = () => (
-  <svg
-    width="28"
-    height="28"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="text-accent"
-    style={{ opacity: 0.25 }}
-    aria-hidden="true"
-  >
-    <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.76-2-2-2H4c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2h3c0 4.01-3 5-3 5z" />
-    <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.76-2-2-2h-4c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2h3c0 4.01-3 5-3 5z" />
-  </svg>
-);
+const ProofIcon = ({ name }: { name: Proof['icon'] }) => {
+  const common = {
+    width: 22,
+    height: 22,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.8,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+    'aria-hidden': true,
+  };
 
-const StarRow = ({ count }: { count: number }) => (
-  <div
-    className="flex items-center gap-0.5 text-accent text-[15px] mb-3.5"
-    aria-label={`Note ${count} sur 5`}
-  >
-    {Array.from({ length: count }).map((_, i) => (
-      <span key={i} aria-hidden="true">
-        ★
-      </span>
-    ))}
-  </div>
-);
+  if (name === 'guides') {
+    // open book
+    return (
+      <svg {...common}>
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+      </svg>
+    );
+  }
+  if (name === 'route') {
+    // route / map pins
+    return (
+      <svg {...common}>
+        <circle cx="6" cy="19" r="3" />
+        <circle cx="18" cy="5" r="3" />
+        <path d="M9 19h6a3 3 0 0 0 3-3V8M6 16V8a3 3 0 0 1 3-3h6" />
+      </svg>
+    );
+  }
+  // community / chat
+  return (
+    <svg {...common}>
+      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+    </svg>
+  );
+};
 
 export const TestimonialsSection = () => {
   return (
@@ -78,55 +91,60 @@ export const TestimonialsSection = () => {
       <div className="container mx-auto px-4">
         <div className="text-center max-w-[720px] mx-auto mb-12">
           <span className="text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
-            Témoignages
+            Ce que vous trouvez ici
           </span>
           <h2
             className="text-[clamp(1.875rem,3.5vw,2.5rem)] font-bold text-foreground mt-3"
             style={{ letterSpacing: '-0.02em', lineHeight: 1.1 }}
           >
-            Ils ont choisi les <span className="text-accent">Philippines</span>
+            De vrais atouts, <span className="text-accent">concrets</span>
           </h2>
+          <p className="text-[17px] text-muted-foreground leading-[1.6] mt-3">
+            Un guide francophone indépendant, des ressources réelles et des
+            conseils testés sur place.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-[22px] max-w-6xl mx-auto">
-          {testimonials.map((t) => (
+          {proofs.map((p) => (
             <article
-              key={t.initials}
-              className="relative bg-card rounded-2xl p-7 border-[0.5px] border-border shadow-card-rest"
+              key={p.statLabel}
+              className="relative bg-card rounded-2xl p-7 border-[0.5px] border-border shadow-card-rest transition-transform duration-300 hover:-translate-y-1 motion-reduce:hover:transform-none"
             >
-              <div className="absolute top-5 right-5">
-                <QuoteGlyph />
-              </div>
+              <span
+                className="inline-flex items-center justify-center rounded-xl"
+                style={{
+                  width: '46px',
+                  height: '46px',
+                  backgroundColor: p.tone.bg,
+                  color: p.tone.fg,
+                }}
+                aria-hidden="true"
+              >
+                <ProofIcon name={p.icon} />
+              </span>
 
-              <StarRow count={t.stars} />
-
-              <p className="text-[15px] italic leading-[1.6] mb-6 text-foreground/80">
-                « {t.quote} »
-              </p>
-
-              <div className="flex items-center gap-3.5 pt-4 border-t border-border/60">
-                <span
-                  className="inline-flex items-center justify-center rounded-full flex-shrink-0 text-white font-bold"
-                  style={{
-                    width: '44px',
-                    height: '44px',
-                    backgroundColor: t.avatarColor,
-                    fontSize: '14px',
-                    letterSpacing: '0.02em',
-                  }}
-                  aria-hidden="true"
+              <div className="mt-5 flex items-baseline gap-2">
+                <strong
+                  className="text-[34px] font-bold text-foreground tabular-nums"
+                  style={{ letterSpacing: '-0.02em', lineHeight: 1 }}
                 >
-                  {t.initials}
+                  {p.stat}
+                </strong>
+                <span
+                  className="text-[13px] font-medium uppercase text-muted-foreground"
+                  style={{ letterSpacing: '0.05em' }}
+                >
+                  {p.statLabel}
                 </span>
-                <div className="min-w-0">
-                  <p className="text-[14px] font-semibold text-foreground truncate">
-                    {t.name}
-                  </p>
-                  <p className="text-[12px] text-muted-foreground truncate">
-                    {t.role}
-                  </p>
-                </div>
               </div>
+
+              <h3 className="text-[17px] font-semibold text-foreground mt-4 mb-2">
+                {p.title}
+              </h3>
+              <p className="text-[15px] leading-[1.6] text-foreground/75">
+                {p.text}
+              </p>
             </article>
           ))}
         </div>

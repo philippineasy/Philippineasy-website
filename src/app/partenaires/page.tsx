@@ -14,7 +14,7 @@ import {
   faArrowUpRightFromSquare,
   faHeart,
   faShieldAlt,
-  faUsers,
+  faBookOpen,
 } from '@fortawesome/free-solid-svg-icons'
 import type { IconDefinition } from '@fortawesome/free-solid-svg-icons'
 
@@ -179,10 +179,10 @@ export default function PartenairesPage() {
           <div className="mt-12 grid grid-cols-3 gap-4 md:gap-8 max-w-2xl mx-auto">
             <div className="text-center">
               <div className="flex items-center justify-center w-12 h-12 mx-auto mb-2 rounded-xl bg-primary/10 text-primary">
-                <FontAwesomeIcon icon={faUsers} className="text-xl" />
+                <FontAwesomeIcon icon={faBookOpen} className="text-xl" />
               </div>
-              <div className="text-2xl md:text-3xl font-bold">10 000+</div>
-              <div className="text-xs md:text-sm text-muted-foreground">voyageurs accompagnes</div>
+              <div className="text-2xl md:text-3xl font-bold">47</div>
+              <div className="text-xs md:text-sm text-muted-foreground">guides gratuits</div>
             </div>
             <div className="text-center">
               <div className="flex items-center justify-center w-12 h-12 mx-auto mb-2 rounded-xl bg-primary/10 text-primary">

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { getTopicsByCategorySlug, deleteForumTopic, lockForumTopic, pinForumTopic } from '@/services/forumService';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faSearch, faThumbtack, faLock, faUnlock, faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -11,6 +10,7 @@ import { supabase } from '@/utils/supabase/client';
 import Modal from '@/components/layout/Modal';
 import toast from 'react-hot-toast';
 import { CustomSelect, SelectOption } from '@/components/shared/CustomSelect';
+import { GradientAvatar } from '@/components/forum/GradientAvatar';
 
 interface Topic {
   id: number;
@@ -33,32 +33,76 @@ interface TopicListClientProps {
   initialTopics: Topic[];
 }
 
+// Strip tags + collapse whitespace so a preview never leaks raw HTML.
+const stripHtml = (html: string) => html.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
+
+// Turn an EditorJS post (JSON string) into a clean one-line excerpt. Walks to the
+// first meaningful block (paragraph / header / quote / list) and returns its text;
+// non-text leading blocks get an elegant label instead of a raw JSON dump.
+const getPostExcerpt = (raw: string): string => {
+  if (!raw) return '';
+  try {
+    const parsed = JSON.parse(raw);
+    const blocks = Array.isArray(parsed?.blocks) ? parsed.blocks : [];
+    for (const block of blocks) {
+      switch (block?.type) {
+        case 'paragraph':
+        case 'header':
+        case 'quote': {
+          const text = stripHtml(block.data?.text || '');
+          if (text) return text.slice(0, 180);
+          break;
+        }
+        case 'list': {
+          const items = Array.isArray(block.data?.items) ? block.data.items : [];
+          const text = items
+            .map((it: unknown) =>
+              stripHtml(
+                typeof it === 'object' && it !== null
+                  ? ((it as { content?: string }).content || '')
+                  : String(it ?? '')
+              )
+            )
+            .filter(Boolean)
+            .join(' · ');
+          if (text) return text.slice(0, 180);
+          break;
+        }
+        case 'image':
+          return 'Photo partagée';
+        case 'table':
+          return 'Tableau partagé';
+        default:
+          break;
+      }
+    }
+    return '';
+  } catch {
+    const text = stripHtml(raw);
+    // Guard: if it still looks like serialized EditorJS, show nothing rather than braces.
+    if (!text || /"(?:blocks|type|data)"\s*:/.test(raw)) return '';
+    return text.slice(0, 180);
+  }
+};
+
 const TopicPreview = ({ previewPosts }: { previewPosts: { content: string, author: string }[] }) => {
-    if (!previewPosts || previewPosts.length === 0) {
-      return <p className="preview-text italic text-muted-foreground">Pas de messages récents à afficher en aperçu.</p>;
+    const items = (previewPosts || [])
+      .map((post) => ({ author: post.author, excerpt: getPostExcerpt(post.content) }))
+      .filter((post) => post.excerpt)
+      .slice(0, 2);
+
+    if (items.length === 0) {
+      return <p className="text-[13px] italic text-muted-foreground/80">Aucun aperçu pour le moment.</p>;
     }
 
     return (
-      <>
-        {previewPosts.map((post, index) => {
-          let content = null;
-          try {
-            const parsedContent = JSON.parse(post.content);
-            const firstBlock = parsedContent.blocks[0];
-            if (firstBlock.type === 'header') {
-              content = <h4 className="preview-header-blue"><strong className="text-foreground">{post.author}:</strong> {firstBlock.data.text}</h4>;
-            } else if (firstBlock.type === 'quote') {
-              content = <blockquote className="preview-quote-orange"><strong className="text-foreground">{post.author}:</strong> {firstBlock.data.text}</blockquote>;
-            } else {
-              content = <p className="preview-text"><strong className="text-foreground">{post.author}:</strong> {firstBlock.data.text.substring(0, 150)}...</p>;
-            }
-          } catch (e) {
-            const cleanContent = post.content ? post.content.replace(/<[^>]*>?/gm, ' ') : '';
-            content = <p className="preview-text"><strong className="text-foreground">{post.author}:</strong> {cleanContent.substring(0, 150)}...</p>;
-          }
-          return <div key={index} className="single-post-preview mb-1">{content}</div>;
-        })}
-      </>
+      <div className="space-y-1.5">
+        {items.map((post, index) => (
+          <p key={index} className="line-clamp-2 text-[13px] leading-[1.5] text-muted-foreground">
+            <strong className="font-semibold text-foreground">{post.author} :</strong> {post.excerpt}
+          </p>
+        ))}
+      </div>
     );
   };
 
@@ -188,15 +232,13 @@ export const TopicListClient = ({ slug, initialTopics }: TopicListClientProps) =
                 href={`/forum-sur-les-philippines/sujet/${topic.slug}`}
                 className="group flex min-w-0 flex-1 items-center gap-4 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
-                <span className="relative h-11 w-11 flex-shrink-0 overflow-hidden rounded-full ring-1 ring-border">
-                  <Image
-                    src={topic.topic_author_avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(topic.topic_author_username || '?')}&background=random&size=88&font-size=0.5`}
-                    alt=""
-                    fill
-                    className="object-cover"
-                    sizes="44px"
-                  />
-                </span>
+                <GradientAvatar
+                  src={topic.topic_author_avatar_url}
+                  name={topic.topic_author_username}
+                  className="h-11 w-11 rounded-full ring-1 ring-border"
+                  imgSizes="44px"
+                  textClassName="text-[16px]"
+                />
                 <span className="min-w-0 flex-1">
                   {(topic.is_pinned || topic.is_locked) && (
                     <span className="mb-1 flex flex-wrap items-center gap-1.5">
@@ -269,12 +311,12 @@ export const TopicListClient = ({ slug, initialTopics }: TopicListClientProps) =
               </div>
             </div>
 
-            <div className="topic-preview-container flex items-center gap-6 pl-[60px] text-sm text-foreground sm:hidden">
+            <div className="flex items-center gap-6 pl-[60px] text-sm text-foreground sm:hidden">
               <span className="text-[13px] font-semibold text-foreground">{topic.reply_count} réponses</span>
               <span className="text-[13px] text-muted-foreground">{topic.view_count} vues</span>
             </div>
 
-            <div className="topic-preview-container pl-[60px] pr-2 text-sm text-foreground">
+            <div className="pl-[60px] pr-2">
               <TopicPreview previewPosts={topic.preview_posts} />
             </div>
           </article>

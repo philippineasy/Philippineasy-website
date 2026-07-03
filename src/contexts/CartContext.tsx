@@ -7,6 +7,7 @@ import { useAuth } from './AuthContext';
 type Product = {
   id: number;
   name: string;
+  slug?: string;
   price: number;
   image_urls: string[] | null;
 };

@@ -4,11 +4,11 @@
  * TrustBadge — credibility / risk-reversal signals.
  *
  * Pourquoi : trafic Google Ads froid arrive sceptique. On reduit l'anxiete
- * d'achat avec 4 leviers psycho :
- *   - autorite (guide francophone depuis 2020)
- *   - preuve sociale (+10 000 voyageurs)
+ * d'achat avec des leviers psycho REELS et verifiables (aucun compteur invente) :
+ *   - autorite (guide francophone independant depuis 2020)
+ *   - preuve produit tangible (47 guides gratuits, itineraires valides a la main)
  *   - reduction du risque (paiement Stripe + satisfait/rembourse)
- *   - support / recours (reponse <48h)
+ *   - support / recours (WhatsApp, vrais Francais sur place)
  *
  * Reference design : OfferConfirmationModal.tsx (gradient bleu, dashed circles,
  * pill-icon en `bg-primary/10 text-primary`, rounded-2xl, shadow subtile).
@@ -24,8 +24,9 @@ import {
   faShieldHalved,
   faLock,
   faRotateLeft,
-  faEnvelopeOpenText,
-  faUsers,
+  faBookOpen,
+  faRoute,
+  faComments,
   faMapLocationDot,
 } from '@fortawesome/free-solid-svg-icons';
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
@@ -356,14 +357,20 @@ export const TRUST_BADGES = {
   guideSince2020: {
     icon: faMapLocationDot,
     label: 'Depuis 2020',
-    description: 'Guide francophone Philippines',
+    description: 'Guide 100% francophone',
     tone: 'primary' as const,
   },
-  travelers: {
-    icon: faUsers,
-    label: '+10 000 voyageurs',
-    description: 'déjà accompagnés',
+  guidesFree: {
+    icon: faBookOpen,
+    label: '47 guides gratuits',
+    description: 'En accès libre, sans paywall',
     tone: 'accent' as const,
+  },
+  itinerariesHuman: {
+    icon: faRoute,
+    label: 'Itinéraires validés',
+    description: 'IA + Français sur place',
+    tone: 'primary' as const,
   },
   securePayment: {
     icon: faShieldHalved,
@@ -378,18 +385,18 @@ export const TRUST_BADGES = {
     tone: 'success' as const,
   },
   support: {
-    icon: faEnvelopeOpenText,
-    label: 'Support réactif',
-    description: 'Réponse sous 48h',
+    icon: faComments,
+    label: 'Support WhatsApp',
+    description: 'De vrais Français, pas un bot',
     tone: 'primary' as const,
   },
 } satisfies Record<string, TrustBadgeBarBadge>;
 
-// Combinaisons pre-configurees
+// Combinaisons pre-configurees — homepage : 4 preuves REELLES et verifiables.
 export const HOMEPAGE_TRUST_BADGES: TrustBadgeBarBadge[] = [
   TRUST_BADGES.guideSince2020,
-  TRUST_BADGES.travelers,
-  TRUST_BADGES.securePayment,
+  TRUST_BADGES.guidesFree,
+  TRUST_BADGES.itinerariesHuman,
   TRUST_BADGES.support,
 ];
 

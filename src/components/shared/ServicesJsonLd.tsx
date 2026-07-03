@@ -5,28 +5,21 @@
  *
  * Eligible rich results :
  * - Service rich card (description, offer price)
- * - AggregateRating stars dans SERP
  * - Cross-linking avec FAQPage deja present sur la page
+ *
+ * Note : pas d'AggregateRating tant qu'aucun avis reel n'est collecte (voir
+ * commentaire dans le composant).
  */
 const ServicesJsonLd = () => {
   const siteUrl = 'https://philippineasy.com';
   const orgRef = { '@id': `${siteUrl}/#organization` };
 
-  // AggregateRating distribue sur chaque Service car :
-  // - Le type 'Brand' n'est PAS supporte par Google pour Review Snippets
-  //   (parent_node invalide signale par GSC : "Type d'objet non valide pour
-  //    le champ <parent_node>"). Doc :
-  //   https://developers.google.com/search/docs/appearance/structured-data/review-snippet
-  // - 'Service' EST un type valide (idem Product, LocalBusiness, etc.)
-  // - 320 reviews + 10000 ratings = stats globales legitimes des services
-  //   (10000 voyageurs accompagnes mentionnes sur la page = source verifiable)
-  const aggregateRating = {
-    '@type': 'AggregateRating',
-    ratingValue: '4.9',
-    bestRating: '5',
-    ratingCount: '10000',
-    reviewCount: '320',
-  };
+  // PAS d'AggregateRating : le service n'a pas (encore) de systeme d'avis
+  // publics. Injecter une note fabriquee (ex. 4.9 / 10000 votes) genererait de
+  // fausses etoiles dans la SERP = trompeur pour l'utilisateur + violation des
+  // regles Google Review Snippet (self-serving / unverifiable ratings). On
+  // reactivera ce bloc uniquement adosse a de vrais avis collectes.
+  // Doc : https://developers.google.com/search/docs/appearance/structured-data/review-snippet
 
   const services = [
     {
@@ -37,7 +30,6 @@ const ServicesJsonLd = () => {
       provider: orgRef,
       areaServed: { '@type': 'Country', name: 'Philippines' },
       serviceType: 'Conciergerie voyage personnalisee',
-      aggregateRating,
       offers: {
         '@type': 'Offer',
         priceCurrency: 'EUR',
@@ -60,7 +52,6 @@ const ServicesJsonLd = () => {
       provider: orgRef,
       areaServed: { '@type': 'Country', name: 'Philippines' },
       serviceType: 'Assistance voyage premium',
-      aggregateRating,
       offers: {
         '@type': 'Offer',
         priceCurrency: 'EUR',
@@ -83,7 +74,6 @@ const ServicesJsonLd = () => {
       provider: orgRef,
       areaServed: { '@type': 'Country', name: 'Philippines' },
       serviceType: 'Pack tout-inclus voyage et expatriation',
-      aggregateRating,
       offers: {
         '@type': 'Offer',
         priceCurrency: 'EUR',

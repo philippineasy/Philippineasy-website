@@ -33,7 +33,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function DevenirVendeurPage() {
+export default async function DevenirVendeurPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ success?: string }>;
+}) {
+  const { success } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -45,21 +50,46 @@ export default async function DevenirVendeurPage() {
       .single();
 
     if (existingVendor) {
+      const statusCard = {
+        pending: {
+          tone: 'bg-accent/10 text-accent-strong',
+          title: 'Candidature en cours d’examen',
+          message: 'Merci ! Votre candidature a bien été reçue et est en cours d’examen par notre équipe. Nous vous contacterons très bientôt par e-mail.',
+        },
+        approved: {
+          tone: 'bg-success/10 text-success',
+          title: 'Candidature approuvée',
+          message: 'Félicitations ! Votre candidature a été approuvée. Vous pouvez dès maintenant accéder à votre espace vendeur et publier vos produits.',
+        },
+        rejected: {
+          tone: 'bg-destructive/10 text-destructive',
+          title: 'Candidature non retenue',
+          message: 'Nous sommes désolés, votre candidature n’a pas été retenue pour le moment. N’hésitez pas à nous contacter pour en savoir plus.',
+        },
+      }[existingVendor.status as 'pending' | 'approved' | 'rejected'] ?? {
+        tone: 'bg-muted text-muted-foreground',
+        title: 'Votre candidature',
+        message: 'Le statut de votre candidature est en cours de traitement.',
+      };
+
       return (
-        <div className="container mx-auto px-4 py-16 text-center">
-          <h1 className="text-3xl font-bold mb-4">Votre Candidature</h1>
-          {existingVendor.status === 'pending' && (
-            <p className="text-lg text-yellow-500 dark:text-yellow-400 mb-8">Votre candidature est en cours d'examen. Nous vous contacterons bientôt.</p>
-          )}
-          {existingVendor.status === 'approved' && (
-            <p className="text-lg text-[hsl(var(--success))] mb-8">Félicitations ! Votre candidature a été approuvée. Vous pouvez maintenant accéder à votre tableau de bord.</p>
-          )}
-          {existingVendor.status === 'rejected' && (
-            <p className="text-lg text-destructive mb-8">Nous sommes désolés, mais votre candidature n'a pas été retenue pour le moment.</p>
-          )}
-           <Link href="/profil/boutique" className="inline-block px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition duration-300 font-semibold">
-            Accéder à mon espace vendeur
-          </Link>
+        <div className="container mx-auto px-4 py-16 md:py-24">
+          <div className="mx-auto max-w-lg rounded-2xl border-[0.5px] border-border bg-card p-8 text-center shadow-card-rest md:p-10">
+            <span className={`mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full ${statusCard.tone}`}>
+              <StoreIcon />
+            </span>
+            <h1 className="text-2xl font-bold text-foreground md:text-3xl">{statusCard.title}</h1>
+            <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-muted-foreground">
+              {statusCard.message}
+            </p>
+            <Link
+              href="/profil/boutique"
+              className="mt-8 inline-flex h-11 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              Accéder à mon espace vendeur
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
         </div>
       );
     }
@@ -67,7 +97,15 @@ export default async function DevenirVendeurPage() {
 
   return (
     <div className="container mx-auto px-4 py-16">
-      <VendorApplicationClientPage user={user} />
+      <VendorApplicationClientPage user={user} applicationSuccess={success === 'true'} />
     </div>
   );
 }
+
+const StoreIcon = () => (
+  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M3 9l1.5-5h15L21 9" />
+    <path d="M4 9v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9" />
+    <path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0" />
+  </svg>
+);

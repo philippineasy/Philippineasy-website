@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { supabase } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle, faFacebookF } from '@fortawesome/free-brands-svg-icons';
 import toast from 'react-hot-toast';
@@ -49,9 +50,9 @@ const VendeurConnexionPage = () => {
   };
 
   return (
-    <main className="py-16 md:py-24 bg-black/50 flex items-center justify-center min-h-screen vendeur-theme">
+    <main className="py-16 md:py-24 bg-muted flex items-center justify-center min-h-screen">
       <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto bg-card rounded-xl shadow-2xl overflow-hidden">
+        <div className="max-w-4xl mx-auto bg-card rounded-2xl border-[0.5px] border-border shadow-card overflow-hidden">
           <div className="flex flex-col md:flex-row">
             {/* Form Section */}
             <div className="w-full md:w-1/2 p-8 md:p-12">
@@ -72,15 +73,15 @@ const VendeurConnexionPage = () => {
                 {isLogin ? (
                   <>
                     <div>
-                      <label className="block text-foreground mb-2" htmlFor="email">Email</label>
-                      <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" placeholder="votre@email.com" required />
+                      <label className="block text-foreground mb-2 font-medium" htmlFor="email">Email</label>
+                      <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-2.5 border border-border bg-card text-foreground rounded-lg placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="votre@email.com" required autoComplete="email" />
                     </div>
                     <div>
-                      <label className="block text-foreground mb-2" htmlFor="password">Mot de passe</label>
-                      <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" placeholder="••••••••" required autoComplete="current-password" />
+                      <label className="block text-foreground mb-2 font-medium" htmlFor="password">Mot de passe</label>
+                      <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-2.5 border border-border bg-card text-foreground rounded-lg placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent" placeholder="••••••••" required autoComplete="current-password" />
                     </div>
-                     <div className="flex items-center justify-between">
-                        <a href="#" className="text-sm text-primary hover:underline">Mot de passe oublié ?</a>
+                     <div className="flex items-center justify-end">
+                        <Link href="/mot-de-passe-oublie" className="text-sm text-primary hover:underline">Mot de passe oublié ?</Link>
                     </div>
                   </>
                 ) : (
