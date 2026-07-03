@@ -101,11 +101,11 @@ const ProfileClientPage = () => {
   }, [id, user]);
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">Chargement du profil...</div>;
+    return <div className="flex h-screen items-center justify-center text-muted-foreground">Chargement du profil…</div>;
   }
 
   if (!profile) {
-    return <div className="flex justify-center items-center h-screen">Profil non trouvé ou non validé.</div>;
+    return <div className="flex h-screen items-center justify-center text-muted-foreground">Profil non trouvé ou non validé.</div>;
   }
 
   return (
@@ -116,11 +116,13 @@ const ProfileClientPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* Left Column */}
-          <div className="lg:col-span-1 space-y-8">
+          <div className="lg:col-span-1 space-y-6">
             {!isOwnProfile && (
-              <div className="bg-card rounded-lg shadow-lg p-6 text-center">
-                <h3 className="text-2xl font-bold text-primary">{compatibility}%</h3>
-                <p className="text-muted-foreground">de compatibilité</p>
+              <div className="rounded-2xl border border-border bg-card p-6 text-center shadow-sm">
+                <span className="block text-4xl font-bold tabular-nums tracking-[-0.02em] text-primary">
+                  {compatibility}%
+                </span>
+                <p className="mt-1 text-sm text-muted-foreground">de compatibilité</p>
               </div>
             )}
 
@@ -132,19 +134,63 @@ const ProfileClientPage = () => {
 
             {isOwnProfile && (
               <>
-                <div className="bg-card rounded-lg shadow-lg p-6">
-                  <h2 className="text-xl font-bold text-foreground mb-4">Mon Tableau de Bord</h2>
-                  <ul className="space-y-3">
-                    <li><Link href="/rencontre-philippines/messages" className="flex items-center text-primary hover:underline"><FontAwesomeIcon icon={faComments} className="w-5 mr-3" /> Mes Conversations</Link></li>
-                    <li><Link href="/rencontre-philippines/likes" className="flex items-center text-primary hover:underline"><FontAwesomeIcon icon={faHeart} className="w-5 mr-3" /> Qui m'a liké ?</Link></li>
-                    <li><Link href="/rencontre-philippines/swipe" className="flex items-center text-primary hover:underline"><FontAwesomeIcon icon={faClone} className="w-5 mr-3" /> Mode Découverte</Link></li>
-                    <li><Link href="/rencontre-philippines/profil/modifier" className="flex items-center text-primary hover:underline"><FontAwesomeIcon icon={faEdit} className="w-5 mr-3" /> Modifier mon profil</Link></li>
+                <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+                  <h2 className="mb-4 text-lg font-bold tracking-[-0.01em] text-foreground">Mon tableau de bord</h2>
+                  <ul className="space-y-1">
+                    {[
+                      { href: '/rencontre-philippines/messages', icon: faComments, label: 'Mes conversations' },
+                      { href: '/rencontre-philippines/likes', icon: faHeart, label: "Qui m'a liké ?" },
+                      { href: '/rencontre-philippines/swipe', icon: faClone, label: 'Mode Découverte' },
+                      { href: '/rencontre-philippines/profil/modifier', icon: faEdit, label: 'Modifier mon profil' },
+                    ].map((item) => (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                            <FontAwesomeIcon icon={item.icon} className="text-[13px]" />
+                          </span>
+                          {item.label}
+                          <span aria-hidden="true" className="ml-auto text-muted-foreground transition-transform group-hover:translate-x-0.5">→</span>
+                        </Link>
+                      </li>
+                    ))}
                     {isPremium ? (
-                      <li><Link href="/rencontre-philippines/profil/abonnement" className="flex items-center text-primary hover:underline"><FontAwesomeIcon icon={faShieldAlt} className="w-5 mr-3" /> Mon Abonnement</Link></li>
+                      <li>
+                        <Link
+                          href="/rencontre-philippines/profil/abonnement"
+                          className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                            <FontAwesomeIcon icon={faShieldAlt} className="text-[13px]" />
+                          </span>
+                          Mon abonnement
+                          <span aria-hidden="true" className="ml-auto text-muted-foreground transition-transform group-hover:translate-x-0.5">→</span>
+                        </Link>
+                      </li>
                     ) : (
-                      <li><Link href="/rencontre-philippines/premium" className="flex items-center text-accent hover:underline"><FontAwesomeIcon icon={faCrown} className="w-5 mr-3" /> Passer Premium</Link></li>
+                      <li>
+                        <Link
+                          href="/rencontre-philippines/premium"
+                          className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-semibold text-accent-strong transition-colors hover:bg-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        >
+                          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent-strong">
+                            <FontAwesomeIcon icon={faCrown} className="text-[13px]" />
+                          </span>
+                          Passer Premium
+                          <span aria-hidden="true" className="ml-auto transition-transform group-hover:translate-x-0.5">→</span>
+                        </Link>
+                      </li>
                     )}
-                    <li><button className="flex items-center text-destructive hover:underline"><FontAwesomeIcon icon={faTrash} className="w-5 mr-3" /> Supprimer le profil</button></li>
+                    <li className="pt-1">
+                      <button className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-medium text-destructive transition-colors hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                        <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+                          <FontAwesomeIcon icon={faTrash} className="text-[13px]" />
+                        </span>
+                        Supprimer le profil
+                      </button>
+                    </li>
                   </ul>
                 </div>
                 <UserLimits />

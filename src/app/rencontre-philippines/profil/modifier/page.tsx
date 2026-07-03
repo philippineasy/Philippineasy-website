@@ -198,25 +198,25 @@ const EditDatingProfilePage = () => {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8 order-2 lg:order-1">
-              <div className="bg-card p-6 rounded-xl shadow-md">
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
                 <h2 className="text-xl font-bold text-foreground mb-6">Vos Informations</h2>
                 <div className="space-y-6">
                   <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-foreground">Description</label>
-                    <textarea id="description" {...register('description', { required: 'La description est requise.' })} className="mt-1 block w-full rounded-md border-border shadow-sm focus:border-primary focus:ring-primary" rows={5}></textarea>
-                    {errors.description && <p className="text-destructive text-xs mt-1">{errors.description.message}</p>}
+                    <label htmlFor="description" className="block text-sm font-semibold text-foreground mb-2">Description</label>
+                    <textarea id="description" {...register('description', { required: 'La description est requise.' })} className="block w-full resize-none rounded-xl border border-border bg-card p-3 text-[15px] text-foreground shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" rows={5}></textarea>
+                    {errors.description && <p className="mt-1.5 text-sm text-destructive">{errors.description.message}</p>}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-foreground">Genre</label>
+                      <label className="block text-sm font-semibold text-foreground mb-2">Genre</label>
                       <p className="mt-1 text-lg font-semibold text-foreground">{staticProfileData.gender}</p>
                     </div>
                      <div>
-                      <label className="block text-sm font-medium text-foreground">Taille</label>
+                      <label className="block text-sm font-semibold text-foreground mb-2">Taille</label>
                       <p className="mt-1 text-lg font-semibold text-foreground">{staticProfileData.height ? `${staticProfileData.height} cm` : 'Non spécifiée'}</p>
                     </div>
                     <div>
-                      <label htmlFor="city" className="block text-sm font-medium text-foreground">Ville</label>
+                      <label htmlFor="city" className="block text-sm font-semibold text-foreground mb-2">Ville</label>
                       <Controller
                         name="city"
                         control={control}
@@ -228,10 +228,10 @@ const EditDatingProfilePage = () => {
                           />
                         )}
                       />
-                      {errors.city && <p className="text-destructive text-xs mt-1">{errors.city.message}</p>}
+                      {errors.city && <p className="mt-1.5 text-sm text-destructive">{errors.city.message}</p>}
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-foreground">Orientation Sexuelle</label>
+                      <label className="block text-sm font-semibold text-foreground mb-2">Orientation Sexuelle</label>
                       <Controller
                         name="orientation"
                         control={control}
@@ -245,7 +245,7 @@ const EditDatingProfilePage = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-foreground">Religion</label>
+                      <label className="block text-sm font-semibold text-foreground mb-2">Religion</label>
                       <Controller
                         name="religion"
                         control={control}
@@ -259,7 +259,7 @@ const EditDatingProfilePage = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-foreground">Que recherchez-vous ?</label>
+                      <label className="block text-sm font-semibold text-foreground mb-2">Que recherchez-vous ?</label>
                       <Controller
                         name="dating_intent"
                         control={control}
@@ -276,23 +276,23 @@ const EditDatingProfilePage = () => {
                 </div>
               </div>
 
-              <div className="bg-card p-6 rounded-xl shadow-md">
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
                 <h2 className="text-xl font-bold text-foreground mb-6">Questionnaire</h2>
                 <div className="space-y-6">
                   {staticProfileData.gender === 'Femme' && (
                     <>
                       <div>
-                        <label className="block text-sm font-medium text-foreground">{questionMap.foreign_country}</label>
+                        <label className="block text-sm font-semibold text-foreground mb-2">{questionMap.foreign_country}</label>
                         <Controller name="answers.0.answer" control={control} render={({ field }) => <CustomSelect {...field} options={YES_NO_MAYBE_OPTIONS} />} />
                         <input type="hidden" {...register('answers.0.question_key')} value="foreign_country" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-foreground">{questionMap.money_importance}</label>
+                        <label className="block text-sm font-semibold text-foreground mb-2">{questionMap.money_importance}</label>
                         <Controller name="answers.1.answer" control={control} render={({ field }) => <CustomSelect {...field} options={MONEY_IMPORTANCE_OPTIONS} />} />
                         <input type="hidden" {...register('answers.1.question_key')} value="money_importance" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-foreground">{questionMap.foreigner_kinky}</label>
+                        <label className="block text-sm font-semibold text-foreground mb-2">{questionMap.foreigner_kinky}</label>
                         <Controller name="answers.2.answer" control={control} render={({ field }) => <CustomSelect {...field} options={FOREINGNER_KINKY_OPTIONS} />} />
                         <input type="hidden" {...register('answers.2.question_key')} value="foreigner_kinky" />
                       </div>
@@ -301,17 +301,17 @@ const EditDatingProfilePage = () => {
                   {staticProfileData.gender === 'Homme' && (
                     <>
                       <div>
-                        <label className="block text-sm font-medium text-foreground">{questionMap.partner_move}</label>
+                        <label className="block text-sm font-semibold text-foreground mb-2">{questionMap.partner_move}</label>
                         <Controller name="answers.0.answer" control={control} render={({ field }) => <CustomSelect {...field} options={PARTNER_MOVE_OPTIONS} />} />
                         <input type="hidden" {...register('answers.0.question_key')} value="partner_move" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-foreground">{questionMap.financial_stability}</label>
+                        <label className="block text-sm font-semibold text-foreground mb-2">{questionMap.financial_stability}</label>
                         <Controller name="answers.1.answer" control={control} render={({ field }) => <CustomSelect {...field} options={FINANCIAL_STABILITY_OPTIONS} />} />
                         <input type="hidden" {...register('answers.1.question_key')} value="financial_stability" />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-foreground">{questionMap.partner_not_kinky}</label>
+                        <label className="block text-sm font-semibold text-foreground mb-2">{questionMap.partner_not_kinky}</label>
                         <Controller name="answers.2.answer" control={control} render={({ field }) => <CustomSelect {...field} options={PARTNER_NOT_KINKY_OPTIONS} />} />
                         <input type="hidden" {...register('answers.2.question_key')} value="partner_not_kinky" />
                       </div>
@@ -320,16 +320,14 @@ const EditDatingProfilePage = () => {
                 </div>
               </div>
 
-              <div className="bg-card p-6 rounded-xl shadow-md">
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
                 <h2 className="text-xl font-bold text-foreground mb-4">Centres d'intérêt</h2>
                 <div className="flex flex-wrap gap-3">
                   {interests.map(interest => (
                     <div key={interest.id}>
                       <input type="checkbox" id={`interest-edit-${interest.id}`} value={interest.id.toString()} {...register('interests')} className="hidden peer" defaultChecked={watchedInterests.includes(interest.id.toString())} />
-                      <label htmlFor={`interest-edit-${interest.id}`} className="inline-flex items-center justify-center w-full p-3 text-muted-foreground bg-card border-2 border-border rounded-lg cursor-pointer peer-checked:border-primary peer-checked:text-primary hover:text-foreground hover:bg-muted">
-                        <div className="block">
-                          <div className="w-full text-lg">{interest.icon} {interest.name}</div>
-                        </div>
+                      <label htmlFor={`interest-edit-${interest.id}`} className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border-2 border-border px-4 py-2.5 text-sm text-muted-foreground transition-all hover:bg-muted hover:text-foreground peer-checked:border-primary peer-checked:bg-primary/10 peer-checked:text-primary peer-checked:shadow-sm peer-checked:shadow-primary/10">
+                        {interest.icon} {interest.name}
                       </label>
                     </div>
                   ))}
@@ -338,7 +336,7 @@ const EditDatingProfilePage = () => {
             </div>
 
             <div className="lg:col-span-1 space-y-8 order-1 lg:order-2">
-              <div className="bg-card p-6 rounded-xl shadow-md">
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
                 <h2 className="text-xl font-bold text-foreground mb-4">Gérer vos Photos</h2>
                 <p className="text-sm text-muted-foreground mb-4">Cliquez sur une photo approuvée pour la définir comme photo de profil. Les nouvelles photos sont en attente de modération.</p>
                 <div className="grid grid-cols-3 gap-4">
@@ -358,7 +356,7 @@ const EditDatingProfilePage = () => {
                       <button 
                         type="button"
                         onClick={() => handlePhotoDeleteRequest(photo)}
-                        className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground opacity-0 shadow-sm transition-opacity group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         aria-label="Supprimer la photo"
                       >
                         <FontAwesomeIcon icon={faTrash} size="xs" />
@@ -382,12 +380,12 @@ const EditDatingProfilePage = () => {
               </div>
             </div>
           </div>
-          <div className="flex justify-end mt-8">
-            <button type="submit" disabled={isLoading} className="bg-primary text-primary-foreground font-bold py-3 px-8 rounded-lg hover:bg-primary/90 transition-colors disabled:bg-muted">
-              {isLoading ? 'Sauvegarde...' : 'Sauvegarder les modifications'}
+          <div className="mt-8 flex justify-end">
+            <button type="submit" disabled={isLoading} className="inline-flex min-h-[48px] items-center gap-2 rounded-lg bg-primary px-8 text-base font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none">
+              {isLoading ? 'Sauvegarde…' : 'Sauvegarder les modifications'}
             </button>
           </div>
-          {error && <p className="text-destructive text-center mt-4">{error}</p>}
+          {error && <p className="mt-4 text-center text-sm text-destructive">{error}</p>}
         </form>
 
         <ConfirmationModal

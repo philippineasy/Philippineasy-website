@@ -6,7 +6,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import {
   ArrowLeft, ArrowRight, Download, Pencil, MapPin,
-  Lightbulb, Loader2, AlertTriangle, Star, Bus,
+  Lightbulb, Loader2, AlertTriangle, Star, Bus, Hotel,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
@@ -16,6 +16,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { PlacePhoto } from '@/components/itinerary/PlacePhoto';
 import {
   DURATION_LABELS, OFFER_LABELS,
   type Duration, type OfferType,
@@ -374,6 +375,12 @@ export default function ItineraryPage({ params }: PageProps) {
                                     isSelected ? 'border-primary ring-2 ring-primary/20 bg-primary/5' : 'border-border',
                                   ].join(' ')}
                                 >
+                                  <PlacePhoto
+                                    coordinates={activity.coordinates}
+                                    name={activity.name}
+                                    className="w-16 h-16 rounded-xl shrink-0"
+                                    fallbackIcon={<MapPin className="w-5 h-5 text-muted-foreground/30" aria-hidden="true" />}
+                                  />
                                   <div className="w-[52px] shrink-0 pt-0.5 text-[12px] font-semibold text-muted-foreground tabular-nums">
                                     {activity.time || '—'}
                                   </div>
@@ -472,11 +479,17 @@ export default function ItineraryPage({ params }: PageProps) {
                         <div
                           id={`day-${day.day}-accommodation`}
                           className={[
-                            'rounded-xl border bg-muted/40 px-4 py-3 flex items-start justify-between gap-3 transition-colors',
+                            'rounded-xl border bg-muted/40 px-4 py-3 flex items-start gap-3 transition-colors',
                             selectedPointId === `day-${day.day}-accommodation` ? 'border-primary ring-2 ring-primary/20' : 'border-border',
                           ].join(' ')}
                         >
-                          <div className="min-w-0">
+                          <PlacePhoto
+                            coordinates={day.accommodation.coordinates}
+                            name={day.accommodation.name}
+                            className="w-16 h-16 rounded-xl shrink-0"
+                            fallbackIcon={<Hotel className="w-5 h-5 text-muted-foreground/30" aria-hidden="true" />}
+                          />
+                          <div className="min-w-0 flex-1">
                             <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground/80 mb-1">Hébergement</p>
                             <p className="text-[14px] font-semibold text-ink leading-tight">{day.accommodation.name}</p>
                             <p className="text-[12.5px] text-muted-foreground mt-0.5">
