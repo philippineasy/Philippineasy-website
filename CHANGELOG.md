@@ -5,6 +5,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fix/Ops — Incident inbound email résolu + surveillance automatique (2026-07-03)
+
+**Incident découvert pendant l'audit email demandé par Hugo** : Resend avait cessé de livrer les webhooks `email.received` depuis le 27 avril (statut « enabled » trompeur, route prod et secret parfaitement fonctionnels — prouvé par appel signé forgé). Conséquence : plus AUCUN email vers `contact@philippineasy.com` (y compris le formulaire contact) n'atteignait Gmail depuis 2 mois. **2 emails perdus récupérés par replay signé** (dont la réponse partenariat du 10 mai) et forwardés vers Gmail. **Fix : toggle du webhook (disabled→enabled) via l'API Resend**, vérifié par test E2E autonome (livraison en 15 s).
+
+**Nouveau cron `inbound-health` (lundi 06:00 UTC)** : vérifie que le probe de la semaine précédente a été forwardé (email_log), **réarme automatiquement le webhook en cas de panne** (le fix validé), alerte Telegram avec instructions de récupération, puis émet le probe suivant. Protégé par CRON_SECRET comme les 5 autres. Le probe hebdo arrive dans Gmail (filtrable sur « [HEALTHCHECK] »).
+
+Audit complet par ailleurs sain : domaine Resend vérifié, DNS (SPF/DKIM/DMARC) propres, 5 crons protégés et testés en prod (401 sans secret, 200 avec), circuit d'envoi centralisé (préférences + rate-limit + log), CRM branché sur les senders.
+
 ### Feature — Dark mode complet + rattrapage des pages restées à l'ancienne interface (2026-07-03)
 
 **Dark mode (toggle actif)** : le token `ink` devient adaptatif (`hsl(var(--ink))` — les titres de marque passent en clair sur thème sombre) ; nouveau token constant `night` (#0F172A) pour les surfaces signature qui ne basculent jamais (footer, ticker météo, sidebar admin, scrims de modales) ; texte sur boutons ambre verrouillé via `accent-foreground`. Toggle lune/soleil dans le header (desktop + drawer mobile), icône en pur CSS (zéro mismatch d'hydratation), persistance localStorage, préférence système par défaut, script inline anti-flash dans le layout, `color-scheme` natif. Sweep de compatibilité sur 20 fichiers secondaires (mon-espace, profil, rencontre, vendeur, légales : statuts sémantiques → tokens success/destructive + variants `dark:`), exceptions raisonnées (badges stores, scrims photo, gradients premium).
