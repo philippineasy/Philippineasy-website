@@ -5,6 +5,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Feature — FAQ généralisées : 31 pages de contenu supplémentaires (2026-07-03)
+
+Déploiement du `FaqAccordion` (pattern canvas) sur tout le contenu éditorial, ~150 Q/R formulées comme de vraies recherches utilisateur, chaque réponse dérivée EXCLUSIVEMENT du contenu fact-checké déjà présent sur la page (fidélité stricte sur le médical vaccins et le réglementaire visas/investissement) :
+- **Voyager (17)** : budget (+hébergement, nourriture), quand-partir, transport (+bus, ferries, vols), communication (+carte-SIM, expressions), santé-sécurité (+conseils, vaccins), Palawan, Cebu-Visayas, Siargao.
+- **Vivre (12)** : visas-et-formalités, logement, banque-finances, santé-assurances, travail-entreprise, culture-intégration, universités, écoles internationales, immobilier, bourse-et-entreprises, créer-entreprise, emploi-salarié.
+- **Vitrines (2)** : marketplace (fonctionnement réel croisé avec les CGV) et itinéraires (distincte de la FAQ du funnel).
+1 seul schema FAQPage par page (vérifié globalement — 35 pages FAQ au total avec le lot précédent), éligibles aux résultats enrichis Google.
+
 ### Feature — FAQ visibles au pattern du canvas Design (2026-07-03)
 
 Nouveau composant `FaqAccordion` (Section Kit) fidèle au canvas Services de Hugo : accordéons natifs details/summary à filets hairline, eyebrow « Questions fréquentes », h2 « Tout est *clair ?* », footnote optionnelle, chevron CSS, dark-ready. Déployé avec schema FAQPage (1 seul par page, dédupliqué) :

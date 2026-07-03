@@ -1,12 +1,38 @@
 import { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Ship, Anchor, LifeBuoy, Ticket } from 'lucide-react';
-import { PageHero } from '@/components/sections';
+import { PageHero, FaqAccordion } from '@/components/sections';
 
 export const metadata: Metadata = {
   title: "Guide des Ferries aux Philippines",
   description: "Naviguez entre les îles des Philippines en ferry. Découvrez les principales compagnies, les types de bateaux, et nos conseils pour un voyage sûr et agréable.",
 };
+
+// FAQ 100 % factuelle — reformule les compagnies, types de bateaux et
+// conseils déjà détaillés plus haut sur la page. Feed le visible ET le
+// FAQPage schema via <FaqAccordion withSchema>.
+const FERRIES_FAQS = [
+  {
+    q: 'Quelles sont les principales compagnies de ferry aux Philippines ?',
+    a: "2GO Travel est la plus grande compagnie de ferries du pays : elle dessert les principales îles avec de grands navires confortables, couchettes et restaurants inclus, idéale pour les longues distances comme Manille-Cebu. OceanJet, elle, se spécialise dans les trajets rapides entre les îles des Visayas (Cebu, Bohol, Siquijor) grâce à des catamarans modernes.",
+  },
+  {
+    q: 'Quels types de bateaux circulent entre les îles ?',
+    a: "Trois familles se partagent l'archipel : les ferries lents de type RORO (Roll-on/Roll-off), économiques et adaptés aux longs trajets de nuit ; les Fast Crafts, des catamarans rapides pour les trajets de 1 à 4 heures ; et les bangkas, ces bateaux traditionnels à balancier utilisés pour l'island hopping et les courts trajets côtiers.",
+  },
+  {
+    q: 'Faut-il réserver son billet de ferry à l\'avance ?',
+    a: "Oui, il est conseillé de réserver en ligne à l'avance, surtout en haute saison. Des sites comme 12Go Asia sont pratiques pour comparer les options. Prévoyez aussi d'arriver au port au moins une heure avant le départ.",
+  },
+  {
+    q: 'Le ferry est-il un moyen sûr de voyager aux Philippines ?',
+    a: "Oui, à condition de choisir des compagnies réputées. Pensez aussi à prévoir une veste, car la climatisation à bord est souvent forte, et à garder vos objets de valeur avec vous.",
+  },
+  {
+    q: 'Pourquoi voyager en ferry plutôt qu\'en avion aux Philippines ?',
+    a: "Le ferry est une option économique et pittoresque, qui offre une véritable immersion dans la vie locale. C'est un moyen incontournable pour explorer la diversité des 7 641 îles de l'archipel, à un rythme différent de l'avion.",
+  },
+];
 
 /* -------------------------------------------------------------------------- */
 /* En-tête de section : eyebrow uppercase + h2 avec UN mot en amber vif.       */
@@ -145,6 +171,19 @@ const FerriesPage = () => {
               </CardContent>
             </Card>
           </div>
+        </div>
+      </section>
+
+      {/* FAQ — visible + FAQPage schema (source unique FERRIES_FAQS) */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <FaqAccordion
+            eyebrow="Questions fréquentes"
+            title="Vos questions"
+            titleAccent="ferry"
+            faqs={FERRIES_FAQS}
+            withSchema
+          />
         </div>
       </section>
     </div>

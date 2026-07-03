@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { PageHero, StatRow, SplitSection, CardGrid, LinkCard } from '@/components/sections';
+import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, FaqAccordion } from '@/components/sections';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faWallet, faBed, faUtensils, faHotel } from '@fortawesome/free-solid-svg-icons';
 import { AffiliateRecommendation } from '@/components/affiliate/AffiliateRecommendation';
@@ -7,6 +7,32 @@ import { createClient } from '@/utils/supabase/server';
 import { getPageBySlug } from '@/services/pageService';
 import { notFound } from 'next/navigation';
 import { cn } from '@/lib/utils';
+
+// FAQ 100 % factuelle — reformule les repères prix déjà donnés plus haut sur la
+// page (StatRow, DataTables manger/hébergement) et le bloc de recommandations.
+// Feed le visible ET le FAQPage schema via <FaqAccordion withSchema>.
+const BUDGET_FAQS = [
+  {
+    q: 'Quel budget prévoir par jour aux Philippines ?',
+    a: "Trois profils reviennent le plus souvent chez nos lecteurs : entre 30 et 50 € par jour et par personne en mode backpacker, entre 60 et 100 € pour un séjour confortable, et à partir de 120 € pour un voyage plus luxueux. Ces montants couvrent l'ensemble des dépenses quotidiennes.",
+  },
+  {
+    q: 'Combien coûte un repas aux Philippines ?',
+    a: "Un repas complet dans une carinderia, ces petits restaurants de quartier sans chichi, revient entre 2 et 4 €. Comptez plutôt 8 à 15 € dans un restaurant milieu de gamme, et à peine 1 € pour une bière San Miguel bien fraîche.",
+  },
+  {
+    q: 'Quel budget prévoir pour se loger ?',
+    a: "L'hébergement absorbe souvent la plus grosse part du budget. Un lit en dortoir se loue entre 8 et 15 € la nuit, une chambre double simple entre 20 et 40 €, tandis qu'un resort en bord de mer peut multiplier la facture par dix.",
+  },
+  {
+    q: 'Combien coûte une excursion en bateau à El Nido ?',
+    a: "Un tour en bateau parmi les plus courus, comme ceux d'El Nido, reste autour de 20 à 25 € par personne. Les activités comme la plongée ou les sorties en bateau viennent ensuite s'ajouter au budget, île par île.",
+  },
+  {
+    q: 'Comment économiser sur son voyage aux Philippines ?',
+    a: "Réservez votre hébergement à l'avance en haute saison (décembre-mai), notamment à El Nido et Siargao où les meilleurs hôtels partent vite. Côté change, évitez de changer de l'argent à l'aéroport et privilégiez une carte comme Wise, qui applique le taux de change réel sans frais de conversion.",
+  },
+];
 
 export async function generateMetadata(): Promise<Metadata> {
   const supabase = await createClient();
@@ -227,6 +253,19 @@ const BudgetPage = async () => {
               icon={<FontAwesomeIcon icon={faBed} className="text-[18px]" />}
             />
           </CardGrid>
+        </div>
+      </section>
+
+      {/* FAQ — visible + FAQPage schema (source unique BUDGET_FAQS) */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <FaqAccordion
+            eyebrow="Questions fréquentes"
+            title="Vos questions"
+            titleAccent="budget"
+            faqs={BUDGET_FAQS}
+            withSchema
+          />
         </div>
       </section>
 

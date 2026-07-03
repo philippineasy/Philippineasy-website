@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { CheckCircle, ExternalLink, ArrowRight, AlertTriangle } from 'lucide-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlane, faCalendarDays, faHouse, faShieldHalved } from '@fortawesome/free-solid-svg-icons';
-import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, CTABand } from '@/components/sections';
+import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, CTABand, FaqAccordion } from '@/components/sections';
 import { VisaSimulator } from '@/components/visa/VisaSimulator';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
@@ -277,6 +277,33 @@ const ressources = [
   { name: 'Philippine Retirement Authority', url: 'https://pra.gov.ph/', domain: 'pra.gov.ph' },
   { name: 'Ambassade des Philippines (Paris)', url: 'https://parispe.dfa.gov.ph/', domain: 'parispe.dfa.gov.ph' },
   { name: 'eTravel (enregistrement)', url: 'https://etravel.gov.ph/', domain: 'etravel.gov.ph' },
+];
+
+const visasFaqs = [
+  {
+    q: 'Combien de temps peut-on rester aux Philippines sans visa ?',
+    a: "En tant que Français, vous entrez aux Philippines sans visa préalable pour un séjour de 30 jours, une facilité qui concerne 157 nationalités. Il vous faut un passeport valide au moins 6 mois après la date de retour prévue, un billet prouvant votre sortie du territoire et un enregistrement sur le portail eTravel, désormais obligatoire. Ces 30 jours ne se prolongent pas à la frontière : pour rester plus longtemps, il faut basculer sur le visa touriste.",
+  },
+  {
+    q: 'Jusqu\'où peut-on prolonger un visa touriste aux Philippines ?',
+    a: "Une fois les 30 jours écoulés, le visa touriste 9(A) se prolonge directement sur place, auprès du Bureau of Immigration, jusqu'à 36 mois cumulés grâce au programme LSVVE. Comptez de 3 000 à 13 900 PHP selon la durée de l'extension. Passé 59 jours sur le sol philippin, l'ACR I-Card devient par ailleurs obligatoire, pour environ 3 000 PHP.",
+  },
+  {
+    q: 'Quelles sont les conditions pour obtenir le visa retraite SRRV ?',
+    a: "Le SRRV s'adresse aux retraités à partir de 40 ans, en échange d'un dépôt bloqué dans une banque philippine dont le montant varie de 15 000 à 50 000 $US selon l'âge et l'existence d'une pension. Depuis 2025, l'âge minimum est descendu à 40 ans et les montants de dépôt ont été révisés. S'y ajoutent 1 500 $US de frais de dossier pour le demandeur principal, plus 300 $US par personne à charge.",
+  },
+  {
+    q: 'Quels sont les avantages du SRRV une fois obtenu ?',
+    a: "Au-delà de la résidence permanente, le SRRV permet des entrées et sorties du territoire sans limite et ne demande aucun renouvellement annuel. Il ouvre aussi droit à une exemption de certains droits de douane et à l'importation de vos biens en franchise jusqu'à 7 000 $US. Le dépôt initial vous est par ailleurs restitué en cas de départ définitif.",
+  },
+  {
+    q: 'Comment obtenir un visa de travail aux Philippines ?',
+    a: "Travailler légalement suppose deux documents liés : l'AEP, permis de travail délivré par le DOLE en 2 à 3 semaines, où l'employeur doit démontrer qu'aucun Philippin qualifié n'est disponible pour le poste, puis le visa 9(G) lui-même, valable 1 à 3 ans. L'AEP reste rattaché à un employeur précis — changer de poste implique de refaire toute la démarche — et l'entreprise qui vous parraine doit en général disposer d'un capital d'au moins 200 000 $US.",
+  },
+  {
+    q: 'Quelles sont les conditions du visa étudiant 9(F) ?',
+    a: "Il faut avoir 18 ans ou plus et une place dans une université philippine accréditée par la CHED. Le dossier passe par l'université puis la CHED, avant d'être transmis au Bureau of Immigration et à l'ambassade pour la délivrance du visa. Le visa 9(F) est valable un an, renouvelable, avec un délai d'obtention de 2 à 8 semaines.",
+  },
 ];
 
 const VisasEtFormalitesPage = async () => {
@@ -661,6 +688,17 @@ const VisasEtFormalitesPage = async () => {
             ))}
           </CardGrid>
         </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="bg-background py-16 md:py-20">
+        <FaqAccordion
+          withSchema
+          eyebrow="Questions fréquentes"
+          title="Visas et formalités,"
+          titleAccent="en clair"
+          faqs={visasFaqs}
+        />
       </section>
 
       {/* Navigation interne */}

@@ -8,7 +8,7 @@ import { getArticlesByCategorySlug } from '@/services/articleService';
 import ArticleList from '@/components/shared/ArticleList';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
-import { PageHero, StatRow, SplitSection, CardGrid, LinkCard } from '@/components/sections';
+import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, FaqAccordion } from '@/components/sections';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
@@ -202,6 +202,29 @@ const banks: Bank[] = [
   },
 ];
 
+const banqueFaqs = [
+  {
+    q: 'Un étranger peut-il ouvrir un compte bancaire aux Philippines ?',
+    a: "Les grandes banques philippines ouvrent volontiers un compte aux étrangers, à condition d'être reconnu comme resident alien : il faut avoir séjourné au moins 59 à 60 jours aux Philippines et posséder une ACR I-Card. Sans ce statut, impossible d'ouvrir un compte en pesos ; les touristes peuvent parfois ouvrir un compte en devises, mais avec des restrictions.",
+  },
+  {
+    q: 'Quelles pièces faut-il réunir pour ouvrir un compte en banque ?',
+    a: "Il faut présenter un passeport valide, original et copie, votre ACR I-Card ou ICR, un visa en cours de validité, un justificatif de domicile, deux à trois photos d'identité et un dépôt initial compris entre 2 000 et 10 000 PHP. L'ouverture se fait généralement en agence, parfois avec une lettre de l'employeur en complément du dossier.",
+  },
+  {
+    q: 'Quelles sont les banques les plus utilisées par les expatriés ?',
+    a: "BDO, la plus grande banque du pays, se distingue par son réseau d'agences et de distributeurs le plus étendu, avec une ouverture de compte possible via Zoom. BPI est réputée pour son service client et son application mobile, tandis que Metrobank propose un large réseau d'agences et des comptes multi-devises. Comptez ensuite 1 à 2 semaines pour recevoir votre carte de débit, pour des frais de tenue de compte de 0 à 300 PHP par mois.",
+  },
+  {
+    q: 'Quels sont les portefeuilles digitaux à utiliser aux Philippines ?',
+    a: "GCash, le portefeuille électronique le plus populaire du pays, convient bien aux paiements du quotidien, aux transferts entre particuliers et aux achats en ligne. Maya (ex-PayMaya) est une alternative qui propose aussi des comptes d'épargne numériques à taux attractifs. Ces deux outils comblent les usages qu'un compte bancaire classique ne couvre pas toujours, comme payer un jeepney ou un vendeur de rue.",
+  },
+  {
+    q: "Comment transférer de l'argent entre la France et les Philippines ?",
+    a: "Pour recevoir un salaire depuis la France ou envoyer de l'argent vers les Philippines, les néobanques multi-devises comme Wise complètent utilement un compte bancaire local et les portefeuilles digitaux GCash ou Maya.",
+  },
+];
+
 const BanqueFinancesPage = async () => {
   const supabase = await createClient();
   const { data: articles } = await getArticlesByCategorySlug(supabase, 'banque-finances');
@@ -377,6 +400,17 @@ const BanqueFinancesPage = async () => {
             />
           </div>
         </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="bg-background pb-16 md:pb-20">
+        <FaqAccordion
+          withSchema
+          eyebrow="Questions fréquentes"
+          title="Banque et finances,"
+          titleAccent="en clair"
+          faqs={banqueFaqs}
+        />
       </section>
 
       {/* Articles de la catégorie */}

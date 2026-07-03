@@ -1,9 +1,35 @@
 import { Metadata } from 'next';
-import { PageHero, SplitSection } from '@/components/sections';
+import { PageHero, SplitSection, FaqAccordion } from '@/components/sections';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 import { getPageBySlug } from '@/services/pageService';
 import { notFound } from 'next/navigation';
+
+// FAQ 100 % factuelle — reformule les trois chapitres (avion / ferry / bus-van)
+// déjà détaillés plus haut sur la page (intro éditoriale + SplitSections).
+// Feed le visible ET le FAQPage schema via <FaqAccordion withSchema>.
+const TRANSPORT_FAQS = [
+  {
+    q: 'Quel est le meilleur moyen de transport aux Philippines ?',
+    a: "Cela dépend de la distance à parcourir. Pour couvrir de grandes distances entre régions, l'avion reste le plus rapide. Sur l'eau, les ferries prennent le relais à un rythme plus lent mais plus pittoresque, et une fois sur une île, les bus et les vans permettent de l'explorer en profondeur.",
+  },
+  {
+    q: 'Quelles compagnies aériennes desservent les Philippines en interne ?',
+    a: "Cebu Pacific, Philippine Airlines et AirAsia multiplient les liaisons entre les îles, avec Manille (MNL) et Cebu (CEB) comme principaux hubs. Il est conseillé de réserver à l'avance pour obtenir les meilleurs tarifs, et de vérifier les franchises de bagages, souvent limitées.",
+  },
+  {
+    q: 'Comment se déplacer en ferry entre les îles ?',
+    a: "Des compagnies comme 2GO Travel desservent de nombreuses destinations avec des ferries rapides, des RORO (Roll-on/Roll-off) ou des bateaux plus lents. Pour les trajets plus courts, les « bangkas », ces bateaux à balancier traditionnels, sont omniprésentes. Mieux vaut choisir des compagnies réputées pour la sécurité.",
+  },
+  {
+    q: 'Comment fonctionnent les bus et vans aux Philippines ?',
+    a: "Les bus « Ceres » sont célèbres dans tout le pays et desservent la plupart des liaisons terrestres, climatisés ou non. Pour plus de confort et de rapidité, les vans (V-Hire) constituent une excellente alternative. Il est conseillé d'arriver un peu en avance, car les départs se font souvent dès que le véhicule est plein.",
+  },
+  {
+    q: 'Faut-il réserver ses trajets à l\'avance aux Philippines ?',
+    a: "Pour les vols intérieurs, réservez à l'avance afin d'obtenir les meilleurs tarifs. Pour les bus et les vans, ce n'est généralement pas nécessaire : il suffit de se présenter au terminal, sachant que les départs se font souvent dès que le véhicule est complet.",
+  },
+];
 
 export async function generateMetadata(): Promise<Metadata> {
   const supabase = await createClient();
@@ -190,6 +216,19 @@ const TransportPage = async () => {
         </ul>
         <Link href="/voyager-aux-philippines/transport/bus" className="text-accent font-bold hover:underline mt-4 inline-block">Guide des voyages en bus →</Link>
       </SplitSection>
+
+      {/* FAQ — visible + FAQPage schema (source unique TRANSPORT_FAQS) */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <FaqAccordion
+            eyebrow="Questions fréquentes"
+            title="Vos questions"
+            titleAccent="transport"
+            faqs={TRANSPORT_FAQS}
+            withSchema
+          />
+        </div>
+      </section>
     </div>
   );
 };

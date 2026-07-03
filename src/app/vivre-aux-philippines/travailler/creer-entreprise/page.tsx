@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Building, FileText, Users, Globe, CheckCircle, AlertTriangle, Briefcase, ExternalLink, Building2, User, Clock, Wallet, Banknote, BadgeCheck } from 'lucide-react';
-import { PageHero, StatRow, CardGrid, LinkCard, SplitSection } from '@/components/sections';
+import { PageHero, StatRow, CardGrid, LinkCard, SplitSection, FaqAccordion } from '@/components/sections';
 import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
@@ -117,6 +117,31 @@ const InlineLink = ({ href, children }: { href: string; children: ReactNode }) =
     {children}
   </a>
 );
+
+// FAQ 100 % factuelle — reformulée à partir du contenu de la page ci-dessous
+// (capital minimum, délais eSPARC, FINL, coûts hors capital, PEZA/BOI).
+const CREER_ENTREPRISE_FAQS = [
+  {
+    q: "Quel capital minimum pour créer une entreprise aux Philippines ?",
+    a: "En règle générale, US$200 000 pour une Corporation majoritairement étrangère, réduit à US$100 000 si l'activité est exportatrice, technologique ou emploie plus de 50 salariés locaux. Une Representative Office (sans revenus locaux) ne demande que US$30 000, et une Partnership n'a pas de minimum, sous réserve des règles FINL si la part étrangère dépasse 40 %.",
+  },
+  {
+    q: "Combien de temps prend la création d'une entreprise ?",
+    a: "Comptez 4 à 12 semaines via la plateforme eSPARC de la SEC : réservation du nom (1-3 jours), enregistrement SEC (7-20 jours), puis Barangay Clearance, Mayor's Permit et enregistrement BIR, chaque étape se déclenchant une fois la précédente validée.",
+  },
+  {
+    q: "Quels secteurs sont fermés ou limités aux étrangers ?",
+    a: "La Foreign Investment Negative List (12ème édition, Executive Order 175) restreint plusieurs secteurs : médias interdits aux étrangers, retail avec un capital minimum de ₱25M si la part étrangère dépasse 40 %, utilities plafonnées à 40 %, et certaines professions réservées aux citoyens philippins.",
+  },
+  {
+    q: "Combien coûte la création hors capital social ?",
+    a: "Entre ₱19 000 et ₱62 000 si vous gérez le dossier vous-même (SEC, Barangay, Mayor's Permit, BIR), et entre ₱70 000 et ₱200 000 avec un avocat ou un consultant local. Ce budget n'inclut pas le capital social requis, US$100 000 à 200 000 pour les étrangers.",
+  },
+  {
+    q: "Existe-t-il des avantages fiscaux pour les entreprises exportatrices ou tech ?",
+    a: "Oui, via la PEZA pour les 422 zones économiques du pays (export, tech, BPO) : jusqu'à 8 ans d'Income Tax Holiday puis 5 % de SCIT au lieu de 25 % de CIT, plus des importations en franchise de droits. Hors zones, le BOI offre un ITH de 4 à 7 ans pour les secteurs prioritaires. Le CREATE MORE Act de 2024 porte ces avantages jusqu'à 27 ans pour les projets à fort impact.",
+  },
+];
 
 const CreerEntreprisePage = () => {
   return (
@@ -847,6 +872,19 @@ const CreerEntreprisePage = () => {
               <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
             </a>
           </CardGrid>
+        </div>
+      </section>
+
+      {/* FAQ — questions fréquentes, dérivées du contenu de la page ci-dessus */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <FaqAccordion
+            eyebrow="Questions fréquentes"
+            title="Créer son entreprise,"
+            titleAccent="en clair"
+            faqs={CREER_ENTREPRISE_FAQS}
+            withSchema
+          />
         </div>
       </section>
 

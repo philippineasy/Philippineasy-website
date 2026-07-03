@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Briefcase, Search, Building, Users, AlertTriangle, CheckCircle, ExternalLink, TrendingUp, Globe, FileText, Clock, ChevronRight, GraduationCap, Heart, Factory, Award, Target, Zap, MapPin, Calendar, CreditCard, Plane, Home, Shield, Star } from 'lucide-react';
-import { PageHero, StatRow, CardGrid, LinkCard, SplitSection } from '@/components/sections';
+import { PageHero, StatRow, CardGrid, LinkCard, SplitSection, FaqAccordion } from '@/components/sections';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -127,6 +127,31 @@ const CautionBox = ({ title, items }: { title: string; items: string[] }) => (
     </div>
   </div>
 );
+
+// FAQ 100 % factuelle — reformulée à partir du contenu de la page ci-dessous
+// (AEP + visa 9G, secteurs, salaires, avantages, PWP).
+const EMPLOI_SALARIE_FAQS = [
+  {
+    q: "Quels documents sont nécessaires pour travailler légalement aux Philippines ?",
+    a: "Un Alien Employment Permit (AEP) délivré par le DOLE, suivi d'un visa de travail 9(G) du Bureau of Immigration. Ces démarches sont généralement initiées par l'employeur, et le processus complet prend en moyenne 2 à 4 mois.",
+  },
+  {
+    q: "Quels secteurs recrutent le plus d'expatriés ?",
+    a: "Six familles de métiers concentrent l'essentiel des embauches : BPO/Call Centers (le pays compte environ 1,5 million d'emplois dans ce secteur), IT & Tech, Enseignement (professeurs de FLE ou d'anglais, écoles internationales), Finance & Consulting, Hôtellerie & Tourisme, et Industrie/Manufacturing dans les zones PEZA.",
+  },
+  {
+    q: "À quel salaire un expatrié peut-il s'attendre ?",
+    a: "Cela dépend surtout de l'ancienneté : 40 000-70 000 ₱/mois (≈650-1 150 €) en junior, 70 000-150 000 ₱ (≈1 150-2 450 €) en profil intermédiaire, 150 000-300 000 ₱ (≈2 450-4 900 €) en senior, et 300 000-600 000+ ₱ (≈4 900-10 000 €+) pour un poste de direction.",
+  },
+  {
+    q: "Quels avantages sont généralement inclus dans un contrat ?",
+    a: "Le 13ème mois est obligatoire par la loi, auquel s'ajoutent souvent une assurance santé HMO, 5 à 15 jours de congés payés selon l'ancienneté et une prime de performance. Les packages seniors pour expatriés peuvent aussi couvrir le logement, des billets d'avion annuels, la prise en charge du visa/AEP et parfois la scolarité des enfants.",
+  },
+  {
+    q: "Existe-t-il un moyen de commencer à travailler plus rapidement ?",
+    a: "Oui, le Provisional Work Permit (PWP) permet de démarrer avant l'obtention du visa 9(G) définitif. Il est valable 3 mois, renouvelable une fois, le temps que les démarches AEP et visa suivent leur cours normal.",
+  },
+];
 
 const EmploiSalariePage = () => {
   return (
@@ -878,6 +903,19 @@ const EmploiSalariePage = () => {
               </div>
             </div>
           </CardGrid>
+        </div>
+      </section>
+
+      {/* FAQ — questions fréquentes, dérivées du contenu de la page ci-dessus */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <FaqAccordion
+            eyebrow="Questions fréquentes"
+            title="Trouver un emploi,"
+            titleAccent="en clair"
+            faqs={EMPLOI_SALARIE_FAQS}
+            withSchema
+          />
         </div>
       </section>
 

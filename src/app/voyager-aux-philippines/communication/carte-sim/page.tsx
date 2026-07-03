@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { CheckCircle, ExternalLink, ArrowRight, AlertTriangle } from 'lucide-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSimCard, faPassport, faSignal, faClock } from '@fortawesome/free-solid-svg-icons';
-import { PageHero, StatRow, SplitSection, CardGrid, CTABand } from '@/components/sections';
+import { PageHero, StatRow, SplitSection, CardGrid, CTABand, FaqAccordion } from '@/components/sections';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
 import { AffiliateRecommendation } from '@/components/affiliate/AffiliateRecommendation';
@@ -249,6 +249,29 @@ const ressources = [
   { name: 'Smart · Tourist SIM', url: 'https://smart.com.ph/Pages/TravelSIM', domain: 'smart.com.ph' },
   { name: 'GOMO (data sans expiration)', url: 'https://www.gomo.ph/', domain: 'gomo.ph' },
   { name: 'DITO Telecommunity', url: 'https://dito.ph/', domain: 'dito.ph' },
+];
+
+const carteSimFaqs = [
+  {
+    q: "Quel opérateur choisir entre Globe, Smart et DITO ?",
+    a: "Globe et Smart concentrent à eux deux environ 85 % des cartes SIM actives et restent les valeurs sûres pour un itinéraire multi-îles, Smart étant réputé le plus régulier sur Palawan, Siargao ou Bohol. DITO domine les débits et la 5G, mais sa couverture se concentre surtout sur les grandes villes comme Manille, Cebu ou Davao.",
+  },
+  {
+    q: "Où acheter sa carte SIM, à l'aéroport ou en ville ?",
+    a: "L'aéroport est le plus simple : des stands Globe et Smart attendent dès la sortie de douane et installent la SIM avec vous, mais les packs data touristiques y coûtent plus cher (2 000 à 3 500 ₱ pour 30 jours). En ville, la SIM nue ne coûte que 40 à 50 ₱ chez 7-Eleven ou en boutique officielle, complétée d'une promo data à environ 99 ₱ la semaine.",
+  },
+  {
+    q: "Comment fonctionne l'enregistrement obligatoire de la carte SIM ?",
+    a: "Depuis le SIM Registration Act de 2022, toute carte SIM philippine doit être enregistrée au nom de son porteur pour fonctionner, avec passeport, adresse locale et billet de sortie du territoire. La procédure se fait via le portail de l'opérateur ou directement avec le personnel du stand à l'aéroport, et le profil touriste n'est valable que 30 jours.",
+  },
+  {
+    q: "Vaut-il mieux prendre une eSIM ou une carte SIM physique ?",
+    a: "Pour un court séjour urbain, une eSIM internationale type Airalo ou Holafly permet d'atterrir déjà connecté, sans file d'attente, mais sans numéro philippin pour recevoir des SMS locaux. Pour plusieurs semaines avec des îles au programme, la SIM locale (physique ou eSIM) reste imbattable sur le prix et donne un vrai numéro philippin.",
+  },
+  {
+    q: "Quel forfait data choisir selon la durée du séjour ?",
+    a: "Pour deux semaines de vacances, une promo hebdomadaire autour de 99 ₱ rechargée une fois suffit largement. Pour un mois, les forfaits 30 jours de DITO ou Smart prennent le relais, tandis que les séjours plus longs se tournent vers la data « sans expiration » de GOMO ou de la gamme Magic Data de Smart.",
+  },
 ];
 
 const CarteSimPage = () => {
@@ -582,6 +605,17 @@ const CarteSimPage = () => {
           },
         ]}
       />
+
+      {/* FAQ */}
+      <section className="bg-background py-16 md:py-20">
+        <FaqAccordion
+          withSchema
+          eyebrow="Questions fréquentes"
+          title="Carte SIM : ce qu'il faut"
+          titleAccent="savoir"
+          faqs={carteSimFaqs}
+        />
+      </section>
 
       {/* Panneau signature de clôture */}
       <CTABand

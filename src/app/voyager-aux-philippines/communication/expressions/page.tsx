@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Smile, ShoppingCart, HelpCircle } from 'lucide-react';
-import { PageHero } from '@/components/sections';
+import { PageHero, FaqAccordion } from '@/components/sections';
 
 export const metadata: Metadata = {
   title: "Expressions Utiles en Tagalog",
@@ -65,6 +65,29 @@ const LexiconTable = ({
   </dl>
 );
 
+const expressionsFaqs = [
+  {
+    q: "Faut-il vraiment apprendre le tagalog si l'anglais est parlé partout ?",
+    a: "L'anglais suffit largement pour se faire comprendre presque partout aux Philippines. Mais connaître quelques mots de tagalog vous ouvrira bien des portes et des sourires : un petit effort qui change souvent la qualité des échanges avec les habitants.",
+  },
+  {
+    q: "Comment dire merci et bonjour en tagalog ?",
+    a: "« Salamat » signifie merci, et pour saluer selon le moment de la journée on dit « Magandang umaga » (bonjour le matin), « Magandang hapon » (l'après-midi) ou « Magandang gabi » (le soir). Pour prendre congé, « Paalam » veut dire au revoir.",
+  },
+  {
+    q: "Comment demander un prix ou marchander au marché ?",
+    a: "La formule à retenir est « Magkano po? », qui veut dire « Combien ça coûte ? » — le « po » est une marque de respect à ajouter dans vos échanges. Pour compter, « Isa », « Dalawa » et « Tatlo » signifient respectivement un, deux et trois.",
+  },
+  {
+    q: "Comment demander où sont les toilettes ?",
+    a: "La question type est « Saan ang CR? », littéralement « Où sont les toilettes ? » — CR signifie « Comfort Room », le terme local pour désigner les toilettes.",
+  },
+  {
+    q: "Que signifie le mot « Ingat » que l'on entend souvent aux Philippines ?",
+    a: "« Ingat » se traduit par « Prends soin de toi » ou « Fais attention ». C'est une expression courante, souvent utilisée pour se dire au revoir avec bienveillance.",
+  },
+];
+
 const ExpressionsPage = () => {
   return (
     <div>
@@ -120,6 +143,16 @@ const ExpressionsPage = () => {
               />
             </CardContent>
           </Card>
+        </div>
+
+        <div className="mt-16">
+          <FaqAccordion
+            withSchema
+            eyebrow="Questions fréquentes"
+            title="Le tagalog en pratique,"
+            titleAccent="questions courantes"
+            faqs={expressionsFaqs}
+          />
         </div>
       </div>
     </div>

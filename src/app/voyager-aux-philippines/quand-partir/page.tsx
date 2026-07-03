@@ -1,9 +1,35 @@
 import { Metadata } from 'next';
-import { PageHero, SplitSection } from '@/components/sections';
+import { PageHero, SplitSection, FaqAccordion } from '@/components/sections';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 import { getPageBySlug } from '@/services/pageService';
 import { notFound } from 'next/navigation';
+
+// FAQ 100 % factuelle — reformule les deux chapitres saison sèche / saison des
+// pluies déjà détaillés plus haut sur la page (intro éditoriale + SplitSections).
+// Feed le visible ET le FAQPage schema via <FaqAccordion withSchema>.
+const QUAND_PARTIR_FAQS = [
+  {
+    q: 'Quelle est la meilleure période pour partir aux Philippines ?',
+    a: "La saison sèche, de novembre à mai, offre un ciel généralement dégagé et un risque de typhon faible : c'est la fenêtre classique pour les plages, la plongée et toutes les activités en extérieur. Toutes les îles restent accessibles durant cette période.",
+  },
+  {
+    q: 'Quelle est la saison des pluies aux Philippines ?',
+    a: "La saison des pluies s'étend de juin à octobre. Les averses reviennent plus souvent, intenses mais rarement longues, avec un risque de typhons et certaines liaisons maritimes pouvant être annulées. En échange, la nature vire au vert éclatant et l'archipel se vide d'une partie de ses visiteurs.",
+  },
+  {
+    q: 'Quelle température fait-il aux Philippines toute l\'année ?',
+    a: "Le thermomètre tourne autour de 28°C toute l'année, quelle que soit la saison choisie pour voyager.",
+  },
+  {
+    q: 'Vaut-il mieux voyager en haute ou basse saison ?',
+    a: "La haute saison (novembre-mai) garantit une météo idéale mais attire plus de touristes avec des prix légèrement plus élevés. La basse saison (juin-octobre) offre moins de monde et des prix plus doux, en échange d'un risque de typhons et d'un ciel plus incertain.",
+  },
+  {
+    q: 'Quelles activités privilégier selon la saison ?',
+    a: "En saison sèche, misez sur les plages, l'island hopping et les festivals. En saison des pluies, tournez-vous plutôt vers les rizières de Banaue, le surf à Siargao ou les cascades, des expériences qui profitent justement de la verdure et de l'ambiance plus calme.",
+  },
+];
 
 export async function generateMetadata(): Promise<Metadata> {
   const supabase = await createClient();
@@ -176,6 +202,19 @@ const QuandPartirPage = async () => {
         </p>
         <Link href="/voyager-aux-philippines/siargao" className="text-accent font-bold hover:underline mt-4 inline-block">Explorer Siargao pendant la saison verte →</Link>
       </SplitSection>
+
+      {/* FAQ — visible + FAQPage schema (source unique QUAND_PARTIR_FAQS) */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <FaqAccordion
+            eyebrow="Questions fréquentes"
+            title="Vos questions"
+            titleAccent="saisons"
+            faqs={QUAND_PARTIR_FAQS}
+            withSchema
+          />
+        </div>
+      </section>
 
     </div>
   );

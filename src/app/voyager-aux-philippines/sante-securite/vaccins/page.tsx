@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Syringe, ShieldCheck, AlertTriangle, Stethoscope } from 'lucide-react';
-import { PageHero } from '@/components/sections';
+import { PageHero, FaqAccordion } from '@/components/sections';
 
 export const metadata: Metadata = {
   title: "Vaccins pour les Philippines | Guide de Santé du Voyageur",
@@ -45,6 +45,29 @@ const SectionHeader = ({
     )}
   </div>
 );
+
+const vaccinsFaqs = [
+  {
+    q: "Quand faut-il consulter son médecin avant de partir aux Philippines ?",
+    a: "Il est essentiel de consulter votre médecin traitant ou un centre de vaccinations internationales au moins 4 à 6 semaines avant le départ, afin d'obtenir des conseils personnalisés. Ce guide reste informatif et ne remplace pas cet avis médical.",
+  },
+  {
+    q: "Quels vaccins de base faut-il vérifier avant de partir ?",
+    a: "Assurez-vous que vos vaccins universels sont à jour : un rappel contre la diphtérie, le tétanos, la coqueluche et la poliomyélite est recommandé tous les 10 ans. Le vaccin contre l'hépatite B est quant à lui recommandé pour les séjours longs ou fréquents.",
+  },
+  {
+    q: "Le vaccin contre l'hépatite A est-il recommandé pour les Philippines ?",
+    a: "Oui, il est très recommandé : la transmission se fait par l'eau et les aliments contaminés, un risque spécifique aux Philippines. L'injection doit être réalisée 15 jours avant le départ.",
+  },
+  {
+    q: "Faut-il se faire vacciner contre la fièvre typhoïde ?",
+    a: "Ce vaccin est recommandé, surtout pour les séjours longs ou dans des conditions d'hygiène précaires. Comme pour l'hépatite A, l'injection se fait 15 jours avant le départ.",
+  },
+  {
+    q: "Dans quels cas faut-il envisager les vaccins contre la rage et l'encéphalite japonaise ?",
+    a: "Le vaccin contre la rage est recommandé pour les séjours longs, en zone rurale, ou pour les activités à risque comme la randonnée ou la spéléologie, avec une vaccination préventive en 3 injections. L'encéphalite japonaise est recommandée pour les séjours de plus d'un mois en zone rurale, surtout pendant la saison des pluies, selon un schéma en 2 injections.",
+  },
+];
 
 const VaccinsPage = () => {
   return (
@@ -115,6 +138,16 @@ const VaccinsPage = () => {
                 </ul>
               </CardContent>
             </Card>
+          </div>
+
+          <div className="mt-16">
+            <FaqAccordion
+              withSchema
+              eyebrow="Questions fréquentes"
+              title="Vaccins pour les Philippines,"
+              titleAccent="vos questions"
+              faqs={vaccinsFaqs}
+            />
           </div>
         </div>
       </section>

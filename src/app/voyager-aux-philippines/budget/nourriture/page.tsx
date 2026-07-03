@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import type { ReactNode } from 'react';
-import { PageHero, StatRow, SplitSection } from '@/components/sections';
+import { PageHero, StatRow, SplitSection, FaqAccordion } from '@/components/sections';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStreetView, faStore, faCocktail } from '@fortawesome/free-solid-svg-icons';
 import { CheckCircle } from 'lucide-react';
@@ -12,6 +12,32 @@ export const metadata: Metadata = {
   title: 'Manger aux Philippines : Guide des Prix et de la Street Food',
   description: 'Découvrez le coût de la nourriture aux Philippines, de la street food savoureuse aux restaurants locaux. Ce guide vous aidera à bien manger sans vous ruiner.',
 };
+
+// FAQ 100 % factuelle — reformule les repères prix et les plats déjà présentés
+// plus haut sur la page (StatRow, grille street food, carinderia, sécurité alimentaire).
+// Feed le visible ET le FAQPage schema via <FaqAccordion withSchema>.
+const NOURRITURE_FAQS = [
+  {
+    q: 'Combien coûte la street food aux Philippines ?',
+    a: "Une brochette de street food coûte généralement moins de 1 €, tandis qu'un repas complet dans une carinderia (petit restaurant de quartier) revient entre 2 et 4 €. Une bière locale accompagne le tout pour à peine 1 € de plus.",
+  },
+  {
+    q: 'Quels plats de street food goûter aux Philippines ?',
+    a: "Parmi les classiques, on retrouve l'isaw (intestin grillé), le kwek kwek (œufs de caille frits) et le betamax (sang coagulé grillé), tous autour de 10 à 15 pesos. Le balut (œuf de canard fécondé) coûte un peu plus, entre 20 et 30 pesos, tandis que le taho (tofu sucré chaud) et le banana cue (banane caramélisée) complètent le tableau des douceurs de rue.",
+  },
+  {
+    q: 'Qu\'est-ce qu\'une carinderia ?',
+    a: "Une carinderia est un petit restaurant de quartier sans menu papier : on désigne du doigt les plats qui mijotent dans des marmites en inox, comme l'adobo, le sinigang, le lechon ou le kare-kare. C'est le cœur battant de la cuisine locale, présent dans tous les barangays.",
+  },
+  {
+    q: 'Peut-on manger végétarien aux Philippines ?',
+    a: "Oui, certaines carinderias s'adaptent volontiers : il suffit de demander « gulay lang » (juste des légumes) ou « no meat please ». Les plats de légumes sautés (gulay) figurent d'ailleurs parmi les classiques proposés au comptoir.",
+  },
+  {
+    q: 'La street food est-elle sans risque pour les touristes ?',
+    a: "La plupart des voyageurs n'ont aucun souci à manger local aux Philippines, à condition de suivre quelques règles simples : choisir des stands fréquentés, surtout aux heures de pointe, privilégier les plats bien cuits (grillés ou frits), et éviter l'eau du robinet au profit de l'eau en bouteille.",
+  },
+];
 
 /* -------------------------------------------------------------------------- */
 /* Petits blocs éditoriaux locaux, repris de la recette validée sur           */
@@ -183,6 +209,19 @@ const NourriturePage = () => {
           souvent autour d&apos;un plat qu&apos;on tisse les plus beaux souvenirs.
         </p>
       </SplitSection>
+
+      {/* FAQ — visible + FAQPage schema (source unique NOURRITURE_FAQS) */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <FaqAccordion
+            eyebrow="Questions fréquentes"
+            title="Vos questions"
+            titleAccent="nourriture"
+            faqs={NOURRITURE_FAQS}
+            withSchema
+          />
+        </div>
+      </section>
 
       <div className="bg-muted py-16">
         <div className="container mx-auto px-4 text-center">

@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { PageHero, SplitSection } from '@/components/sections';
+import { PageHero, SplitSection, FaqAccordion } from '@/components/sections';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 import { getArticlesByCategorySlug } from '@/services/articleService';
@@ -71,6 +71,29 @@ const SectionHeader = ({
     </h2>
   </div>
 );
+
+const siargaoFaqs = [
+  {
+    q: "Quelle est la meilleure période pour surfer à Siargao ?",
+    a: "La haute saison de surf tombe pendant la saison des pluies, de juin à octobre — contre-intuitif, mais c'est la réalité de l'île. C'est la période où les vagues sont les plus impressionnantes.",
+  },
+  {
+    q: "La saison des pluies est-elle un bon moment pour visiter Siargao ?",
+    a: "Oui : de juin à octobre, les averses sont courtes et généreuses, suivies de belles éclaircies, et la végétation devient particulièrement luxuriante avec des cascades abondantes. C'est aussi la période où l'île se fait plus calme, avec moins de monde et des prix plus doux.",
+  },
+  {
+    q: "Que faire à Siargao en dehors du surf ?",
+    a: "L'île se prête à l'island hopping vers Naked Island, Daku et Guyam, à la baignade et au paddle dans le Sugba Lagoon aux eaux turquoise, ou encore aux piscines naturelles creusées dans la roche de Magpupungko Rock Pools.",
+  },
+  {
+    q: "Qu'est-ce que le Sugba Lagoon ?",
+    a: "Le Sugba Lagoon est un lagon aux eaux turquoise où l'on peut nager et faire du paddle, l'un des trésors de Siargao à découvrir une fois la planche de surf reposée.",
+  },
+  {
+    q: "Faut-il prévoir de l'argent liquide pour visiter Siargao ?",
+    a: "Oui, c'est un conseil à anticiper avant de partir : les distributeurs ne courent pas les rues une fois loin des zones touristiques de l'île.",
+  },
+];
 
 const SiargaoPage = async () => {
   const supabase = await createClient();
@@ -174,6 +197,17 @@ const SiargaoPage = async () => {
           subtitle="Surf a Cloud 9, island hopping et lagons secrets"
         />
       </div>
+
+      {/* FAQ */}
+      <section className="bg-background py-16 md:py-20">
+        <FaqAccordion
+          withSchema
+          eyebrow="Questions fréquentes"
+          title="Partir à Siargao,"
+          titleAccent="vos questions"
+          faqs={siargaoFaqs}
+        />
+      </section>
 
       {articles && articles.length > 0 && (
         <section className="bg-background pb-16 md:pb-20">

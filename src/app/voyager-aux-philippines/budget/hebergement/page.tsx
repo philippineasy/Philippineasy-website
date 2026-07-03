@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import type { ReactNode } from 'react';
-import { PageHero, StatRow, SplitSection } from '@/components/sections';
+import { PageHero, StatRow, SplitSection, FaqAccordion } from '@/components/sections';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBed, faHotel, faHouseUser } from '@fortawesome/free-solid-svg-icons';
 import { CheckCircle } from 'lucide-react';
@@ -12,6 +12,32 @@ export const metadata: Metadata = {
   title: 'Hébergement aux Philippines : Guide des Prix et Conseils',
   description: 'Découvrez le coût de l\'hébergement aux Philippines, des auberges de jeunesse conviviales aux hôtels de luxe. Ce guide vous aidera à trouver le logement idéal pour votre budget.',
 };
+
+// FAQ 100 % factuelle — reformule les repères prix et conseils déjà donnés
+// plus haut sur la page (StatRow, familles de logements, checklists, comparatif).
+// Feed le visible ET le FAQPage schema via <FaqAccordion withSchema>.
+const HEBERGEMENT_FAQS = [
+  {
+    q: 'Combien coûte une nuit d\'hébergement aux Philippines ?',
+    a: "Comptez entre 8 et 15 € pour un lit en dortoir, 20 à 40 € pour une chambre double confortable, et plus de 100 € la nuit pour un hôtel haut de gamme. Entre les deux, un appart'hôtel se loue généralement entre 50 et 80 €.",
+  },
+  {
+    q: 'Quelles sont les auberges de jeunesse recommandées aux Philippines ?',
+    a: "Des enseignes comme Mad Monkey, Spin Hostel ou The Circle Hostel reviennent souvent parmi les auberges appréciées des voyageurs. Elles restent la solution la moins chère pour dormir sur l'archipel et misent sur une ambiance conviviale, avec souvent un rooftop pour partager un verre entre voyageurs.",
+  },
+  {
+    q: 'Faut-il réserver son hébergement à l\'avance ?',
+    a: "Oui, surtout en haute saison, où les meilleurs lits en dortoir comme les chambres partent vite. Les sites Booking.com, Agoda et Airbnb restent les plus pratiques, notamment pour les séjours plus longs.",
+  },
+  {
+    q: 'Quels points vérifier avant de réserver un logement ?',
+    a: "Si vous travaillez en ligne, vérifiez la qualité du Wi-Fi avant de réserver. Côté sécurité, privilégiez les quartiers centraux, en particulier à Manille ou Cebu, et pensez à demander si l'établissement dispose d'un générateur en cas de coupure de courant, ce qui n'est pas systématique dans les guesthouses.",
+  },
+  {
+    q: 'Auberge, chambre double ou resort : que choisir ?',
+    a: "L'auberge convient aux petits budgets en quête de rencontres, avec un peu moins d'intimité. La chambre double offre un confort abordable, mais son niveau varie selon les zones. Le resort assure tout le confort — piscine, spa, salle de sport — pour un coût nettement plus élevé.",
+  },
+];
 
 /* -------------------------------------------------------------------------- */
 /* Petits blocs éditoriaux locaux, repris de la recette validée sur           */
@@ -180,6 +206,19 @@ const HebergementPage = () => {
           ]}
         />
       </div>
+
+      {/* FAQ — visible + FAQPage schema (source unique HEBERGEMENT_FAQS) */}
+      <section className="bg-background py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <FaqAccordion
+            eyebrow="Questions fréquentes"
+            title="Vos questions"
+            titleAccent="logement"
+            faqs={HEBERGEMENT_FAQS}
+            withSchema
+          />
+        </div>
+      </section>
 
       <div className="bg-muted py-12">
         <div className="container mx-auto px-4">

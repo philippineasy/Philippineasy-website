@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { PageHero, SplitSection } from '@/components/sections';
+import { PageHero, SplitSection, FaqAccordion } from '@/components/sections';
 import { faShieldHalved } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
 import { AffiliateRecommendation } from '@/components/affiliate/AffiliateRecommendation';
@@ -92,6 +92,29 @@ const SectionHeader = ({
   </div>
 );
 
+const santeSecuriteFaqs = [
+  {
+    q: "Quels vaccins sont recommandés pour un voyage aux Philippines ?",
+    a: "Les vaccins contre l'hépatite A, l'hépatite B et le tétanos sont fortement recommandés avant le départ. Une bonne protection contre les moustiques reste tout aussi essentielle, puisqu'elle est la seule vraie parade contre la dengue et le chikungunya.",
+  },
+  {
+    q: "Les Philippines sont-elles une destination sûre pour les touristes ?",
+    a: "Oui, les Philippines restent un pays globalement sûr pour les voyageurs. Comme partout, quelques précautions de base s'imposent, et il est utile de se renseigner sur les zones déconseillées par les autorités avant de s'y aventurer.",
+  },
+  {
+    q: "Quelles précautions prendre au quotidien pour rester en sécurité ?",
+    a: "Les réflexes de base suffisent : ne pas exposer ses objets de valeur, rester vigilant dans les zones très fréquentées, et éviter les zones signalées comme déconseillées. Ce sont les mêmes précautions qu'on adopterait dans n'importe quelle destination touristique.",
+  },
+  {
+    q: "Une assurance voyage est-elle obligatoire pour les Philippines ?",
+    a: "Elle n'est pas obligatoire pour un visa touriste de 30 jours, mais elle est fortement recommandée : les frais médicaux ne sont pas couverts par la Sécurité sociale française, et une hospitalisation sur place peut coûter plusieurs milliers d'euros. Mieux vaut souscrire avant de partir.",
+  },
+  {
+    q: "Comment se protéger sur les Wi-Fi publics des Philippines ?",
+    a: "Les réseaux Wi-Fi des hôtels et des cafés aux Philippines sont rarement sécurisés. Un VPN chiffre la connexion et protège les données bancaires et mots de passe lors de leur utilisation.",
+  },
+];
+
 const SanteSecuritePage = async () => {
   const supabase = await createClient();
   const { data: page } = await getPageBySlug(supabase, 'sante-securite');
@@ -165,6 +188,17 @@ const SanteSecuritePage = async () => {
         </p>
         <Link href="/voyager-aux-philippines/sante-securite/conseils" className="text-accent font-bold hover:underline mt-4 inline-block">Nos conseils de sécurité →</Link>
       </SplitSection>
+
+      {/* FAQ */}
+      <section className="bg-background py-16 md:py-20">
+        <FaqAccordion
+          withSchema
+          eyebrow="Questions fréquentes"
+          title="Santé et sécurité,"
+          titleAccent="l'essentiel"
+          faqs={santeSecuriteFaqs}
+        />
+      </section>
 
       <AffiliateRecommendation
         title="Protegez-vous avant de partir"

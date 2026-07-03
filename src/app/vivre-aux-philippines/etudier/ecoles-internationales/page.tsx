@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { School, BookOpen, DollarSign, MapPin, Globe, Users, Award, FileCheck, GraduationCap, Languages, Shield, Building2, ExternalLink, CheckCircle, Calendar, Clock, ArrowRight, AlertTriangle } from 'lucide-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSchool, faGlobe, faUsers, faSackDollar } from '@fortawesome/free-solid-svg-icons';
-import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, CTABand } from '@/components/sections';
+import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, CTABand, FaqAccordion } from '@/components/sections';
 
 export const metadata: Metadata = {
   title: "Écoles Internationales aux Philippines en 2026 : Guide Complet",
@@ -75,6 +75,31 @@ const SectionHeader = ({
     )}
   </div>
 );
+
+// FAQ 100 % factuelle — reformulée à partir du contenu de la page ci-dessous
+// (visa des enfants, frais de scolarité, curricula, support EAL, admission).
+const ECOLES_FAQS = [
+  {
+    q: "Faut-il un visa étudiant spécifique pour mon enfant ?",
+    a: "Pas toujours. Les enfants mineurs (moins de 21 ans, non mariés) de titulaires d'un visa 9(g) travail, 9(d) diplomatique, SIRV ou SRRV sont exemptés du visa étudiant 9(f) et peuvent étudier avec un visa de dépendant lié à celui du parent. Sinon, un visa 9(f) reste nécessaire, pour environ ₱3 000-5 000.",
+  },
+  {
+    q: "Combien coûte une scolarité dans une école internationale ?",
+    a: "Comptez de 6 000 à 24 000 € par an selon l'école et le niveau. À titre d'exemple, ISM atteint environ 24 000 €/an, BSM se situe entre 10 000 et 22 500 €, et le pôle franco-allemand GESM démarre à partir de 6 500 € en maternelle — nettement plus abordable que les écoles anglo-saxonnes.",
+  },
+  {
+    q: "Quels curricula proposent ces écoles ?",
+    a: "Les principaux sont le IB (PYP, MYP, DP), l'américain (AP), le britannique (IGCSE, A-Levels) et le français (AEFE, au Lycée Français de Manille/GESM). Chaque établissement combine généralement deux de ces programmes, comme ISM (IB + AP) ou BSM (British + IB).",
+  },
+  {
+    q: "Mon enfant ne parle pas encore bien anglais, est-ce un problème ?",
+    a: "La plupart des écoles proposent un accompagnement English as an Additional Language (EAL) pour aider les enfants francophones à s'intégrer. À ISM par exemple, ce programme coûte 1 625 $/semestre la première année, puis 1 100 $/semestre la deuxième.",
+  },
+  {
+    q: "Combien de temps à l'avance faut-il s'inscrire ?",
+    a: "Comptez 6 à 12 mois avant la rentrée d'août : ISM et BSM ont notamment des listes d'attente pour les niveaux 6 à 10. Le dossier (formulaire, bulletins, recommandations) coûte entre 200 et 600 $, et la décision arrive généralement sous 2 à 4 semaines après les évaluations et l'entretien.",
+  },
+];
 
 const ressources = [
   { name: 'ISM', url: 'https://www.ismanila.org/', domain: 'ismanila.org' },
@@ -1047,6 +1072,19 @@ const EcolesInternationalesPage = () => {
               />
             </CardGrid>
           </div>
+        </div>
+      </section>
+
+      {/* FAQ — questions fréquentes, dérivées du contenu de la page ci-dessus */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <FaqAccordion
+            eyebrow="Questions fréquentes"
+            title="Scolariser ses enfants,"
+            titleAccent="en clair"
+            faqs={ECOLES_FAQS}
+            withSchema
+          />
         </div>
       </section>
 

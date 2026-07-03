@@ -1,8 +1,35 @@
 import { createClient } from '@/utils/supabase/server';
 import { MarketplaceClientPage } from './MarketplaceClientPage';
-import { PageHero, CTABand } from '@/components/sections';
+import { PageHero, CTABand, FaqAccordion } from '@/components/sections';
 import type { StatItem } from '@/components/sections';
 import type { Metadata } from 'next';
+
+// FAQ 100 % factuelle — croise le contenu de cette page avec les CGV
+// (art. 6 Paiement, art. 7 Livraison, art. 8 Rétractation, art. 10 Marketplace)
+// et la page /marketplace-aux-philippines/devenir-vendeur. Rien d'inventé :
+// pas de délai ni de taux de commission non documentés ailleurs sur le site.
+const MARKETPLACE_FAQS = [
+  {
+    q: "Qui vend réellement les produits de la marketplace ?",
+    a: "Des vendeurs tiers dont la candidature est examinée par notre équipe avant validation. Philippin'Easy agit comme plateforme de mise en relation entre vous et ces vendeurs : le contrat de vente du produit est conclu directement avec le vendeur, dont l'identité est indiquée sur la fiche produit.",
+  },
+  {
+    q: "Le paiement est-il sécurisé ?",
+    a: "Oui, tous les paiements passent par Stripe, certifié PCI-DSS : vos données bancaires ne transitent jamais par nos serveurs. Philippin'Easy encaisse le règlement pour le compte du vendeur, puis le lui reverse.",
+  },
+  {
+    q: "Qui expédie ma commande ?",
+    a: "Chaque produit physique est expédié directement par le vendeur tiers concerné, selon les délais indiqués sur sa fiche produit. Le vendeur reste seul responsable de l'expédition et de la conformité de l'article livré.",
+  },
+  {
+    q: "Puis-je retourner un produit ou me faire rembourser ?",
+    a: "Oui : comme pour tout achat de produit physique, vous disposez de 14 jours à réception du bien pour vous rétracter, et le remboursement intervient dans les 14 jours suivant votre notification. En cas de litige sur la conformité d'un article, nous relayons votre réclamation auprès du vendeur, seul responsable des garanties légales de son produit.",
+  },
+  {
+    q: "Comment devenir vendeur sur la marketplace ?",
+    a: "L'inscription est gratuite via le formulaire \"Devenir vendeur\" : votre candidature est examinée par notre équipe, puis, une fois approuvée, vous accédez à un espace vendeur pour publier vos produits et vendre à notre communauté francophone, moyennant une commission équitable.",
+  },
+];
 
 export const metadata: Metadata = {
   title: 'Marketplace Philippines : Achat & Vente de Produits',
@@ -134,6 +161,19 @@ export default async function MarketplacePage() {
       />
 
       <MarketplaceClientPage initialProducts={products} categories={categories} />
+
+      {/* FAQ — questions fréquentes, croisées avec les CGV et devenir-vendeur */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <FaqAccordion
+            eyebrow="Questions fréquentes"
+            title="Comment ça"
+            titleAccent="marche ?"
+            faqs={MARKETPLACE_FAQS}
+            withSchema
+          />
+        </div>
+      </section>
 
       <CTABand
         title="Vous fabriquez ou vendez des produits"

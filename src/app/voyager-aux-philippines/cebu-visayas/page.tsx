@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { PageHero, SplitSection } from '@/components/sections';
+import { PageHero, SplitSection, FaqAccordion } from '@/components/sections';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 import { getArticlesByCategorySlug } from '@/services/articleService';
@@ -71,6 +71,29 @@ const SectionHeader = ({
     </h2>
   </div>
 );
+
+const cebuVisayasFaqs = [
+  {
+    q: "Quelle est la différence entre Cebu, Bohol et Siquijor ?",
+    a: "Cebu joue les carrefours économiques et culturels de la région, Bohol aligne les Chocolate Hills et ses minuscules tarsiers, et Siquijor cultive sa réputation d'île mystique, entre guérisseurs traditionnels et plages désertes. Ces trois îles s'enchaînent bien sur un même circuit.",
+  },
+  {
+    q: "Où plonger dans les Visayas ?",
+    a: "Malapascua et Moalboal comptent parmi les sites de plongée les plus réputés de la région, de renommée mondiale. Ils font partie des expériences à ne pas manquer aux côtés des chutes de Kawasan et des rizières en terrasses.",
+  },
+  {
+    q: "Quel site historique visiter à Cebu ?",
+    a: "La Croix de Magellan, à Cebu, est un incontournable historique : elle symbolise l'arrivée du christianisme dans l'archipel.",
+  },
+  {
+    q: "Que voir côté nature dans les Visayas ?",
+    a: "Les chutes de Kawasan se prêtent à la randonnée, et les rizières en terrasses valent le détour pour les amateurs de paysages. Ces expériences complètent la plongée et l'histoire dans un même itinéraire.",
+  },
+  {
+    q: "Qu'est-ce qui rend Siquijor particulière ?",
+    a: "Siquijor cultive une réputation d'île mystique, réputée pour ses guérisseurs traditionnels et ses plages désertes — une ambiance très différente de l'effervescence de Cebu City.",
+  },
+];
 
 const CebuVisayasPage = async () => {
   const supabase = await createClient();
@@ -173,6 +196,17 @@ const CebuVisayasPage = async () => {
           subtitle="Requins-baleines, canyoneering, plongee — les meilleures experiences"
         />
       </div>
+
+      {/* FAQ */}
+      <section className="bg-background py-16 md:py-20">
+        <FaqAccordion
+          withSchema
+          eyebrow="Questions fréquentes"
+          title="Cebu et les Visayas,"
+          titleAccent="vos questions"
+          faqs={cebuVisayasFaqs}
+        />
+      </section>
 
       {articles && articles.length > 0 && (
         <section className="bg-background pb-16 md:pb-20">

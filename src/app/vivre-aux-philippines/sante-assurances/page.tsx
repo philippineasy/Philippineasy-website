@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { Shield, Hospital, Heart, Globe, CheckCircle, AlertTriangle, ExternalLink, ArrowRight, Landmark, Syringe } from 'lucide-react';
 import { faShieldHalved } from '@fortawesome/free-solid-svg-icons';
-import { PageHero, StatRow, SplitSection, CardGrid, LinkCard } from '@/components/sections';
+import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, FaqAccordion } from '@/components/sections';
 import { AffiliateRecommendation } from '@/components/affiliate/AffiliateRecommendation';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
@@ -265,6 +265,29 @@ const hopitauxRows = [
   { name: 'Chong Hua Hospital', location: 'Cebu City', desc: 'Accrédité JCI (standard international)' },
 ];
 
+const santeFaqs = [
+  {
+    q: 'Qu\'est-ce que PhilHealth et que couvre-t-il ?',
+    a: "PhilHealth est le système national d'assurance santé des Philippines, auquel un expatrié résident peut adhérer volontairement pour une couverture de base. Il prend en charge les hospitalisations sous forme de forfaits, les consultations dans le secteur public et les chirurgies non urgentes. Ces forfaits sont fixes et non un remboursement intégral : pour des soins complexes ou en hôpital privé, le reste à charge peut grimper jusqu'à 40 %.",
+  },
+  {
+    q: "Combien coûte l'adhésion à PhilHealth ?",
+    a: "Pour les salariés, la cotisation représente 5 % du salaire, partagée avec l'employeur. En adhésion volontaire, comptez de 2 400 à 5 000 PHP par an.",
+  },
+  {
+    q: 'Qu\'est-ce qu\'une HMO et pourquoi en souscrire une aux Philippines ?',
+    a: "Une HMO (Health Maintenance Organization) est une couverture complémentaire souscrite en plus de PhilHealth pour les soins courants : consultations, petits pépins, dentaire. Maxicare, le leader, propose des plans individuels et familiaux à partir d'environ 15 000 PHP par an ; Intellicare mise sur des formules personnalisables et une bonne couverture dentaire ; MediCard revendique plus de 500 hôpitaux partenaires. Ces couvertures suffisent au quotidien, mais pas pour un accident grave ou un rapatriement.",
+  },
+  {
+    q: "Faut-il une assurance internationale en plus de PhilHealth et d'une HMO ?",
+    a: "Pour une couverture complète avec rapatriement et soins à l'étranger, une assurance internationale comme Cigna Global, Allianz Care, AXA ou April International offre une meilleure prise en charge dans les hôpitaux premium. Les tarifs vont de 30 à 50 €/mois pour un plan de base à 200-400 €/mois pour une couverture premium avec rapatriement, selon l'âge et la franchise choisie. La recommandation consiste à empiler les trois niveaux : PhilHealth comme socle, une HMO locale pour le quotidien, une assurance internationale pour les événements majeurs.",
+  },
+  {
+    q: 'Quels sont les hôpitaux de référence pour les expatriés aux Philippines ?',
+    a: "Plusieurs établissements privés sont reconnus comme références : St. Luke's Medical Center (BGC et Quezon City) pour les soins complexes selon un standard international, Makati Medical Center pour la cardiologie et l'oncologie, ou The Medical City à Pasig pour son équipe multilingue. À Cebu, Chong Hua Hospital est accrédité JCI, et le Cebu Doctors' University Hospital reste la référence pour les Visayas, avec des tarifs plus accessibles.",
+  },
+];
+
 const SanteAssurancesPage = async () => {
   const supabase = await createClient();
   const { data: articles } = await getArticlesByCategorySlug(supabase, 'sante-assurances');
@@ -512,6 +535,17 @@ const SanteAssurancesPage = async () => {
             />
           </div>
         </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="bg-background py-16 md:py-20">
+        <FaqAccordion
+          withSchema
+          eyebrow="Questions fréquentes"
+          title="Santé et assurances,"
+          titleAccent="en clair"
+          faqs={santeFaqs}
+        />
       </section>
 
       {/* Avant l'installation : renvois vers les guides santé & sécurité voyage */}

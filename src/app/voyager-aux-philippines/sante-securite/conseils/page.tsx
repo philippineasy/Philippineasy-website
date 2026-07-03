@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { ShieldCheck, Wifi, Phone, UserCheck, AlertTriangle } from 'lucide-react';
-import { PageHero } from '@/components/sections';
+import { PageHero, FaqAccordion } from '@/components/sections';
 
 export const metadata: Metadata = {
   title: "Sécurité aux Philippines | Conseils pour les Voyageurs",
@@ -45,6 +45,33 @@ const SectionHeader = ({
     )}
   </div>
 );
+
+const conseilsSecuriteFaqs = [
+  {
+    q: "Quelles zones des Philippines sont considérées comme sûres ?",
+    a: "Les lieux les plus fréquentés par les touristes sont aussi les plus sécurisés : Cebu City et ses plages de Mactan, Palawan (El Nido, Coron), Bohol (Chocolate Hills, Panglao), Siargao, ainsi que les villes calmes et bien gérées comme Iloilo, Dumaguete ou Davao. Une police touristique est d'ailleurs présente dans ces zones pour assister les visiteurs.",
+  },
+  {
+    q: "Quelles zones des Philippines faut-il éviter ?",
+    a: "Certaines régions sont formellement déconseillées, classées au niveau 4/4 par France Diplomatie : le centre et l'ouest de l'île de Mindanao (Marawi, Cotabato, Zamboanga), l'archipel de Sulu (Jolo, Tawi-Tawi), ainsi que certaines zones rurales isolées de Lanao del Sur.",
+  },
+  {
+    q: "Quelles sont les bonnes pratiques de sécurité au quotidien ?",
+    a: "Il s'agit de précautions classiques : éviter d'exposer ses gadgets dernier cri en public, rester attentif dans les marchés et les transports, privilégier Grab, Angkas ou les taxis d'hôtels, répartir son argent liquide plutôt que de tout garder sur soi, et éviter les ruelles mal éclairées seul(e) le soir.",
+  },
+  {
+    q: "Comment sécuriser sa connexion sur les Wi-Fi publics ?",
+    a: "Utilisez un VPN comme NordVPN ou ProtonVPN, évitez de vous connecter à votre banque sans protection, et ne laissez jamais votre téléphone sans surveillance.",
+  },
+  {
+    q: "Qui contacter en cas de problème aux Philippines ?",
+    a: "En cas d'urgence, la police locale se joint au 117 ou au 911. Pour toute démarche consulaire, l'Ambassade de France est joignable au (+63) 2 8851 58 00.",
+  },
+  {
+    q: "Que faut-il préparer avant de partir pour voyager en sécurité ?",
+    a: "Prévoyez des photocopies ou scans de vos documents importants, gardez l'adresse de votre hôtel sur vous, et installez les applis utiles comme Grab, Google Maps et Maps.me. L'application eTravel est par ailleurs obligatoire à l'arrivée.",
+  },
+];
 
 const ConseilsSecuritePage = () => {
   return (
@@ -179,6 +206,17 @@ const ConseilsSecuritePage = () => {
             </CardContent>
           </Card>
         </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="bg-background py-16 md:py-20">
+        <FaqAccordion
+          withSchema
+          eyebrow="Questions fréquentes"
+          title="Sécurité aux Philippines,"
+          titleAccent="vos questions"
+          faqs={conseilsSecuriteFaqs}
+        />
       </section>
     </div>
   );

@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { PageHero, SplitSection } from '@/components/sections';
+import { PageHero, SplitSection, FaqAccordion } from '@/components/sections';
 import Link from 'next/link';
 import { KlookCarousel } from '@/components/affiliate/KlookCarousel';
 import { palawanActivities } from '@/components/affiliate/klook-activities-data';
@@ -71,6 +71,29 @@ const SectionHeader = ({
     </h2>
   </div>
 );
+
+const palawanFaqs = [
+  {
+    q: "Quelle est la meilleure période pour partir à Palawan ?",
+    a: "La saison sèche, de novembre à mai, est la fenêtre à viser : le ciel se dégage et la mer devient praticable presque partout autour de l'île. C'est le meilleur moment pour enchaîner sorties en bateau, plongée et balades sans mauvaise surprise côté météo.",
+  },
+  {
+    q: "Que faire à El Nido ?",
+    a: "El Nido est célèbre pour ses falaises de calcaire, ses lagons cachés et ses plages idylliques comme Nacpan Beach. C'est l'une des trois adresses qui donnent à Palawan sa réputation.",
+  },
+  {
+    q: "Que faire à Coron ?",
+    a: "Coron est un paradis pour les plongeurs, avec ses épaves de navires japonais de la Seconde Guerre mondiale et ses lacs cristallins comme le lac Kayangan.",
+  },
+  {
+    q: "Que voir à Puerto Princesa ?",
+    a: "Puerto Princesa abrite une rivière souterraine, classée parmi les sept nouvelles merveilles de la nature. C'est la troisième adresse incontournable de Palawan, aux côtés d'El Nido et de Coron.",
+  },
+  {
+    q: "Quelles activités pratiquer à Palawan pendant la saison sèche ?",
+    a: "La saison sèche se prête à l'island hopping, à la plongée, au kayak et à l'exploration des grottes, avec un ciel dégagé et des températures agréables. C'est aussi l'occasion de profiter des festivals locaux qui animent les villes et les villages.",
+  },
+];
 
 const PalawanPage = async () => {
   const supabase = await createClient();
@@ -174,6 +197,17 @@ const PalawanPage = async () => {
           subtitle="Island hopping, plongee, et excursions aux meilleurs prix"
         />
       </div>
+
+      {/* FAQ */}
+      <section className="bg-background py-16 md:py-20">
+        <FaqAccordion
+          withSchema
+          eyebrow="Questions fréquentes"
+          title="Partir à Palawan,"
+          titleAccent="vos questions"
+          faqs={palawanFaqs}
+        />
+      </section>
 
       {articles && articles.length > 0 && (
         <section className="bg-background pb-16 md:pb-20">

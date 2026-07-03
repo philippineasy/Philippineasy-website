@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import type { ReactNode } from 'react';
-import { PageHero, StatRow, SplitSection, CardGrid, LinkCard } from '@/components/sections';
+import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, FaqAccordion } from '@/components/sections';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSimCard, faLanguage, faPhone, faWifi, faComments } from '@fortawesome/free-solid-svg-icons';
 import { CheckCircle, ArrowRight } from 'lucide-react';
@@ -177,6 +177,29 @@ const InlineLink = ({ href, children }: { href: string; children: ReactNode }) =
     />
   </Link>
 );
+
+const communicationFaqs = [
+  {
+    q: "Faut-il choisir Globe, Smart ou DITO pour son voyage aux Philippines ?",
+    a: "Les trois opérateurs se partagent l'essentiel du marché mobile, avec des stands dès la sortie de l'aéroport. Globe et Smart couvrent le mieux les villes comme les îles reculées, tandis que DITO, plus récent, complète le paysage. S'équiper prend à peine quelques minutes une fois arrivé.",
+  },
+  {
+    q: "L'anglais suffit-il pour se faire comprendre aux Philippines ?",
+    a: "Oui, l'anglais est parlé par la quasi-totalité de la population : c'est l'une des deux langues officielles du pays, aux côtés du tagalog. Apprendre quelques mots de tagalog reste toutefois très apprécié des habitants.",
+  },
+  {
+    q: "Le Wi-Fi est-il fiable partout aux Philippines ?",
+    a: "La qualité varie beaucoup selon les endroits : excellente dans les hôtels et cafés urbains, elle devient plus aléatoire dans les zones reculées. Sur les petites îles, mieux vaut faire de la data mobile son plan A et considérer le Wi-Fi comme un simple bonus.",
+  },
+  {
+    q: "Quelles applications utilisent les Philippins au quotidien ?",
+    a: "Contrairement aux habitudes françaises, WhatsApp reste minoritaire : Messenger sert de canal par défaut, y compris pour contacter un hôtel ou un guide, et Viber complète la panoplie pour les échanges plus formels. Ajoutez Grab pour les trajets et livraisons, ainsi que Maya ou GCash comme porte-monnaie mobile.",
+  },
+  {
+    q: "Peut-on utiliser un porte-monnaie mobile comme visiteur de passage ?",
+    a: "GCash domine le marché mais sa vérification exige des documents de résident, ce qui le rend difficile d'accès pour un touriste. Maya, avec un simple passeport, est en pratique plus accessible pour un visiteur de passage.",
+  },
+];
 
 const CommunicationPage = async () => {
   const supabase = await createClient();
@@ -381,6 +404,17 @@ const CommunicationPage = async () => {
           Apprendre les bases : notre guide d&apos;expressions
         </InlineLink>
       </SplitSection>
+
+      {/* FAQ */}
+      <section className="bg-background py-16 md:py-20">
+        <FaqAccordion
+          withSchema
+          eyebrow="Questions fréquentes"
+          title="Communiquer aux Philippines,"
+          titleAccent="en clair"
+          faqs={communicationFaqs}
+        />
+      </section>
 
       {/* Nos guides */}
       <section className="bg-background py-16 md:py-20">

@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { CheckCircle, ExternalLink, ArrowRight, AlertTriangle, MessageSquare } from 'lucide-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuilding, faSackDollar, faLocationDot, faClock } from '@fortawesome/free-solid-svg-icons';
-import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, CTABand } from '@/components/sections';
+import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, CTABand, FaqAccordion } from '@/components/sections';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
 import ArticleList from '@/components/shared/ArticleList';
@@ -217,6 +217,29 @@ const InlineLink = ({
       />
     </Link>
   );
+
+const logementFaqs = [
+  {
+    q: 'Quels types de logement trouve-t-on aux Philippines ?',
+    a: "Trois formats se partagent l'essentiel du marché : le condominium en tour avec sécurité, piscine et salle de sport, la maison individuelle (house and lot) dans un lotissement fermé, plus adaptée aux familles, et l'appartement, plus économique, avec des baux souvent plus flexibles. Le choix dépend surtout du budget et du style de vie recherché.",
+  },
+  {
+    q: 'Combien coûte un loyer à Manille et à Cebu ?',
+    a: "À Metro Manila (BGC, Makati, Rockwell, Ortigas), comptez de 25 000 à 40 000 PHP pour un studio, jusqu'à 80 000-150 000 PHP pour un logement de 3 chambres et plus. À Cebu City, les prix sont sensiblement inférieurs, entre 14 000 et 23 000 PHP pour un studio. À ces loyers s'ajoutent électricité, eau, internet et charges de copropriété, qui peuvent représenter plusieurs milliers de pesos par mois.",
+  },
+  {
+    q: 'Où chercher un logement aux Philippines ?',
+    a: "La recherche démarre en ligne, sur des plateformes comme Lamudi.com.ph, DotProperty.com.ph ou Carousell Property, ainsi que sur des groupes Facebook actifs comme Manila Expats Housing ou Cebu Apartments for Rent. Les agents immobiliers restent utiles pour les biens haut de gamme et la négociation ; leur commission, environ un mois de loyer, est le plus souvent payée par le propriétaire. Vérifiez simplement que l'agent est enregistré auprès de la PRC avant de vous engager.",
+  },
+  {
+    q: 'Quel budget prévoir pour signer un bail aux Philippines ?',
+    a: "Il faut généralement prévoir un dépôt de garantie de 2 mois de loyer, plus 1 à 2 mois d'avance, soit un total de 3 à 4 mois de loyer à la signature. Le bail standard court sur 12 mois renouvelables, avec pénalité en cas de départ anticipé ; une courte durée de 6 mois est possible, mais majore le loyer de 10 à 20 %. Le dépôt est normalement restitué en fin de bail, déduction faite des réparations éventuelles.",
+  },
+  {
+    q: 'Un étranger peut-il acheter un logement aux Philippines ?',
+    a: "Les étrangers ne peuvent pas posséder de terrain aux Philippines, mais peuvent détenir un condominium à 100 % en nom propre, dans la limite d'un quota de 40 % par immeuble. Pour un achat destiné à la location, le rendement locatif brut se situe généralement entre 5 et 8 % selon les zones, avec une fiscalité spécifique sur les revenus locatifs.",
+  },
+];
 
 const LogementPage = async () => {
   const supabase = await createClient();
@@ -616,6 +639,17 @@ const LogementPage = async () => {
           Acheter pour y vivre : résidence principale, pas d&apos;investissement
         </InlineLink>
       </SplitSection>
+
+      {/* FAQ */}
+      <section className="bg-background py-16 md:py-20">
+        <FaqAccordion
+          withSchema
+          eyebrow="Questions fréquentes"
+          title="Trouver un logement,"
+          titleAccent="en clair"
+          faqs={logementFaqs}
+        />
+      </section>
 
       {/* Navigation interne */}
       <section className="bg-background pb-16 md:pb-20">

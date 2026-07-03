@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { ExternalLink, ArrowRight } from 'lucide-react';
-import { PageHero, SplitSection, CardGrid, LinkCard, CTABand } from '@/components/sections';
+import { PageHero, SplitSection, CardGrid, LinkCard, CTABand, FaqAccordion } from '@/components/sections';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
 import ArticleList from '@/components/shared/ArticleList';
@@ -199,6 +199,29 @@ const budgetRows = [
   { label: 'Santé & loisirs', value: '250 € – 500 €' },
 ];
 
+const cultureFaqs = [
+  {
+    q: 'Faut-il parler tagalog pour vivre aux Philippines ?',
+    a: "Non, l'anglais est la langue d'enseignement officielle et il est parlé pratiquement partout dans l'archipel, ce qui simplifie nettement les démarches du quotidien. Ce sont surtout les valeurs familiales et la vie communautaire, plus que la langue, qui structurent le quotidien et font la différence dans une intégration réussie.",
+  },
+  {
+    q: "Quel budget prévoir pour s'installer en famille aux Philippines ?",
+    a: "Un budget familial mensuel se situe généralement entre 1 500 € et 3 000 €, toutes dépenses courantes incluses. Le logement représente le principal poste, entre 600 € et 1 500 € selon la ville, suivi de la nourriture (350 à 600 €) et de la scolarité (800 à 2 100 €).",
+  },
+  {
+    q: 'Quel budget prévoir pour se loger en famille à Manille ou à Cebu ?',
+    a: "Comptez 700 à 1 200 € pour un condominium sécurisé à Manille, contre 400 à 600 € pour une maison à Cebu ou Davao. Côté santé, les hôpitaux privés sont de bon niveau, mais une assurance santé internationale reste indispensable pour couvrir les frais.",
+  },
+  {
+    q: 'Quels visas concernent une installation en famille aux Philippines ?',
+    a: "Les visas 13(a) pour le mariage, 9(G) pour le travail ou le SRRV pour la retraite couvrent la majorité des situations. L'ACR Card (Alien Certificate of Registration) reste par ailleurs obligatoire pour les résidents, tandis que Grab facilite les déplacements et les groupes Facebook d'expatriés restent une mine de conseils pratiques.",
+  },
+  {
+    q: 'Quelles universités et écoles internationales choisir aux Philippines ?',
+    a: "Côté universités, l'Université des Philippines (UP), Ateneo de Manila (ADMU), De La Salle University (DLSU) ou University of Santo Tomas (UST) proposent des programmes en anglais à des frais très abordables comparés à l'Europe ; en 2026, 35 universités philippines figurent au classement QS Asia. Pour les enfants d'expatriés, les écoles internationales de Manille et de Cebu, comme l'International School Manila (ISM) ou la British School Manila (BSM), proposent des cursus américain, britannique ou IB, pour un budget de 10 000 à 25 000 €/an.",
+  },
+];
+
 const CultureIntegrationPage = async () => {
   const supabase = await createClient();
   const { data: articles, error } = await getArticlesByCategorySlug(supabase, 'culture-integration');
@@ -369,6 +392,17 @@ const CultureIntegrationPage = async () => {
           Trouver une école internationale
         </InlineLink>
       </SplitSection>
+
+      {/* FAQ */}
+      <section className="bg-background py-16 md:py-20">
+        <FaqAccordion
+          withSchema
+          eyebrow="Questions fréquentes"
+          title="Culture et intégration,"
+          titleAccent="en clair"
+          faqs={cultureFaqs}
+        />
+      </section>
 
       {/* Navigation interne */}
       <section className="bg-background pb-16 md:pb-20">

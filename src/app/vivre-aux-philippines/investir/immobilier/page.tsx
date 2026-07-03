@@ -3,7 +3,7 @@ import { Home, Building, DollarSign, Landmark, Info, AlertTriangle, CheckCircle,
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowTrendUp, faUsers, faCalculator, faClock } from '@fortawesome/free-solid-svg-icons';
-import { PageHero, StatRow, SplitSection, CardGrid, LinkCard } from '@/components/sections';
+import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, FaqAccordion } from '@/components/sections';
 
 export const metadata: Metadata = {
   title: "Investissement Locatif aux Philippines en 2026 : Rendement et Fiscalité",
@@ -74,6 +74,31 @@ const SectionHeader = ({
     )}
   </div>
 );
+
+// FAQ 100 % factuelle — reformulée à partir du contenu de la page ci-dessous
+// (règle des 40%, restriction terrain, rendements, fiscalité, frais d'acquisition).
+const IMMOBILIER_FAQS = [
+  {
+    q: "Un étranger peut-il posséder un terrain aux Philippines ?",
+    a: "Non : c'est une restriction constitutionnelle (Article XII, Section 7), réservée aux citoyens philippins ou aux sociétés détenues à 60 % minimum par des Philippins. Vous pouvez en revanche être propriétaire à 100 % d'un condominium (Republic Act 4726), tant que la part étrangère de l'immeuble ne dépasse pas 40 % des unités.",
+  },
+  {
+    q: "Qu'est-ce que le quota de 40 % pour les condominiums ?",
+    a: "C'est la part maximale d'unités qu'un immeuble peut vendre à des étrangers, propriétaire de sa condominium corporation. Ce quota s'applique par projet, pas au niveau national : un immeuble populaire auprès des étrangers peut donc l'atteindre rapidement, d'où l'intérêt de vérifier sa disponibilité avant de verser un acompte.",
+  },
+  {
+    q: "Quel rendement locatif espérer selon la zone ?",
+    a: "Le rendement brut varie du simple au double : autour de 4-6 % à BGC ou Makati Prime, très demandés mais chers au m², contre 6-8 % à Quezon City ou 5-7 % à Cebu IT Park, où les loyers sont plus accessibles pour une demande locale en croissance.",
+  },
+  {
+    q: "Comment sont imposés les loyers pour un non-résident ?",
+    a: "Les non-résidents sont taxés à 25 % sur leurs revenus locatifs bruts, contre un barème progressif pouvant aller jusqu'à 35 % pour les résidents. Une TVA de 12 % s'applique en plus si le revenu locatif annuel dépasse ₱3 000 000. Le Capital Gains Tax (6 %), lui, reste à la charge du vendeur, pas de l'acheteur.",
+  },
+  {
+    q: "Quels frais d'acquisition prévoir en plus du prix d'achat ?",
+    a: "Comptez environ 4 à 5 % du prix : Documentary Stamp Tax (1,5 %), Transfer Tax à Metro Manila (0,75 %), frais d'enregistrement au Registry of Deeds (~0,5 %) et notaire (1-2 %). À cela s'ajoutent chaque année la taxe foncière (1-2 % de la valeur fiscale) et les charges de copropriété.",
+  },
+];
 
 const ImmobilierPage = () => {
   return (
@@ -978,6 +1003,17 @@ const ImmobilierPage = () => {
               <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
             </a>
           </CardGrid>
+        </section>
+
+        {/* FAQ — questions fréquentes, dérivées du contenu de la page ci-dessus */}
+        <section className="mb-16">
+          <FaqAccordion
+            eyebrow="Questions fréquentes"
+            title="Investir dans la pierre,"
+            titleAccent="en clair"
+            faqs={IMMOBILIER_FAQS}
+            withSchema
+          />
         </section>
 
         {/* Navigation */}

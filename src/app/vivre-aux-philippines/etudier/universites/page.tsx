@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { GraduationCap, FileText, Award, CheckCircle, ExternalLink, Clock, DollarSign, BookOpen, Home, Utensils, Bus, Smartphone, Building2 } from 'lucide-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGraduationCap, faGlobe, faSackDollar, faLandmark } from '@fortawesome/free-solid-svg-icons';
-import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, CTABand } from '@/components/sections';
+import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, CTABand, FaqAccordion } from '@/components/sections';
 
 export const metadata: Metadata = {
   title: "Étudier aux Philippines en 2026 : Universités, Programmes et Visa 9F",
@@ -74,6 +74,31 @@ const SectionHeader = ({
     )}
   </div>
 );
+
+// FAQ 100 % factuelle — reformulée à partir du contenu de la page ci-dessous
+// (intro, classements, Big Three, frais de scolarité, visa 9(F), budget).
+const UNIVERSITES_FAQS = [
+  {
+    q: 'Faut-il déjà parler couramment anglais pour étudier aux Philippines ?',
+    a: "Pas nécessairement un test de langue formel : la quasi-totalité des programmes universitaires sont enseignés en anglais, et le pays est le 3ème plus grand pays anglophone au monde. Pour un étudiant venant d'un pays anglophone ou ayant suivi un cursus en anglais, aucun test n'est généralement exigé à l'inscription.",
+  },
+  {
+    q: 'Quelles sont les universités philippines les plus reconnues ?',
+    a: "Trois établissements forment le \"Big Three\" : University of the Philippines (publique, fondée en 1908, frais les plus bas), Ateneo de Manila (privée jésuite, #1 aux THE Rankings Philippines) et De La Salle University (privée, forte en ingénierie et commerce). University of Santo Tomas, la plus ancienne université d'Asie, complète ce quatuor de tête.",
+  },
+  {
+    q: 'Combien coûtent des études universitaires aux Philippines ?',
+    a: "Cela dépend du statut de l'établissement : de 20 000 à 60 000 ₱/an (≈320-960 €) dans le public, jusqu'à 150 000-250 000 ₱/an (≈2 400-4 000 €) dans le privé premium comme Ateneo ou DLSU, et 200 000-400 000 ₱/an pour les filières médecine. Les étudiants internationaux paient généralement 20 à 50 % de plus que leurs camarades philippins.",
+  },
+  {
+    q: 'Le visa étudiant 9(F) est-il obligatoire ?',
+    a: "Oui, pour tout cursus supérieur de plus de 30 jours. Il faut avoir 18 ans minimum, une lettre d'acceptation d'une université accréditée CHED, une preuve de moyens financiers et un casier judiciaire vierge. Comptez 2 à 8 semaines de délai et 250-400 US$ de frais selon la nationalité ; le visa est valable 1 an renouvelable, et une ACR I-Card est requise après l'arrivée.",
+  },
+  {
+    q: 'Quel budget mensuel prévoir en dehors de la scolarité ?',
+    a: "Comptez environ 20 000 à 40 000 ₱ par mois (≈320-640 €) à Metro Manila, hors frais de scolarité : logement, nourriture, transport, téléphone/internet et fournitures. C'est le budget de vie courante d'un étudiant installé dans la capitale.",
+  },
+];
 
 const ressources = [
   { name: 'CHED (Commission on Higher Ed)', url: 'https://ched.gov.ph/', domain: 'ched.gov.ph' },
@@ -911,6 +936,19 @@ const UniversitesPage = () => {
               />
             </CardGrid>
           </div>
+        </div>
+      </section>
+
+      {/* FAQ — questions fréquentes, dérivées du contenu de la page ci-dessus */}
+      <section className="bg-muted py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <FaqAccordion
+            eyebrow="Questions fréquentes"
+            title="Étudier aux Philippines,"
+            titleAccent="en clair"
+            faqs={UNIVERSITES_FAQS}
+            withSchema
+          />
         </div>
       </section>
 

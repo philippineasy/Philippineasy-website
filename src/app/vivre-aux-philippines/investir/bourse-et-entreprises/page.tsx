@@ -3,7 +3,7 @@ import { Briefcase, TrendingUp, Building, Info, AlertTriangle, CheckCircle, Exte
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChartLine, faBuilding, faSackDollar, faBullseye } from '@fortawesome/free-solid-svg-icons';
-import { PageHero, StatRow, SplitSection, CardGrid, LinkCard } from '@/components/sections';
+import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, FaqAccordion } from '@/components/sections';
 
 export const metadata: Metadata = {
   title: "Investir en Bourse aux Philippines en 2026 : PSE, Actions, Entreprises",
@@ -74,6 +74,31 @@ const SectionHeader = ({
     )}
   </div>
 );
+
+// FAQ 100 % factuelle — reformulée à partir du contenu de la page ci-dessous
+// (brokers, actions A/B, fiscalité, SIRV, entreprises non cotées).
+const BOURSE_FAQS = [
+  {
+    q: "Puis-je investir en bourse philippine sans être résident ?",
+    a: "Oui, via un broker international comme Interactive Brokers ou Boom Securities : ouverture 100 % en ligne, avec pour seuls documents un passeport, un justificatif de domicile et, pour les plateformes américaines, un formulaire W-8BEN. Un broker local (COL Financial, BDO/BPI Securities) suppose en revanche un visa résident et une ACR I-Card.",
+  },
+  {
+    q: "Quelle est la différence entre actions de Classe A et de Classe B ?",
+    a: "Les actions de Classe A sont réservées aux citoyens philippins uniquement. Les actions de Classe B sont ouvertes aux étrangers ET aux Philippins, avec les mêmes droits — c'est donc la classe qu'un investisseur étranger doit viser.",
+  },
+  {
+    q: "Comment sont imposés les dividendes pour un investisseur étranger ?",
+    a: "Les dividendes versés à une personne physique sont retenus à la source à 25 %, contre 30 % pour une société étrangère (réductible par convention fiscale). S'y ajoutent une taxe de 0,6 % sur chaque vente d'actions et une TVA de 12 % sur les commissions du broker.",
+  },
+  {
+    q: "Qu'est-ce que le visa investisseur SIRV ?",
+    a: "Le Special Investor's Resident Visa permet de résider indéfiniment aux Philippines en échange d'un investissement minimum de 75 000 US$ dans des actions cotées à la PSE ou des entreprises de secteurs prioritaires (BOI) — l'immobilier n'y est pas éligible. Conditions : 21 ans minimum, casier judiciaire vierge, ~300 US$ de frais de dossier.",
+  },
+  {
+    q: "Peut-on investir dans une entreprise philippine non cotée ?",
+    a: "Oui, mais la participation étrangère y est généralement plafonnée à 40 %, sauf dans les secteurs listés par la FINL (Foreign Investment Negative List) qui autorisent jusqu'à 100 % — export ou tech notamment. En contrepartie, la liquidité est faible et la due diligence plus complexe qu'en bourse.",
+  },
+];
 
 const BourseEntreprisesPage = () => {
   return (
@@ -833,6 +858,17 @@ const BourseEntreprisesPage = () => {
               <ExternalLink className="h-4 w-4 text-muted-foreground" />
             </a>
           </CardGrid>
+        </section>
+
+        {/* FAQ — questions fréquentes, dérivées du contenu de la page ci-dessus */}
+        <section className="mb-16">
+          <FaqAccordion
+            eyebrow="Questions fréquentes"
+            title="Investir en bourse,"
+            titleAccent="en clair"
+            faqs={BOURSE_FAQS}
+            withSchema
+          />
         </section>
 
         {/* Navigation */}

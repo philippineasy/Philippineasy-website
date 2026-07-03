@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { ArrowRight, CheckCircle, ExternalLink, TrendingUp, Home } from 'lucide-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBriefcase, faBuilding, faCalendarDays, faSackDollar } from '@fortawesome/free-solid-svg-icons';
-import { PageHero, StatRow, SplitSection, CardGrid, LinkCard } from '@/components/sections';
+import { PageHero, StatRow, SplitSection, CardGrid, LinkCard, FaqAccordion } from '@/components/sections';
 import { Breadcrumb } from '@/components/layout/Breadcrumb';
 import BreadcrumbJsonLd from '@/components/shared/BreadcrumbJsonLd';
 import ArticleList from '@/components/shared/ArticleList';
@@ -164,6 +164,25 @@ const InlineLink = ({
     </Link>
   );
 
+const travailFaqs = [
+  {
+    q: 'Quel secteur recrute le plus de profils internationaux aux Philippines ?',
+    a: "Le secteur du BPO (Business Process Outsourcing) reste le plus gros pourvoyeur d'emplois pour les profils internationaux : centres d'appel, support client, comptabilité délocalisée. Les recruteurs y cherchent surtout des bilingues capables de gérer une clientèle francophone, un vrai atout pour un candidat français.",
+  },
+  {
+    q: 'Quelles démarches pour travailler légalement en tant que salarié aux Philippines ?',
+    a: "Les démarches sont encadrées par le visa de travail 9(G) et le permis AEP, à initier avec votre employeur. Les postes les plus recherchés concernent les développeurs, les spécialistes support et les analystes financiers, avec des salaires qui varient selon l'expérience et le secteur.",
+  },
+  {
+    q: 'Comment créer son entreprise aux Philippines en tant qu\'étranger ?',
+    a: "La plateforme eSPARC facilite l'enregistrement en ligne auprès de la SEC, et les zones PEZA offrent des avantages fiscaux appréciables pour les activités exportatrices ou technologiques. La structure juridique se choisit selon le projet — Corporation, Sole Proprietorship ou Branch Office — et le capital requis varie selon l'activité et la part de capital détenue par des étrangers. La FINL encadre encore la participation étrangère dans certains secteurs.",
+  },
+  {
+    q: "Peut-on investir aux Philippines sans y travailler ?",
+    a: "Oui : si vous disposez déjà d'un capital, deux voies méritent d'être creusées, la bourse via le Philippine Stock Exchange (PSE) et l'immobilier locatif, soumis à la règle des 40 % pour les acquéreurs étrangers. Ce ne sont pas les seules façons de construire son avenir sur l'archipel, mais elles complètent le salariat et l'entrepreneuriat.",
+  },
+];
+
 const TravailEntreprisePage = async () => {
   const supabase = await createClient();
   const { data: articles, error } = await getArticlesByCategorySlug(supabase, 'travail-entreprise');
@@ -287,6 +306,17 @@ const TravailEntreprisePage = async () => {
           Le guide complet de la création d&apos;entreprise
         </InlineLink>
       </SplitSection>
+
+      {/* FAQ */}
+      <section className="bg-background py-16 md:py-20">
+        <FaqAccordion
+          withSchema
+          eyebrow="Questions fréquentes"
+          title="Travailler et entreprendre,"
+          titleAccent="en clair"
+          faqs={travailFaqs}
+        />
+      </section>
 
       {/* Investir — section courte, anti-cannibalisation : la requête large   */}
       {/* appartient à l'article investir-aux-philippines-guide-francais-2025. */}
