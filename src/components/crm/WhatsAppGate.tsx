@@ -17,7 +17,7 @@ type Props = {
 };
 
 const BUSINESS_WHATSAPP =
-  process.env.NEXT_PUBLIC_BUSINESS_WHATSAPP || '+639171234567';
+  process.env.NEXT_PUBLIC_BUSINESS_WHATSAPP || '+639565628289';
 
 function hasActiveWhatsApp(entitlements: Entitlement[]): boolean {
   return entitlements.some(
