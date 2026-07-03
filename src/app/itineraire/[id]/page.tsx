@@ -2,27 +2,12 @@
 
 import { useEffect, useState, useCallback, use } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faArrowLeft,
-  faSpinner,
-  faExclamationTriangle,
-  faEdit,
-  faInfinity,
-  faClock,
-  faMapMarkerAlt,
-  faPencil,
-  faLock,
-  faLightbulb,
-  faUtensils,
-  faBed,
-  faBus,
-  faSun,
-  faArrowRight,
-} from '@fortawesome/free-solid-svg-icons';
-import { MapPin, Clock, ExternalLink, Utensils, Hotel, Bus, Pencil, Lock, Lightbulb, Download } from 'lucide-react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import {
+  ArrowLeft, ArrowRight, Download, Pencil, MapPin,
+  Lightbulb, Loader2, AlertTriangle, Star, Bus,
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import {
@@ -31,14 +16,16 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { PlacePhoto } from '@/components/itinerary/PlacePhoto';
-import dynamic from 'next/dynamic';
+import {
+  DURATION_LABELS, OFFER_LABELS,
+  type Duration, type OfferType,
+} from '@/config/itinerary-pricing';
 
 const ItineraryMap = dynamic(() => import('@/components/itinerary/ItineraryMap'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[300px] md:h-[400px] rounded-2xl bg-muted flex items-center justify-center border border-border">
-      <div className="text-muted-foreground">Chargement de la carte...</div>
+    <div className="w-full h-[300px] md:h-[320px] bg-muted flex items-center justify-center">
+      <span className="text-[13px] text-muted-foreground">Chargement de la carte…</span>
     </div>
   ),
 });
@@ -70,6 +57,33 @@ interface Itinerary {
 
 interface MapPoint { id: string; name: string; type: 'attraction' | 'restaurant' | 'accommodation' | 'activity' | 'beach'; coordinates: { lat: number; lng: number }; day: number; period: string; }
 interface PageProps { params: Promise<{ id: string }>; }
+
+// Variant identity — pill tones declined for dark like the existing patterns.
+const VARIANT_LABEL: Record<string, string> = {
+  relax: 'Relax',
+  balanced: 'Équilibré',
+  adventure: 'Aventure',
+};
+const VARIANT_TONE: Record<string, string> = {
+  relax: 'bg-sky-100 text-sky-800 dark:bg-sky-500/15 dark:text-sky-300',
+  balanced: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300',
+  adventure: 'bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300',
+};
+const VARIANT_TONE_FALLBACK = 'bg-primary/10 text-primary';
+
+function mapsUrl(item: { google_maps_url?: string; coordinates?: Coordinates }): string | null {
+  if (item.google_maps_url) return item.google_maps_url;
+  if (item.coordinates) return `https://maps.google.com/?q=${item.coordinates.lat},${item.coordinates.lng}`;
+  return null;
+}
+
+// Accent the last word of the title (AA-safe accent token).
+function TitleWithAccent({ text }: { text: string }) {
+  const parts = text.trim().split(/\s+/);
+  if (parts.length <= 1) return <span className="text-accent-strong">{text}</span>;
+  const last = parts.pop();
+  return <>{parts.join(' ')} <span className="text-accent-strong">{last}</span></>;
+}
 
 export default function ItineraryPage({ params }: PageProps) {
   const resolvedParams = use(params);
@@ -135,22 +149,26 @@ export default function ItineraryPage({ params }: PageProps) {
   if (authLoading || loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] pt-32">
-        <FontAwesomeIcon icon={faSpinner} className="animate-spin text-4xl text-primary mb-4" />
-        <p className="text-muted-foreground">Chargement de l&apos;itineraire...</p>
+        <Loader2 className="w-9 h-9 animate-spin text-primary mb-4" />
+        <p className="text-[14px] text-muted-foreground">Chargement de l&apos;itinéraire…</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-16 pt-32 max-w-2xl">
-        <div className="bg-card p-8 rounded-2xl border border-destructive/20 shadow-lg text-center">
-          <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FontAwesomeIcon icon={faExclamationTriangle} className="text-destructive text-2xl" />
-          </div>
-          <h1 className="text-xl font-bold text-destructive mb-2">Erreur</h1>
-          <p className="text-muted-foreground mb-6">{error}</p>
-          <Button asChild><Link href="/profil"><FontAwesomeIcon icon={faArrowLeft} className="mr-2" /> Retour au profil</Link></Button>
+      <div className="container mx-auto px-4 py-16 pt-32 max-w-lg">
+        <div className="bg-card p-8 rounded-2xl border border-destructive/20 shadow-card text-center">
+          <span className="inline-flex w-14 h-14 rounded-full bg-destructive/10 items-center justify-center mb-4">
+            <AlertTriangle className="w-6 h-6 text-destructive" />
+          </span>
+          <h1 className="text-lg font-bold text-ink mb-2">Une erreur est survenue</h1>
+          <p className="text-[14px] text-muted-foreground mb-6">{error}</p>
+          <Button asChild>
+            <Link href="/mon-espace/itineraires">
+              <ArrowLeft className="w-4 h-4 mr-2" /> Retour à mes itinéraires
+            </Link>
+          </Button>
         </div>
       </div>
     );
@@ -159,355 +177,378 @@ export default function ItineraryPage({ params }: PageProps) {
   if (!itinerary) return null;
   const { selected_variant } = itinerary;
 
+  // Real header meta
+  const variantKey = selected_variant?.name || 'balanced';
+  const variantLabel = VARIANT_LABEL[variantKey] || (variantKey.charAt(0).toUpperCase() + variantKey.slice(1));
+  const variantTone = VARIANT_TONE[variantKey] || VARIANT_TONE_FALLBACK;
+
+  const duration = itinerary.preferences?.duration as Duration | undefined;
+  const durationLabel = duration ? DURATION_LABELS[duration] : null;
+  const offerName = OFFER_LABELS[itinerary.offer_type as OfferType]?.name || itinerary.offer_type;
+  const budget = selected_variant?.total_budget && selected_variant.total_budget !== 'N/A'
+    ? selected_variant.total_budget : null;
+  const metaLine = [
+    durationLabel,
+    offerName ? `Formule ${offerName}` : null,
+    budget ? `Budget estimé ${budget}` : null,
+  ].filter(Boolean).join(' · ');
+
+  const days = selected_variant?.days || [];
+  const title = selected_variant?.title || 'Mon itinéraire';
+
   return (
-    <div className="min-h-screen bg-muted">
-      {/* Sticky header */}
-      <div className="backdrop-blur-md bg-card/90 border-b border-border sticky top-32 z-20">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link href="/profil" className="flex items-center justify-center w-9 h-9 rounded-xl bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-all">
-                <FontAwesomeIcon icon={faArrowLeft} className="w-3.5 h-3.5" />
-              </Link>
-              <div className="h-5 w-px bg-border" />
-              <h1 className="font-bold text-base text-foreground truncate max-w-[200px] sm:max-w-none">
-                {selected_variant?.title || 'Mon Itineraire'}
-              </h1>
-            </div>
-            <div className="flex items-center gap-2">
-              <a
-                href={`/api/itinerary/pdf/${itinerary.id}`}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-muted hover:bg-muted/80 rounded-full text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Download className="w-3 h-3" />
-                <span className="hidden sm:inline">PDF</span>
-              </a>
-              <div className="px-3 py-1.5 flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full text-xs">
-                <Pencil className="w-3 h-3 text-primary" />
-                <span className="text-foreground/70">
-                  {isUnlimited ? (
-                    <>Modif. illimitees</>
-                  ) : (
-                    <><span className="font-bold text-primary">{itinerary.modifications_remaining}</span> modif.</>
-                  )}
+    <div className="min-h-screen bg-muted/40">
+      {/* Sticky tool bar */}
+      <div className="sticky top-32 z-30 border-b border-border bg-card/95 backdrop-blur-md">
+        <div className="mx-auto max-w-[860px] px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <Link
+              href="/mon-espace/itineraires"
+              aria-label="Retour à mes itinéraires"
+              className="inline-flex items-center justify-center w-[34px] h-[34px] shrink-0 rounded-[10px] bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Link>
+            <p className="text-[15px] font-bold text-ink truncate">{title}</p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <a
+              href={`/api/itinerary/pdf/${itinerary.id}`}
+              target="_blank"
+              rel="noopener"
+              className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-[12px] font-medium text-foreground/80 hover:text-foreground hover:bg-muted/70 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <Download className="w-3 h-3" aria-hidden="true" />
+              <span className="hidden sm:inline">Télécharger le PDF</span>
+              <span className="sm:hidden">PDF</span>
+            </a>
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/[0.08] px-3 py-1.5 text-[12px]">
+              <Pencil className="w-3 h-3 text-primary" aria-hidden="true" />
+              {isUnlimited ? (
+                <span className="font-medium text-foreground/80">Modifications illimitées</span>
+              ) : (
+                <span className="text-foreground/80">
+                  <span className="font-bold text-primary">{itinerary.modifications_remaining}</span>
+                  {' '}modification{itinerary.modifications_remaining > 1 ? 's' : ''} restante{itinerary.modifications_remaining > 1 ? 's' : ''}
                 </span>
-              </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="mx-auto max-w-[860px] px-4 sm:px-6 pb-16">
         {/* Welcome banner after checkout */}
         {showWelcome && (
-          <motion.div
-            initial={{ opacity: 0, y: -12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3"
-          >
-            <span className="text-2xl">🎉</span>
-            <div>
-              <p className="font-semibold text-green-800">Votre itineraire est pret !</p>
-              <p className="text-sm text-green-600">Bon voyage aux Philippines.</p>
+          <div className="mt-6 animate-fade-in-up rounded-2xl border border-[hsl(var(--success)/0.3)] bg-[hsl(var(--success)/0.08)] px-4 py-3.5 flex items-center gap-3">
+            <span className="text-2xl" aria-hidden="true">🎉</span>
+            <div className="min-w-0">
+              <p className="font-semibold text-[hsl(var(--success))] text-[14px]">Votre itinéraire est prêt !</p>
+              <p className="text-[13px] text-muted-foreground">Bon voyage aux Philippines.</p>
             </div>
-            <button onClick={() => setShowWelcome(false)} className="ml-auto text-green-400 hover:text-green-600 text-lg">&times;</button>
-          </motion.div>
-        )}
-
-        {/* Description */}
-        {selected_variant?.description && (
-          <p className="text-lg text-muted-foreground leading-relaxed mb-8">{selected_variant.description}</p>
-        )}
-
-        {/* Map */}
-        {mapPoints.length > 0 && (
-          <div className="mb-10">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-foreground">Votre parcours</h2>
-              <span className="text-xs text-muted-foreground">{mapPoints.length} etapes</span>
-            </div>
-            <div className="rounded-2xl overflow-hidden border border-border shadow-lg">
-              <ItineraryMap points={mapPoints} selectedPointId={selectedPointId} onPointClick={handlePointClick} />
-            </div>
+            <button
+              type="button"
+              onClick={() => setShowWelcome(false)}
+              aria-label="Fermer la notification"
+              className="ml-auto shrink-0 text-muted-foreground hover:text-foreground text-xl leading-none px-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+            >
+              &times;
+            </button>
           </div>
         )}
 
+        {/* Header */}
+        <header className="pt-9 pb-2">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-3">
+            <span className={['inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-[0.05em]', variantTone].join(' ')}>
+              {variantLabel}
+            </span>
+            {metaLine && (
+              <span className="text-[12.5px] text-muted-foreground">{metaLine}</span>
+            )}
+          </div>
+          <h1 className="text-[clamp(1.625rem,4vw,2.25rem)] font-bold leading-[1.1] tracking-[-0.02em] text-ink">
+            <TitleWithAccent text={title} />
+          </h1>
+          {selected_variant?.description && (
+            <p className="mt-3 max-w-[620px] text-[16px] leading-[1.65] text-muted-foreground">
+              {selected_variant.description}
+            </p>
+          )}
+        </header>
+
+        {/* Map — only when real interactive points exist */}
+        {mapPoints.length > 0 && (
+          <section className="mt-8">
+            <div className="flex items-center justify-between mb-3.5">
+              <h2 className="text-[17px] font-bold text-ink">Votre parcours</h2>
+              <span className="text-[12px] text-muted-foreground tabular-nums">
+                {days.length} jour{days.length > 1 ? 's' : ''} · {mapPoints.length} étape{mapPoints.length > 1 ? 's' : ''}
+              </span>
+            </div>
+            <div className="rounded-[20px] overflow-hidden border border-border">
+              <ItineraryMap points={mapPoints} selectedPointId={selectedPointId} onPointClick={handlePointClick} />
+            </div>
+          </section>
+        )}
+
         {/* Day-by-day */}
-        <h2 className="text-lg font-bold text-foreground mb-6">Programme jour par jour</h2>
+        <section className="mt-10">
+          <h2 className="text-[17px] font-bold text-ink mb-4">Programme jour par jour</h2>
 
-        {selected_variant?.days && selected_variant.days.length > 0 ? (
-          <Accordion type="multiple" defaultValue={['day-1']}>
-            {selected_variant.days.map((day) => (
-              <AccordionItem
-                key={day.day}
-                value={`day-${day.day}`}
-                className="bg-card rounded-2xl mb-4 overflow-hidden border border-border shadow-sm data-[state=open]:shadow-lg transition-shadow"
-              >
-                <AccordionTrigger className="px-5 py-4 hover:no-underline hover:bg-muted/30 [&>svg]:text-muted-foreground [&>svg]:w-5 [&>svg]:h-5">
-                  <div className="flex items-center gap-4">
-                    {/* Day photo with number overlay */}
-                    <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0">
-                      <PlacePhoto
-                        coordinates={day.activities?.[0]?.coordinates}
-                        name={day.location || day.activities?.[0]?.name}
-                        className="w-14 h-14 rounded-xl"
-                        fallbackIcon={
-                          <div className="w-14 h-14 bg-primary text-primary-foreground rounded-xl flex flex-col items-center justify-center">
-                            <span className="text-[10px] uppercase font-medium opacity-70">Jour</span>
-                            <span className="text-xl font-bold leading-none">{day.day}</span>
-                          </div>
-                        }
-                      />
-                      {/* Number overlay on photo */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-xl flex flex-col items-center justify-end pb-1">
-                        <span className="text-[8px] uppercase font-medium text-white/80 leading-none">Jour</span>
-                        <span className="text-sm font-bold text-white leading-none">{day.day}</span>
-                      </div>
-                    </div>
-                    <div className="text-left">
-                      <p className="font-bold text-foreground text-base">{day.location || `Jour ${day.day}`}</p>
-                      {day.title && day.title !== 'description' && day.title !== 'jours' && (
-                        <p className="text-sm text-muted-foreground">{day.title}</p>
-                      )}
-                    </div>
-                  </div>
-                </AccordionTrigger>
+          {days.length > 0 ? (
+            <Accordion type="multiple" defaultValue={['day-1']} className="space-y-3.5">
+              {days.map((day) => {
+                const hasTitle = day.title && day.title !== 'description' && day.title !== 'jours';
+                const transportParts = day.transport?.method
+                  ? [
+                      day.transport.method,
+                      day.transport.from && day.transport.to ? `${day.transport.from} → ${day.transport.to}` : null,
+                      day.transport.duration,
+                      day.transport.cost,
+                    ].filter(Boolean).join(' · ')
+                  : null;
+                const hasContent =
+                  !!day.activities?.length || !!day.meals?.breakfast || !!day.meals?.lunch ||
+                  !!day.meals?.dinner || !!day.accommodation?.name || !!day.transport?.method;
 
-                <AccordionContent className="px-5 pt-2 pb-6">
-                  {/* Transport */}
-                  {day.transport?.method && (
-                    <div id={`day-${day.day}-transport`} className="mb-6 flex items-start gap-3 p-4 rounded-xl bg-muted/50">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <Bus className="w-4 h-4 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-foreground text-sm">{day.transport.method}</p>
-                        {day.transport.from && day.transport.to && (
-                          <p className="text-sm text-muted-foreground">{day.transport.from} → {day.transport.to}</p>
-                        )}
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {day.transport.duration && <span className="text-xs bg-card border border-border px-2 py-0.5 rounded-md">⏱ {day.transport.duration}</span>}
-                          {day.transport.cost && <span className="text-xs bg-card border border-border px-2 py-0.5 rounded-md">💰 {day.transport.cost}</span>}
+                return (
+                  <AccordionItem
+                    key={day.day}
+                    value={`day-${day.day}`}
+                    className="border border-border rounded-2xl bg-card shadow-card-rest overflow-hidden"
+                  >
+                    <AccordionTrigger className="px-5 py-4 hover:no-underline hover:bg-muted/40 [&>svg]:text-muted-foreground [&>svg]:w-5 [&>svg]:h-5">
+                      <div className="flex flex-1 items-center gap-3.5 min-w-0 text-left">
+                        <div className="w-[52px] h-[52px] shrink-0 rounded-xl bg-primary/10 text-primary flex flex-col items-center justify-center">
+                          <span className="text-[9px] font-semibold uppercase tracking-wide leading-none opacity-80">Jour</span>
+                          <span className="text-[19px] font-bold leading-none mt-0.5 tabular-nums">{day.day}</span>
                         </div>
-                        {day.transport.coordinates && (
-                          <a href={`https://maps.google.com/?q=${day.transport.coordinates.lat},${day.transport.coordinates.lng}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-2 text-xs text-primary font-medium hover:underline">
-                            <MapPin className="w-3 h-3" /> Google Maps
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Activities */}
-                  {day.activities && day.activities.length > 0 && (
-                    <div className="mb-6">
-                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Activites</p>
-                      <div className="space-y-3">
-                        {day.activities.map((activity, actIndex) => (
-                          <motion.div
-                            key={actIndex}
-                            id={`day-${day.day}-act-${actIndex}`}
-                            initial={{ opacity: 0, y: 8 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true, margin: '-40px' }}
-                            transition={{ delay: actIndex * 0.05, duration: 0.3 }}
-                            className={`flex gap-4 p-3 rounded-xl border transition-all ${
-                              selectedPointId === `day-${day.day}-act-${actIndex}`
-                                ? 'border-primary ring-2 ring-primary/20 bg-primary/5'
-                                : 'border-border hover:border-border/80 hover:shadow-md bg-card'
-                            }`}
-                          >
-                            {/* Activity photo */}
-                            <PlacePhoto
-                              coordinates={activity.coordinates}
-                              name={activity.name}
-                              className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg flex-shrink-0"
-                              fallbackIcon={
-                                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-muted rounded-lg flex items-center justify-center">
-                                  <MapPin className="w-5 h-5 text-muted-foreground/30" />
-                                </div>
-                              }
-                            />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-2">
-                                <div className="min-w-0">
-                                  {activity.time && (
-                                    <p className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
-                                      <Clock className="w-3 h-3" /> {activity.time}
-                                    </p>
-                                  )}
-                                  <h4 className="font-semibold text-foreground text-sm leading-tight">{activity.name}</h4>
-                                  {activity.description && activity.description !== activity.name && (
-                                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{activity.description}</p>
-                                  )}
-                                </div>
-                                {canModify && (
-                                  <button
-                                    className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors flex-shrink-0"
-                                    onClick={() => alert('Fonctionnalite de modification a venir')}
-                                  >
-                                    <Pencil className="w-3 h-3" />
-                                    <span className="hidden sm:inline">Modifier</span>
-                                  </button>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-3 mt-2">
-                                {activity.google_rating && (
-                                  <span className="text-xs text-accent font-semibold">{activity.google_rating.toFixed(1)}/5</span>
-                                )}
-                                {(activity.google_maps_url || activity.coordinates) && (
-                                  <a href={activity.google_maps_url || `https://maps.google.com/?q=${activity.coordinates!.lat},${activity.coordinates!.lng}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary font-medium hover:underline">
-                                    <ExternalLink className="w-3 h-3" /> Google Maps
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Meals */}
-                  {(day.meals?.breakfast || day.meals?.lunch || day.meals?.dinner) && (
-                    <div className="mb-6">
-                      <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Restaurants</p>
-                      <div className="grid gap-3 sm:grid-cols-3">
-                        {([
-                          { key: 'breakfast', data: day.meals?.breakfast, label: 'Petit-dej.' },
-                          { key: 'lunch', data: day.meals?.lunch, label: 'Dejeuner' },
-                          { key: 'dinner', data: day.meals?.dinner, label: 'Diner' },
-                        ] as const).map(({ key, data, label }) => data?.restaurant && (
-                          <div
-                            key={key}
-                            id={`day-${day.day}-${key}`}
-                            className={`bg-card rounded-xl border overflow-hidden transition-all ${
-                              selectedPointId === `day-${day.day}-${key}`
-                                ? 'border-primary ring-2 ring-primary/20'
-                                : 'border-border hover:shadow-md'
-                            }`}
-                          >
-                            <PlacePhoto
-                              coordinates={data.coordinates}
-                              name={data.restaurant}
-                              className="w-full h-24"
-                              fallbackIcon={
-                                <div className="w-full h-24 bg-muted flex items-center justify-center">
-                                  <Utensils className="w-5 h-5 text-muted-foreground/20" />
-                                </div>
-                              }
-                            />
-                            <div className="p-3">
-                              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">{label}</p>
-                              <p className="font-semibold text-foreground text-sm">{data.restaurant}</p>
-                              {data.dish && <p className="text-xs text-muted-foreground mt-0.5">{data.dish}</p>}
-                              <div className="flex items-center justify-between mt-2">
-                                <div className="flex items-center gap-2">
-                                  {data.cost && <span className="text-xs font-semibold text-primary">{data.cost}</span>}
-                                  {data.google_rating && <span className="text-xs text-accent font-semibold">{data.google_rating.toFixed(1)}/5</span>}
-                                </div>
-                                {(data.google_maps_url || data.coordinates) && (
-                                  <a href={data.google_maps_url || `https://maps.google.com/?q=${data.coordinates!.lat},${data.coordinates!.lng}`} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline">Maps</a>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Accommodation */}
-                  {day.accommodation?.name && (
-                    <div
-                      id={`day-${day.day}-accommodation`}
-                      className={`rounded-xl border overflow-hidden transition-all ${
-                        selectedPointId === `day-${day.day}-accommodation`
-                          ? 'border-primary ring-2 ring-primary/20'
-                          : 'border-border hover:shadow-md'
-                      }`}
-                    >
-                      <div className="flex flex-col sm:flex-row">
-                        <PlacePhoto
-                          coordinates={day.accommodation.coordinates}
-                          name={day.accommodation.name}
-                          className="w-full sm:w-40 h-32 sm:h-auto"
-                          fallbackIcon={
-                            <div className="w-full sm:w-40 h-32 bg-muted flex items-center justify-center">
-                              <Hotel className="w-6 h-6 text-muted-foreground/20" />
-                            </div>
-                          }
-                        />
-                        <div className="p-4 flex-1">
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Hebergement</p>
-                          <p className="font-bold text-foreground">{day.accommodation.name}</p>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {day.accommodation.type && (
-                              <span className="text-xs bg-muted px-2 py-0.5 rounded-md text-muted-foreground">{day.accommodation.type}</span>
-                            )}
-                            {day.accommodation.cost && (
-                              <span className="text-xs bg-primary/10 px-2 py-0.5 rounded-md text-primary font-medium">{day.accommodation.cost}</span>
-                            )}
-                            {day.accommodation.google_rating && (
-                              <span className="text-xs bg-accent/10 px-2 py-0.5 rounded-md text-accent font-semibold">{day.accommodation.google_rating.toFixed(1)}/5</span>
-                            )}
-                          </div>
-                          {(day.accommodation.google_maps_url || day.accommodation.coordinates) && (
-                            <a href={day.accommodation.google_maps_url || `https://maps.google.com/?q=${day.accommodation.coordinates!.lat},${day.accommodation.coordinates!.lng}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 mt-3 text-xs text-primary font-medium hover:underline">
-                              <ExternalLink className="w-3 h-3" /> Google Maps
-                            </a>
+                        <div className="min-w-0">
+                          <p className="text-[15px] font-bold text-ink leading-tight truncate">
+                            {day.location || `Jour ${day.day}`}
+                          </p>
+                          {hasTitle && (
+                            <p className="text-[13px] text-muted-foreground truncate">{day.title}</p>
                           )}
                         </div>
                       </div>
-                    </div>
-                  )}
+                    </AccordionTrigger>
 
-                  {/* Empty */}
-                  {!day.activities?.length && !day.meals?.breakfast && !day.meals?.lunch && !day.meals?.dinner && !day.accommodation?.name && !day.transport?.method && (
-                    <p className="text-muted-foreground italic text-center py-4">Aucune activite prevue pour ce jour</p>
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        ) : (
-          <div className="text-center py-8 text-muted-foreground">Aucun jour planifie.</div>
-        )}
+                    <AccordionContent className="px-5 pt-1 pb-6">
+                      {/* Transport */}
+                      {transportParts && (
+                        <div id={`day-${day.day}-transport`} className="mb-5 rounded-xl bg-soft-blue px-4 py-3">
+                          <p className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-primary mb-1">
+                            <Bus className="w-3 h-3" aria-hidden="true" /> Transport
+                          </p>
+                          <p className="text-[13px] text-foreground/80 leading-snug">{transportParts}</p>
+                          {mapsUrl(day.transport!) && (
+                            <a
+                              href={mapsUrl(day.transport!)!}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 mt-1.5 text-[12px] font-medium text-primary hover:underline"
+                            >
+                              <MapPin className="w-3 h-3" aria-hidden="true" /> Google Maps
+                            </a>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Activities */}
+                      {day.activities && day.activities.length > 0 && (
+                        <div className="mb-5">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/80 mb-2.5">Activités</p>
+                          <div className="space-y-2.5">
+                            {day.activities.map((activity, actIndex) => {
+                              const pointId = `day-${day.day}-act-${actIndex}`;
+                              const link = mapsUrl(activity);
+                              const isSelected = selectedPointId === pointId;
+                              return (
+                                <div
+                                  key={actIndex}
+                                  id={pointId}
+                                  className={[
+                                    'flex gap-3 rounded-xl border p-3 transition-colors',
+                                    isSelected ? 'border-primary ring-2 ring-primary/20 bg-primary/5' : 'border-border',
+                                  ].join(' ')}
+                                >
+                                  <div className="w-[52px] shrink-0 pt-0.5 text-[12px] font-semibold text-muted-foreground tabular-nums">
+                                    {activity.time || '—'}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div className="min-w-0">
+                                        <h3 className="text-[14px] font-semibold text-ink leading-tight">{activity.name}</h3>
+                                        {activity.description && activity.description !== activity.name && (
+                                          <p className="text-[13px] text-muted-foreground mt-0.5 leading-snug">{activity.description}</p>
+                                        )}
+                                      </div>
+                                      {canModify && (
+                                        <button
+                                          type="button"
+                                          onClick={() => alert('Fonctionnalité de modification à venir')}
+                                          aria-label={`Demander une modification pour ${activity.name}`}
+                                          className="shrink-0 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[12px] text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                        >
+                                          <Pencil className="w-3 h-3" aria-hidden="true" />
+                                          <span className="hidden sm:inline">Modifier</span>
+                                        </button>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-3 mt-1.5 text-[12px]">
+                                      {typeof activity.google_rating === 'number' && (
+                                        <span className="inline-flex items-center gap-0.5 font-semibold text-accent-strong">
+                                          <Star className="w-3 h-3 fill-current" aria-hidden="true" />
+                                          {activity.google_rating.toFixed(1)}
+                                        </span>
+                                      )}
+                                      {link && (
+                                        <a
+                                          href={link}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+                                        >
+                                          <MapPin className="w-3 h-3" aria-hidden="true" /> Google Maps
+                                        </a>
+                                      )}
+                                      {activity.cost && (
+                                        <span className="ml-auto text-muted-foreground tabular-nums">{activity.cost}</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Meals */}
+                      {(day.meals?.breakfast || day.meals?.lunch || day.meals?.dinner) && (
+                        <div className="mb-5">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/80 mb-2.5">Restaurants</p>
+                          <div className="grid gap-2.5 sm:grid-cols-3">
+                            {([
+                              { key: 'breakfast', data: day.meals?.breakfast, label: 'Petit-déj.' },
+                              { key: 'lunch', data: day.meals?.lunch, label: 'Déjeuner' },
+                              { key: 'dinner', data: day.meals?.dinner, label: 'Dîner' },
+                            ] as const).map(({ key, data, label }) => data?.restaurant && (
+                              <div
+                                key={key}
+                                id={`day-${day.day}-${key}`}
+                                className={[
+                                  'rounded-xl border p-3 transition-colors',
+                                  selectedPointId === `day-${day.day}-${key}` ? 'border-primary ring-2 ring-primary/20' : 'border-border',
+                                ].join(' ')}
+                              >
+                                <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground/80 mb-1">{label}</p>
+                                <p className="text-[13px] font-semibold text-ink leading-tight">{data.restaurant}</p>
+                                {data.dish && <p className="text-[12px] text-muted-foreground mt-0.5 leading-snug">{data.dish}</p>}
+                                <div className="mt-2 flex items-center justify-between text-[12px]">
+                                  <div className="flex items-center gap-2">
+                                    {data.cost && <span className="font-semibold text-primary">{data.cost}</span>}
+                                    {typeof data.google_rating === 'number' && (
+                                      <span className="inline-flex items-center gap-0.5 font-semibold text-accent-strong">
+                                        <Star className="w-3 h-3 fill-current" aria-hidden="true" />
+                                        {data.google_rating.toFixed(1)}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {mapsUrl(data) && (
+                                    <a href={mapsUrl(data)!} target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">Maps</a>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Accommodation */}
+                      {day.accommodation?.name && (
+                        <div
+                          id={`day-${day.day}-accommodation`}
+                          className={[
+                            'rounded-xl border bg-muted/40 px-4 py-3 flex items-start justify-between gap-3 transition-colors',
+                            selectedPointId === `day-${day.day}-accommodation` ? 'border-primary ring-2 ring-primary/20' : 'border-border',
+                          ].join(' ')}
+                        >
+                          <div className="min-w-0">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground/80 mb-1">Hébergement</p>
+                            <p className="text-[14px] font-semibold text-ink leading-tight">{day.accommodation.name}</p>
+                            <p className="text-[12.5px] text-muted-foreground mt-0.5">
+                              {[day.accommodation.type, day.accommodation.cost].filter(Boolean).join(' · ')}
+                              {typeof day.accommodation.google_rating === 'number' && (
+                                <>
+                                  {(day.accommodation.type || day.accommodation.cost) ? ' · ' : ''}
+                                  <span className="inline-flex items-center gap-0.5 font-semibold text-accent-strong align-baseline">
+                                    <Star className="w-3 h-3 fill-current" aria-hidden="true" />
+                                    {day.accommodation.google_rating.toFixed(1)}
+                                  </span>
+                                </>
+                              )}
+                            </p>
+                          </div>
+                          {mapsUrl(day.accommodation) && (
+                            <a
+                              href={mapsUrl(day.accommodation)!}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="shrink-0 inline-flex items-center gap-1 text-[12px] font-medium text-primary hover:underline"
+                            >
+                              <MapPin className="w-3 h-3" aria-hidden="true" /> Google Maps
+                            </a>
+                          )}
+                        </div>
+                      )}
+
+                      {!hasContent && (
+                        <p className="text-[13px] text-muted-foreground italic text-center py-3">Aucune activité prévue pour ce jour.</p>
+                      )}
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
+            </Accordion>
+          ) : (
+            <div className="text-center py-8 text-[13px] text-muted-foreground">Aucun jour planifié.</div>
+          )}
+        </section>
 
         {/* Tips */}
         {selected_variant?.tips && selected_variant.tips.length > 0 && (
-          <div className="mt-10 bg-card rounded-2xl border border-border shadow-sm p-6">
-            <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
-              <Lightbulb className="w-4 h-4 text-accent" />
+          <section className="mt-8 rounded-2xl border border-border bg-card shadow-card-rest p-6">
+            <h3 className="flex items-center gap-2 text-[16px] font-bold text-ink mb-4">
+              <Lightbulb className="w-4 h-4 text-accent-strong" aria-hidden="true" />
               Conseils pour votre voyage
             </h3>
-            <ul className="space-y-3">
+            <ul className="space-y-2.5 list-none p-0 m-0">
               {selected_variant.tips.map((tip, i) => (
-                <li key={i} className="text-sm text-muted-foreground flex items-start gap-3">
-                  <span className="w-5 h-5 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-accent text-xs font-bold">{i + 1}</span>
-                  </span>
+                <li key={i} className="flex items-start gap-3 text-[14px] leading-relaxed text-foreground/75">
+                  <span className="shrink-0 w-3 h-[1.5px] bg-accent mt-[10px]" aria-hidden="true" />
                   {tip}
                 </li>
               ))}
             </ul>
-          </div>
+          </section>
         )}
 
-        {/* Upgrade CTA */}
+        {/* Upgrade CTA (express, no modifications left) */}
         {!canModify && itinerary.offer_type === 'express' && (
-          <div className="mt-8 bg-card rounded-2xl border border-border shadow-sm p-6 text-center">
-            <h3 className="font-bold text-foreground mb-2">Envie de personnaliser votre itineraire ?</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Passez en Premium ou Conciergerie pour beneficier de modifications.
+          <section className="mt-6 rounded-2xl border border-border bg-card shadow-card-rest p-6 text-center">
+            <h3 className="text-[16px] font-bold text-ink mb-2">Envie de personnaliser votre itinéraire ?</h3>
+            <p className="text-[14px] text-muted-foreground mb-4 max-w-[46ch] mx-auto">
+              Passez en Premium ou Conciergerie pour bénéficier de modifications.
             </p>
             <Button asChild size="lg">
               <Link href="/itineraire-personnalise-pour-les-philippines">
-                Voir les offres <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
+                Voir les offres <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>
-          </div>
+          </section>
         )}
       </div>
     </div>

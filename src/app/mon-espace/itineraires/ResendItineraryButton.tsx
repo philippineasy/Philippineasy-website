@@ -76,7 +76,7 @@ export function ResendItineraryButton({ generationId, email }: Props) {
       ) : error ? (
         <>{error}</>
       ) : (
-        <><Mail className="w-3.5 h-3.5" /> Renvoyer par email</>
+        <><Mail className="w-3.5 h-3.5" /> Renvoyer par e-mail</>
       )}
     </button>
   );

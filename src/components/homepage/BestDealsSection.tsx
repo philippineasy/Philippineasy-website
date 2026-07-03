@@ -176,13 +176,13 @@ export const BestDealsSection = (_props: BestDealsSectionProps) => {
                       >
                         {deal.tag}
                       </span>
-                      {/* Price overlay bottom-right */}
-                      <span className="absolute bottom-3 right-3 inline-flex items-center px-3 py-1.5 rounded bg-card text-accent text-[13px] font-bold shadow-md">
+                      {/* Price overlay bottom-right — text-accent-strong for AA contrast on bg-card (white) */}
+                      <span className="absolute bottom-3 right-3 inline-flex items-center px-3 py-1.5 rounded bg-card text-accent-strong text-[13px] font-bold shadow-md">
                         dès&nbsp;{source.priceFrom}&nbsp;€
                       </span>
                     </div>
 
-                    <div className="px-5 pt-5 pb-5 flex flex-col flex-1">
+                    <div className="px-5 pt-[18px] pb-5 flex flex-col flex-1">
                       <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground uppercase font-medium mb-2 tracking-[0.04em]">
                         <PinIcon />
                         {deal.location}
@@ -195,7 +195,7 @@ export const BestDealsSection = (_props: BestDealsSectionProps) => {
                       </h3>
                       <div className="flex items-baseline gap-2 mb-4">
                         <span
-                          className="text-accent font-bold text-[14px]"
+                          className="text-accent-strong font-bold text-[14px]"
                           aria-label={`Note ${source.rating} sur 5`}
                         >
                           ★ {source.rating}
@@ -209,7 +209,7 @@ export const BestDealsSection = (_props: BestDealsSectionProps) => {
                         target="_blank"
                         rel="sponsored noopener noreferrer"
                         onClick={() => handleClick(deal)}
-                        className="mt-auto w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-lg font-semibold text-sm transition-all duration-200 hover:bg-primary/90 hover:scale-[1.01] active:scale-[0.99] motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        className="mt-auto w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-card border border-border text-foreground rounded-lg font-semibold text-sm transition-all duration-200 hover:bg-accent hover:text-accent-foreground hover:border-accent hover:scale-[1.01] active:scale-[0.99] motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                       >
                         Réserver
                         <span

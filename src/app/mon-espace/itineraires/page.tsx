@@ -2,8 +2,8 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/server';
 import {
-  Map as MapIcon, Download, ExternalLink, Sparkles,
-  CheckCircle2, AlertCircle, Calendar,
+  Map as MapIcon, Download, ExternalLink,
+  CheckCircle2, AlertCircle,
 } from 'lucide-react';
 import { ResendItineraryButton } from './ResendItineraryButton';
 import {
@@ -19,10 +19,12 @@ const VARIANT_LABEL: Record<string, string> = {
   adventure: 'Aventure',
 };
 
-const VARIANT_TONE: Record<string, { bg: string; text: string; dot: string }> = {
-  relax: { bg: 'bg-sky-500/10', text: 'text-sky-700 dark:text-sky-400', dot: 'bg-sky-500' },
-  balanced: { bg: 'bg-emerald-500/10', text: 'text-emerald-700 dark:text-emerald-400', dot: 'bg-emerald-500' },
-  adventure: { bg: 'bg-amber-500/10', text: 'text-amber-700 dark:text-amber-400', dot: 'bg-amber-500' },
+// Tonal pastel pills, declined for dark mode.
+// balanced ≈ emerald-100/emerald-800 · adventure ≈ amber-100/amber-800.
+const VARIANT_TONE: Record<string, string> = {
+  relax: 'bg-sky-100 text-sky-800 dark:bg-sky-400/15 dark:text-sky-300',
+  balanced: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-400/15 dark:text-emerald-300',
+  adventure: 'bg-amber-100 text-amber-800 dark:bg-amber-400/15 dark:text-amber-300',
 };
 
 function formatDate(iso: string): string {
@@ -61,31 +63,49 @@ export default async function MonEspaceItinerairesPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <span className="block text-[11px] font-semibold uppercase tracking-[0.12em] text-accent mb-1">
-          Mes itinéraires
-        </span>
-        <h1 className="text-[clamp(1.5rem,3vw,2.25rem)] font-bold tracking-[-0.02em] leading-tight text-ink">
-          Vos voyages <span className="text-accent">sur-mesure</span>
-        </h1>
-        <p className="text-[14px] text-muted-foreground mt-1.5">
-          Tous les itinéraires que vous avez débloqués — téléchargez, faites-vous-les renvoyer ou demandez une modification.
-        </p>
+      {/* Header + breadcrumb */}
+      <div className="space-y-4">
+        <nav aria-label="Fil d'ariane" className="text-[12px] uppercase tracking-[0.12em]">
+          <ol className="flex items-center gap-2 list-none p-0 m-0">
+            <li>
+              <Link
+                href="/mon-espace"
+                className="font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded"
+              >
+                Mon espace
+              </Link>
+            </li>
+            <li aria-hidden="true" className="text-muted-foreground/50">/</li>
+            <li>
+              <span aria-current="page" className="font-semibold text-foreground">
+                Itinéraires
+              </span>
+            </li>
+          </ol>
+        </nav>
+
+        <div>
+          <h1 className="text-[clamp(1.625rem,3vw,2.25rem)] font-bold tracking-[-0.02em] leading-tight text-ink">
+            Vos voyages <span className="text-accent-strong">sur-mesure</span>
+          </h1>
+          <p className="text-[14.5px] text-muted-foreground mt-2 max-w-[62ch]">
+            Tous les itinéraires que vous avez débloqués — téléchargez, faites-vous-les renvoyer ou demandez une modification.
+          </p>
+        </div>
       </div>
 
       {/* KPI strip */}
       {totalPaid > 0 && (
-        <div className="grid grid-cols-3 gap-3">
-          <KPI label="Itinéraires débloqués" value={totalPaid} icon={<MapIcon className="w-4 h-4" />} accent="bg-primary/10 text-primary" />
-          <KPI label="Total dépensé" value={`${totalSpent.toFixed(2)}€`} icon={<Sparkles className="w-4 h-4" />} accent="bg-accent/15 text-accent" />
-          <KPI label="Modifications restantes" value={totalModRemaining} icon={<CheckCircle2 className="w-4 h-4" />} accent="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" />
+        <div className="grid grid-cols-3 gap-3 sm:gap-4">
+          <KPI label="Itinéraires débloqués" value={totalPaid} />
+          <KPI label="Total dépensé" value={formatPrice(totalSpent)} />
+          <KPI label="Modifications restantes" value={totalModRemaining} />
         </div>
       )}
 
       {/* List */}
       {gens && gens.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-[18px]">
           {gens.map((g: any) => {
             const prefs = g.preferences || {};
             const dur = (prefs.duration as Duration) || '1-week';
@@ -95,7 +115,6 @@ export default async function MonEspaceItinerairesPage() {
             const offerInfo = OFFER_LABELS[offer];
             const itineraries = Array.isArray(g.itineraries) ? g.itineraries : [];
             const selectedFull = itineraries.find((it: any) => it.variant === g.selected_variant);
-            const days = selectedFull?.full?.days || [];
             const hasMods = (g.modifications_remaining ?? 0) > 0;
 
             return (
@@ -104,102 +123,73 @@ export default async function MonEspaceItinerairesPage() {
                 className="rounded-2xl border border-border/60 bg-card shadow-card-rest overflow-hidden"
               >
                 {/* Header strip */}
-                <div className="px-5 py-4 border-b border-border/50 flex flex-wrap items-center gap-3 bg-muted/20">
+                <div className="px-[22px] py-3.5 border-b border-border/50 flex flex-wrap items-center gap-x-3 gap-y-1.5 bg-muted/40">
                   {variantLabel && variantTone && (
-                    <span className={['inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-[0.05em]', variantTone.bg, variantTone.text].join(' ')}>
-                      <span className={['w-1.5 h-1.5 rounded-full', variantTone.dot].join(' ')} />
+                    <span className={['inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-[0.06em]', variantTone].join(' ')}>
                       {variantLabel}
                     </span>
                   )}
-                  <span className="inline-flex items-center gap-1 text-[12px] text-muted-foreground">
-                    <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span className="text-[12.5px] text-muted-foreground">
                     Acheté le {formatDate(g.created_at)}
                   </span>
                   {g.delivered_at && (
-                    <span className="inline-flex items-center gap-1 text-[12px] text-emerald-700 dark:text-emerald-400">
+                    <span className="inline-flex items-center gap-1 text-[12.5px] font-medium text-emerald-800 dark:text-emerald-300">
                       <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
                       Livré
                     </span>
                   )}
-                  <span className="ml-auto text-[13px] font-bold tabular-nums text-ink">
+                  <span className="ml-auto text-[14px] font-bold tabular-nums text-ink">
                     {g.amount_paid ? formatPrice(Number(g.amount_paid)) : ''}
                   </span>
                 </div>
 
                 {/* Body */}
-                <div className="px-5 py-5 lg:px-6">
-                  <div className="flex flex-wrap items-baseline justify-between gap-2 mb-2">
+                <div className="p-[22px]">
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 mb-2">
                     <h2 className="text-[18px] font-bold text-ink leading-tight">
                       {selectedFull?.full?.title || selectedFull?.preview?.title || `Voyage ${variantLabel || ''}`}
                     </h2>
-                    <span className="text-[12px] text-muted-foreground font-medium">
+                    <span className="shrink-0 text-[12.5px] text-muted-foreground font-medium">
                       {DURATION_LABELS[dur]} · Formule {offerInfo?.name || offer}
                     </span>
                   </div>
 
                   {selectedFull?.full?.description && (
-                    <p className="text-[13.5px] text-muted-foreground leading-snug mb-4 line-clamp-2">
+                    <p className="text-[14px] text-muted-foreground leading-[1.6] line-clamp-3">
                       {selectedFull.full.description}
                     </p>
                   )}
 
-                  {/* Days teaser */}
-                  {days.length > 0 && (
-                    <div className="mb-4">
-                      <span className="block text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground mb-2">
-                        Aperçu du parcours
-                      </span>
-                      <ul className="space-y-1.5 list-none p-0">
-                        {days.slice(0, 4).map((d: any, i: number) => (
-                          <li key={i} className="flex items-baseline gap-2 text-[13px] text-foreground/90">
-                            <span className="shrink-0 w-12 text-[11px] font-bold uppercase tracking-[0.05em] text-accent tabular-nums">
-                              J{d.day}
-                            </span>
-                            <span className="truncate">
-                              <strong className="font-semibold">{d.location || d.title}</strong>
-                              {d.title && d.location && <span className="text-muted-foreground"> · {d.title}</span>}
-                            </span>
-                          </li>
-                        ))}
-                        {days.length > 4 && (
-                          <li className="text-[12px] text-muted-foreground italic pl-14">
-                            … et {days.length - 4} jour{days.length - 4 > 1 ? 's' : ''} de plus dans le PDF
-                          </li>
-                        )}
-                      </ul>
-                    </div>
-                  )}
-
                   {/* Actions */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-border/40">
+                  <div className="mt-5 pt-4 border-t border-border/40 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex flex-wrap gap-2">
                       <Link
                         href={`/itineraire/${g.id}`}
                         className="inline-flex items-center gap-1.5 rounded-full bg-accent text-accent-foreground px-4 py-2 text-[13px] font-semibold shadow-cta hover:bg-accent/90 hover:scale-[1.02] active:scale-[0.99] transition-transform motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
                       >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        Voir le détail (carte, photos, jours)
+                        <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+                        Voir le détail
                       </Link>
                       <a
                         href={`/api/itinerary/pdf/${g.id}`}
                         target="_blank"
                         rel="noopener"
-                        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card text-foreground px-4 py-2 text-[13px] font-medium hover:border-primary/40 hover:text-primary transition-colors"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card text-foreground px-4 py-2 text-[13px] font-medium hover:border-primary/40 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
                       >
-                        <Download className="w-3.5 h-3.5" />
-                        PDF
+                        <Download className="w-3.5 h-3.5" aria-hidden="true" />
+                        Télécharger le PDF
                       </a>
                       <ResendItineraryButton generationId={g.id} email={g.delivery_email} />
                       {hasMods && (
                         <span
-                          className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border/60 bg-muted/40 text-muted-foreground px-4 py-2 text-[12px] font-medium cursor-not-allowed"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border bg-muted/40 text-muted-foreground px-4 py-2 text-[12.5px] font-medium cursor-help"
                           title="Modifications via le support — bientôt accessible en self-service"
                         >
                           {g.modifications_remaining} modification{g.modifications_remaining > 1 ? 's' : ''} restante{g.modifications_remaining > 1 ? 's' : ''}
                         </span>
                       )}
                     </div>
-                    <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                    <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground/80">
                       ID #{g.id.slice(0, 8)}
                     </span>
                   </div>
@@ -226,21 +216,21 @@ export default async function MonEspaceItinerairesPage() {
         const resumeUrl = `/itineraire-personnalise-pour-les-philippines?resume_payment=${latest.id}&offer=${latest.offer_type || 'express'}&variant=${latest.selected_variant || 'balanced'}`;
 
         return (
-          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 px-5 py-4">
+          <div className="rounded-2xl border border-amber-300/70 bg-amber-50 dark:border-amber-500/30 dark:bg-amber-500/5 p-5">
             <div className="flex items-start gap-3">
-              <AlertCircle className="shrink-0 w-5 h-5 text-amber-700 dark:text-amber-400 mt-0.5" aria-hidden="true" />
+              <AlertCircle className="shrink-0 w-5 h-5 text-accent-strong mt-0.5" aria-hidden="true" />
               <div className="min-w-0 flex-1">
-                <strong className="block text-[14px] font-semibold text-ink mb-0.5">
+                <strong className="block text-[14px] font-semibold text-ink mb-1">
                   {pendingGens.length} génération{pendingGens.length > 1 ? 's' : ''} en attente de paiement
                 </strong>
-                <p className="text-[12.5px] text-muted-foreground leading-snug mb-2">
+                <p className="text-[13px] text-muted-foreground leading-relaxed mb-2.5">
                   Vous avez généré {pendingGens.length} itinéraire{pendingGens.length > 1 ? 's' : ''} sans le débloquer. Reprenez où vous en étiez.
                 </p>
                 <Link
                   href={resumeUrl}
-                  className="inline-flex items-center gap-1 text-[13px] font-semibold text-accent hover:text-accent/80 transition-colors"
+                  className="inline-flex items-center gap-1 text-[13px] font-semibold text-accent-strong transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded"
                 >
-                  Reprendre <ExternalLink className="w-3 h-3" />
+                  Reprendre <span aria-hidden="true">→</span>
                 </Link>
               </div>
             </div>
@@ -251,20 +241,15 @@ export default async function MonEspaceItinerairesPage() {
   );
 }
 
-function KPI({
-  label, value, icon, accent,
-}: {
-  label: string; value: React.ReactNode; icon: React.ReactNode; accent: string;
-}) {
+function KPI({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-border/60 bg-card shadow-card-rest px-4 py-3">
-      <div className="flex items-start justify-between gap-2 mb-1">
-        <span className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">{label}</span>
-        <span className={['shrink-0 w-7 h-7 rounded-lg flex items-center justify-center', accent].join(' ')} aria-hidden="true">
-          {icon}
-        </span>
-      </div>
-      <span className="block text-[20px] font-bold tabular-nums text-ink leading-tight">{value}</span>
+    <div className="rounded-2xl border border-border/60 bg-card shadow-card-rest px-5 py-[18px]">
+      <span className="block text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground mb-2">
+        {label}
+      </span>
+      <span className="block text-[24px] font-bold tabular-nums text-ink leading-none">
+        {value}
+      </span>
     </div>
   );
 }
@@ -292,4 +277,3 @@ function EmptyPaidState({ pendingCount }: { pendingCount: number }) {
     </div>
   );
 }
-

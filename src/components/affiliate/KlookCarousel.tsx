@@ -5,17 +5,42 @@ import Image from 'next/image'
 import Link from 'next/link'
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  faChevronLeft,
-  faChevronRight,
-  faStar,
-  faClock,
-  faArrowUpRightFromSquare,
-} from '@fortawesome/free-solid-svg-icons'
+import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons'
 import { trackCtaClicked } from '@/lib/analytics'
 import type { KlookActivity } from './klook-activities-data'
+
+// Friendly labels for the "lieu" pill — destination is a tracking slug
+// (e.g. "palawan"), not display copy.
+const DESTINATION_LABELS: Record<string, string> = {
+  palawan: 'Palawan',
+  cebu: 'Cebu & Visayas',
+  siargao: 'Siargao',
+  philippines: 'Philippines',
+}
+
+function destinationLabel(destination: string): string {
+  return DESTINATION_LABELS[destination] ?? destination
+}
+
+const PinIcon = () => (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    className="flex-shrink-0"
+  >
+    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+)
 
 interface KlookCarouselProps {
   activities: KlookActivity[]
@@ -107,6 +132,7 @@ export function KlookCarousel({
             >
               <ActivityCard
                 activity={activity}
+                destination={destination}
                 isActive={idx === selectedIndex}
                 onTrack={() => handleActivityClick(activity)}
               />
@@ -146,101 +172,82 @@ export function KlookCarousel({
 
 interface ActivityCardProps {
   activity: KlookActivity
+  destination: string
   isActive: boolean
   onTrack: () => void
 }
 
-function ActivityCard({ activity, isActive, onTrack }: ActivityCardProps) {
+function ActivityCard({ activity, destination, isActive, onTrack }: ActivityCardProps) {
   return (
     <motion.a
       href={activity.url}
       target="_blank"
       rel="sponsored noopener noreferrer"
       onClick={onTrack}
-      className="group block rounded-2xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-2xl transition-shadow duration-300"
+      className="group block rounded-2xl overflow-hidden bg-card border-[0.5px] border-border shadow-card-rest hover:shadow-card transition-shadow duration-300"
       animate={{
         scale: isActive ? 1 : 0.75,
         opacity: isActive ? 1 : 0.35,
         filter: isActive ? 'blur(0px)' : 'blur(1px)',
       }}
-      transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+      whileHover={{ y: -4 }}
+      transition={{
+        scale: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+        opacity: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+        filter: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] },
+        y: { duration: 0.2, ease: 'easeOut' },
+      }}
       style={{ pointerEvents: isActive ? 'auto' : 'none' }}
     >
-      {/* Image with overlay */}
-      <div className="relative aspect-[3/2] overflow-hidden bg-muted">
+      {/* Image */}
+      <div className="relative w-full h-[180px] overflow-hidden bg-muted">
         <Image
           src={activity.image}
           alt={activity.title}
           fill
           sizes="(max-width: 640px) 90vw, (max-width: 768px) 60vw, (max-width: 1024px) 48vw, 40vw"
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
+          className="object-cover transition-transform duration-500 group-hover:scale-[1.04] motion-reduce:group-hover:scale-100"
           priority={isActive}
         />
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
 
-        {/* Price badge */}
-        <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm rounded-full px-3 py-1 shadow-lg">
-          <span className="text-[10px] text-muted-foreground">Des</span>{' '}
-          <span className="text-sm font-bold text-foreground">{activity.priceFrom}€</span>
-        </div>
-
-        {/* Duration badge */}
-        <div className="absolute top-3 left-3 bg-black/50 backdrop-blur-sm rounded-full px-2.5 py-1 text-white text-[10px] font-medium flex items-center gap-1">
-          <FontAwesomeIcon icon={faClock} className="text-[9px]" />
-          {activity.duration}
-        </div>
-
-        {/* Title & subtitle over image */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-          <h4 className="text-base md:text-lg font-bold leading-tight mb-0.5 line-clamp-2">
-            {activity.title}
-          </h4>
-          <p className="text-xs text-white/90 line-clamp-1">{activity.subtitle}</p>
-        </div>
+        {/* Price pill bottom-right — text-accent-strong for AA contrast on bg-card (white) */}
+        <span className="absolute bottom-3 right-3 inline-flex items-center px-3 py-1.5 rounded bg-card text-accent-strong text-[13px] font-bold shadow-md">
+          dès&nbsp;{activity.priceFrom}&nbsp;€
+        </span>
       </div>
 
-      {/* Content below image */}
-      <div className="p-4 space-y-3">
-        {/* Rating */}
-        <div className="flex items-center gap-2 text-xs">
-          <div className="flex items-center gap-1 text-amber-500">
-            <FontAwesomeIcon icon={faStar} className="text-[11px]" />
-            <span className="font-semibold text-foreground">{activity.rating}</span>
-          </div>
-          <span className="text-muted-foreground">·</span>
-          <span className="text-muted-foreground">{activity.reviews}</span>
+      {/* Body */}
+      <div className="px-5 pt-[18px] pb-5">
+        <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground uppercase font-medium mb-2 tracking-[0.04em]">
+          <PinIcon />
+          {destinationLabel(destination)}
         </div>
-
-        {/* Highlights — show 2 for compactness */}
-        <ul className="space-y-1">
-          {activity.highlights.slice(0, 2).map((h) => (
-            <li key={h} className="flex items-start gap-2 text-xs text-muted-foreground">
-              <span className="mt-1 inline-block w-1 h-1 rounded-full bg-primary flex-shrink-0" />
-              <span className="line-clamp-1">{h}</span>
-            </li>
-          ))}
-        </ul>
-
-        {/* CTA */}
-        <div className="flex items-center justify-between pt-1">
-          <span className="inline-flex items-center gap-1.5 text-primary text-sm font-semibold group-hover:gap-2 transition-all">
-            Reserver sur Klook
-            <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px]" />
+        <h4
+          className="text-[16px] font-semibold text-foreground mb-2.5 leading-[1.35] line-clamp-2"
+          style={{ letterSpacing: '-0.01em' }}
+        >
+          {activity.title}
+        </h4>
+        <div className="flex items-baseline gap-2 mb-4">
+          <span
+            className="text-accent-strong font-bold text-[14px]"
+            aria-label={`Note ${activity.rating} sur 5`}
+          >
+            ★ {activity.rating}
           </span>
-          <AnimatePresence>
-            {isActive && (
-              <motion.span
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="text-[10px] text-green-700 dark:text-green-400 font-medium"
-              >
-                Annulation gratuite
-              </motion.span>
-            )}
-          </AnimatePresence>
+          <span className="text-[12px] text-muted-foreground">({activity.reviews})</span>
         </div>
+
+        {/* CTA — outline, full width; whole card is already the clickable link */}
+        <span className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-card border border-border text-foreground rounded-lg font-semibold text-sm transition-colors duration-200 group-hover:bg-accent group-hover:text-accent-foreground group-hover:border-accent">
+          Réserver
+          <span
+            aria-hidden="true"
+            className="transition-transform duration-200 group-hover:translate-x-0.5"
+          >
+            →
+          </span>
+        </span>
       </div>
     </motion.a>
   )
