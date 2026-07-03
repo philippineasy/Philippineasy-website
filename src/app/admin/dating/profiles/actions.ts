@@ -1,9 +1,11 @@
 'use server';
 
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
+import { requireAdmin } from '@/utils/auth/requireAdmin';
 import { revalidatePath } from 'next/cache';
 
 export async function validateProfile(userId: string, isValidated: boolean) {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
   const { error } = await supabase
     .from('dating_profiles')
@@ -19,6 +21,7 @@ export async function validateProfile(userId: string, isValidated: boolean) {
 }
 
 export async function grantPremium(userId: string, plan: 'premium' | 'free') {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
 
   // We write BOTH legacy column (premium_expires_at, read by admin/dating UI)

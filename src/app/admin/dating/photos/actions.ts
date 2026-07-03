@@ -1,9 +1,12 @@
 'use server';
 
 import { createClient } from '@/utils/supabase/server';
+import { createServiceRoleClient } from '@/utils/supabase/service-role';
+import { requireAdmin } from '@/utils/auth/requireAdmin';
 import { revalidatePath } from 'next/cache';
 
 export async function approvePhoto(photoId: number) {
+  await requireAdmin();
   const supabase = await createClient();
   
   // First, update the photo status to 'approved'
@@ -50,16 +53,20 @@ export async function approvePhoto(photoId: number) {
     }
   }
 
-  // Grant premium for women upon first photo approval
-  if (userDatingProfile && userDatingProfile.gender === 'Femme') {
-    const { data: mainProfile, error: mainProfileError } = await supabase
+  // Grant premium for women upon first photo approval.
+  // Genre stocké en minuscules ('femme') → comparaison insensible à la casse.
+  // Écriture d'une colonne sensible (plan) : via service_role (les UPDATE de
+  // colonnes sensibles de profiles sont révoqués au rôle authenticated).
+  if (userDatingProfile && userDatingProfile.gender?.toLowerCase() === 'femme') {
+    const admin = createServiceRoleClient();
+    const { data: mainProfile } = await admin
         .from('profiles')
         .select('plan')
         .eq('id', userId)
         .single();
 
     if (mainProfile && mainProfile.plan !== 'premium') {
-        const { error: premiumError } = await supabase
+        const { error: premiumError } = await admin
             .from('profiles')
             .update({ plan: 'premium' })
             .eq('id', userId);

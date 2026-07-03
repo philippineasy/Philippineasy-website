@@ -38,13 +38,9 @@ export async function POST(request: Request) {
     p_dating_intent: body.dating_intent,
   });
   
-  if (!error) {
-    // Also initialize the plan in the profiles table
-    await supabase
-      .from('profiles')
-      .update({ plan: 'free' })
-      .eq('id', user.id);
-  }
+  // Note : profiles.plan a déjà 'free' comme valeur par défaut — pas besoin de
+  // l'écrire ici (et le rôle authenticated n'a plus le droit d'écrire `plan`,
+  // colonne verrouillée contre l'auto-attribution de premium).
 
   if (error) {
     console.error('Error from upsert_dating_profile:', error);
