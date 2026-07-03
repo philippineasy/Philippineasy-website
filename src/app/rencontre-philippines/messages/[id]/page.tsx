@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import ChatClientPage from './ChatClientPage';
-import { getProfileById } from '@/services/userService';
+import { getProfileById, getDatingGateStatus } from '@/services/userService';
 
 export default async function MessagePage({
   params,
@@ -15,6 +15,14 @@ export default async function MessagePage({
 
   if (!user) {
     return notFound();
+  }
+
+  const gateStatus = await getDatingGateStatus(supabase, user.id);
+  if (gateStatus === 'no-profile') {
+    redirect('/rencontre-philippines/inscription');
+  }
+  if (gateStatus === 'pending') {
+    redirect('/rencontre-philippines/en-attente');
   }
 
   const [otherUserProfile, currentUserProfile] = await Promise.all([

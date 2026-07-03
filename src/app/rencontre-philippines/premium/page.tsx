@@ -1,6 +1,7 @@
 import { CheckCircle, Star, Heart, Ghost } from 'lucide-react';
 import Link from 'next/link';
 import { Metadata } from 'next';
+import { DATING_CONFIG } from '@/config/dating';
 
 export const metadata: Metadata = {
   title: 'Passez Premium - Rencontre Philippines',
@@ -57,14 +58,27 @@ const PLANS = [
   },
 ];
 
+// Chiffres lus depuis DATING_CONFIG (source unique de vérité, alignée sur les
+// triggers/fonctions Supabase) — aucune promesse ici qui ne soit pas tenue par le code.
+const FREE_MESSAGE_LIMIT = String(DATING_CONFIG.free_plan.daily_message_limit);
+const PREMIUM_MESSAGE_LIMIT =
+  DATING_CONFIG.premium_plan.daily_message_limit === -1
+    ? 'Illimités'
+    : String(DATING_CONFIG.premium_plan.daily_message_limit);
+const FREE_SUPER_LIKES =
+  DATING_CONFIG.free_plan.super_likes_per_day > 0
+    ? `${DATING_CONFIG.free_plan.super_likes_per_day} par jour`
+    : 'dash';
+const PREMIUM_SUPER_LIKES = `${DATING_CONFIG.premium_plan.super_likes_per_day} par jour`;
+
 const COMPARISON: { label: string; free: React.ReactNode; premium: React.ReactNode }[] = [
   { label: 'Inscription & Création de profil', free: 'check', premium: 'check' },
   { label: 'Recherche de profils', free: 'check', premium: 'check' },
-  { label: 'Messages par jour (hommes)', free: '2', premium: 'Illimités' },
+  { label: 'Messages par jour (hommes)', free: FREE_MESSAGE_LIMIT, premium: PREMIUM_MESSAGE_LIMIT },
   { label: 'Messages (femmes)', free: 'Illimités', premium: 'Illimités' },
   { label: 'Voir qui a aimé votre profil', free: 'dash', premium: 'check' },
-  { label: 'Super Likes', free: '1 par semaine', premium: '5 par jour' },
-  { label: 'Mise en avant du profil', free: 'dash', premium: 'check' },
+  { label: 'Super Likes', free: FREE_SUPER_LIKES, premium: PREMIUM_SUPER_LIKES },
+  { label: 'Visibilité accrue', free: 'dash', premium: 'check' },
   { label: 'Mode Incognito', free: 'dash', premium: 'check' },
 ];
 

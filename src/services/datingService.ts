@@ -142,36 +142,16 @@ export const checkExistingDatingProfile = async (userId: string) => {
   return !!data;
 };
 
-export const likeUser = async (toUserId: string, direction: string) => {
-  const response = await fetch('/api/dating/like', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ to_user_id: toUserId, direction }),
-  });
-  if (!response.ok) {
-    const { error } = await response.json();
-    throw new Error(error || 'Failed to like user');
-  }
-  return await response.json();
-};
+// Note: `likeUser`/`superLikeUser` used to live here but called routes that
+// never existed (/api/dating/like, /api/dating/super-like). The real like /
+// super-like flow goes through the server actions in
+// `rencontre-philippines/profil/actions.ts` (used by SwipeClientPage and
+// ProfileClientPage), so those dead functions were removed.
 
 export const getLikers = async () => {
   const response = await fetch('/api/dating/likes');
   if (!response.ok) {
     throw new Error('Failed to fetch likers');
-  }
-  return await response.json();
-};
-
-export const superLikeUser = async (toUserId: string) => {
-  const response = await fetch('/api/dating/super-like', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ to_user_id: toUserId }),
-  });
-  if (!response.ok) {
-    const { error } = await response.json();
-    throw new Error(error || 'Failed to send Super Like');
   }
   return await response.json();
 };

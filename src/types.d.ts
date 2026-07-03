@@ -159,6 +159,7 @@ export interface DatingProfile {
   profile_picture_url?: string;
   interests: Interest[];
   is_validated: boolean;
+  is_incognito?: boolean;
   charter_signed_at?: string; // ISO 8601 format
   message_daily_count: number;
   last_message_reset?: string; // ISO 8601 format

@@ -7,6 +7,7 @@ import { sendDatingPremiumConfirmation } from '@/emails/senders/lifecycle';
 import { sendItineraryReadyEmail } from '@/emails/senders/itinerary';
 import { getUserEmail } from '@/emails/send';
 import { trackServerPurchase } from '@/lib/ga4-server';
+import { DATING_PREMIUM_PLANS, type DatingPremiumPlan } from '@/config/services-pricing';
 
 // Helper : envoie l'email "Itineraire pret" avec lien + PDF.
 // Appele depuis le webhook pour garantir delivery meme si l'utilisateur ne
@@ -142,10 +143,34 @@ export async function POST(req: NextRequest) {
     // --- Dating subscription (legacy) ---
     else if (session.metadata?.userId && session.customer && session.subscription) {
       const userId = session.metadata.userId;
+
+      // Duree selon le plan achete (metadata posee par /api/dating/checkout). Defaut 30j
+      // (mensuel) si absente/inconnue — ex. anciennes sessions creees avant ce fix.
+      const rawPlan = session.metadata.plan;
+      const plan: DatingPremiumPlan =
+        rawPlan === 'trimester' || rawPlan === 'semester' || rawPlan === 'month' ? rawPlan : 'month';
+      const durationDays = DATING_PREMIUM_PLANS[plan].durationDays;
+
+      // Semantique d'extension identique a activateRencontrePremium() (services/activationService.ts) :
+      // base = MAX(now, expiration actuelle) + duree. Evite de faire perdre des jours restants
+      // si l'utilisateur re-souscrit avant expiration (upgrade de plan, resub apres echec carte, etc).
+      const { data: existingProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('rencontre_premium_expires_at')
+        .eq('id', userId)
+        .maybeSingle();
+
+      const currentExpiry = existingProfile?.rencontre_premium_expires_at as string | null | undefined;
+      const nowMs = Date.now();
+      const currentMs = currentExpiry ? new Date(currentExpiry).getTime() : 0;
+      const baseMs = Math.max(nowMs, currentMs);
+      const expiresAt = new Date(baseMs + durationDays * 24 * 60 * 60 * 1000).toISOString();
+
       const { error } = await supabaseAdmin
         .from('profiles')
         .update({
           plan: 'premium',
+          rencontre_premium_expires_at: expiresAt,
           stripe_customer_id: (session.customer as string),
           stripe_subscription_id: (session.subscription as string),
         })
@@ -355,6 +380,14 @@ export async function POST(req: NextRequest) {
 
         await activateService(supabaseAdmin, purchase.id);
         console.log(`Subscription renewed: ${purchase.service_type} for user ${purchase.user_id}`);
+      } else {
+        // Pas de service_purchases correspondant : peut-etre un abonnement dating "legacy"
+        // (cree via /api/dating/checkout, qui n'ecrit que profiles.stripe_subscription_id,
+        // jamais service_purchases). Sans ce fallback, Stripe continue a debiter le client
+        // chaque mois/trimestre/semestre mais rencontre_premium_expires_at n'est jamais
+        // etendu -> le cron dating-premium-expiry finirait par retrograder un client qui
+        // paie toujours. Cf. src/app/api/cron/dating-premium-expiry/route.ts.
+        await renewLegacyDatingPremium(supabaseAdmin, stripe, subscriptionId as string);
       }
     }
   }
@@ -386,6 +419,61 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ received: true });
+}
+
+// =====================================================
+// Handler: renouvellement d'un abonnement "Rencontre Premium" legacy
+// (cree via /api/dating/checkout, identifie par profiles.stripe_subscription_id —
+// pas de ligne service_purchases pour ce flux). Etend rencontre_premium_expires_at
+// avec la meme semantique que activateRencontrePremium() : MAX(now, expiration
+// actuelle) + duree du plan, pour ne jamais faire perdre de jours restants.
+// =====================================================
+async function renewLegacyDatingPremium(
+  supabaseAdmin: ReturnType<typeof getSupabaseAdmin>,
+  stripe: Stripe,
+  subscriptionId: string
+) {
+  const { data: profile } = await supabaseAdmin
+    .from('profiles')
+    .select('id, rencontre_premium_expires_at')
+    .eq('stripe_subscription_id', subscriptionId)
+    .maybeSingle();
+
+  if (!profile) {
+    // Ni un renouvellement CRM (service_purchases), ni un renouvellement dating legacy
+    // connu — abonnement d'un autre type ou deja resilie cote profiles. Rien a faire.
+    return;
+  }
+
+  let plan: DatingPremiumPlan = 'month';
+  try {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const metaPlan = subscription.metadata?.plan;
+    if (metaPlan === 'trimester' || metaPlan === 'semester' || metaPlan === 'month') {
+      plan = metaPlan;
+    }
+  } catch (err) {
+    console.error(`renewLegacyDatingPremium: failed to retrieve subscription ${subscriptionId}:`, err);
+  }
+
+  const durationDays = DATING_PREMIUM_PLANS[plan].durationDays;
+  const currentExpiry = profile.rencontre_premium_expires_at as string | null;
+  const nowMs = Date.now();
+  const currentMs = currentExpiry ? new Date(currentExpiry).getTime() : 0;
+  const baseMs = Math.max(nowMs, currentMs);
+  const expiresAt = new Date(baseMs + durationDays * 24 * 60 * 60 * 1000).toISOString();
+
+  const { error } = await supabaseAdmin
+    .from('profiles')
+    .update({ plan: 'premium', rencontre_premium_expires_at: expiresAt })
+    .eq('id', profile.id);
+
+  if (error) {
+    console.error(`renewLegacyDatingPremium: failed to update profile ${profile.id}:`, error);
+    return;
+  }
+
+  console.log(`Legacy dating premium renewed for user ${profile.id}, plan=${plan}, new expiry=${expiresAt}`);
 }
 
 // =====================================================

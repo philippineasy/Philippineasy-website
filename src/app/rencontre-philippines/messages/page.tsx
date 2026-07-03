@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import MessagesClientPage from './MessagesClientPage';
 import { Message } from '@/types';
+import { getDatingGateStatus } from '@/services/userService';
 
 export default async function MessagesPage() {
   const supabase = await createClient();
@@ -10,6 +11,14 @@ export default async function MessagesPage() {
 
   if (!user) {
     redirect('/connexion');
+  }
+
+  const gateStatus = await getDatingGateStatus(supabase, user.id);
+  if (gateStatus === 'no-profile') {
+    redirect('/rencontre-philippines/inscription');
+  }
+  if (gateStatus === 'pending') {
+    redirect('/rencontre-philippines/en-attente');
   }
 
   const { data: matchesWithLastMessage, error } = await supabase

@@ -9,11 +9,14 @@ import { Lock, Heart } from 'lucide-react';
 import { getLikers } from '@/services/datingService';
 
 interface LikerProfile {
-  user_id: string;
-  username: string;
-  age: number;
-  city: string;
-  profile_picture_url: string;
+  // Non-premium callers only ever receive `{ masked: true }` placeholders
+  // from the API (server-side gating) — every other field is then optional.
+  user_id?: string;
+  username?: string;
+  age?: number;
+  city?: string;
+  profile_picture_url?: string;
+  masked?: boolean;
 }
 
 // Signature gradients — same brand constants as MemberCard, cycled by index.
@@ -62,7 +65,11 @@ const LikesClientPage = () => {
   }
 
   const renderProfileCard = (profile: LikerProfile, index: number) => {
-    const canViewProfile = isPremium;
+    // Source of truth is the payload itself: the API only ever sends real
+    // fields to a premium caller, so `masked` is authoritative even if the
+    // client-side isPremium hook is momentarily stale.
+    const canViewProfile = isPremium && !profile.masked;
+    const cardKey = profile.user_id ?? `masked-${index}`;
     const gradient = MEMBER_GRADIENTS[index % MEMBER_GRADIENTS.length];
     const showPhoto = canViewProfile && Boolean(profile.profile_picture_url);
 
@@ -130,7 +137,7 @@ const LikesClientPage = () => {
     if (canViewProfile) {
       return (
         <Link
-          key={profile.user_id}
+          key={cardKey}
           href={`/rencontre-philippines/profil/${profile.user_id}`}
           className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
@@ -140,7 +147,7 @@ const LikesClientPage = () => {
     }
 
     return (
-      <div key={profile.user_id} className="group block">
+      <div key={cardKey} className="group block">
         {card}
       </div>
     );

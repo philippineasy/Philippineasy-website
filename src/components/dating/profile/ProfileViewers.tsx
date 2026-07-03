@@ -4,15 +4,18 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePremium } from '@/hooks/usePremium';
-import { supabase } from '@/utils/supabase/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faLock, faCrown } from '@fortawesome/free-solid-svg-icons';
 
 interface ViewerProfile {
-  id: string;
-  username: string;
-  age: number;
-  profile_picture_url: string;
+  // Non-premium callers only ever receive `{ masked: true }` placeholders
+  // from /api/dating/viewers (server-side gating) — every other field is
+  // then optional.
+  id?: string;
+  username?: string;
+  age?: number;
+  profile_picture_url?: string;
+  masked?: boolean;
 }
 
 const ProfileViewers = () => {
@@ -24,15 +27,21 @@ const ProfileViewers = () => {
   useEffect(() => {
     if (user) {
       const fetchViewers = async () => {
-        // Fetch the last 5 unique viewers
-        const { data, error } = await supabase.rpc('get_profile_viewers', { p_user_id: user.id, p_limit: 5 });
-
-        if (data) {
-          setViewers(data);
+        try {
+          const response = await fetch('/api/dating/viewers');
+          if (response.ok) {
+            const data = await response.json();
+            setViewers(data);
+          }
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setLoading(false);
         }
-        setLoading(false);
       };
       fetchViewers();
+    } else {
+      setLoading(false);
     }
   }, [user]);
 
@@ -59,32 +68,38 @@ const ProfileViewers = () => {
         Qui a vu mon profil ?
       </h2>
       <div className="space-y-3">
-        {viewers.map((viewer, index) => (
-          <Link 
-            key={viewer.id} 
-            href={isPremium ? `/rencontre/profil/${viewer.id}` : '/rencontre/premium'}
-            className="flex items-center space-x-4 p-2 rounded-lg hover:bg-muted"
-          >
-            <div className="relative">
-              <img 
-                src={viewer.profile_picture_url || '/default-avatar.webp'}
-                alt="Visiteur" 
-                className={`w-12 h-12 rounded-full object-cover ${!isPremium ? 'blur-sm' : ''}`}
-              />
-              {!isPremium && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-full">
-                  <FontAwesomeIcon icon={faLock} className="text-white" />
-                </div>
-              )}
-            </div>
-            <div className="flex-grow">
-              <p className={`font-bold ${!isPremium ? 'text-transparent bg-muted rounded-md' : 'text-foreground'}`}>
-                {isPremium ? `${viewer.username}, ${viewer.age}` : 'Utilisateur Premium'}
-              </p>
-              <p className="text-sm text-muted-foreground">A vu votre profil</p>
-            </div>
-          </Link>
-        ))}
+        {viewers.map((viewer, index) => {
+          // Source of truth is the payload itself: the API only ever sends
+          // real fields to a premium caller, so `masked` is authoritative
+          // even if the client-side isPremium hook is momentarily stale.
+          const canView = isPremium && !viewer.masked;
+          return (
+            <Link
+              key={viewer.id ?? `masked-${index}`}
+              href={canView ? `/rencontre-philippines/profil/${viewer.id}` : '/rencontre-philippines/premium'}
+              className="flex items-center space-x-4 p-2 rounded-lg hover:bg-muted"
+            >
+              <div className="relative">
+                <img
+                  src={(canView && viewer.profile_picture_url) || '/default-avatar.webp'}
+                  alt="Visiteur"
+                  className={`w-12 h-12 rounded-full object-cover ${!canView ? 'blur-sm' : ''}`}
+                />
+                {!canView && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-full">
+                    <FontAwesomeIcon icon={faLock} className="text-white" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-grow">
+                <p className={`font-bold ${!canView ? 'text-transparent bg-muted rounded-md' : 'text-foreground'}`}>
+                  {canView ? `${viewer.username}, ${viewer.age}` : 'Utilisateur Premium'}
+                </p>
+                <p className="text-sm text-muted-foreground">A vu votre profil</p>
+              </div>
+            </Link>
+          );
+        })}
       </div>
       {!isPremium && (
         <div className="mt-4 pt-4 border-t border-border text-center">

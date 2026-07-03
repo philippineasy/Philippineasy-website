@@ -22,6 +22,26 @@ export async function GET() {
       return NextResponse.json([]);
     }
 
+    // Server-side premium gate: only a premium caller may ever receive real
+    // liker identities. Same source of truth as usePremium() (profiles.plan).
+    const { data: callerProfile, error: planError } = await supabase
+      .from('profiles')
+      .select('plan')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (planError) throw planError;
+
+    const isPremium = callerProfile?.plan === 'premium';
+
+    if (!isPremium) {
+      // Non-premium: expose the COUNT only, via anonymous placeholders. No
+      // username/city/photo/age ever leaves the server for these callers —
+      // the blurred UI is now backed by masked data, not just CSS.
+      const maskedProfiles = userIds.map(() => ({ masked: true as const }));
+      return NextResponse.json(maskedProfiles);
+    }
+
     // Get the profiles of those users
     const { data: profiles, error: profilesError } = await supabase
       .from('dating_profiles')
@@ -29,7 +49,7 @@ export async function GET() {
       .in('user_id', userIds);
 
     if (profilesError) throw profilesError;
-    
+
     const formattedProfiles = profiles.map((p: any) => ({
         ...p,
         username: p.profiles?.username,

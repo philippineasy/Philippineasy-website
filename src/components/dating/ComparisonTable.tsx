@@ -1,6 +1,20 @@
 'use client';
 
 import { CheckCircle } from 'lucide-react';
+import { DATING_CONFIG } from '@/config/dating';
+
+// Chiffres lus depuis DATING_CONFIG (source unique de vérité, alignée sur les
+// triggers/fonctions Supabase) — aucune promesse ici qui ne soit pas tenue par le code.
+const FREE_MESSAGE_LIMIT = String(DATING_CONFIG.free_plan.daily_message_limit);
+const PREMIUM_MESSAGE_LIMIT =
+  DATING_CONFIG.premium_plan.daily_message_limit === -1
+    ? 'Illimités'
+    : String(DATING_CONFIG.premium_plan.daily_message_limit);
+const FREE_SUPER_LIKES =
+  DATING_CONFIG.free_plan.super_likes_per_day > 0
+    ? `${DATING_CONFIG.free_plan.super_likes_per_day} par jour`
+    : null;
+const PREMIUM_SUPER_LIKES = `${DATING_CONFIG.premium_plan.super_likes_per_day} par jour`;
 
 const ComparisonTable = () => {
   return (
@@ -29,8 +43,8 @@ const ComparisonTable = () => {
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">Messages par jour (hommes)</td>
-                <td className="px-6 py-4 text-center text-sm text-muted-foreground">2</td>
-                <td className="px-6 py-4 text-center bg-primary/10 text-sm font-semibold text-primary">Illimités</td>
+                <td className="px-6 py-4 text-center text-sm text-muted-foreground">{FREE_MESSAGE_LIMIT}</td>
+                <td className="px-6 py-4 text-center bg-primary/10 text-sm font-semibold text-primary">{PREMIUM_MESSAGE_LIMIT}</td>
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">Messages (femmes)</td>
@@ -44,11 +58,13 @@ const ComparisonTable = () => {
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">Super Likes</td>
-                <td className="px-6 py-4 text-center text-sm text-muted-foreground">1 par semaine</td>
-                <td className="px-6 py-4 text-center bg-primary/10 text-sm font-semibold text-primary">5 par jour</td>
+                <td className="px-6 py-4 text-center text-xl text-muted-foreground/60">
+                  {FREE_SUPER_LIKES ?? '-'}
+                </td>
+                <td className="px-6 py-4 text-center bg-primary/10 text-sm font-semibold text-primary">{PREMIUM_SUPER_LIKES}</td>
               </tr>
               <tr>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">Mise en avant du profil</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">Visibilité accrue</td>
                 <td className="px-6 py-4 text-center text-xl text-muted-foreground/60">-</td>
                 <td className="px-6 py-4 text-center bg-primary/10"><CheckCircle className="h-5 w-5 text-green-500 mx-auto" /></td>
               </tr>

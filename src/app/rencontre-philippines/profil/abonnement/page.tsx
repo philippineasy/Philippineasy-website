@@ -6,6 +6,7 @@ import { usePremium } from '@/hooks/usePremium';
 import { getSubscription, cancelSubscription } from '../actions';
 import toast from 'react-hot-toast';
 import ComparisonTable from '@/components/dating/ComparisonTable';
+import IncognitoToggle from '@/components/dating/IncognitoToggle';
 
 const AbonnementPage = () => {
   const { user } = useAuth();
@@ -110,6 +111,10 @@ const AbonnementPage = () => {
           <div className="mt-8 border-t border-border pt-8">
             <ComparisonTable />
           </div>
+        </div>
+
+        <div className="mt-6">
+          <IncognitoToggle />
         </div>
       </div>
     </div>

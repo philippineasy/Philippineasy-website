@@ -46,3 +46,30 @@ export const unbanUser = async (supabase: SupabaseClient, userId: string) => {
     }
     return { error };
 };
+
+export type DatingGateStatus = 'no-profile' | 'pending' | 'validated';
+
+/**
+ * Server-side gate for the dating area: distinguishes users without a
+ * `dating_profiles` row, users pending moderation, and validated members.
+ * Used to redirect swipe/messages/likes/profil pages that previously only
+ * checked for an authenticated session.
+ */
+export const getDatingGateStatus = async (
+  supabase: SupabaseClient,
+  userId: string
+): Promise<DatingGateStatus> => {
+  const { data, error } = await supabase
+    .from('dating_profiles')
+    .select('is_validated')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error checking dating profile gate status:', error);
+    return 'no-profile';
+  }
+
+  if (!data) return 'no-profile';
+  return data.is_validated ? 'validated' : 'pending';
+};

@@ -47,6 +47,14 @@ const ChatClientPage = ({ currentUser, otherUser }: ChatClientPageProps) => {
         console.error('Error fetching messages:', error);
       } else {
         setMessages(data as any);
+        // Marque comme lus les messages reçus de cet interlocuteur : purge le
+        // compteur de non-lus dès l'ouverture de la conversation.
+        const { error: markReadError } = await supabase.rpc('mark_conversation_as_read', {
+          p_other_user_id: otherUser.id,
+        });
+        if (markReadError) {
+          console.error('Error marking conversation as read:', markReadError);
+        }
       }
     };
 
@@ -61,6 +69,11 @@ const ChatClientPage = ({ currentUser, otherUser }: ChatClientPageProps) => {
           (newMessage.from_user_id === otherUser.id && newMessage.to_user_id === currentUser.id)
         ) {
           setMessages((prevMessages) => [...prevMessages, newMessage]);
+          if (newMessage.from_user_id === otherUser.id) {
+            supabase.rpc('mark_conversation_as_read', { p_other_user_id: otherUser.id }).then(({ error: err }) => {
+              if (err) console.error('Error marking new message as read:', err);
+            });
+          }
         }
       })
       .subscribe();

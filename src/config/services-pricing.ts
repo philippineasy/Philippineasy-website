@@ -65,6 +65,29 @@ export const EASY_PLUS_PRICING = {
   lifetime: { price: 499, priceId: 'price_1SzetuRxqcfmHXQYMQoa10Us', period: 'à vie' },
 } as const;
 
+// =====================================================
+// Rencontre Premium — plans par durée (legacy checkout `/api/dating/checkout?plan=...`)
+// Distinct de SERVICE_CHECKOUT_MAP.rencontre_premium (flux CRM plus récent, mensuel only).
+//
+// ACTION MANUELLE STRIPE REQUISE : à ce jour un SEUL Price existe sur le produit
+// "Rencontre Premium" (prod_Txa04zZwioxjnv) : price_1SzetvRxqcfmHXQYHVh9NIMU (19.99€/mois).
+// Les plans "trimester" et "semester" DEVRAIENT facturer 44.97€/3 mois (14.99€/mois) et
+// 59.94€/6 mois (9.99€/mois) respectivement — cf. tarifs affichés sur
+// /rencontre-philippines/premium — mais faute de Price Stripe dédiés, ils utilisent
+// temporairement le même Price mensuel : le montant réellement facturé reste 19.99€/mois
+// quel que soit le plan choisi tant que ces 2 Price ne sont pas créés dans Stripe.
+// TODO action manuelle (Stripe Dashboard ou API) sur prod_Txa04zZwioxjnv :
+//   - trimester : recurring price, unit_amount=4497 (44.97€), interval=month, interval_count=3
+//   - semester  : recurring price, unit_amount=5994 (59.94€), interval=month, interval_count=6
+// puis remplacer les priceId ci-dessous par les vrais IDs générés.
+export type DatingPremiumPlan = 'month' | 'trimester' | 'semester';
+
+export const DATING_PREMIUM_PLANS: Record<DatingPremiumPlan, { priceId: string; durationDays: number }> = {
+  month: { priceId: 'price_1SzetvRxqcfmHXQYHVh9NIMU', durationDays: 30 },
+  trimester: { priceId: 'price_1SzetvRxqcfmHXQYHVh9NIMU', durationDays: 90 }, // TODO: remplacer par le Price trimestriel dédié une fois créé
+  semester: { priceId: 'price_1SzetvRxqcfmHXQYHVh9NIMU', durationDays: 180 }, // TODO: remplacer par le Price semestriel dédié une fois créé
+};
+
 // Labels pour l'affichage
 export const SERVICE_DURATION_LABELS: Record<ServiceDuration, string> = {
   short: '3-5 jours',
