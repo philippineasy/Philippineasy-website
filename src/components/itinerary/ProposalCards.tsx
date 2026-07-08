@@ -64,7 +64,12 @@ export function ProposalCards({ previews, selectedVariant, recommendedVariant, o
               aria-checked={isSelected}
               tabIndex={0}
               onClick={() => onSelect(preview.variant)}
-              onKeyDown={(e) => e.key === 'Enter' && onSelect(preview.variant)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault(); // Espace ne doit pas scroller la page
+                  onSelect(preview.variant);
+                }
+              }}
               variants={fadeInUp}
               className="relative cursor-pointer overflow-hidden rounded-2xl bg-card transition-all duration-200 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               style={{
@@ -153,7 +158,7 @@ export function ProposalCards({ previews, selectedVariant, recommendedVariant, o
                     Aperçu
                   </p>
                   <div className="space-y-1.5">
-                    {preview.teaser_days?.map((day) => (
+                    {preview.teaser_days?.slice(0, 2).map((day) => (
                       <p key={day.day} className="text-[13px] leading-[1.5] text-muted-foreground">
                         <span className="font-semibold text-foreground">Jour {day.day} :</span> {day.summary}
                       </p>

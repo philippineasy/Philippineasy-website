@@ -5,6 +5,24 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Feature — Refonte du pipeline itinéraires IA « previews-first » (2026-07-08)
+
+**Génération rapatriée de n8n vers Next.js** : `POST /api/itinerary/generate` appelle désormais OpenAI en direct (GPT-4.1, JSON mode) via la nouvelle lib `src/lib/itinerary/` (contexte, prompts, parsing, Places, finalize). Fin de la dépendance au Mac local + tunnel Cloudflare (SPOF) et du webhook n8n public non authentifié.
+
+**Previews-first** : l'appel initial ne génère plus que les 3 aperçus (+ **jour 1 complet en échantillon** + **plan de route jour par jour**) en ~10-20 s au lieu de 3 itinéraires complets en 60-90 s (75 % du trafic est mobile, session moyenne 81 s ; 71 % des utilisateurs abandonnaient pendant/après l'attente). L'itinéraire complet du variant acheté est généré **après paiement** (`runFinalize`, ~1-2 min) : déclenché par le webhook Stripe (`after()`), en fallback par confirm-payment et la page completion, en dernier filet par le cron quotidien. Colonnes `finalize_status/finalize_error/finalize_started_at/finalized_at` (migration appliquée, rows payées legacy marquées `ready`).
+
+**Cohérence aperçu ↔ itinéraire garantie** (l'aperçu vendu est un contrat) : le prompt full reçoit la preview verbatim (titre, plan de route, jour 1, budget, highlights) ; vérifications déterministes (nombre de jours, plan de route ≤25 % de divergence, jour 1 fidèle, titre forcé) + juge LLM (gpt-4.1-mini) ; 1 relance corrective nourrie des divergences ; échec définitif si le nombre de jours ne correspond pas. Enrichissement Google Places (coordonnées, notes, liens Maps) déplacé AVANT livraison.
+
+**Funnel front** : previews + generation_id persistés en localStorage (7 j) avec bannière « Aperçu restauré » (un refresh ne perd plus rien) ; `beforeunload` pendant la génération ; timeout client 75 s ; étapes de progression réelles pendant l'attente ; **nouveau composant `SampleDayPreview`** (jour 1 en clair + jours verrouillés/floutés avec localités réelles) ; page completion avec **polling de finalisation** (étapes, retry, « vous pouvez fermer, l'email arrive ») ; `/itineraire/[id]` gère l'état 202 « en cours de rédaction » ; CTA completion passe `?welcome=true` (bannière 🎉 enfin déclenchée) ; clavier + rôles radio sur les cartes offres/variants.
+
+**PDF enrichi (Premium+)** : photo de destination pleine page en couverture (voile sombre), bandeau photo par jour (première activité), vignettes hôtels — jusqu'à ~37 photos Google Places chargées en parallèle ; lit `delivered_itinerary` (enrichi) en priorité.
+
+**Fixes** : boutons « Télécharger le PDF » masqués pour Express (`/itineraire/[id]` + mon-espace — ouvraient un JSON d'erreur 403) ; « modifications à partir de 4,99 € » corrigé en 9,99 € ; rate-limit paiement assoupli 2/semaine fail-closed → **5/24 h fail-open** (IP partagées bloquées, panne DB = 0 paiement possible) ; promesses de délai alignées (« instantané » → « quelques minutes ») ; l'email « Itinéraire prêt » part une seule fois (depuis finalize) au lieu de webhook + completion.
+
+**Dead code supprimé** : `IAOverlay` (40 KB monté sur toutes les pages, jamais ouvert) + `IAOverlayContext`, `ModificationModal`/`ModifyButton`/`DaySchedule`, routes `check-credits` et `[id]/modification` (la vraie modification passe par le CRM).
+
+⚠️ ACTION HUGO : poser `OPENAI_API_KEY` dans `.env.local` ET dans Vercel (Production). Après déploiement vérifié : désactiver les workflows n8n `Itinerary Generator V3`, `Itinerary Deliver V3 (Enriched)` et `Itinerary Deliver Premium` (webhooks publics, clé service_role en clair). `Itinerary Deliver V2` (Telegram) reste utilisé.
+
 ### Feature/Fix — Vague finale du backlog post-audit (2026-07-03)
 
 **Bandeau en direct — vol Amadeus + change** : le prix de vol « Paris → MNL » n'est plus codé en dur sous un badge « En direct ». Nouveau module `src/lib/flight-price.ts` : prix le moins cher réel via l'API officielle Amadeus (gratuite, cache 6 h ~4 appels/jour), affiché seulement si un vrai prix revient — sinon l'item est masqué (jamais de valeur figée). Le taux EUR→PHP était déjà live (frankfurter). ⚠️ ACTION HUGO : créer une clé gratuite sur developers.amadeus.com et poser `AMADEUS_API_KEY`/`AMADEUS_API_SECRET` dans Vercel pour activer l'item vol.

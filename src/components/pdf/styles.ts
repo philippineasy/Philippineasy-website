@@ -23,6 +23,9 @@ export const styles = StyleSheet.create({
     fontSize: 10,
     color: COLORS.foreground,
     backgroundColor: COLORS.white,
+    // Réserve la zone du footer fixe (position absolute bottom 20) — sans ça
+    // le contenu long passe SOUS le footer.
+    paddingBottom: 55,
   },
 
   // Cover
@@ -54,8 +57,11 @@ export const styles = StyleSheet.create({
   },
   coverMeta: {
     flexDirection: 'row',
-    gap: 20,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 10,
     marginBottom: 30,
+    maxWidth: 420,
   },
   coverMetaItem: {
     backgroundColor: 'rgba(255,255,255,0.15)',
@@ -86,8 +92,8 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: COLORS.primary,
     paddingHorizontal: 20,
-    paddingVertical: 12,
-    marginBottom: 16,
+    paddingVertical: 10,
+    marginBottom: 10,
     borderRadius: 6,
   },
   dayNumber: {
@@ -100,7 +106,6 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: 'Helvetica-Bold',
     color: COLORS.white,
-    flex: 1,
   },
   dayLocation: {
     fontSize: 10,
@@ -110,8 +115,8 @@ export const styles = StyleSheet.create({
   // Place item
   placeItem: {
     flexDirection: 'row',
-    marginBottom: 10,
-    paddingBottom: 10,
+    marginBottom: 7,
+    paddingBottom: 7,
     borderBottomWidth: 0.5,
     borderBottomColor: COLORS.border,
   },
@@ -261,7 +266,7 @@ export const styles = StyleSheet.create({
   // Content padding
   content: {
     paddingHorizontal: 30,
-    paddingTop: 20,
-    paddingBottom: 50,
+    paddingTop: 12,
+    paddingBottom: 10,
   },
 });

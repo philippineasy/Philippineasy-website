@@ -2,37 +2,66 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClientForRouteHandler } from '@/utils/supabase/server';
 import { renderToBuffer } from '@react-pdf/renderer';
 import { ItineraryPDF } from '@/components/pdf/ItineraryPDF';
+import { fetchPlacePhoto } from '@/lib/itinerary/places';
 import React from 'react';
 
-export const maxDuration = 60;
+export const maxDuration = 90;
 
-const PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
-const PLACES_API_BASE = 'https://places.googleapis.com/v1';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeMealForPdf(m: any) {
+  if (!m) return undefined;
+  if (typeof m === 'string') return { restaurant: m };
+  return {
+    restaurant: m.restaurant || m.name || '',
+    dish: m.dish || '',
+    cost: m.cost || '',
+    coordinates: m.coordinates || null,
+    google_maps_url: m.google_maps_url || null,
+    google_rating: m.google_rating || null,
+  };
+}
 
-async function fetchPlacePhoto(name: string, location?: string): Promise<string | null> {
-  if (!PLACES_API_KEY || !name) return null;
-  try {
-    const query = `${name} ${location || ''} Philippines`;
-    const searchRes = await fetch(`${PLACES_API_BASE}/places:searchText`, {
-      method: 'POST',
-      headers: {
-        'X-Goog-Api-Key': PLACES_API_KEY,
-        'X-Goog-FieldMask': 'places.photos',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ textQuery: query, maxResultCount: 1 }),
-    });
-    const searchData = await searchRes.json();
-    const photoName = searchData.places?.[0]?.photos?.[0]?.name;
-    if (!photoName) return null;
-
-    const mediaRes = await fetch(
-      `${PLACES_API_BASE}/${photoName}/media?maxWidthPx=400&skipHttpRedirect=true`,
-      { headers: { 'X-Goog-Api-Key': PLACES_API_KEY } }
-    );
-    const mediaData = await mediaRes.json();
-    return mediaData.photoUri || null;
-  } catch { return null; }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function buildPdfDays(rawDays: any[]) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (rawDays || []).map((d: any, i: number) => ({
+    day: d.day || i + 1,
+    title: d.title || `Jour ${d.day || i + 1}`,
+    location: d.location || '',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    activities: (d.activities || []).map((a: any) => {
+      if (typeof a === 'string') return { name: a };
+      return {
+        time: a.time,
+        name: a.name || '',
+        description: a.description || '',
+        cost: a.cost || '',
+        coordinates: a.coordinates || null,
+        google_maps_url: a.google_maps_url || null,
+        google_rating: a.google_rating || null,
+      };
+    }),
+    meals: {
+      breakfast: normalizeMealForPdf(d.meals?.breakfast),
+      lunch: normalizeMealForPdf(d.meals?.lunch),
+      dinner: normalizeMealForPdf(d.meals?.dinner),
+    },
+    accommodation: (() => {
+      const acc = d.accommodation;
+      if (!acc) return undefined;
+      if (typeof acc === 'string') return { name: acc };
+      return {
+        name: acc.name || '',
+        type: acc.type || '',
+        cost: acc.cost || '',
+        coordinates: acc.coordinates || null,
+        google_maps_url: acc.google_maps_url || null,
+        google_rating: acc.google_rating || null,
+      };
+    })(),
+    transport: d.transport || undefined,
+    photoUrl: null as string | null,
+  }));
 }
 
 export async function GET(
@@ -43,13 +72,11 @@ export async function GET(
     const { id } = await params;
     const supabase = await createClientForRouteHandler();
 
-    // Get user
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: 'Non authentifie' }, { status: 401 });
     }
 
-    // Get itinerary
     const { data: generation, error } = await supabase
       .from('itinerary_generations')
       .select('*')
@@ -70,122 +97,103 @@ export async function GET(
 
     // Le PDF est une feature Premium+ — Express n'y a pas droit
     // (cf. OFFER_LABELS dans src/config/itinerary-pricing.ts).
-    // Default sur 'express' si offer_type null pour etre conservateur.
     const generationOfferType = (generation.offer_type as string) || 'express';
     if (generationOfferType === 'express') {
       return NextResponse.json(
-        {
-          error: 'PDF reserve aux offres Premium et Conciergerie',
-          upgradeRequired: true,
-        },
+        { error: 'PDF reserve aux offres Premium et Conciergerie', upgradeRequired: true },
         { status: 403 }
       );
     }
 
-    // Parse itineraries
-    let itineraries = generation.itineraries;
-    if (typeof itineraries === 'string') itineraries = JSON.parse(itineraries);
-
-    // Find selected variant
-    const selectedVariant = generation.selected_variant;
-    const variant = itineraries.find((it: { variant: string }) => it.variant === selectedVariant)
-      || itineraries[0];
-
-    if (!variant) {
-      return NextResponse.json({ error: 'Variant non trouve' }, { status: 404 });
+    // ── Source du contenu : delivered_itinerary (finalisé + enrichi Places),
+    // fallback itineraries[].full pour les rows legacy.
+    let delivered = generation.delivered_itinerary;
+    if (typeof delivered === 'string') {
+      try { delivered = JSON.parse(delivered); } catch { delivered = null; }
     }
 
-    // Build itinerary data for PDF
-    const full = variant.full || variant;
-    const days = (full.days || []).map((d: any, i: number) => ({
-      day: d.day || i + 1,
-      title: d.title || `Jour ${d.day || i + 1}`,
-      location: d.location || '',
-      activities: (d.activities || []).map((a: any) => {
-        if (typeof a === 'string') return { name: a };
-        return {
-          time: a.time,
-          name: a.name || '',
-          description: a.description || '',
-          cost: a.cost || '',
-          coordinates: a.coordinates || null,
-          google_maps_url: a.google_maps_url || null,
-          google_rating: a.google_rating || null,
-        };
-      }),
-      meals: (() => {
-        const raw = d.meals || {};
-        const normalize = (m: any) => {
-          if (!m) return undefined;
-          if (typeof m === 'string') return { restaurant: m };
-          return {
-            restaurant: m.restaurant || m.name || '',
-            dish: m.dish || '',
-            cost: m.cost || '',
-            coordinates: m.coordinates || null,
-            google_maps_url: m.google_maps_url || null,
-            google_rating: m.google_rating || null,
-          };
-        };
-        return {
-          breakfast: normalize(raw.breakfast),
-          lunch: normalize(raw.lunch),
-          dinner: normalize(raw.dinner),
-        };
-      })(),
-      accommodation: (() => {
-        const acc = d.accommodation;
-        if (!acc) return undefined;
-        if (typeof acc === 'string') return { name: acc };
-        return {
-          name: acc.name || '',
-          type: acc.type || '',
-          cost: acc.cost || '',
-          coordinates: acc.coordinates || null,
-          google_maps_url: acc.google_maps_url || null,
-          google_rating: acc.google_rating || null,
-        };
-      })(),
-      transport: d.transport || undefined,
-    }));
+    let title: string, description: string, tips: string[], totalBudget: string, variantName: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let rawDays: any[];
 
-    // Enrich with Google Places photos — collect targets first, then fetch
-    // EN PARALLÈLE (max 15) pour éviter le timeout Vercel sur les longs itinéraires.
-    const MAX_PHOTOS = 15;
-    type PhotoTarget = { setUrl: (url: string | null) => void; name: string; location: string };
-    const targets: PhotoTarget[] = [];
-    for (const day of days) {
-      const location = day.location || '';
-      for (const act of (day.activities || [])) {
-        if (act.name) targets.push({ setUrl: (u) => { act.photoUrl = u; }, name: act.name, location });
+    if (delivered?.days?.length > 0) {
+      title = delivered.title || 'Votre itineraire Philippines';
+      description = delivered.description || '';
+      rawDays = delivered.days;
+      tips = delivered.tips || [];
+      totalBudget = typeof delivered.total_budget === 'string'
+        ? delivered.total_budget
+        : delivered.total_budget?.total || '';
+      variantName = delivered.name || generation.selected_variant || 'balanced';
+    } else {
+      let itineraries = generation.itineraries;
+      if (typeof itineraries === 'string') itineraries = JSON.parse(itineraries);
+      const variant = itineraries.find((it: { variant: string }) => it.variant === generation.selected_variant)
+        || itineraries[0];
+      if (!variant?.full?.days?.length) {
+        // Previews-first : le complet n'est pas encore généré
+        return NextResponse.json(
+          { error: 'Itineraire en cours de finalisation, reessayez dans une minute', generating: true },
+          { status: 409 }
+        );
       }
-      for (const mt of ['breakfast', 'lunch', 'dinner'] as const) {
-        const meal = day.meals?.[mt];
-        if (meal?.restaurant) targets.push({ setUrl: (u) => { meal.photoUrl = u; }, name: meal.restaurant, location });
-      }
-      if (day.accommodation?.name && day.accommodation.name !== 'N/A') {
-        const acc = day.accommodation;
-        targets.push({ setUrl: (u) => { acc.photoUrl = u; }, name: acc.name, location });
-      }
+      const full = variant.full;
+      title = variant.preview?.title || full.title || 'Votre itineraire Philippines';
+      description = variant.preview?.description || full.description || '';
+      rawDays = full.days;
+      tips = full.tips || [];
+      totalBudget = full.total_budget?.total || variant.preview?.budget_estimate || '';
+      variantName = variant.variant || generation.selected_variant || 'balanced';
     }
-    const limited = targets.slice(0, MAX_PHOTOS);
-    await Promise.all(
-      limited.map(async (t) => {
-        const url = await fetchPlacePhoto(t.name, t.location);
-        t.setUrl(url);
-      })
+
+    const days = buildPdfDays(rawDays);
+
+    // ── Photos (Google Places) — tout en parallèle pour tenir le timeout ─────
+    // 1 photo de couverture (destination principale, grande) + 1 bandeau par
+    // jour (première activité) + hôtels en vignette.
+    const photoJobs: Promise<void>[] = [];
+
+    let coverPhotoUrl: string | null = null;
+    const mainLocation = days[0]?.location || 'Palawan';
+    photoJobs.push(
+      fetchPlacePhoto(mainLocation, '', 1600).then((url) => { coverPhotoUrl = url; })
     );
 
+    const MAX_DAY_BANNERS = 24;
+    for (const day of days.slice(0, MAX_DAY_BANNERS)) {
+      const target = day.activities?.[0]?.name || day.location;
+      if (!target) continue;
+      photoJobs.push(
+        fetchPlacePhoto(target, day.location, 900).then((url) => { day.photoUrl = url; })
+      );
+    }
+
+    const MAX_PLACE_THUMBS = 12;
+    let thumbCount = 0;
+    for (const day of days) {
+      if (thumbCount >= MAX_PLACE_THUMBS) break;
+      const acc = day.accommodation;
+      if (acc?.name && acc.name !== 'N/A') {
+        thumbCount++;
+        photoJobs.push(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          fetchPlacePhoto(acc.name, day.location, 400).then((url) => { (acc as any).photoUrl = url; })
+        );
+      }
+    }
+
+    await Promise.all(photoJobs);
+
     const itineraryData = {
-      title: variant.preview?.title || full.title || 'Votre itineraire Philippines',
-      description: variant.preview?.description || full.description || '',
+      title,
+      description,
       days,
-      tips: full.tips || [],
-      total_budget: full.total_budget?.total || variant.preview?.budget_estimate || '',
-      variant: variant.variant || selectedVariant || 'balanced',
+      tips,
+      total_budget: totalBudget,
+      variant: variantName,
+      coverPhotoUrl,
     };
 
-    // Get user name
     const { data: profile } = await supabase
       .from('profiles')
       .select('username')
@@ -203,16 +211,16 @@ export async function GET(
     };
     const offerType = offerLabels[generation.offer_type] || generation.offer_type || '';
 
-    // Generate PDF
     const pdfElement = React.createElement(ItineraryPDF, {
       itinerary: itineraryData,
       userName,
       duration,
       offerType,
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const pdfBuffer = await renderToBuffer(pdfElement as any);
 
-    // Build filename
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const destinations = [...new Set(days.map((d: any) => d.location).filter(Boolean))].join('-') || 'philippines';
     const filename = `philippineasy-itineraire-${destinations.toLowerCase().replace(/\s+/g, '-')}.pdf`;
 

@@ -170,15 +170,18 @@ export default async function MonEspaceItinerairesPage() {
                         <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
                         Voir le détail
                       </Link>
-                      <a
-                        href={`/api/itinerary/pdf/${g.id}`}
-                        target="_blank"
-                        rel="noopener"
-                        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card text-foreground px-4 py-2 text-[13px] font-medium hover:border-primary/40 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
-                      >
-                        <Download className="w-3.5 h-3.5" aria-hidden="true" />
-                        Télécharger le PDF
-                      </a>
+                      {/* PDF = feature Premium+ : la route renvoie 403 pour Express */}
+                      {offer !== 'express' && (
+                        <a
+                          href={`/api/itinerary/pdf/${g.id}`}
+                          target="_blank"
+                          rel="noopener"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card text-foreground px-4 py-2 text-[13px] font-medium hover:border-primary/40 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                        >
+                          <Download className="w-3.5 h-3.5" aria-hidden="true" />
+                          Télécharger le PDF
+                        </a>
+                      )}
                       <ResendItineraryButton generationId={g.id} email={g.delivery_email} />
                       {hasMods && (
                         <Link

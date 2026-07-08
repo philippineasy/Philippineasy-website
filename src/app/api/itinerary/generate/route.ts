@@ -1,126 +1,99 @@
 import { NextResponse } from 'next/server';
 import { createClientForRouteHandler } from '@/utils/supabase/server';
+import { createServiceRoleClient } from '@/utils/supabase/service-role';
 import { trackServerEvent, extractClientId } from '@/lib/ga4-server';
+import { validatePreferences, buildTripContext, InvalidPreferencesError } from '@/lib/itinerary/context';
+import { callOpenAIJson, OpenAIError } from '@/lib/itinerary/openai';
+import { PREVIEW_SYSTEM, buildPreviewUserPrompt } from '@/lib/itinerary/prompts';
+import { parsePreviewResponse, GenerationParseError } from '@/lib/itinerary/normalize';
 
-// n8n GPT-4.1 + Supabase chain takes ~60-80s typically. Default Vercel Hobby
-// is 10s, Pro is 60s. Bump to 90s to comfortably accommodate the workflow.
-export const maxDuration = 90;
+// Previews-first (2026-07) : on ne génère plus que les 3 aperçus (+ jour 1
+// échantillon + plan de route) en un appel OpenAI court (~10-20s). L'itinéraire
+// complet du variant acheté est généré post-paiement (src/lib/itinerary/finalize.ts).
+// Avant : proxy n8n synchrone qui générait 3 itinéraires complets en 60-90s.
+export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
-const N8N_WEBHOOK_URL = process.env.N8N_ITINERARY_GENERATE_URL || 'https://n8n.adascanpro.com/webhook/itinerary-generate';
-const N8N_API_KEY = process.env.N8N_API_KEY;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    // Valider les champs requis
-    const requiredFields = ['travelType', 'duration', 'budget', 'tripStyle', 'interests'];
-    for (const field of requiredFields) {
-      if (!body[field]) {
-        return NextResponse.json(
-          { success: false, error: `Champ requis manquant: ${field}` },
-          { status: 400 }
-        );
+    let prefs;
+    try {
+      prefs = validatePreferences(body);
+    } catch (err) {
+      if (err instanceof InvalidPreferencesError) {
+        return NextResponse.json({ success: false, error: err.message }, { status: 400 });
       }
+      throw err;
     }
 
-    // Vérifier l'authentification (optionnelle — flux anonyme supporte avec ou sans email)
+    // Auth optionnelle — le flux anonyme fournit un email pour recovery/magic link
     const supabase = await createClientForRouteHandler();
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Email OPTIONNEL — capture si fournie (PreferencesForm landing page) pour recovery
-    // mais pas bloquant pour les autres entry points (IAOverlay popup depuis Header
-    // sans champ email). Validation regex simple si presente.
-    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const rawEmail = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
-    const submittedEmail = rawEmail && emailRe.test(rawEmail) ? rawEmail : '';
+    const submittedEmail = rawEmail && EMAIL_RE.test(rawEmail) ? rawEmail : '';
 
-    // Préparer les données pour n8n (workflow inchangé)
-    const n8nPayload = {
-      userId: user?.id || null,
-      travelType: body.travelType,
-      duration: body.duration,
-      budget: body.budget,
-      tripStyle: body.tripStyle,
-      interests: body.interests,
-      additionalInfo: body.additionalInfo || '',
-    };
-
-    // Appeler le webhook n8n
-    const n8nResponse = await fetch(N8N_WEBHOOK_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-N8N-API-Key': N8N_API_KEY || '',
-      },
-      body: JSON.stringify(n8nPayload),
-    });
-
-    const rawText = await n8nResponse.text();
-
-    if (!n8nResponse.ok) {
-      console.error('[itinerary/generate] upstream n8n non-200', n8nResponse.status, rawText);
-      return NextResponse.json(
-        { success: false, error: 'Le générateur IA est temporairement indisponible. Réessayez dans une minute.', upstream: n8nResponse.status },
-        { status: 502 }
-      );
-    }
-
-    if (!rawText || rawText.trim() === '') {
-      console.error('[itinerary/generate] upstream n8n returned empty body — workflow likely throwing before Respond node');
-      return NextResponse.json(
-        { success: false, error: 'Le générateur IA n\'a renvoyé aucun résultat. Vérifiez votre formulaire ou réessayez.' },
-        { status: 502 }
-      );
-    }
-
-    let result: any;
+    // ── Génération des previews (OpenAI direct) ──────────────────────────────
+    const ctx = buildTripContext(prefs);
+    let variants;
     try {
-      result = JSON.parse(rawText);
-    } catch (jsonErr) {
-      console.error('[itinerary/generate] upstream n8n returned invalid JSON', rawText.slice(0, 500));
-      return NextResponse.json(
-        { success: false, error: 'Réponse IA invalide. Réessayez.' },
-        { status: 502 }
-      );
-    }
-
-    if (!result.success) {
-      console.error('[itinerary/generate] workflow reported failure', result);
-      return NextResponse.json(
-        { success: false, error: result.error || 'Erreur inconnue côté IA' },
-        { status: 502 }
-      );
-    }
-
-    // Stocker delivery_email apres generation reussie (flux anonyme : recovery + magic link payment)
-    // n8n cree la row sans delivery_email -> on la met a jour cote Next.js pour eviter de toucher au workflow.
-    // Pour les users authentifies, on stocke aussi l'email saisi s'il differe de l'email du compte
-    // (cas oppose : user veut recevoir l'itineraire sur un email pro/perso different).
-    if (result.generation_id && submittedEmail) {
-      const { error: updateError } = await supabase
-        .from('itinerary_generations')
-        .update({ delivery_email: submittedEmail })
-        .eq('id', result.generation_id);
-      if (updateError) {
-        // Non-bloquant : l'utilisateur a son apercu, mais le recovery email ne marchera pas pour cette gen
-        console.error('[itinerary/generate] failed to store delivery_email', updateError);
+      const { data } = await callOpenAIJson<unknown>({
+        system: PREVIEW_SYSTEM,
+        user: buildPreviewUserPrompt(ctx),
+        temperature: 0.4,
+        maxTokens: 8000,
+        timeoutMs: 50_000,
+      });
+      variants = parsePreviewResponse(data, ctx.numberOfDays);
+    } catch (err) {
+      if (err instanceof OpenAIError || err instanceof GenerationParseError) {
+        console.error('[itinerary/generate] generation failed:', err.message);
+        return NextResponse.json(
+          { success: false, error: 'Le générateur IA est temporairement indisponible. Réessayez dans une minute.' },
+          { status: 502 }
+        );
       }
+      throw err;
     }
 
-    // Server-side GA4 tracking (bypass adblockers) — ia_itinerary_generated
+    // ── Persistance (service role : le flux anonyme n'a pas de session) ──────
+    const admin = createServiceRoleClient();
+    const { data: inserted, error: insertError } = await admin
+      .from('itinerary_generations')
+      .insert({
+        user_id: user?.id || null,
+        preferences: { ...prefs },
+        itineraries: variants,
+        status: 'generated',
+        ...(submittedEmail ? { delivery_email: submittedEmail } : {}),
+      })
+      .select('id')
+      .single();
+
+    if (insertError || !inserted) {
+      console.error('[itinerary/generate] insert failed:', insertError);
+      return NextResponse.json(
+        { success: false, error: 'Erreur lors de la sauvegarde. Réessayez.' },
+        { status: 500 }
+      );
+    }
+
+    // Server-side GA4 tracking (bypass adblockers)
     const clientId = extractClientId(request.headers.get('cookie'));
     trackServerEvent(
       clientId,
       {
         name: 'ia_itinerary_generated',
         params: {
-          generation_id: result.generation_id || '',
-          travel_type: body.travelType,
-          duration: body.duration,
-          budget: body.budget,
-          trip_style: body.tripStyle,
+          generation_id: inserted.id,
+          travel_type: prefs.travelType,
+          duration: prefs.duration,
+          budget: prefs.budget,
+          trip_style: prefs.tripStyle,
           authenticated: user ? 'yes' : 'no',
         },
       },
@@ -129,15 +102,13 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      generation_id: result.generation_id,
-      previews: result.previews,
-      meta: result.meta,
+      generation_id: inserted.id,
+      previews: variants.map((v) => ({ variant: v.variant, ...v.preview })),
     });
-
   } catch (error) {
     console.error('[itinerary/generate] unexpected error', error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Erreur serveur' },
+      { success: false, error: 'Erreur serveur' },
       { status: 500 }
     );
   }

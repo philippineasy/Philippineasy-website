@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMagic, faLock, faSpinner, faCompass, faEnvelope } from '@fortawesome/free-solid-svg-icons';
@@ -65,7 +65,33 @@ interface PreferencesFormProps {
 // Micro-label partagé par tous les champs — hiérarchie nette et cohérente.
 const fieldLabel = 'mb-1.5 block text-sm font-semibold text-foreground';
 
+// Étapes affichées pendant la génération (~10-20s depuis le passage en
+// previews-first). Les seuils suivent le déroulé réel de l'appel OpenAI.
+const LOADING_STAGES = [
+  { atSeconds: 0, label: 'Analyse de vos préférences…' },
+  { atSeconds: 5, label: 'Sélection des îles et des lieux adaptés…' },
+  { atSeconds: 11, label: 'Rédaction de vos 3 propositions…' },
+  { atSeconds: 20, label: 'Finalisation, encore quelques secondes…' },
+];
+
+function useLoadingStage(isLoading: boolean): string {
+  const [stage, setStage] = useState(LOADING_STAGES[0].label);
+  useEffect(() => {
+    if (!isLoading) return;
+    setStage(LOADING_STAGES[0].label);
+    const start = Date.now();
+    const interval = setInterval(() => {
+      const elapsed = (Date.now() - start) / 1000;
+      const current = [...LOADING_STAGES].reverse().find((s) => elapsed >= s.atSeconds);
+      if (current) setStage(current.label);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isLoading]);
+  return stage;
+}
+
 export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated, authLoading, defaultEmail }: PreferencesFormProps) {
+  const loadingStage = useLoadingStage(isLoading);
   const [travelType, setTravelType] = useState('');
   const [duration, setDuration] = useState<Duration | ''>('');
   const [budget, setBudget] = useState('');
@@ -247,10 +273,10 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
                     className="mt-6 space-y-3 rounded-2xl border border-primary/20 bg-primary/5 p-6 text-center"
                   >
                     <p className="text-base font-semibold text-foreground">
-                      Votre itineraire est en cours de creation...
+                      Création de vos 3 propositions…
                     </p>
-                    <p className="mx-auto max-w-md text-sm leading-relaxed text-muted-foreground">
-                      Nos experts IA analysent vos preferences et selectionnent les meilleurs lieux aux Philippines.
+                    <p aria-live="polite" className="mx-auto max-w-md text-sm leading-relaxed text-muted-foreground">
+                      {loadingStage}
                     </p>
 
                     {/* Animated progress dots */}
@@ -285,7 +311,7 @@ export function PreferencesForm({ onGenerate, isLoading, error, isAuthenticated,
                     </div>
 
                     <p className="pt-1 text-xs font-medium text-muted-foreground">
-                      Veuillez ne pas fermer cette page. Cela peut prendre jusqu&apos;a 1 minute.
+                      Environ 20 secondes — restez sur cette page.
                     </p>
                   </motion.div>
                 )}

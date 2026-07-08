@@ -34,9 +34,60 @@ function CompletionContent() {
   const [offerType, setOfferType] = useState<'express' | 'premium' | 'conciergerie' | null>(null);
   const hasPdfAccess = offerType === 'premium' || offerType === 'conciergerie';
 
+  // Previews-first : l'itinéraire COMPLET est généré après le paiement
+  // (1-3 min). On poll finalize_status jusqu'à ready/failed.
+  const [finalizeStatus, setFinalizeStatus] = useState<'pending' | 'ready' | 'failed' | 'timeout'>('pending');
+  const [finalizeElapsed, setFinalizeElapsed] = useState(0);
+
   useEffect(() => {
     if (user?.email) setEmail(user.email);
   }, [user]);
+
+  // ── Polling de la finalisation (démarre une fois le paiement confirmé) ────
+  useEffect(() => {
+    if (!paymentConfirmed || !generationId || finalizeStatus !== 'pending') return;
+
+    // Filet : déclenche la finalisation si le webhook ne l'a pas déjà fait.
+    // Idempotent côté serveur (claim atomique) — pas besoin d'attendre la réponse.
+    fetch('/api/itinerary/finalize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ generation_id: generationId }),
+    }).catch(() => { /* le polling + cron rattrapent */ });
+
+    const startedAt = Date.now();
+    const MAX_WAIT_MS = 5 * 60 * 1000;
+    const interval = setInterval(async () => {
+      setFinalizeElapsed(Math.round((Date.now() - startedAt) / 1000));
+      try {
+        const res = await fetch(`/api/itinerary/generation/${generationId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.finalize_status === 'ready') {
+            setFinalizeStatus('ready');
+            clearInterval(interval);
+            return;
+          }
+          if (data.finalize_status === 'failed') {
+            setFinalizeStatus('failed');
+            clearInterval(interval);
+            return;
+          }
+        }
+      } catch { /* erreur réseau transitoire : on continue de poller */ }
+      if (Date.now() - startedAt > MAX_WAIT_MS) {
+        setFinalizeStatus('timeout');
+        clearInterval(interval);
+      }
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [paymentConfirmed, generationId, finalizeStatus]);
+
+  const retryFinalize = () => {
+    setFinalizeStatus('pending');
+    setFinalizeElapsed(0);
+  };
 
   // Auto-confirm payment and set status to 'delivered' immediately
   useEffect(() => {
@@ -53,6 +104,8 @@ function CompletionContent() {
         if (data.success) {
           setPaymentConfirmed(true);
           if (data.offer_type) setOfferType(data.offer_type);
+          // L'aperçu persisté sur la landing n'a plus d'utilité une fois payé
+          try { localStorage.removeItem('phe_itinerary_previews_v1'); } catch { /* noop */ }
           const value = Number(data.amount) || 0;
           const currency = data.currency || 'EUR';
           trackPurchase({
@@ -181,6 +234,66 @@ function CompletionContent() {
     );
   }
 
+  // ── Paiement OK, itinéraire complet en cours de rédaction ──────────────────
+  if (finalizeStatus !== 'ready') {
+    const stageLabel = finalizeElapsed < 20
+      ? 'Rédaction de votre itinéraire jour par jour…'
+      : finalizeElapsed < 50
+        ? 'Vérification de la cohérence avec votre aperçu…'
+        : finalizeElapsed < 90
+          ? 'Ajout des liens Google Maps et des coordonnées…'
+          : 'Dernières finitions, merci de patienter…';
+
+    return (
+      <div className="container mx-auto max-w-2xl px-4 py-16">
+        <div className="rounded-2xl border border-border/60 bg-card p-8 text-center shadow-card">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[hsl(var(--success)/0.15)]">
+            <CheckCircle2 className="h-9 w-9 text-[hsl(var(--success))]" aria-hidden="true" />
+          </div>
+          <h1 className="mb-2 text-[clamp(1.5rem,3vw,2rem)] font-bold tracking-[-0.02em] text-ink">
+            Paiement confirmé !
+          </h1>
+
+          {finalizeStatus === 'pending' && (
+            <>
+              <p className="mb-1 text-muted-foreground">
+                Votre itinéraire complet est en cours de rédaction — comptez 1 à 2 minutes.
+              </p>
+              <p aria-live="polite" className="mb-6 text-[14px] font-medium text-primary">
+                {stageLabel}
+              </p>
+              <div className="flex items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />
+              </div>
+              <p className="mt-6 text-[13px] text-muted-foreground">
+                Vous pouvez fermer cette page : l&apos;itinéraire vous sera aussi envoyé par email dès qu&apos;il est prêt.
+              </p>
+            </>
+          )}
+
+          {(finalizeStatus === 'failed' || finalizeStatus === 'timeout') && (
+            <>
+              <p className="mb-6 text-muted-foreground">
+                {finalizeStatus === 'failed'
+                  ? 'La rédaction a rencontré un souci — relancez-la, votre paiement est bien enregistré.'
+                  : 'La rédaction prend plus de temps que prévu. Vous recevrez votre itinéraire par email dès qu\'il est prêt — ou relancez maintenant.'}
+              </p>
+              <button
+                onClick={retryFinalize}
+                className="inline-flex items-center gap-2 rounded-full bg-accent px-8 py-4 text-[16px] font-semibold text-accent-foreground shadow-cta transition-colors hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+              >
+                Relancer la rédaction
+              </button>
+              <p className="mt-4 text-[13px] text-muted-foreground">
+                Besoin d&apos;aide ? Répondez simplement à l&apos;email de confirmation de paiement.
+              </p>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto max-w-2xl px-4 py-16">
       {/* Main CTA: Itinerary is ready in profile */}
@@ -195,7 +308,7 @@ function CompletionContent() {
           Il est disponible dans votre espace personnel. Bon voyage aux Philippines !
         </p>
         <Link
-          href={`/itineraire/${generationId}`}
+          href={`/itineraire/${generationId}?welcome=true`}
           className="inline-flex items-center gap-2 rounded-full bg-accent px-8 py-4 text-[16px] font-semibold text-accent-foreground shadow-cta transition-colors hover:bg-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
         >
           Voir mon itinéraire

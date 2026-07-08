@@ -41,6 +41,8 @@ interface Day {
   meals?: { breakfast?: Meal; lunch?: Meal; dinner?: Meal };
   accommodation?: Accommodation;
   transport?: { method?: string; from?: string; to?: string; cost?: string; duration?: string };
+  /** Photo bandeau du jour (première activité, Google Places). */
+  photoUrl?: string | null;
 }
 
 interface ItineraryData {
@@ -50,6 +52,8 @@ interface ItineraryData {
   tips: string[];
   total_budget: string;
   variant: string;
+  /** Photo pleine page de la couverture (destination principale). */
+  coverPhotoUrl?: string | null;
 }
 
 interface PDFProps {
@@ -88,7 +92,8 @@ function PlacePhoto({ url }: { url?: string }) {
 
 function SectionLabel({ label, color }: { label: string; color: string }) {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 14, marginBottom: 8, paddingBottom: 4, borderBottomWidth: 1, borderBottomColor: color }}>
+    // minPresenceAhead : évite un titre de section orphelin en bas de page
+    <View minPresenceAhead={45} style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10, marginBottom: 6, paddingBottom: 4, borderBottomWidth: 1, borderBottomColor: color }}>
       <View style={{ width: 14, height: 14, borderRadius: 3, backgroundColor: color, marginRight: 6, justifyContent: 'center', alignItems: 'center' }}>
         <Text style={{ fontSize: 7, color: '#fff', fontFamily: 'Helvetica-Bold' }}>
           {label === 'Transport' ? 'T' : label === 'Programme' ? 'P' : label === 'Restaurants' ? 'R' : 'H'}
@@ -105,7 +110,8 @@ function PlaceItem({ label, name, description, time, cost, coordinates, googleMa
 }) {
   const mapLink = googleMapsUrl || mapsUrl(coordinates);
   return (
-    <View style={styles.placeItem}>
+    // wrap=false : un lieu ne doit jamais être coupé entre deux pages
+    <View wrap={false} style={styles.placeItem}>
       <PlacePhoto url={photoUrl} />
       <View style={styles.placeContent}>
         {label && <Text style={{ fontSize: 7, color: COLORS.muted, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 1 }}>{label}</Text>}
@@ -135,11 +141,32 @@ function PageFooter() {
 
 function CoverPage({ itinerary, userName, duration, offerType }: PDFProps) {
   const durationLabel = DURATION_MAP[duration] || `${itinerary.days.length} jours`;
-  const destinations = [...new Set(itinerary.days.map(d => d.location).filter(Boolean))].join(', ');
+  // Destinations principales dédupliquées ("El Nido (Nacpan)" → "El Nido")
+  const destinations = [...new Set(
+    itinerary.days.map(d => (d.location || '').split('(')[0].split('/')[0].trim()).filter(Boolean)
+  )].slice(0, 4).join(', ');
 
   return (
-    <Page size="A4" style={styles.page}>
-      <View style={styles.coverPage}>
+    // paddingBottom 0 : la couverture est pleine page (le padding footer du
+    // style global ferait déborder le contenu 100% sur une 2e page vide)
+    <Page size="A4" style={{ ...styles.page, paddingBottom: 0 }}>
+      {/* Photo de la destination en pleine page + voile sombre pour la lisibilité */}
+      {itinerary.coverPhotoUrl && (
+        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+          {/* eslint-disable-next-line jsx-a11y/alt-text -- @react-pdf/renderer Image has no alt prop */}
+          <Image src={itinerary.coverPhotoUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </View>
+      )}
+      <View
+        style={{
+          position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: itinerary.coverPhotoUrl ? 'rgba(13,27,52,0.62)' : COLORS.primary,
+        }}
+      />
+      <View style={{ ...styles.coverPage, backgroundColor: 'transparent' }}>
+        <Text style={{ fontSize: 10, color: 'rgba(255,255,255,0.85)', letterSpacing: 3, marginBottom: 18 }}>
+          PHILIPPINEASY
+        </Text>
         <Text style={styles.coverTitle}>{itinerary.title}</Text>
         <Text style={styles.coverSubtitle}>{itinerary.description}</Text>
         <View style={styles.coverDivider} />
@@ -157,7 +184,7 @@ function CoverPage({ itinerary, userName, duration, offerType }: PDFProps) {
           </View>
         </View>
         {userName && <Text style={styles.coverName}>Prepare pour {userName}</Text>}
-        <Text style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', marginTop: 40 }}>philippineasy.com</Text>
+        <Text style={{ fontSize: 9, color: 'rgba(255,255,255,0.6)', marginTop: 40 }}>philippineasy.com</Text>
       </View>
     </Page>
   );
@@ -176,6 +203,17 @@ function DayPage({ day }: { day: Day }) {
         </View>
       </View>
 
+      {/* Bandeau photo du jour (première activité) */}
+      {day.photoUrl && (
+        <View style={{ paddingHorizontal: 30 }}>
+          {/* eslint-disable-next-line jsx-a11y/alt-text -- @react-pdf/renderer Image has no alt prop */}
+          <Image
+            src={day.photoUrl}
+            style={{ width: '100%', height: 92, borderRadius: 8, objectFit: 'cover' }}
+          />
+        </View>
+      )}
+
       <View style={styles.content}>
         {/* Transport */}
         {day.transport?.method && (
@@ -183,7 +221,8 @@ function DayPage({ day }: { day: Day }) {
             <SectionLabel label="Transport" color={COLORS.primary} />
             <PlaceItem
               name={day.transport.method}
-              description={day.transport.from && day.transport.to ? `${day.transport.from} → ${day.transport.to}` : undefined}
+              // "→" absent de Helvetica WinAnsi (rendait une apostrophe) — en-dash
+              description={day.transport.from && day.transport.to ? `${day.transport.from} – ${day.transport.to}` : undefined}
               cost={day.transport.cost}
             />
           </>

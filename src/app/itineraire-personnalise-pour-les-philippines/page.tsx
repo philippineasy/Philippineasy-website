@@ -10,6 +10,7 @@ import { HowItWorks } from '@/components/itinerary/HowItWorks';
 import { PreferencesForm } from '@/components/itinerary/PreferencesForm';
 import { ProposalCards } from '@/components/itinerary/ProposalCards';
 import { OfferSelection } from '@/components/itinerary/OfferSelection';
+import { SampleDayPreview } from '@/components/itinerary/SampleDayPreview';
 import { PaymentAuthModal } from '@/components/itinerary/PaymentAuthModal';
 import { OfferConfirmationModal } from '@/components/itinerary/OfferConfirmationModal';
 import {
@@ -25,6 +26,51 @@ interface ItineraryPreview {
   budget_estimate: string;
   highlights: string[];
   teaser_days: { day: number; summary: string }[];
+  /** Jour 1 complet montré en clair (échantillon de qualité). */
+  sample_day?: {
+    day: number;
+    title?: string;
+    location?: string;
+    transport?: { method?: string; from?: string; to?: string; cost?: string; duration?: string };
+    activities?: { time?: string; name: string; description?: string; cost?: string }[];
+    meals?: {
+      breakfast?: { restaurant?: string; dish?: string; cost?: string };
+      lunch?: { restaurant?: string; dish?: string; cost?: string };
+      dinner?: { restaurant?: string; dish?: string; cost?: string };
+    };
+    accommodation?: { name?: string; type?: string; cost?: string };
+  };
+  /** Localité de chaque jour — affichée verrouillée avant achat. */
+  route_plan?: { day: number; location: string }[];
+}
+
+// Persistance de l'aperçu généré : un refresh/fermeture ne doit plus perdre
+// la génération (previews + generation_id vivaient uniquement en state React).
+const PREVIEWS_STORAGE_KEY = 'phe_itinerary_previews_v1';
+const PREVIEWS_TTL_MS = 7 * 24 * 60 * 60 * 1000; // aligné sur la fenêtre recovery
+
+interface StoredPreviews {
+  generationId: string;
+  previews: ItineraryPreview[];
+  duration: Duration;
+  tripStyle: string;
+  savedAt: number;
+}
+
+function loadStoredPreviews(): StoredPreviews | null {
+  try {
+    const raw = localStorage.getItem(PREVIEWS_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as StoredPreviews;
+    if (!parsed.generationId || !Array.isArray(parsed.previews) || parsed.previews.length === 0) return null;
+    if (Date.now() - (parsed.savedAt || 0) > PREVIEWS_TTL_MS) {
+      localStorage.removeItem(PREVIEWS_STORAGE_KEY);
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
 }
 
 // FAQ 100 % factuelle — tirée de src/config/itinerary-pricing.ts (offres,
@@ -37,7 +83,7 @@ const ITINERARY_FAQS = [
   },
   {
     q: 'En combien de temps je reçois mon itinéraire ?',
-    a: "Votre itinéraire est généré instantanément par notre IA et disponible dès la validation du paiement. Avec le Premium et la Conciergerie, cette base est ensuite affinée par notre équipe (retouches, support e-mail sous 48 h, et pour la Conciergerie un échange préalable).",
+    a: "L'aperçu gratuit est généré en une vingtaine de secondes. Après paiement, l'itinéraire complet est rédigé jour par jour, vérifié, puis livré en 1 à 2 minutes par e-mail et dans votre espace. Avec le Premium et la Conciergerie, cette base est ensuite affinée par notre équipe (retouches, support e-mail sous 48 h, et pour la Conciergerie un échange préalable).",
   },
   {
     q: 'Puis-je modifier mon itinéraire après réception ?',
@@ -45,7 +91,7 @@ const ITINERARY_FAQS = [
   },
   {
     q: 'Comment mon itinéraire est-il livré ?',
-    a: "Par e-mail, instantanément après le paiement sécurisé par Stripe. Les offres Premium et Conciergerie ajoutent un PDF professionnel téléchargeable ; la Conciergerie inclut en plus un contact direct sur WhatsApp.",
+    a: "Par e-mail, quelques minutes après le paiement sécurisé par Stripe, et dans votre espace personnel. Les offres Premium et Conciergerie ajoutent un PDF professionnel téléchargeable ; la Conciergerie inclut en plus un contact direct sur WhatsApp.",
   },
   {
     q: "Puis-je me rétracter après l'achat ?",
@@ -94,6 +140,36 @@ function ItineraireContent() {
   // PaymentAuthModal pour expliquer ce que l'utilisateur achete
   const [offerConfirmationModalOpen, setOfferConfirmationModalOpen] = useState(false);
 
+  // Vrai quand les previews affichés viennent du localStorage (session précédente)
+  const [restoredFromStorage, setRestoredFromStorage] = useState(false);
+
+  // ─── Reprise après refresh : restaure l'aperçu généré précédemment ─────────
+  useEffect(() => {
+    if (searchParams.get('resume_payment')) return; // le flow resume a priorité
+    const stored = loadStoredPreviews();
+    if (!stored) return;
+    setGenerationId(stored.generationId);
+    setPreviews(stored.previews);
+    setDuration(stored.duration);
+    const recommended = getRecommendedVariant(stored.tripStyle);
+    setRecommendedVariant(recommended);
+    setSelectedVariant(recommended);
+    setRestoredFromStorage(true);
+    setShowResult(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ─── Garde-fou : prévenir la fermeture pendant la génération ───────────────
+  useEffect(() => {
+    if (!isLoading) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [isLoading]);
+
   const handleGenerate = async (data: {
     travelType: string;
     duration: Duration;
@@ -116,11 +192,18 @@ function ItineraireContent() {
     }
 
     try {
+      // Timeout client : la génération previews prend ~10-20s, on coupe à 75s
+      // avec un message clair plutôt qu'un fetch qui pend indéfiniment.
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 75_000);
+
       const response = await fetch('/api/itinerary/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
 
       const result = await response.json();
 
@@ -130,17 +213,33 @@ function ItineraireContent() {
 
       setGenerationId(result.generation_id);
       setPreviews(result.previews);
+      setRestoredFromStorage(false);
 
       const recommended = getRecommendedVariant(data.tripStyle);
       setRecommendedVariant(recommended);
       setSelectedVariant(recommended);
       setShowResult(true);
 
+      try {
+        const stored: StoredPreviews = {
+          generationId: result.generation_id,
+          previews: result.previews,
+          duration: data.duration,
+          tripStyle: data.tripStyle,
+          savedAt: Date.now(),
+        };
+        localStorage.setItem(PREVIEWS_STORAGE_KEY, JSON.stringify(stored));
+      } catch { /* stockage plein/désactivé : non-bloquant */ }
+
       setTimeout(() => {
         document.getElementById('itinerary-result')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        setError('La génération prend plus de temps que prévu. Réessayez — vos préférences sont conservées.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -185,7 +284,7 @@ function ItineraireContent() {
         if (response.status === 429 || data.code === 'RATE_LIMIT_EXCEEDED') {
           throw new Error(
             data.message ||
-              'Vous avez atteint la limite de tentatives de paiement (2 par semaine). Reessayez plus tard ou contactez-nous.'
+              'Trop de tentatives de paiement depuis votre connexion. Reessayez plus tard ou contactez-nous.'
           );
         }
         throw new Error(data.error || 'Erreur lors du paiement');
@@ -464,12 +563,46 @@ function ItineraireContent() {
               transition={{ duration: 0.4 }}
               className="mt-10 max-w-4xl mx-auto"
             >
+              {restoredFromStorage && (
+                <div className="mb-6 flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
+                  <p className="text-[13px] text-foreground/80">
+                    <span className="font-semibold">Aperçu restauré</span> — voici les propositions de votre dernière visite.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      try { localStorage.removeItem(PREVIEWS_STORAGE_KEY); } catch { /* noop */ }
+                      setRestoredFromStorage(false);
+                      setShowResult(false);
+                      setPreviews([]);
+                      setGenerationId(null);
+                      document.getElementById('itinerary-form')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="shrink-0 text-[13px] font-semibold text-primary transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded"
+                  >
+                    Recommencer
+                  </button>
+                </div>
+              )}
+
               <ProposalCards
                 previews={previews}
                 selectedVariant={selectedVariant}
                 recommendedVariant={recommendedVariant}
                 onSelect={setSelectedVariant}
               />
+
+              {(() => {
+                const selected = previews.find((p) => p.variant === selectedVariant);
+                if (!selected?.sample_day) return null;
+                return (
+                  <SampleDayPreview
+                    variantTitle={selected.title}
+                    sampleDay={selected.sample_day}
+                    routePlan={selected.route_plan || []}
+                  />
+                );
+              })()}
 
               {selectedVariant && currentPricing && (
                 <OfferSelection

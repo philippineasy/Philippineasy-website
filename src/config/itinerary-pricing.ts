@@ -90,7 +90,7 @@ export const OFFER_LABELS: Record<OfferType, {
 }> = {
   express: {
     name: 'Express',
-    description: '100% IA - Livraison instantanée',
+    description: '100% IA - Livré en quelques minutes',
     features: [
       'Itinéraire complet jour par jour',
       'Hébergements recommandés',

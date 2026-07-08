@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
+import { after } from 'next/server';
 import Stripe from 'stripe';
 import { createClientForRouteHandler } from '@/utils/supabase/server';
+import { runFinalize } from '@/lib/itinerary/finalize';
+
+// after() peut porter la finalisation (génération du complet, 1-3 min) si le
+// webhook Stripe ne l'a pas déjà prise.
+export const maxDuration = 300;
 
 export async function POST(request: Request) {
   try {
@@ -78,13 +84,14 @@ export async function POST(request: Request) {
     }
 
     // UPDATE conditionnel pour empêcher le double-traitement (race entre 2 onglets)
+    // status 'paid' (pas 'delivered') : la livraison réelle est faite par
+    // runFinalize() une fois l'itinéraire complet généré.
     const { data: updated, error: updateError } = await supabase
       .from('itinerary_generations')
       .update({
         payment_status: 'completed',
         amount_paid: paymentIntent.amount / 100,
-        status: 'delivered',
-        delivered_at: new Date().toISOString(),
+        status: 'paid',
         updated_at: new Date().toISOString(),
       })
       .eq('id', generation_id)
@@ -98,6 +105,16 @@ export async function POST(request: Request) {
 
     const amount = paymentIntent.amount / 100;
     const currency = (paymentIntent.currency ?? 'eur').toUpperCase();
+
+    // Filet : si le webhook Stripe n'a pas (encore) déclenché la finalisation,
+    // on la lance ici. runFinalize est idempotent (claim atomique) — au pire
+    // ce call constate que le webhook a déjà la main et ne fait rien.
+    after(async () => {
+      const result = await runFinalize(generation_id);
+      if (result.status !== 'ready' && result.status !== 'generating') {
+        console.error(`[confirm-payment] finalize ${generation_id} -> ${result.status}${result.error ? `: ${result.error}` : ''}`);
+      }
+    });
 
     // Si rien n'a été mis à jour, c'est qu'un autre process a déjà completé entre-temps
     if (!updated || updated.length === 0) {

@@ -45,7 +45,7 @@ const microLabel: CSSProperties = {
 
 export function OfferSelection({ selectedOffer, onSelectOffer, currentPricing, duration, onPayment }: OfferSelectionProps) {
   return (
-    <div className="mt-10">
+    <div id="offer-selection" className="mt-10 scroll-mt-32">
       <h3 className="mb-2 text-center text-xl font-bold text-foreground">
         Choisissez votre formule
       </h3>
@@ -55,6 +55,8 @@ export function OfferSelection({ selectedOffer, onSelectOffer, currentPricing, d
 
       <motion.div
         className="grid grid-cols-1 gap-6 md:grid-cols-3"
+        role="radiogroup"
+        aria-label="Choix de la formule"
         variants={staggerContainer}
         initial="initial"
         animate="animate"
@@ -70,8 +72,17 @@ export function OfferSelection({ selectedOffer, onSelectOffer, currentPricing, d
             <motion.div
               key={offerKey}
               variants={fadeInUp}
+              role="radio"
+              aria-checked={isSelected}
+              tabIndex={0}
               onClick={() => onSelectOffer(offerKey)}
-              className="relative flex cursor-pointer flex-col overflow-hidden rounded-2xl bg-card transition-all duration-200 hover:-translate-y-1"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSelectOffer(offerKey);
+                }
+              }}
+              className="relative flex cursor-pointer flex-col overflow-hidden rounded-2xl bg-card transition-all duration-200 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               style={{
                 border: isSelected ? '1.5px solid hsl(var(--primary))' : '0.5px solid hsl(var(--border))',
                 boxShadow: isSelected ? '0 8px 24px hsl(var(--primary) / 0.18)' : '0 1px 2px rgba(0,0,0,0.04)',
@@ -210,7 +221,7 @@ export function OfferSelection({ selectedOffer, onSelectOffer, currentPricing, d
         </Button>
         <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
           <FontAwesomeIcon icon={faLock} className="text-[10px]" />
-          Paiement securise par Stripe • Livraison instantanee par email
+          Paiement securise par Stripe • Livraison par email en quelques minutes
         </p>
       </div>
     </div>

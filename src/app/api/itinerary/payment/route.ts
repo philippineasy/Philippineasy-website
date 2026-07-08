@@ -102,7 +102,11 @@ export async function POST(request: Request) {
     }
 
     // =====================================================
-    // RATE LIMITING PAR IP (2 tentatives/semaine)
+    // RATE LIMITING PAR IP (5 tentatives/24h)
+    // Assoupli le 2026-07-08 : 2/semaine fail-closed bloquait les IP partagées
+    // (hôtels, entreprises, CGNAT mobile) et une panne DB bloquait 100% des
+    // paiements. Créer un PaymentIntent est inoffensif tant qu'il n'est pas
+    // confirmé — le rate limit ne protège que du spam, pas d'une fraude.
     // =====================================================
     const clientIp = normalizeIp(await getClientIp());
     const isExempt = userId && EXEMPT_USER_ID && userId === EXEMPT_USER_ID;
@@ -110,19 +114,14 @@ export async function POST(request: Request) {
     if (!isExempt) {
       const supabaseAdmin = createServiceRoleClient();
 
-      // Vérifier le rate limit
       const { data: rateLimit, error: rateLimitError } = await supabaseAdmin
-        .rpc('check_ip_rate_limit', { p_ip_address: clientIp, p_limit: 2, p_window_days: 7 })
+        .rpc('check_ip_rate_limit', { p_ip_address: clientIp, p_limit: 5, p_window_days: 1 })
         .single() as { data: RateLimitResult | null; error: Error | null };
 
       if (rateLimitError) {
-        // Fail-CLOSED : si le check échoue, on refuse (sinon une panne DB
-        // permettrait de spammer les paiements de test sans limite).
-        console.error('Rate limit check error:', rateLimitError);
-        return NextResponse.json(
-          { error: 'Service temporairement indisponible, réessayez dans un instant.' },
-          { status: 503 }
-        );
+        // Fail-OPEN : une panne du check ne doit jamais empêcher un client
+        // de payer. On log pour surveiller.
+        console.error('Rate limit check error (fail-open):', rateLimitError);
       } else if (rateLimit && !rateLimit.allowed && rateLimit.reset_at) {
         const resetDate = new Date(rateLimit.reset_at).toLocaleDateString('fr-FR', {
           weekday: 'long',
@@ -133,7 +132,7 @@ export async function POST(request: Request) {
         });
         return NextResponse.json({
           error: 'Limite de tentatives atteinte',
-          message: `Vous avez atteint la limite de 2 tentatives de paiement test par semaine. Réessayez à partir du ${resetDate}.`,
+          message: `Trop de tentatives de paiement depuis votre connexion. Réessayez à partir du ${resetDate}, ou contactez-nous si vous pensez qu'il s'agit d'une erreur.`,
           code: 'RATE_LIMIT_EXCEEDED',
           reset_at: rateLimit.reset_at
         }, { status: 429 });

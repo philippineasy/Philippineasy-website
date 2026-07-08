@@ -37,7 +37,7 @@ export async function GET(
     const admin = createServiceRoleClient();
     const { data: gen, error } = await admin
       .from('itinerary_generations')
-      .select('id, user_id, delivery_email, offer_type, payment_status, status, preferences, selected_variant')
+      .select('id, user_id, delivery_email, offer_type, payment_status, status, preferences, selected_variant, finalize_status')
       .eq('id', id)
       .single();
 
@@ -78,6 +78,8 @@ export async function GET(
       offer_type: gen.offer_type,
       payment_status: gen.payment_status,
       status: gen.status,
+      // Polling post-paiement (page completion) : null|generating|ready|failed
+      finalize_status: gen.finalize_status,
       preferences: gen.preferences,
       selected_variant: gen.selected_variant,
     });

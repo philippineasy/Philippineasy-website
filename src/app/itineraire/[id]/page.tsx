@@ -107,24 +107,47 @@ export default function ItineraryPage({ params }: PageProps) {
     }
   }, [searchParams]);
 
+  // Previews-first : payé mais itinéraire complet encore en rédaction (202).
+  const [finalizing, setFinalizing] = useState(false);
+
   useEffect(() => {
+    let cancelled = false;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
+
     const fetchItinerary = async () => {
       if (!user) return;
       try {
         const response = await fetch(`/api/itinerary/${resolvedParams.id}`);
         const data = await response.json();
+        if (cancelled) return;
+
+        // 202 = paiement OK, génération du complet en cours → re-poll
+        if (response.status === 202) {
+          setFinalizing(true);
+          setLoading(false);
+          retryTimer = setTimeout(fetchItinerary, 5000);
+          return;
+        }
+
         if (!response.ok) throw new Error(data.error || 'Erreur lors du chargement');
+        setFinalizing(false);
         setItinerary(data.itinerary);
+        setLoading(false);
       } catch (err) {
+        if (cancelled) return;
         setError(err instanceof Error ? err.message : 'Une erreur est survenue');
-      } finally {
         setLoading(false);
       }
     };
+
     if (!authLoading) {
       if (!user) router.push('/connexion');
       else fetchItinerary();
     }
+    return () => {
+      cancelled = true;
+      if (retryTimer) clearTimeout(retryTimer);
+    };
   }, [user, authLoading, resolvedParams.id, router]);
 
   const mapPoints: MapPoint[] = itinerary?.selected_variant?.days?.flatMap((day) => {
@@ -152,6 +175,21 @@ export default function ItineraryPage({ params }: PageProps) {
       <div className="flex flex-col items-center justify-center min-h-[400px] pt-32">
         <Loader2 className="w-9 h-9 animate-spin text-primary mb-4" />
         <p className="text-[14px] text-muted-foreground">Chargement de l&apos;itinéraire…</p>
+      </div>
+    );
+  }
+
+  if (finalizing) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] pt-32 px-4 text-center">
+        <Loader2 className="w-9 h-9 animate-spin text-primary mb-4" />
+        <p className="text-[15px] font-semibold text-ink mb-1">
+          Votre itinéraire complet est en cours de rédaction
+        </p>
+        <p className="text-[13.5px] text-muted-foreground max-w-md">
+          Encore 1 à 2 minutes — cette page se mettra à jour automatiquement,
+          et vous recevrez aussi un email dès qu&apos;il est prêt.
+        </p>
       </div>
     );
   }
@@ -213,16 +251,20 @@ export default function ItineraryPage({ params }: PageProps) {
             <p className="text-[15px] font-bold text-ink truncate">{title}</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <a
-              href={`/api/itinerary/pdf/${itinerary.id}`}
-              target="_blank"
-              rel="noopener"
-              className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-[12px] font-medium text-foreground/80 hover:text-foreground hover:bg-muted/70 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            >
-              <Download className="w-3 h-3" aria-hidden="true" />
-              <span className="hidden sm:inline">Télécharger le PDF</span>
-              <span className="sm:hidden">PDF</span>
-            </a>
+            {/* PDF = feature Premium+ : la route renvoie 403 pour Express.
+                On n'affiche plus un bouton qui ouvre un onglet d'erreur JSON. */}
+            {itinerary.offer_type !== 'express' && (
+              <a
+                href={`/api/itinerary/pdf/${itinerary.id}`}
+                target="_blank"
+                rel="noopener"
+                className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-[12px] font-medium text-foreground/80 hover:text-foreground hover:bg-muted/70 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <Download className="w-3 h-3" aria-hidden="true" />
+                <span className="hidden sm:inline">Télécharger le PDF</span>
+                <span className="sm:hidden">PDF</span>
+              </a>
+            )}
             <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/[0.08] px-3 py-1.5 text-[12px]">
               <Pencil className="w-3 h-3 text-primary" aria-hidden="true" />
               {isUnlimited ? (

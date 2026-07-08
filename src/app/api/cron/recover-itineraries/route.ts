@@ -27,8 +27,11 @@ import {
   sendRecoveryEmail72h,
   sendRecoveryEmail7d,
 } from '@/emails/senders/itinerary-recovery';
+import { runFinalize } from '@/lib/itinerary/finalize';
 
 export const dynamic = 'force-dynamic';
+// Le sweep de finalisation peut générer des itinéraires complets (1-3 min chacun)
+export const maxDuration = 300;
 
 // ---------------------------------------------------------------------------
 // Duration label map (mirrors itinerary-pricing.ts DURATION_LABELS)
@@ -250,9 +253,40 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // FINALIZE SWEEP : dernier filet du pipeline previews-first. Un client a
+  // payé mais son itinéraire complet n'existe pas (webhook ET completion ont
+  // échoué : OpenAI down, function tuée…). runFinalize gère lui-même les
+  // claims (reprend aussi les 'generating' morts >15 min).
+  // ─────────────────────────────────────────────────────────────────────────
+  let finalized = 0;
+  let finalizeErrors = 0;
+  const { data: stuckRows } = await supabase
+    .from('itinerary_generations')
+    .select('id, finalize_status')
+    .eq('payment_status', 'completed')
+    .or('finalize_status.is.null,finalize_status.eq.failed,finalize_status.eq.generating')
+    .limit(5); // 5 max par tick — chaque finalisation peut prendre ~1 min
+
+  for (const row of stuckRows ?? []) {
+    try {
+      const result = await runFinalize(row.id);
+      if (result.status === 'ready') finalized++;
+      else if (result.status === 'failed') {
+        console.error(`[cron/recover-itineraries] finalize ${row.id} failed: ${result.error}`);
+        finalizeErrors++;
+      }
+    } catch (err) {
+      console.error(`[cron/recover-itineraries] finalize ${row.id} threw:`, err);
+      finalizeErrors++;
+    }
+  }
+
   return NextResponse.json({
     ok: true,
     timestamp: now.toISOString(),
     ...results,
+    finalized,
+    finalize_errors: finalizeErrors,
   });
 }

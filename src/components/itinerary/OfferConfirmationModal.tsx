@@ -44,7 +44,8 @@ interface OfferConfirmationModalProps {
 // "non inclus / inclus" qui faisait paraitre Express comme un produit ampute.
 const NOT_INCLUDED: Record<OfferType, string[]> = {
   express: [
-    'Modifications en option (à partir de 4,99€)',
+    // Prix aligné sur MODIFICATION_PRICES.simple (itinerary-pricing.ts)
+    'Modifications en option (à partir de 9,99€)',
     'Pas de suivi humain personnalisé',
   ],
   premium: [

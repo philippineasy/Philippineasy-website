@@ -12,7 +12,6 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { EditModeProvider } from '@/contexts/EditModeContext';
-import { IAOverlayProvider } from '@/contexts/IAOverlayContext';
 import ClientOverlays from '@/components/layout/ClientOverlays';
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
@@ -249,7 +248,6 @@ export default async function RootLayout({
         >
           <CartProvider>
             <EditModeProvider>
-              <IAOverlayProvider>
               <div className="fixed top-0 w-full z-50">
               <Header navLinks={navLinks} />
               <WeatherTicker />
@@ -262,7 +260,6 @@ export default async function RootLayout({
             <TawkToChat />
             <ClientOverlays />
             <Toaster position="bottom-right" />
-              </IAOverlayProvider>
             </EditModeProvider>
           </CartProvider>
         </AuthProvider>
