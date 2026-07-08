@@ -3,6 +3,7 @@
 import type { CSSProperties } from 'react';
 import { motion } from 'framer-motion';
 import { Clock, MapPin, Lock, BedDouble, UtensilsCrossed, Bus, ArrowDown } from 'lucide-react';
+import { PlacePhoto } from './PlacePhoto';
 
 interface SampleActivity {
   time?: string;
@@ -116,26 +117,32 @@ export function SampleDayPreview({ variantTitle, sampleDay, routePlan }: SampleD
             </div>
           )}
 
-          {/* Programme */}
+          {/* Programme — vraies photos Google Places : le lieu existe, on le montre */}
           {(sampleDay.activities?.length ?? 0) > 0 && (
             <div>
               <p className="mb-2" style={microLabel}>Programme</p>
               <ul className="space-y-3">
                 {sampleDay.activities!.map((act, idx) => (
-                  <li key={idx} className="flex items-start gap-2.5">
-                    <span className="mt-0.5 flex h-6 w-11 shrink-0 items-center justify-center gap-1 rounded-md bg-primary/10 text-[11px] font-semibold tabular-nums text-primary">
-                      <Clock className="h-2.5 w-2.5" aria-hidden="true" />
-                      {act.time || '—'}
-                    </span>
+                  <li key={idx} className="flex items-start gap-3">
+                    <PlacePhoto
+                      name={act.name}
+                      searchQuery={`${act.name} ${sampleDay.location || ''} Philippines`}
+                      className="h-14 w-14 shrink-0 rounded-xl"
+                      fallbackIcon={<MapPin className="h-4 w-4 text-muted-foreground/30" aria-hidden="true" />}
+                    />
                     <div className="min-w-0">
-                      <p className="text-[13.5px] font-medium leading-snug text-foreground">
+                      <p className="flex flex-wrap items-center gap-x-2 text-[13.5px] font-medium leading-snug text-foreground">
+                        <span className="inline-flex h-5 items-center gap-1 rounded-md bg-primary/10 px-1.5 text-[10.5px] font-semibold tabular-nums text-primary">
+                          <Clock className="h-2.5 w-2.5" aria-hidden="true" />
+                          {act.time || '—'}
+                        </span>
                         {act.name}
                         {act.cost && (
-                          <span className="ml-2 font-normal text-muted-foreground">{act.cost}</span>
+                          <span className="font-normal text-muted-foreground">{act.cost}</span>
                         )}
                       </p>
                       {act.description && (
-                        <p className="text-[12.5px] leading-relaxed text-muted-foreground">{act.description}</p>
+                        <p className="mt-0.5 text-[12.5px] leading-relaxed text-muted-foreground">{act.description}</p>
                       )}
                     </div>
                   </li>
@@ -171,9 +178,14 @@ export function SampleDayPreview({ variantTitle, sampleDay, routePlan }: SampleD
           {sampleDay.accommodation?.name && (
             <div>
               <p className="mb-2" style={microLabel}>Hébergement</p>
-              <div className="flex items-start gap-2.5 text-[13.5px] text-foreground/85">
-                <BedDouble className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-                <p>
+              <div className="flex items-start gap-3">
+                <PlacePhoto
+                  name={sampleDay.accommodation.name}
+                  searchQuery={`${sampleDay.accommodation.name} ${sampleDay.location || ''} Philippines`}
+                  className="h-14 w-14 shrink-0 rounded-xl"
+                  fallbackIcon={<BedDouble className="h-4 w-4 text-muted-foreground/30" aria-hidden="true" />}
+                />
+                <p className="pt-1 text-[13.5px] text-foreground/85">
                   <span className="font-medium">{sampleDay.accommodation.name}</span>
                   {sampleDay.accommodation.type && (
                     <span className="text-muted-foreground"> · {sampleDay.accommodation.type}</span>

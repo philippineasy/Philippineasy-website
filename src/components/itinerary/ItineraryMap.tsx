@@ -30,11 +30,12 @@ const MARKER_COLORS: Record<string, string> = {
   accommodation: '#16a34a', // vert
 };
 
-// Icone personnalisee pour les marqueurs
-const createCustomIcon = (type: string, index: number, isSelected: boolean) => {
+// Icone personnalisee pour les marqueurs — numérotée par JOUR (J1, J2…),
+// bien plus lisible qu'un index global 1→60 sur les longs itinéraires.
+const createCustomIcon = (type: string, day: number, isSelected: boolean) => {
   const color = MARKER_COLORS[type] || '#1e40af';
-  const size = isSelected ? 40 : 32;
-  const fontSize = isSelected ? 14 : 12;
+  const size = isSelected ? 40 : 30;
+  const fontSize = isSelected ? 12 : 10;
 
   return L.divIcon({
     className: 'custom-marker',
@@ -55,7 +56,7 @@ const createCustomIcon = (type: string, index: number, isSelected: boolean) => {
         transform: translate(-50%, -50%);
         ${isSelected ? 'transform: translate(-50%, -50%) scale(1.2);' : ''}
       ">
-        ${index + 1}
+        J${day}
       </div>
     `,
     iconSize: [size, size],
@@ -93,7 +94,9 @@ function MapContent({ points, selectedPointId, onPointClick, className }: Itiner
   }, [points]);
 
   useEffect(() => {
-    // Initialiser la carte
+    // Initialiser la carte UNE SEULE fois. L'ancienne version dépendait de
+    // `center` (référence recalculée à chaque render parent) : chaque clic sur
+    // un point détruisait et recréait la carte (flicker + zoom perdu).
     if (!mapRef.current) {
       const map = L.map('itinerary-map', {
         center: center,
@@ -116,7 +119,8 @@ function MapContent({ points, selectedPointId, onPointClick, className }: Itiner
         mapRef.current = null;
       }
     };
-  }, [center]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- init once, cleanup on unmount
+  }, []);
 
   // Mettre a jour les marqueurs
   useEffect(() => {
@@ -128,9 +132,9 @@ function MapContent({ points, selectedPointId, onPointClick, className }: Itiner
     markersRef.current = [];
 
     // Ajouter les nouveaux marqueurs
-    points.forEach((point, index) => {
+    points.forEach((point) => {
       const isSelected = point.id === selectedPointId;
-      const icon = createCustomIcon(point.type, index, isSelected);
+      const icon = createCustomIcon(point.type, point.day, isSelected);
 
       const marker = L.marker([point.coordinates.lat, point.coordinates.lng], { icon })
         .addTo(map)
@@ -150,10 +154,18 @@ function MapContent({ points, selectedPointId, onPointClick, className }: Itiner
       markersRef.current.push(marker);
     });
 
-    // Ajouter le trace (polyline)
-    if (points.length > 1) {
-      const coordinates = points.map((p) => [p.coordinates.lat, p.coordinates.lng] as L.LatLngTuple);
-      const polyline = L.polyline(coordinates, {
+    // Tracé du parcours : UN point représentatif par jour (le premier), sinon
+    // la ligne relie chaque resto/hôtel/activité et fait des zigzags illisibles.
+    const dayAnchors: L.LatLngTuple[] = [];
+    const seenDays = new Set<number>();
+    for (const p of points) {
+      if (!seenDays.has(p.day)) {
+        seenDays.add(p.day);
+        dayAnchors.push([p.coordinates.lat, p.coordinates.lng]);
+      }
+    }
+    if (dayAnchors.length > 1) {
+      const polyline = L.polyline(dayAnchors, {
         color: '#1e40af',
         weight: 3,
         opacity: 0.6,
@@ -164,11 +176,16 @@ function MapContent({ points, selectedPointId, onPointClick, className }: Itiner
       markersRef.current.push(polyline as unknown as L.Marker);
     }
 
-    // Ajuster la vue pour englober tous les points
-    if (bounds) {
+  }, [points, selectedPointId, onPointClick]);
+
+  // Recadrage global UNIQUEMENT quand les points changent — pas à chaque
+  // sélection (sinon fitBounds annule le setView de l'effet ci-dessous).
+  useEffect(() => {
+    const map = mapRef.current;
+    if (map && bounds) {
       map.fitBounds(bounds, { padding: [50, 50] });
     }
-  }, [points, selectedPointId, bounds, onPointClick]);
+  }, [bounds]);
 
   // Centrer sur le point selectionne
   useEffect(() => {

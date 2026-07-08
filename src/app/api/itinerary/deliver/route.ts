@@ -54,6 +54,24 @@ export async function POST(request: Request) {
       (it: { variant: string }) => it.variant === generation.selected_variant
     ) || itineraries[0];
 
+    // Source de vérité : delivered_itinerary (pipeline previews-first),
+    // fallback itineraries[].full pour les rows legacy.
+    const delivered = typeof generation.delivered_itinerary === 'string'
+      ? JSON.parse(generation.delivered_itinerary)
+      : generation.delivered_itinerary;
+    const days: { location?: string }[] = delivered?.days?.length
+      ? delivered.days
+      : (selectedVariant?.full?.days || []);
+
+    if (days.length === 0) {
+      // Payé mais finalisation pas encore terminée — l'email "prêt" partira
+      // automatiquement de runFinalize, inutile d'envoyer un email vide.
+      return NextResponse.json(
+        { error: 'Itineraire en cours de finalisation, reessayez dans une minute' },
+        { status: 409 }
+      );
+    }
+
     const errors: string[] = [];
 
     // Email: send directly via Resend (not n8n)
@@ -65,13 +83,14 @@ export async function POST(request: Request) {
           .eq('id', generation.user_id)
           .single();
 
-        const days = selectedVariant?.full?.days || [];
-        const destinations = [...new Set(days.map((d: { location?: string }) => d.location).filter(Boolean))].join(', ') || 'Philippines';
+        const destinations = [...new Set(
+          days.map((d) => (d.location || '').split('(')[0].split('/')[0].trim()).filter(Boolean)
+        )].join(', ') || 'Philippines';
 
         await sendItineraryEmail({
           to: email,
           userName: profile?.username || undefined,
-          itineraryTitle: selectedVariant?.preview?.title || selectedVariant?.full?.title || 'Votre itineraire',
+          itineraryTitle: delivered?.title || selectedVariant?.preview?.title || selectedVariant?.full?.title || 'Votre itineraire',
           destination: destinations,
           days: days.length,
           variant: generation.selected_variant || 'balanced',

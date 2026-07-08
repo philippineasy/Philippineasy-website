@@ -154,9 +154,9 @@ export default async function MonEspaceItinerairesPage() {
                     </span>
                   </div>
 
-                  {selectedFull?.full?.description && (
+                  {(selectedFull?.full?.description || selectedFull?.preview?.description) && (
                     <p className="text-[14px] text-muted-foreground leading-[1.6] line-clamp-3">
-                      {selectedFull.full.description}
+                      {selectedFull?.full?.description || selectedFull?.preview?.description}
                     </p>
                   )}
 

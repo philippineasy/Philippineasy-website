@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, use } from 'react';
+import { useEffect, useState, useCallback, useMemo, use } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -150,7 +150,9 @@ export default function ItineraryPage({ params }: PageProps) {
     };
   }, [user, authLoading, resolvedParams.id, router]);
 
-  const mapPoints: MapPoint[] = itinerary?.selected_variant?.days?.flatMap((day) => {
+  // Mémoïsé : sinon nouvelle référence à chaque render (clic sur un point,
+  // accordion…) → les effets de la carte se re-déclenchent en cascade.
+  const mapPoints: MapPoint[] = useMemo(() => itinerary?.selected_variant?.days?.flatMap((day) => {
     const points: MapPoint[] = [];
     day.activities?.forEach((activity, actIndex) => {
       if (activity.coordinates) points.push({ id: `day-${day.day}-act-${actIndex}`, name: activity.name, type: 'activity', coordinates: activity.coordinates, day: day.day, period: activity.time || `Activite ${actIndex + 1}` });
@@ -160,7 +162,7 @@ export default function ItineraryPage({ params }: PageProps) {
     if (day.meals?.dinner?.coordinates) points.push({ id: `day-${day.day}-dinner`, name: day.meals.dinner.restaurant || 'Diner', type: 'restaurant', coordinates: day.meals.dinner.coordinates, day: day.day, period: 'Diner' });
     if (day.accommodation?.coordinates) points.push({ id: `day-${day.day}-accommodation`, name: day.accommodation.name || 'Hebergement', type: 'accommodation', coordinates: day.accommodation.coordinates, day: day.day, period: 'Hebergement' });
     return points;
-  }) || [];
+  }) || [], [itinerary]);
 
   const handlePointClick = useCallback((pointId: string) => {
     setSelectedPointId(pointId);

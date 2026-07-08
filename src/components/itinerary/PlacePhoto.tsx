@@ -7,22 +7,26 @@ const photoCache = new Map<string, string | null>();
 interface PlacePhotoProps {
   coordinates?: { lat: number; lng: number };
   name?: string;
+  /** Requête de recherche si différente du nom affiché (ex: "Alona Beach Panglao Philippines"
+   * quand on n'a pas encore de coordonnées — cas des previews avant paiement). */
+  searchQuery?: string;
   className?: string;
   fallbackIcon?: React.ReactNode;
 }
 
-export function PlacePhoto({ coordinates, name, className = '', fallbackIcon }: PlacePhotoProps) {
+export function PlacePhoto({ coordinates, name, searchQuery, className = '', fallbackIcon }: PlacePhotoProps) {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
 
   useEffect(() => {
-    // Need at least coordinates OR name to search
-    if (!coordinates && !name) return;
+    const query = searchQuery || name;
+    // Need at least coordinates OR a query to search
+    if (!coordinates && !query) return;
 
     const cacheKey = coordinates
-      ? `${coordinates.lat},${coordinates.lng},${name || ''}`
-      : `name:${name}`;
+      ? `${coordinates.lat},${coordinates.lng},${query || ''}`
+      : `name:${query}`;
 
     if (photoCache.has(cacheKey)) {
       setPhotoUrl(photoCache.get(cacheKey) || null);
@@ -34,7 +38,7 @@ export function PlacePhoto({ coordinates, name, className = '', fallbackIcon }: 
       params.set('lat', String(coordinates.lat));
       params.set('lng', String(coordinates.lng));
     }
-    if (name) params.set('name', name);
+    if (query) params.set('name', query);
 
     fetch(`/api/places/photo?${params}`)
       .then(res => res.json())
@@ -45,7 +49,7 @@ export function PlacePhoto({ coordinates, name, className = '', fallbackIcon }: 
       .catch(() => {
         photoCache.set(cacheKey, null);
       });
-  }, [coordinates, name]);
+  }, [coordinates, name, searchQuery]);
 
   if (!photoUrl || errored) {
     if (fallbackIcon) {

@@ -5,6 +5,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fix/Polish — Post-achat itinéraires : carte, photos, caches (2026-07-08)
+
+**Carte `/itineraire/[id]` réparée** : la carte Leaflet était détruite/recréée à chaque clic sur un point (dépendance `center` instable → flicker + zoom perdu) — init unique désormais ; `mapPoints` mémoïsé côté page ; `fitBounds` séparé de la sélection (le recadrage n'annule plus le zoom sur un point) ; marqueurs numérotés par JOUR (J1, J2…) au lieu d'un index global 1→60 ; tracé du parcours = un point par jour (fini les zigzags entre chaque resto/hôtel).
+
+**Photos de lieux** : vraies photos Google Places ajoutées au jour 1 échantillon AVANT paiement (activités + hébergement, via `PlacePhoto` avec `searchQuery` nom+localité) — preuve visuelle que les lieux existent. Cache CDN Vercel sur `/api/places/photo` (s-maxage 24 h + SWR ; le cache mémoire ne survivait pas aux cold starts serverless).
+
+**Durcissements** : `/api/itinerary/deliver` lit `delivered_itinerary` en priorité et renvoie 409 si la finalisation n'est pas terminée (au lieu d'envoyer un email « 0 jours ») + destinations dédupliquées dans le sujet ; cartes mon-espace : fallback description depuis la preview pour les générations previews-first en attente ; hook mort `usePlacePhoto` supprimé.
+
 ### Feature — Refonte du pipeline itinéraires IA « previews-first » (2026-07-08)
 
 **Génération rapatriée de n8n vers Next.js** : `POST /api/itinerary/generate` appelle désormais OpenAI en direct (GPT-4.1, JSON mode) via la nouvelle lib `src/lib/itinerary/` (contexte, prompts, parsing, Places, finalize). Fin de la dépendance au Mac local + tunnel Cloudflare (SPOF) et du webhook n8n public non authentifié.

@@ -7,6 +7,13 @@ const PLACES_API_BASE = 'https://places.googleapis.com/v1';
 const photoCache = new Map<string, { url: string | null; expiry: number }>();
 const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
 
+// Cache CDN Vercel : le cache mémoire ne survit pas aux cold starts serverless.
+// 24h + SWR (les photoUri Google expirent au bout de quelques jours — ne pas
+// mettre s-maxage=7j sous peine de servir des URLs mortes).
+const CDN_CACHE_HEADERS = {
+  'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=43200',
+};
+
 async function getPhotoName(query: string, lat?: string, lng?: string): Promise<string | null> {
   if (!GOOGLE_PLACES_API_KEY) return null;
 
@@ -61,7 +68,7 @@ export async function GET(request: NextRequest) {
   const cacheKey = lat ? `${lat},${lng},${name || ''}` : `name:${name}`;
   const cached = photoCache.get(cacheKey);
   if (cached && cached.expiry > Date.now()) {
-    return NextResponse.json({ photoUrl: cached.url });
+    return NextResponse.json({ photoUrl: cached.url }, { headers: CDN_CACHE_HEADERS });
   }
 
   try {
@@ -102,7 +109,7 @@ export async function GET(request: NextRequest) {
 
     if (!photoName) {
       photoCache.set(cacheKey, { url: null, expiry: Date.now() + CACHE_TTL });
-      return NextResponse.json({ photoUrl: null });
+      return NextResponse.json({ photoUrl: null }, { headers: CDN_CACHE_HEADERS });
     }
 
     // Get photo URL
@@ -114,7 +121,7 @@ export async function GET(request: NextRequest) {
     const photoUrl = mediaData.photoUri || null;
     photoCache.set(cacheKey, { url: photoUrl, expiry: Date.now() + CACHE_TTL });
 
-    return NextResponse.json({ photoUrl });
+    return NextResponse.json({ photoUrl }, { headers: CDN_CACHE_HEADERS });
   } catch (error) {
     console.error('Google Places API error:', error);
     photoCache.set(cacheKey, { url: null, expiry: Date.now() + 60000 });
