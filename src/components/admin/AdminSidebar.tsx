@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Newspaper, Users, MessagesSquare, Heart,
   UserCog, Phone, BarChart3, Store, Tag, Image as ImageIcon, TrendingUp, Map,
+  MessageCircle,
 } from 'lucide-react';
 
 type NavItem = {
@@ -23,6 +24,7 @@ const GROUPS: NavGroup[] = [
   {
     items: [
       { href: '/admin', label: 'Tableau de bord', icon: LayoutDashboard },
+      { href: '/admin/chat', label: 'Chat visiteurs', icon: MessageCircle },
       { href: '/admin/articles', label: 'Articles', icon: Newspaper },
       { href: '/admin/users', label: 'Utilisateurs', icon: Users },
       { href: '/admin/forum', label: 'Forum', icon: MessagesSquare },

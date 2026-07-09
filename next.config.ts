@@ -278,18 +278,19 @@ const nextConfig: NextConfig = {
             // - object-src 'none' : bloque <object>/<embed> Flash legacy
             // - upgrade-insecure-requests : force HTTPS sur les sub-resources
             // 'unsafe-inline' + 'unsafe-eval' restent pour script-src tant que
-            // Tawk/GTM/Sentry inline-init ne sont pas migres vers nonces CSP
+            // GTM/Sentry inline-init ne sont pas migres vers nonces CSP
             // (pattern Next 15 mais necessite refacto + middleware nonce, non
             // shippe dans cette session pour eviter de casser les widgets).
+            // Tawk.to retire 2026-07-09 (remplace par le chat maison, zero host tiers).
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.tawk.to https://*.sentry.io https://cdn.jsdelivr.net https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://connect.facebook.net",
-              "style-src 'self' 'unsafe-inline' https://embed.tawk.to https://fonts.googleapis.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.sentry.io https://cdn.jsdelivr.net https://js.stripe.com https://www.googletagmanager.com https://www.google-analytics.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://connect.facebook.net",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob: https: https://www.facebook.com",
-              "font-src 'self' data: https://embed.tawk.to https://fonts.gstatic.com",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.sentry.io https://*.ingest.sentry.io wss://*.tawk.to https://*.tawk.to https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://region1.google-analytics.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://www.facebook.com https://connect.facebook.net https://maps.googleapis.com https://places.googleapis.com",
-              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://www.youtube.com https://youtube.com https://embed.tawk.to https://www.facebook.com",
+              "font-src 'self' data: https://fonts.gstatic.com",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.sentry.io https://*.ingest.sentry.io https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://region1.google-analytics.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://www.facebook.com https://connect.facebook.net https://maps.googleapis.com https://places.googleapis.com",
+              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://www.youtube.com https://youtube.com https://www.facebook.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self' https://hooks.stripe.com",

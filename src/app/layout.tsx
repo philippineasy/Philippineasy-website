@@ -7,7 +7,7 @@ import CookieBanner from "@/components/layout/CookieBanner";
 import WeatherTicker from "@/components/layout/WeatherTicker";
 import { createClient } from '@/utils/supabase/server';
 import { getCategoriesByMainCategory, getProductCategories } from "@/services/categoryService";
-import TawkToChat from "@/components/shared/TawkToChat";
+import ChatLauncher from "@/components/chat/ChatLauncher";
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
@@ -257,7 +257,7 @@ export default async function RootLayout({
             </main>
             <CookieBanner />
             <Footer />
-            <TawkToChat />
+            <ChatLauncher />
             <ClientOverlays />
             <Toaster position="bottom-right" />
             </EditModeProvider>

@@ -96,8 +96,8 @@ const ConfidentialitePage = () => {
 
               <h3 className="text-xl font-semibold text-primary/80 mt-6 mb-3">g. Support et chat en ligne</h3>
               <ul className="list-disc list-inside space-y-2 mt-2">
-                <li><strong>Données :</strong> contenu de vos demandes (formulaire de contact, e-mail, chat Tawk.to), adresse e-mail.</li>
-                <li><strong>Finalité :</strong> répondre à vos demandes et assurer le suivi de la relation client.</li>
+                <li><strong>Données :</strong> contenu de vos demandes (formulaire de contact, e-mail, chat du site), adresse e-mail si vous la renseignez.</li>
+                <li><strong>Finalité :</strong> répondre à vos demandes et assurer le suivi de la relation client. Les messages du chat sont hébergés sur notre propre base de données (Supabase, Union européenne) ; pour les questions générales, une réponse automatique peut être générée par un modèle d&rsquo;IA (OpenAI), le contenu de votre message étant alors transmis à ce prestataire pour traitement.</li>
                 <li><strong>Base légale :</strong> intérêt légitime (répondre aux sollicitations) et exécution du contrat pour les clients.</li>
               </ul>
 
@@ -161,7 +161,7 @@ const ConfidentialitePage = () => {
                 <li><strong>Resend</strong> (USA) — envoi des e-mails transactionnels et de la newsletter.</li>
                 <li><strong>Google</strong> (Google Ireland Ltd. / Google LLC, USA) — mesure d&rsquo;audience (Google Analytics 4) et gestion des e-mails (Gmail).</li>
                 <li><strong>Meta Platforms</strong> (Meta Platforms Ireland Ltd. / Meta Platforms Inc., USA) — mesure publicitaire (Meta Pixel), uniquement si vous y consentez.</li>
-                <li><strong>Tawk.to</strong> (USA) — chat de support en ligne.</li>
+                <li><strong>OpenAI</strong> (OpenAI Ireland Ltd. / OpenAI LLC, USA) — génération des réponses automatiques du chat de support et des itinéraires personnalisés.</li>
                 <li><strong>Sentry</strong> (Functional Software Inc., USA) — supervision technique et suivi des erreurs.</li>
               </ul>
               <p>
@@ -173,7 +173,7 @@ const ConfidentialitePage = () => {
             <section>
               <h2 className="text-2xl font-semibold text-primary/90 mb-4">6. Transferts hors Union européenne</h2>
               <p>
-                Certains de nos sous-traitants (notamment Vercel, Stripe, Google, Meta, Resend, Tawk.to et Sentry)
+                Certains de nos sous-traitants (notamment Vercel, Stripe, Google, Meta, Resend, OpenAI et Sentry)
                 sont établis aux États-Unis ou sont susceptibles d&rsquo;y transférer des données. Ces transferts sont
                 encadrés par des garanties appropriées au sens des articles 44 et suivants du RGPD : clauses
                 contractuelles types adoptées par la Commission européenne et, pour les prestataires certifiés,

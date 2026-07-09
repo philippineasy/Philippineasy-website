@@ -5,6 +5,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Feature — Chat maison (remplacement Tawk.to) (2026-07-09)
+
+**Widget de chat 100 % maison, zéro script/iframe tiers** : Tawk.to (script externe + iframe qui pénalisait les Core Web Vitals et échappait à notre contrôle) est remplacé par `ChatLauncher` (bulle ~2 Ko dans le bundle commun) + `ChatPanel` chargé en dynamic import au premier clic. Aucun host tiers ajouté à la CSP — les entrées tawk.to (script/style/font/connect/frame-src) sont retirées.
+
+**Parcours par catégories** : Aide & questions, Nos offres, Remboursement, Partenariat, Contacter Hugo. Les catégories informationnelles reçoivent une **réponse IA instantanée** (gpt-4.1-mini, JSON mode via la lib OpenAI itinéraires, base de connaissances générée depuis `services-pricing.ts`/`itinerary-pricing.ts` — aucun prix inventé, garde-fous needs_human) ; les catégories sensibles partent en relay direct avec accusé de réception.
+
+**Visiteurs anonymes + reprise de conversation** : clé anonyme (localStorage) → un non-connecté peut écrire et **retrouve son fil en revenant sur le site** (badge non-lu via un unique fetch idle) ; conversation liée au compte si connecté (retrouvée cross-device) ; email optionnel pour être recontacté.
+
+**Notifications & réponses** : chaque message visiteur notifie Hugo par **Telegram** (bot existant) et **email** (Resend, throttle 10 min/conversation). Réponse possible depuis **/admin/chat** (nouvelle inbox : filtres ouvertes/clôturées, non-lus, fil temps réel par polling, clôture/réouverture — entrée sidebar « Chat visiteurs ») ou **directement depuis Telegram** via « Répondre » sur la notification (webhook `/api/telegram/webhook`, secret dérivé sha256 du bot token, fail-closed, mapping `chat_telegram_notifications`).
+
+**Données** : tables `chat_conversations`/`chat_messages`/`chat_telegram_notifications` (migrations appliquées), RLS activé **sans policies** — accès uniquement via API routes service_role (send/poll visiteur avec vérification de propriété par clé+compte, rate-limit 8 msg/5 min/IP ; routes admin gardées par rôle). Page `/confidentialite` mise à jour (Tawk.to retiré des sous-traitants, OpenAI ajouté, section chat réécrite).
+
+⚠️ ACTION HUGO : après déploiement, activer le webhook Telegram (commande setWebhook fournie par Claude — vérifier d'abord qu'aucun autre process ne fait de getUpdates avec CE bot). Aucune nouvelle variable d'environnement requise.
+
 ### Fix/Polish — Post-achat itinéraires : carte, photos, caches (2026-07-08)
 
 **Carte `/itineraire/[id]` réparée** : la carte Leaflet était détruite/recréée à chaque clic sur un point (dépendance `center` instable → flicker + zoom perdu) — init unique désormais ; `mapPoints` mémoïsé côté page ; `fitBounds` séparé de la sélection (le recadrage n'annule plus le zoom sur un point) ; marqueurs numérotés par JOUR (J1, J2…) au lieu d'un index global 1→60 ; tracé du parcours = un point par jour (fini les zigzags entre chaque resto/hôtel).
