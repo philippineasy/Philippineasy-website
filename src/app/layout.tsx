@@ -31,9 +31,10 @@ const siteConfig = {
   title: `Voyage & Expatriation Philippines ${new Date().getFullYear()} | Guide Complet - Philippin'Easy`,
   url: "https://philippineasy.com",
   description: "Le guide francophone #1 pour voyager et vivre aux Philippines. Itinéraires IA personnalisés, visas, coût de la vie, forum communautaire. Des conseils de Français installés sur place.",
-  // Image OG par défaut neutre (voyage), pas une photo dating : elle s'affiche
-  // sur TOUT le site quand une page ne définit pas son propre openGraph.images.
-  ogImage: "https://philippineasy.com/imagesHero/comment-voyager-aux-philippines.webp",
+  // Image OG par défaut = photo du hero de la page d'accueil (1600x900). Elle
+  // s'affiche sur TOUT le site quand une page ne définit pas son propre
+  // openGraph.images (pages génériques, pages protégées non crawlables, etc.).
+  ogImage: "https://philippineasy.com/imagesHero/hero-home-1600.webp",
   keywords: [
     "Philippines",
     "voyage Philippines 2026",
@@ -80,8 +81,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: siteConfig.ogImage,
-        width: 1200,
-        height: 630,
+        width: 1600,
+        height: 900,
         alt: "Philippin'Easy - Guide voyage et expatriation Philippines",
       },
     ],
