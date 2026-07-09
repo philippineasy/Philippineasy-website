@@ -30,8 +30,10 @@ const HELP_TEXT =
   '« Répondre », et tape ta réponse. Elle apparaîtra instantanément dans son fil sur le site.';
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const ownerChatId = process.env.TELEGRAM_CHAT_ID;
+  // .trim() : les valeurs d'env peuvent contenir un \n final invisible (vu en
+  // prod le 2026-07-09 — le sendMessage tolère, la comparaison stricte non).
+  const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
+  const ownerChatId = process.env.TELEGRAM_CHAT_ID?.trim();
   if (!token || !ownerChatId) {
     return NextResponse.json({ ok: true }); // pas configuré : ignorer silencieusement
   }

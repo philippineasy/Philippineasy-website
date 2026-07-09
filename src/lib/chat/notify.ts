@@ -30,8 +30,8 @@ function describeVisitor(conversation: ChatConversation): string {
 // Telegram
 // ---------------------------------------------------------------------------
 async function sendTelegram(params: NotifyParams): Promise<void> {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+  const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
+  const chatId = process.env.TELEGRAM_CHAT_ID?.trim();
   if (!token || !chatId) {
     console.warn('Chat notify: Telegram credentials not configured, skipping');
     return;

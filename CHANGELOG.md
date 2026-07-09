@@ -5,6 +5,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fix — Réponses Telegram silencieusement ignorées (env var avec \n final) (2026-07-09)
+
+Le webhook Telegram comparait strictement `message.chat.id` à `TELEGRAM_CHAT_ID`, or la valeur d'env contient un retour à la ligne final invisible (`"…\n"`) — l'API Telegram tolère à l'envoi, mais la comparaison échouait → les réponses de Hugo étaient ignorées sans erreur. Fix : `.trim()` sur `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID` dans le webhook et notify.
+
 ### Polish — Chat multilingue + notifications Telegram plus claires (2026-07-09)
 
 **Chat multilingue** : l'IA détecte la langue du visiteur et répond dans sa langue (anglais, espagnol…) au lieu de forcer le français ; les accusés de réception des catégories relay (remboursement/partenariat/contact) incluent une ligne 🇬🇧. **Telegram** : le pied de notification explique le geste (« appui long → Répondre ») et la réf n'est plus formatée en #hashtag (Telegram la rendait cliquable vers une recherche vide, source de confusion).
