@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: 'https://philippineasy.com/imagesHero/comment-voyager-aux-philippines.webp',
+        url: 'https://philippineasy.com/imagesHero/hero-home-1600.webp',
         width: 1200,
         height: 630,
         alt: 'Créer votre itinéraire personnalisé pour les Philippines',
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Créer un Itinéraire Personnalisé Philippines avec IA',
     description: 'Assistant IA pour créer votre voyage sur mesure aux Philippines',
-    images: ['https://philippineasy.com/imagesHero/comment-voyager-aux-philippines.webp'],
+    images: ['https://philippineasy.com/imagesHero/hero-home-1600.webp'],
   },
 };
 

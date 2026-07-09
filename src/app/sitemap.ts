@@ -40,7 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
       images: [
         toSeoImage(`${BASE_URL}/logo-512.png`, 'hero'),
-        toSeoImage(`${BASE_URL}/imagesHero/comment-voyager-aux-philippines.webp`, 'hero'),
+        toSeoImage(`${BASE_URL}/imagesHero/hero-home-1600.webp`, 'hero'),
       ],
     },
     { url: `${BASE_URL}/actualites-sur-les-philippines`, lastModified: currentDate,    changeFrequency: 'weekly', priority: 0.8 },
@@ -57,7 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: currentDate,
       changeFrequency: 'monthly',
       priority: 0.8,
-      images: [toSeoImage(`${BASE_URL}/imagesHero/comment-voyager-aux-philippines.webp`, 'hero')],
+      images: [toSeoImage(`${BASE_URL}/imagesHero/hero-home-1600.webp`, 'hero')],
     },
     { url: `${BASE_URL}/forum-sur-les-philippines`,      lastModified: currentDate,    changeFrequency: 'daily',  priority: 0.9 },
     { url: `${BASE_URL}/marketplace-aux-philippines`,     lastModified: currentDate,    changeFrequency: 'daily',  priority: 0.9 },

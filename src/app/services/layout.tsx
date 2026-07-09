@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     siteName: "Philippin'Easy",
     images: [
       {
-        url: 'https://philippineasy.com/imagesHero/comment-voyager-aux-philippines.webp',
+        url: 'https://philippineasy.com/imagesHero/hero-home-1600.webp',
         width: 1200,
         height: 630,
         alt: "Services Premium Philippin'Easy",
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: "Services Premium Philippines : Buddy System & Conciergerie",
     description: "IA + Humain : itinéraires sur-mesure, expat français en relais 24/7, suivi WhatsApp pendant le séjour.",
-    images: ['https://philippineasy.com/imagesHero/comment-voyager-aux-philippines.webp'],
+    images: ['https://philippineasy.com/imagesHero/hero-home-1600.webp'],
   },
   robots: {
     index: true,
