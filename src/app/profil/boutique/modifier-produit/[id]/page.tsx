@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
+import { StatusMessage } from '@/components/shared/StatusMessage';
 import { redirect } from 'next/navigation';
 import { notFound } from 'next/navigation';
 import { EditProductForm } from './EditProductForm';
@@ -51,10 +52,10 @@ export default async function ModifierProduitPage({ params }: { params: Promise<
 
   if (!vendor) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold">Accès non autorisé</h1>
-        <p>Vous n'êtes pas autorisé à modifier ce produit.</p>
-      </div>
+      <StatusMessage
+        title="Accès non autorisé"
+        description="Vous n'êtes pas autorisé à modifier ce produit."
+      />
     );
   }
 
@@ -63,7 +64,8 @@ export default async function ModifierProduitPage({ params }: { params: Promise<
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Modifier le produit</h1>
+        <span className="block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground mb-1">Ma boutique</span>
+        <h1 className="text-3xl font-bold tracking-[-0.02em] text-foreground mb-8">Modifier le produit</h1>
         <EditProductForm categories={categories} product={product} />
       </div>
     </div>

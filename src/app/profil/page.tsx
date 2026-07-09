@@ -338,7 +338,7 @@ const ProfilPage = () => {
                     </span>
                   ) : (
                     <span
-                      className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-blue-800 text-[26px] font-bold text-primary-foreground"
+                      className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-[26px] font-bold text-primary-foreground"
                       aria-hidden="true"
                     >
                       {initial}
@@ -543,8 +543,8 @@ const ProfilPage = () => {
             <div className="flex flex-col gap-5 lg:col-span-1">
 
               {/* Easy+ status — warm amber card */}
-              <section className="rounded-2xl border border-[#F4D38E] bg-[#FFFBF2] p-6 dark:border-accent/30 dark:bg-accent/10">
-                <span className="mb-2.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-[#B45309] dark:text-accent">
+              <section className="rounded-2xl border border-accent/40 bg-accent/[0.07] p-6">
+                <span className="mb-2.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-accent-strong">
                   <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
                   Statut Easy+
                 </span>

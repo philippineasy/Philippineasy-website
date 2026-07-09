@@ -49,12 +49,7 @@ export function ItineraryHero({
           quality={78}
         />
       ) : (
-        <div
-          className="absolute inset-0 z-0"
-          style={{
-            background: 'linear-gradient(135deg, #3B5BDB 0%, #1e40af 100%)',
-          }}
-        />
+        <div className="absolute inset-0 z-0 bg-gradient-to-br from-primary to-primary/80" />
       )}
 
       {/* Overlay gradient pour lisibilite — meme courbe que home (10,20,50) */}
@@ -69,63 +64,29 @@ export function ItineraryHero({
 
       {/* Cercles dashed decoratifs — signature pattern home */}
       <span
-        className="absolute pointer-events-none rounded-full z-10 hidden md:block"
-        style={{
-          width: '440px',
-          height: '440px',
-          top: '-160px',
-          right: '-140px',
-          border: '2px dashed rgba(255, 255, 255, 0.18)',
-        }}
+        className="absolute pointer-events-none rounded-full z-10 hidden md:block w-[440px] h-[440px] -top-40 -right-36 border-2 border-dashed border-white/[0.18]"
         aria-hidden="true"
       />
       <span
-        className="absolute pointer-events-none rounded-full z-10 hidden md:block"
-        style={{
-          width: '260px',
-          height: '260px',
-          bottom: '-90px',
-          left: '-60px',
-          border: '2px dashed rgba(255, 255, 255, 0.13)',
-        }}
+        className="absolute pointer-events-none rounded-full z-10 hidden md:block w-[260px] h-[260px] -bottom-[90px] -left-[60px] border-2 border-dashed border-white/[0.13]"
         aria-hidden="true"
       />
 
       <div className="relative z-20 mx-auto flex h-full max-w-6xl flex-col justify-end px-4 pb-16 pt-28 sm:px-6 md:pb-20">
         {/* Eyebrow uppercase + etoile accent — exact pattern home */}
-        <span
-          className="inline-flex items-center gap-2 mb-5 text-[12px] sm:text-[13px] font-medium uppercase"
-          style={{
-            color: 'rgba(255, 255, 255, 0.78)',
-            letterSpacing: '0.10em',
-          }}
-        >
+        <span className="inline-flex items-center gap-2 mb-5 text-[12px] sm:text-[13px] font-medium uppercase tracking-[0.10em] text-white/[0.78]">
           <span className="text-accent text-base" aria-hidden="true">★</span>
           Itinéraire {name}
           <span aria-hidden="true" className="opacity-50 mx-0.5">·</span>
           <span>Mis à jour {new Date().getFullYear()}</span>
         </span>
 
-        <h1
-          className="text-white font-semibold mb-5 max-w-3xl"
-          style={{
-            fontSize: 'clamp(2.25rem, 6vw, 3.75rem)',
-            lineHeight: 1.04,
-            letterSpacing: '-0.025em',
-          }}
-        >
+        <h1 className="text-white font-semibold mb-5 max-w-3xl leading-[1.04] tracking-[-0.025em] text-[clamp(2.25rem,6vw,3.75rem)]">
           {name},{' '}
           <span className="text-accent">jour par jour</span>
         </h1>
 
-        <p
-          className="text-base md:text-lg max-w-xl mb-7"
-          style={{
-            color: 'rgba(255, 255, 255, 0.85)',
-            lineHeight: 1.55,
-            letterSpacing: '0.005em',
-          }}
-        >
+        <p className="text-base md:text-lg max-w-xl mb-7 leading-[1.55] tracking-[0.005em] text-white/85">
           Le guide francophone complet pour préparer votre voyage à {name} —
           activités, hébergements, budget et conseils terrain.
         </p>
@@ -134,11 +95,7 @@ export function ItineraryHero({
         <div className="flex flex-wrap items-center gap-2 mb-8">
           {recommendedDays && (
             <span
-              className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium text-white backdrop-blur-md"
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.13)',
-                border: '0.5px solid rgba(255, 255, 255, 0.20)',
-              }}
+              className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium text-white backdrop-blur-md bg-white/[0.13] border-[0.5px] border-white/20"
             >
               <PillIcon d="M12 8v4l3 2M12 22a10 10 0 110-20 10 10 0 010 20z" />
               {recommendedDays} jour{recommendedDays > 1 ? 's' : ''} recommandés
@@ -146,11 +103,7 @@ export function ItineraryHero({
           )}
           {budgetMidrange && (
             <span
-              className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium text-white backdrop-blur-md"
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.13)',
-                border: '0.5px solid rgba(255, 255, 255, 0.20)',
-              }}
+              className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium text-white backdrop-blur-md bg-white/[0.13] border-[0.5px] border-white/20"
             >
               <PillIcon d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
               ~{budgetMidrange} €/jour mid-range
@@ -158,11 +111,7 @@ export function ItineraryHero({
           )}
           {bestSeason && (
             <span
-              className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium text-white backdrop-blur-md"
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.13)',
-                border: '0.5px solid rgba(255, 255, 255, 0.20)',
-              }}
+              className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] font-medium text-white backdrop-blur-md bg-white/[0.13] border-[0.5px] border-white/20"
             >
               <PillIcon d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41M12 7a5 5 0 100 10 5 5 0 000-10z" />
               {bestSeason.length > 32 ? `${bestSeason.slice(0, 32)}…` : bestSeason}
@@ -193,11 +142,7 @@ export function ItineraryHero({
           </Link>
           <a
             href="#itineraire-jour-par-jour"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg font-medium text-[14px] text-white backdrop-blur-md transition-all duration-200 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.10)',
-              border: '0.5px solid rgba(255, 255, 255, 0.25)',
-            }}
+            className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg font-medium text-[14px] text-white backdrop-blur-md bg-white/10 border-[0.5px] border-white/25 transition-all duration-200 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
           >
             Voir l&apos;itinéraire
             <span aria-hidden="true">↓</span>

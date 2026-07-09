@@ -99,10 +99,7 @@ export function ItineraryDayCard({ day, isLast = false }: ItineraryDayCardProps)
       {!isLast && (
         <span
           aria-hidden="true"
-          className="absolute left-[27px] top-[68px] bottom-[-32px] w-px hidden sm:block"
-          style={{
-            borderLeft: '2px dashed rgba(59, 91, 219, 0.25)',
-          }}
+          className="absolute left-[27px] top-[68px] bottom-[-32px] hidden sm:block border-l-2 border-dashed border-primary/25"
         />
       )}
 
@@ -113,35 +110,16 @@ export function ItineraryDayCard({ day, isLast = false }: ItineraryDayCardProps)
         {/* Header — gros chiffre cercle accent + titre */}
         <header className="flex items-start gap-4 px-5 sm:px-7 pt-6 sm:pt-7 pb-5">
           <span
-            className="inline-flex items-center justify-center rounded-2xl shrink-0 font-bold tabular-nums shadow-cta"
-            style={{
-              width: '54px',
-              height: '54px',
-              background: 'linear-gradient(135deg, #F59E0B 0%, #EA8A0A 100%)',
-              color: '#1a1a00',
-              fontSize: '22px',
-              letterSpacing: '-0.02em',
-              boxShadow: '0 6px 18px rgba(245, 158, 11, 0.30)',
-            }}
+            className="inline-flex items-center justify-center rounded-2xl shrink-0 font-bold tabular-nums shadow-cta w-[54px] h-[54px] text-[22px] tracking-[-0.02em] bg-gradient-to-br from-accent to-accent/85 text-accent-foreground"
             aria-hidden="true"
           >
             J{day.day}
           </span>
           <div className="flex-1 min-w-0 pt-1">
-            <span
-              className="block text-[11px] font-bold uppercase mb-1.5 text-primary"
-              style={{ letterSpacing: '0.10em' }}
-            >
+            <span className="block text-[11px] font-bold uppercase mb-1.5 tracking-[0.10em] text-primary">
               Jour {day.day}
             </span>
-            <h3
-              className="font-semibold text-ink"
-              style={{
-                fontSize: 'clamp(1.25rem, 2.4vw, 1.5rem)',
-                letterSpacing: '-0.015em',
-                lineHeight: 1.2,
-              }}
-            >
+            <h3 className="font-semibold text-ink tracking-[-0.015em] leading-[1.2] text-[clamp(1.25rem,2.4vw,1.5rem)]">
               {day.title}
             </h3>
           </div>
@@ -177,21 +155,13 @@ export function ItineraryDayCard({ day, isLast = false }: ItineraryDayCardProps)
                   )}
 
                   <div className="flex-1 min-w-0">
-                    <h4
-                      className="font-semibold text-ink mb-1"
-                      style={{
-                        fontSize: '15px',
-                        letterSpacing: '-0.005em',
-                        lineHeight: 1.35,
-                      }}
-                    >
+                    <h4 className="font-semibold text-ink mb-1 text-[15px] tracking-[-0.005em] leading-[1.35]">
                       {activity.name}
                     </h4>
                     <ExpandableText
                       text={activity.description}
                       lines={3}
-                      className="text-[13.5px] text-muted-foreground"
-                      style={{ lineHeight: 1.55 }}
+                      className="text-[13.5px] text-muted-foreground leading-[1.55]"
                     />
                     {(activity.duration || activity.cost) && (
                       <div className="flex flex-wrap items-center gap-2 mt-2.5">
@@ -204,13 +174,7 @@ export function ItineraryDayCard({ day, isLast = false }: ItineraryDayCardProps)
                           </span>
                         )}
                         {activity.cost && (
-                          <span
-                            className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11.5px] font-medium tabular-nums"
-                            style={{
-                              backgroundColor: 'rgba(245, 158, 11, 0.12)',
-                              color: '#92400E',
-                            }}
-                          >
+                          <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11.5px] font-medium tabular-nums bg-accent/[0.12] text-accent-strong">
                             <EuroIcon />
                             {activity.cost}
                           </span>
@@ -226,82 +190,52 @@ export function ItineraryDayCard({ day, isLast = false }: ItineraryDayCardProps)
 
         {/* Footer — transport / hebergement / repas en pills 3 cols */}
         {hasFooter && (
-          <div
-            className="grid grid-cols-1 sm:grid-cols-3 gap-3 px-5 sm:px-7 py-4 mt-3 border-t border-border/60"
-            style={{ background: 'linear-gradient(180deg, #FAFBFD 0%, #F4F7FE 100%)' }}
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 px-5 sm:px-7 py-4 mt-3 border-t border-border/60 bg-soft-blue/60">
             {day.transport && (
               <div className="flex items-start gap-2.5">
                 <span
-                  className="inline-flex items-center justify-center w-7 h-7 rounded-lg shrink-0 mt-0.5"
-                  style={{ backgroundColor: 'rgba(59, 91, 219, 0.10)', color: '#3B5BDB' }}
+                  className="inline-flex items-center justify-center w-7 h-7 rounded-lg shrink-0 mt-0.5 bg-primary/10 text-primary"
                   aria-hidden="true"
                 >
                   <TransportIcon />
                 </span>
                 <div className="min-w-0">
-                  <span
-                    className="block text-[10.5px] font-bold uppercase text-muted-foreground mb-0.5"
-                    style={{ letterSpacing: '0.10em' }}
-                  >
+                  <span className="block text-[10.5px] font-bold uppercase text-muted-foreground mb-0.5 tracking-[0.10em]">
                     Transport
                   </span>
-                  <ExpandableText
-                    text={day.transport}
-                    lines={3}
-                    className="text-[13px] text-ink"
-                    style={{ lineHeight: 1.45 }}
-                  />
+                  <ExpandableText text={day.transport} lines={3} className="text-[13px] text-ink leading-[1.45]" />
                 </div>
               </div>
             )}
             {day.accommodation && (
               <div className="flex items-start gap-2.5">
                 <span
-                  className="inline-flex items-center justify-center w-7 h-7 rounded-lg shrink-0 mt-0.5"
-                  style={{ backgroundColor: 'rgba(59, 91, 219, 0.10)', color: '#3B5BDB' }}
+                  className="inline-flex items-center justify-center w-7 h-7 rounded-lg shrink-0 mt-0.5 bg-primary/10 text-primary"
                   aria-hidden="true"
                 >
                   <BedIcon />
                 </span>
                 <div className="min-w-0">
-                  <span
-                    className="block text-[10.5px] font-bold uppercase text-muted-foreground mb-0.5"
-                    style={{ letterSpacing: '0.10em' }}
-                  >
+                  <span className="block text-[10.5px] font-bold uppercase text-muted-foreground mb-0.5 tracking-[0.10em]">
                     Hébergement
                   </span>
-                  <ExpandableText
-                    text={day.accommodation}
-                    lines={3}
-                    className="text-[13px] text-ink"
-                    style={{ lineHeight: 1.45 }}
-                  />
+                  <ExpandableText text={day.accommodation} lines={3} className="text-[13px] text-ink leading-[1.45]" />
                 </div>
               </div>
             )}
             {day.meals && (
               <div className="flex items-start gap-2.5">
                 <span
-                  className="inline-flex items-center justify-center w-7 h-7 rounded-lg shrink-0 mt-0.5"
-                  style={{ backgroundColor: 'rgba(245, 158, 11, 0.12)', color: '#B45309' }}
+                  className="inline-flex items-center justify-center w-7 h-7 rounded-lg shrink-0 mt-0.5 bg-accent/[0.12] text-accent-strong"
                   aria-hidden="true"
                 >
                   <MealIcon />
                 </span>
                 <div className="min-w-0">
-                  <span
-                    className="block text-[10.5px] font-bold uppercase text-muted-foreground mb-0.5"
-                    style={{ letterSpacing: '0.10em' }}
-                  >
+                  <span className="block text-[10.5px] font-bold uppercase text-muted-foreground mb-0.5 tracking-[0.10em]">
                     Repas
                   </span>
-                  <ExpandableText
-                    text={day.meals}
-                    lines={3}
-                    className="text-[13px] text-ink"
-                    style={{ lineHeight: 1.45 }}
-                  />
+                  <ExpandableText text={day.meals} lines={3} className="text-[13px] text-ink leading-[1.45]" />
                 </div>
               </div>
             )}

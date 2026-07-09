@@ -50,12 +50,7 @@ export function RelatedItineraries({ related }: RelatedItinerariesProps) {
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
               ) : (
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background: 'linear-gradient(135deg, #3B5BDB 0%, #1e40af 100%)',
-                  }}
-                />
+                <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/80" />
               )}
 
               {/* Overlay gradient pour lisibilite des pills */}

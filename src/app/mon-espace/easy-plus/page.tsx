@@ -154,14 +154,14 @@ export default async function MonEspaceEasyPlusPage() {
 
       {/* CTA */}
       {!isActive && (
-        <div className="rounded-2xl bg-gradient-to-br from-primary to-primary/85 text-white px-6 py-7 lg:px-8 lg:py-8 shadow-cta">
+        <div className="rounded-2xl bg-gradient-to-br from-primary to-primary/85 text-primary-foreground px-6 py-7 lg:px-8 lg:py-8 shadow-cta">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="min-w-0">
               <span className="block text-[11px] uppercase tracking-[0.1em] text-accent font-semibold mb-1">✦ Offre à vie</span>
               <strong className="block text-[20px] lg:text-[22px] font-bold leading-tight mb-1">
                 Devenez membre Easy+ à vie pour 499 €
               </strong>
-              <p className="text-[13.5px] text-white/85">
+              <p className="text-[13.5px] text-primary-foreground/85">
                 Économie de 79 % sur 24 mois · accès à vie à tous les avantages ci-dessus.
               </p>
             </div>

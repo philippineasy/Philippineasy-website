@@ -104,15 +104,15 @@ export const ExitIntentPopup = () => {
 
           <h3 className="text-2xl font-bold mb-2">Attendez !</h3>
           <p className="text-muted-foreground mb-6">
-            Recevez gratuitement notre guide <strong className="text-primary">"7 Jours a Palawan"</strong> avant de partir.
-            Itineraire complet, budget et astuces locales.
+            Recevez gratuitement notre guide <strong className="text-primary">«&nbsp;7 Jours à Palawan&nbsp;»</strong> avant de partir.
+            Itinéraire complet, budget et astuces locales.
           </p>
 
           {status === 'success' ? (
-            <div className="p-4 bg-green-50 rounded-xl border border-green-200">
-              <FontAwesomeIcon icon={faCheck} className="text-2xl text-green-500 mb-2" />
-              <p className="font-semibold text-green-700">Telechargement en cours !</p>
-              <p className="text-sm text-green-700/80 mt-1">Verifiez votre boite mail pour confirmer votre inscription.</p>
+            <div className="p-4 bg-success/10 rounded-xl border border-success/30">
+              <FontAwesomeIcon icon={faCheck} className="text-2xl text-success mb-2" />
+              <p className="font-semibold text-success">Téléchargement en cours !</p>
+              <p className="text-sm text-foreground/70 mt-1">Vérifiez votre boîte mail pour confirmer votre inscription.</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-3">
@@ -123,7 +123,7 @@ export const ExitIntentPopup = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Votre adresse email"
-                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary focus:border-primary"
+                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-border bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-primary"
                   required
                   disabled={status === 'loading'}
                   autoFocus
@@ -140,13 +140,13 @@ export const ExitIntentPopup = () => {
                 Recevoir le guide gratuit
               </button>
               {status === 'error' && (
-                <p className="text-red-500 text-sm">{message}</p>
+                <p className="text-destructive text-sm">{message}</p>
               )}
             </form>
           )}
 
           <p className="text-xs text-muted-foreground mt-4">
-            Pas de spam, desabonnement en 1 clic.
+            Pas de spam, désabonnement en 1 clic.
           </p>
         </div>
       </div>

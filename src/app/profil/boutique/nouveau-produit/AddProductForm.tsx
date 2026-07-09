@@ -40,19 +40,19 @@ export function AddProductForm({ categories, vendorId }: AddProductFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-card p-8 rounded-lg shadow-lg space-y-6">
+    <form onSubmit={handleSubmit} className="bg-card p-6 sm:p-8 rounded-2xl border border-border shadow-card-rest space-y-6">
       <div>
         <label htmlFor="name" className="block text-foreground mb-2 font-semibold">Nom du produit</label>
-        <input type="text" id="name" name="name" required className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" />
+        <input type="text" id="name" name="name" required className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
       </div>
       <div>
         <label htmlFor="description" className="block text-foreground mb-2 font-semibold">Description</label>
-        <textarea id="description" name="description" rows={5} required className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"></textarea>
+        <textarea id="description" name="description" rows={5} required className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"></textarea>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label htmlFor="price" className="block text-foreground mb-2 font-semibold">Prix (€)</label>
-          <input type="number" id="price" name="price" required step="0.01" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring" />
+          <input type="number" id="price" name="price" required step="0.01" className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
         </div>
         <div>
           <label htmlFor="category" className="block text-foreground mb-2 font-semibold">Catégorie</label>

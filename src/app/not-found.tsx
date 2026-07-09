@@ -14,48 +14,12 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   const popularSections = [
-    {
-      icon: faHome,
-      title: 'Accueil',
-      description: 'Retour à la page d\'accueil',
-      href: '/',
-      color: 'text-blue-600',
-    },
-    {
-      icon: faMap,
-      title: 'Voyager',
-      description: 'Guides de voyage aux Philippines',
-      href: '/voyager-aux-philippines',
-      color: 'text-green-600',
-    },
-    {
-      icon: faBook,
-      title: 'Vivre',
-      description: 'S\'installer et vivre aux Philippines',
-      href: '/vivre-aux-philippines',
-      color: 'text-purple-600',
-    },
-    {
-      icon: faComments,
-      title: 'Forum',
-      description: 'Posez vos questions à la communauté',
-      href: '/forum-sur-les-philippines',
-      color: 'text-orange-600',
-    },
-    {
-      icon: faShoppingBag,
-      title: 'Marketplace',
-      description: 'Achetez et vendez aux Philippines',
-      href: '/marketplace-aux-philippines',
-      color: 'text-pink-600',
-    },
-    {
-      icon: faHeart,
-      title: 'Rencontre',
-      description: 'Trouvez l\'amour aux Philippines',
-      href: '/rencontre-philippines',
-      color: 'text-red-600',
-    },
+    { icon: faHome, title: 'Accueil', description: 'Retour à la page d\'accueil', href: '/' },
+    { icon: faMap, title: 'Voyager', description: 'Guides de voyage aux Philippines', href: '/voyager-aux-philippines' },
+    { icon: faBook, title: 'Vivre', description: 'S\'installer et vivre aux Philippines', href: '/vivre-aux-philippines' },
+    { icon: faComments, title: 'Forum', description: 'Posez vos questions à la communauté', href: '/forum-sur-les-philippines' },
+    { icon: faShoppingBag, title: 'Marketplace', description: 'Achetez et vendez aux Philippines', href: '/marketplace-aux-philippines' },
+    { icon: faHeart, title: 'Rencontre', description: 'Trouvez l\'amour aux Philippines', href: '/rencontre-philippines' },
   ];
 
   return (
@@ -77,9 +41,11 @@ export default function NotFound() {
               <Link
                 key={section.href}
                 href={section.href}
-                className="group p-6 border rounded-lg hover:border-primary hover:shadow-lg transition-all duration-300 text-left"
+                className="group p-6 bg-card border border-border rounded-2xl shadow-card-rest hover:border-primary/50 transition-all duration-300 text-left"
               >
-                <FontAwesomeIcon icon={section.icon} className={`w-8 h-8 mb-3 ${section.color} group-hover:scale-110 transition-transform`} />
+                <span className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary/15 transition-colors">
+                  <FontAwesomeIcon icon={section.icon} className="w-5 h-5" />
+                </span>
                 <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">
                   {section.title}
                 </h3>

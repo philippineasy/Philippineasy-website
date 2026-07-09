@@ -5,6 +5,25 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fix/Refonte — Passe UI finale : îlots pré-refonte restants + bugs dark mode (2026-07-09)
+
+Audit UI complet du site (hors admin) → la refonte de juillet avait couvert la quasi-totalité ; 3 îlots pré-refonte restants + quelques bugs dark mode traités. Principe : conversion hex→tokens (les tokens SONT les mêmes hex en clair → rendu clair inchangé, dark mode réparé), Section Kit là où c'était propre.
+
+**Bugs dark mode réparés (rendu réellement cassé)** :
+- `ExitIntentPopup` : bloc succès `bg-green-50 text-green-700` sans variante `dark:` → `bg-success/10 text-success` (+ accents FR).
+- `destinations/BudgetTable` : carte forcée `#ffffff` + texte `#0F172A` → `bg-card`/`text-ink` (carte blanche à texte noir sur thème sombre supprimée) ; dégradé indigo `#3B5BDB→#6366F1` (rainbow) → tonal primary.
+- `destinations/ItineraryDayCard` : pied `linear-gradient(#FAFBFD→#F4F7FE)` blanc figé sous libellés `text-ink` (texte clair sur blanc en dark = illisible) → `bg-soft-blue/60` ; badges/icônes hex → tokens accent/primary.
+
+**Îlot 1 — Itinéraires par destination** (`/itineraires/[slug]` + `ItineraryHero`/`RelatedItineraries`) : tous les hex inline (`#3B5BDB`, `#F4F7FE`, rgba…) → tokens ; les 2 CTA gradient et le hero de repli passent en `bg-gradient-to-br from-primary to-primary/80` (dark-ready). Le texte blanc sur images/surfaces colorées constantes est conservé (légitime). Contenu dynamique vérifié intact (aucune donnée perdue).
+
+**Îlot 2 — Boutique vendeur** (`BoutiqueClientPage` + formulaires produit + wrappers) : pastilles `bg-blue-500`/`green-500`/`indigo-500` façon dashboard → tiles `bg-primary/10 text-primary` cohérents ; boîtes d'icônes hex `#F4F7FE`/`#3B5BDB` → `bg-soft-blue text-primary` ; cartes/tables `rounded-lg shadow` → `rounded-2xl border-border shadow-card-rest` ; inputs `border` nu → `border-border bg-background` (dark-ready) ; ajout eyebrow « Ma boutique » + hiérarchie ; nouveau composant partagé `StatusMessage` pour les états « accès refusé / erreur » (étaient des `<h1>`/`<p>` nus non tokenisés).
+
+**Îlot 3 — Contact** : suppression de framer-motion (retiré pour perf partout ailleurs) → animations CSS `animate-in` ; `shadow-lg` → `shadow-card-rest` ; bloc succès vert → `text-success` ; accents FR.
+
+**Quick wins** : `not-found` icônes arc-en-ciel (6 couleurs brutes) → pastilles `bg-primary/10 text-primary` (anti-rainbow) ; `ComparisonTable` coches `text-green-500` → `text-success` ; micro-nits tokens (CTA easy-plus `text-white`→`text-primary-foreground`, carte Easy+ hex profil, gradient avatar `blue-800`→`primary/70`).
+
+Vérifs : lint 0 erreur, build OK, aucun hex résiduel dans les fichiers refondus, contenu dynamique des itinéraires confirmé intact.
+
 ### Feature/UX — Finitions Rencontre : brouillon inscription, compression photo, badge messages, resync modération (2026-07-09)
 
 **Brouillon d'inscription persisté** : le wizard 6 étapes sauvegarde les champs texte en localStorage à chaque changement et les restaure au montage (bannière « Brouillon restauré » + bouton « Recommencer »), purgé après soumission réussie. Quitter à l'étape 3 ne perd plus tout.

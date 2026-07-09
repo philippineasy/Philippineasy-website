@@ -79,8 +79,7 @@ const PracticalCard = ({
   <div className="relative bg-card rounded-2xl p-6 border-[0.5px] border-border shadow-card-rest hover:shadow-card transition-shadow duration-300">
     <div className="flex items-start justify-between mb-4">
       <span
-        className="inline-flex items-center justify-center w-11 h-11 rounded-xl"
-        style={{ backgroundColor: '#F4F7FE', color: '#3B5BDB' }}
+        className="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-soft-blue text-primary"
         aria-hidden="true"
       >
         <svg
@@ -97,26 +96,16 @@ const PracticalCard = ({
         </svg>
       </span>
       <span
-        className="text-[40px] font-bold tabular-nums leading-none select-none"
-        style={{
-          color: 'rgba(59, 91, 219, 0.10)',
-          letterSpacing: '-0.04em',
-        }}
+        className="text-[40px] font-bold tabular-nums leading-none select-none tracking-[-0.04em] text-primary/10"
         aria-hidden="true"
       >
         0{index}
       </span>
     </div>
-    <span
-      className="block text-[11px] font-bold uppercase mb-1.5 text-muted-foreground"
-      style={{ letterSpacing: '0.10em' }}
-    >
+    <span className="block text-[11px] font-bold uppercase mb-1.5 text-muted-foreground tracking-[0.10em]">
       {label}
     </span>
-    <p
-      className="text-[15px] text-ink leading-[1.5]"
-      style={{ letterSpacing: '-0.005em' }}
-    >
+    <p className="text-[15px] text-ink leading-[1.5] tracking-[-0.005em]">
       {value}
     </p>
   </div>
@@ -124,49 +113,21 @@ const PracticalCard = ({
 
 // === CTA inline mid-page — version compacte du gradient bleu home ===
 const InlineCTA = ({ destinationName }: { destinationName: string }) => (
-  <div
-    className="relative overflow-hidden rounded-2xl text-white px-6 sm:px-8 py-7 sm:py-8 my-2"
-    style={{
-      background: 'linear-gradient(135deg, #3B5BDB 0%, #1e40af 100%)',
-    }}
-  >
+  <div className="relative overflow-hidden rounded-2xl text-white px-6 sm:px-8 py-7 sm:py-8 my-2 bg-gradient-to-br from-primary to-primary/80">
     <span
-      className="absolute pointer-events-none rounded-full hidden sm:block"
-      style={{
-        width: '220px',
-        height: '220px',
-        top: '-90px',
-        right: '-60px',
-        border: '2px dashed rgba(255, 255, 255, 0.13)',
-      }}
+      className="absolute pointer-events-none rounded-full hidden sm:block w-[220px] h-[220px] -top-[90px] -right-[60px] border-2 border-dashed border-white/[0.13]"
       aria-hidden="true"
     />
     <div className="relative flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-7">
       <div className="flex-1">
-        <span
-          className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase mb-2.5"
-          style={{
-            letterSpacing: '0.10em',
-            color: 'rgba(255, 255, 255, 0.78)',
-          }}
-        >
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase mb-2.5 tracking-[0.10em] text-white/[0.78]">
           <span className="text-accent" aria-hidden="true">✦</span>
           Cet itinéraire vous inspire&nbsp;?
         </span>
-        <h3
-          className="font-semibold text-white mb-1.5"
-          style={{
-            fontSize: 'clamp(1.125rem, 2.4vw, 1.375rem)',
-            letterSpacing: '-0.015em',
-            lineHeight: 1.2,
-          }}
-        >
+        <h3 className="font-semibold text-white mb-1.5 tracking-[-0.015em] leading-[1.2] text-[clamp(1.125rem,2.4vw,1.375rem)]">
           Faites-le adapter à <span className="text-accent">votre voyage</span>
         </h3>
-        <p
-          className="text-[14px]"
-          style={{ color: 'rgba(255, 255, 255, 0.82)', lineHeight: 1.5 }}
-        >
+        <p className="text-[14px] leading-[1.5] text-white/[0.82]">
           Notre IA crée votre itinéraire {destinationName} sur-mesure selon
           votre durée, votre style et votre budget. Prêt en 30 secondes.
         </p>
@@ -418,8 +379,7 @@ export default async function ItinerairePage({ params }: PageProps) {
                   className="relative flex gap-3.5 rounded-2xl p-4 sm:p-5 bg-card border-[0.5px] border-border shadow-card-rest hover:border-primary/30 transition-colors duration-200"
                 >
                   <span
-                    className="flex-shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-xl text-accent"
-                    style={{ backgroundColor: 'rgba(245, 158, 11, 0.13)' }}
+                    className="flex-shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-xl text-accent-strong bg-accent/[0.13]"
                     aria-hidden="true"
                   >
                     <svg
@@ -458,66 +418,26 @@ export default async function ItinerairePage({ params }: PageProps) {
       {/* === Section 7 : CTA conversion finale (full block style ItineraireIABlock) === */}
       <section className="py-14 md:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div
-            className="relative overflow-hidden rounded-3xl text-white"
-            style={{
-              background: 'linear-gradient(135deg, #3B5BDB 0%, #1e40af 100%)',
-              padding: 'clamp(2.5rem, 5vw, 4rem)',
-            }}
-          >
+          <div className="relative overflow-hidden rounded-3xl text-white bg-gradient-to-br from-primary to-primary/80 p-[clamp(2.5rem,5vw,4rem)]">
             <span
-              className="absolute pointer-events-none rounded-full"
-              style={{
-                width: '320px',
-                height: '320px',
-                top: '-120px',
-                right: '-80px',
-                border: '2px dashed rgba(255, 255, 255, 0.13)',
-              }}
+              className="absolute pointer-events-none rounded-full w-[320px] h-[320px] -top-[120px] -right-[80px] border-2 border-dashed border-white/[0.13]"
               aria-hidden="true"
             />
             <span
-              className="absolute pointer-events-none rounded-full"
-              style={{
-                width: '200px',
-                height: '200px',
-                bottom: '-60px',
-                left: '-40px',
-                border: '2px dashed rgba(255, 255, 255, 0.13)',
-              }}
+              className="absolute pointer-events-none rounded-full w-[200px] h-[200px] -bottom-[60px] -left-[40px] border-2 border-dashed border-white/[0.13]"
               aria-hidden="true"
             />
 
             <div className="relative max-w-2xl">
-              <span
-                className="inline-flex items-center gap-1.5 text-[12px] font-medium uppercase mb-4"
-                style={{
-                  letterSpacing: '0.10em',
-                  color: 'rgba(255, 255, 255, 0.78)',
-                }}
-              >
+              <span className="inline-flex items-center gap-1.5 text-[12px] font-medium uppercase mb-4 tracking-[0.10em] text-white/[0.78]">
                 <span className="text-accent" aria-hidden="true">✦</span>
                 Itinéraire personnalisé
               </span>
-              <h2
-                className="font-bold text-white mb-4"
-                style={{
-                  fontSize: 'clamp(1.875rem, 3.5vw, 2.5rem)',
-                  letterSpacing: '-0.02em',
-                  lineHeight: 1.1,
-                }}
-              >
+              <h2 className="font-bold text-white mb-4 tracking-[-0.02em] leading-[1.1] text-[clamp(1.875rem,3.5vw,2.5rem)]">
                 Cet itinéraire ne vous convient pas{' '}
                 <span className="text-accent">parfaitement&nbsp;?</span>
               </h2>
-              <p
-                className="mb-7"
-                style={{
-                  color: 'rgba(255, 255, 255, 0.85)',
-                  lineHeight: 1.6,
-                  fontSize: '16px',
-                }}
-              >
+              <p className="mb-7 leading-[1.6] text-[16px] text-white/85">
                 Notre IA crée votre itinéraire {itinerary.name} sur-mesure
                 selon vos envies, votre budget et votre durée. Une seule
                 version, prête en 30 secondes.
@@ -544,11 +464,7 @@ export default async function ItinerairePage({ params }: PageProps) {
                 </Link>
                 <Link
                   href="/itineraires-philippines"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg font-medium text-[14px] text-white backdrop-blur-md transition-all duration-200 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.10)',
-                    border: '0.5px solid rgba(255, 255, 255, 0.25)',
-                  }}
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg font-medium text-[14px] text-white backdrop-blur-md bg-white/10 border-[0.5px] border-white/25 transition-all duration-200 hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                 >
                   Voir tous les itinéraires
                 </Link>

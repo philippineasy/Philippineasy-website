@@ -106,10 +106,7 @@ export function BudgetTable({
   return (
     <section aria-labelledby="budget-heading">
       <div className="flex items-baseline justify-between flex-wrap gap-2 mb-2">
-        <span
-          className="text-[12px] font-bold uppercase text-primary"
-          style={{ letterSpacing: '0.10em' }}
-        >
+        <span className="text-[12px] font-bold uppercase tracking-[0.10em] text-primary">
           ✦ Budget terrain
         </span>
         <span className="text-[12.5px] text-muted-foreground tabular-nums">
@@ -118,12 +115,7 @@ export function BudgetTable({
       </div>
       <h2
         id="budget-heading"
-        className="text-ink font-semibold mb-6"
-        style={{
-          fontSize: 'clamp(1.625rem, 3vw, 2.125rem)',
-          letterSpacing: '-0.02em',
-          lineHeight: 1.15,
-        }}
+        className="text-ink font-semibold mb-6 tracking-[-0.02em] leading-[1.15] text-[clamp(1.625rem,3vw,2.125rem)]"
       >
         Combien prévoir pour ce voyage&nbsp;?
       </h2>
@@ -134,57 +126,37 @@ export function BudgetTable({
           const widthPct = ((tier.perDay ?? 0) / maxPerDay) * 100;
           const isHighlight = tier.highlight;
 
+          // La carte "recommandée" est une surface colorée CONSTANTE (dégradé
+          // primary, ne bascule pas avec le thème) : texte clair fixe dessus,
+          // comme un bouton. Les autres cartes suivent les tokens (dark-ready).
           return (
             <article
               key={tier.key}
-              className="relative rounded-2xl p-5 sm:p-6 transition-all duration-300 hover:-translate-y-0.5 motion-reduce:hover:transform-none"
-              style={
+              className={`relative rounded-2xl p-5 sm:p-6 transition-all duration-300 hover:-translate-y-0.5 motion-reduce:hover:transform-none ${
                 isHighlight
-                  ? {
-                      background:
-                        'linear-gradient(135deg, #3B5BDB 0%, #1e40af 100%)',
-                      color: 'white',
-                      boxShadow: '0 12px 32px rgba(59, 91, 219, 0.25)',
-                    }
-                  : {
-                      backgroundColor: '#ffffff',
-                      border: '0.5px solid hsl(var(--border))',
-                      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
-                    }
-              }
+                  ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-cta'
+                  : 'bg-card border border-border shadow-card-rest'
+              }`}
             >
-              {/* Badge "recommande" sur la card highlight */}
               {isHighlight && (
-                <span
-                  className="absolute -top-2.5 right-5 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10.5px] font-bold uppercase tabular-nums shadow-cta"
-                  style={{
-                    backgroundColor: '#F59E0B',
-                    color: '#1a1a00',
-                    letterSpacing: '0.06em',
-                  }}
-                >
+                <span className="absolute -top-2.5 right-5 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10.5px] font-bold uppercase tabular-nums tracking-[0.06em] shadow-cta bg-accent text-accent-foreground">
                   ★ Recommandé
                 </span>
               )}
 
               <div className="flex items-center justify-between mb-4">
                 <span
-                  className="inline-flex items-center justify-center rounded-xl w-11 h-11"
-                  style={
-                    isHighlight
-                      ? { backgroundColor: 'rgba(255, 255, 255, 0.13)', color: '#FCD34D' }
-                      : { backgroundColor: '#F4F7FE', color: '#3B5BDB' }
-                  }
+                  className={`inline-flex items-center justify-center rounded-xl w-11 h-11 ${
+                    isHighlight ? 'bg-white/[0.13] text-amber-300' : 'bg-soft-blue text-primary'
+                  }`}
                   aria-hidden="true"
                 >
                   <tier.Icon />
                 </span>
                 <span
-                  className="text-[11px] font-bold uppercase"
-                  style={{
-                    letterSpacing: '0.10em',
-                    color: isHighlight ? 'rgba(255,255,255,0.78)' : '#64748B',
-                  }}
+                  className={`text-[11px] font-bold uppercase tracking-[0.10em] ${
+                    isHighlight ? 'text-primary-foreground/80' : 'text-muted-foreground'
+                  }`}
                 >
                   {tier.label}
                 </span>
@@ -192,79 +164,60 @@ export function BudgetTable({
 
               <div className="mb-1.5">
                 <span
-                  className="font-bold tabular-nums"
-                  style={{
-                    fontSize: 'clamp(1.875rem, 4vw, 2.25rem)',
-                    letterSpacing: '-0.025em',
-                    lineHeight: 1.05,
-                    color: isHighlight ? '#FCD34D' : '#0F172A',
-                  }}
+                  className={`font-bold tabular-nums tracking-[-0.025em] leading-[1.05] text-[clamp(1.875rem,4vw,2.25rem)] ${
+                    isHighlight ? 'text-amber-300' : 'text-ink'
+                  }`}
                 >
                   {tier.perDay} €
                 </span>
                 <span
-                  className="text-[13.5px] ml-1.5"
-                  style={{ color: isHighlight ? 'rgba(255,255,255,0.78)' : '#64748B' }}
+                  className={`text-[13.5px] ml-1.5 ${
+                    isHighlight ? 'text-primary-foreground/80' : 'text-muted-foreground'
+                  }`}
                 >
                   / jour
                 </span>
               </div>
 
               <p
-                className="text-[13.5px] mb-4"
-                style={{
-                  lineHeight: 1.5,
-                  color: isHighlight ? 'rgba(255,255,255,0.85)' : '#64748B',
-                }}
+                className={`text-[13.5px] mb-4 leading-normal ${
+                  isHighlight ? 'text-primary-foreground/85' : 'text-muted-foreground'
+                }`}
               >
                 {tier.desc}
               </p>
 
               {/* Barre visuelle proportionnelle — pas de chart lib, CSS pur */}
               <div
-                className="relative h-1.5 rounded-full overflow-hidden mb-3"
-                style={{
-                  backgroundColor: isHighlight
-                    ? 'rgba(255, 255, 255, 0.15)'
-                    : 'rgba(15, 23, 42, 0.06)',
-                }}
+                className={`relative h-1.5 rounded-full overflow-hidden mb-3 ${
+                  isHighlight ? 'bg-white/[0.15]' : 'bg-foreground/[0.08]'
+                }`}
                 aria-hidden="true"
               >
                 <span
-                  className="absolute inset-y-0 left-0 rounded-full"
-                  style={{
-                    width: `${widthPct}%`,
-                    background: isHighlight
-                      ? 'linear-gradient(90deg, #FCD34D, #F59E0B)'
-                      : 'linear-gradient(90deg, #3B5BDB, #6366F1)',
-                  }}
+                  className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r ${
+                    isHighlight ? 'from-amber-300 to-accent' : 'from-primary to-primary/60'
+                  }`}
+                  style={{ width: `${widthPct}%` }}
                 />
               </div>
 
               <div
-                className="pt-3 border-t flex items-baseline justify-between"
-                style={{
-                  borderColor: isHighlight
-                    ? 'rgba(255, 255, 255, 0.18)'
-                    : 'rgba(15, 23, 42, 0.08)',
-                }}
+                className={`pt-3 border-t flex items-baseline justify-between ${
+                  isHighlight ? 'border-white/20' : 'border-border'
+                }`}
               >
                 <span
-                  className="text-[11.5px] font-bold uppercase"
-                  style={{
-                    letterSpacing: '0.08em',
-                    color: isHighlight ? 'rgba(255,255,255,0.65)' : '#94a3b8',
-                  }}
+                  className={`text-[11.5px] font-bold uppercase tracking-[0.08em] ${
+                    isHighlight ? 'text-primary-foreground/65' : 'text-muted-foreground'
+                  }`}
                 >
                   Total {days} j.
                 </span>
                 <span
-                  className="font-bold tabular-nums"
-                  style={{
-                    fontSize: '17px',
-                    letterSpacing: '-0.01em',
-                    color: isHighlight ? '#ffffff' : '#0F172A',
-                  }}
+                  className={`font-bold tabular-nums tracking-[-0.01em] text-[17px] ${
+                    isHighlight ? 'text-primary-foreground' : 'text-ink'
+                  }`}
                 >
                   {total.toLocaleString('fr-FR')} €
                 </span>

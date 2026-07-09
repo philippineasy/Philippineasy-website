@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { BoutiqueClientPage } from './BoutiqueClientPage';
+import { StatusMessage } from '@/components/shared/StatusMessage';
 
 async function getVendorData(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
   const { data: vendor, error: vendorError } = await supabase
@@ -48,10 +49,12 @@ export default async function BoutiquePage() {
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
   if (!profile || !['vendor', 'super_admin'].includes(profile.role)) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold">Accès non autorisé</h1>
-        <p>Vous devez être un vendeur approuvé pour accéder à cette page.</p>
-      </div>
+      <StatusMessage
+        title="Accès non autorisé"
+        description="Vous devez être un vendeur approuvé pour accéder à cette page."
+        ctaLabel="Devenir vendeur"
+        ctaHref="/marketplace-aux-philippines/devenir-vendeur"
+      />
     );
   }
 
@@ -59,10 +62,11 @@ export default async function BoutiquePage() {
 
   if (!vendor) {
      return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold">Erreur</h1>
-        <p>Impossible de charger les informations de votre boutique. Veuillez contacter le support.</p>
-      </div>
+      <StatusMessage
+        variant="error"
+        title="Erreur"
+        description="Impossible de charger les informations de votre boutique. Veuillez contacter le support."
+      />
     );
   }
 

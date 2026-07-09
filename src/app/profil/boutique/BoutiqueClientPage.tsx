@@ -48,19 +48,16 @@ type BoutiqueClientPageProps = {
 };
 
 // Sub-components
-const StatCard = ({ icon, title, value, color }: { icon: any, title: string, value: string | number, color: string }) => (
-  <div
-    className="bg-card rounded-2xl p-4 flex items-center gap-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-    style={{ border: '0.5px solid hsl(var(--border))', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
-  >
-    <div className={`w-11 h-11 flex items-center justify-center rounded-xl flex-shrink-0 ${color}`}>
-      <FontAwesomeIcon icon={icon} className="text-white" style={{ fontSize: '16px' }} />
+const StatCard = ({ icon, title, value }: { icon: any, title: string, value: string | number }) => (
+  <div className="bg-card rounded-2xl p-4 flex items-center gap-4 border border-border shadow-card-rest transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40">
+    <div className="w-11 h-11 flex items-center justify-center rounded-xl flex-shrink-0 bg-primary/10 text-primary">
+      <FontAwesomeIcon icon={icon} className="text-[16px]" />
     </div>
     <div className="min-w-0">
-      <p style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'hsl(var(--muted-foreground))', marginBottom: '2px' }}>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground mb-0.5">
         {title}
       </p>
-      <p className="text-foreground tabular-nums" style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1 }}>
+      <p className="text-foreground tabular-nums text-[22px] font-bold tracking-[-0.01em] leading-none">
         {value}
       </p>
     </div>
@@ -68,23 +65,14 @@ const StatCard = ({ icon, title, value, color }: { icon: any, title: string, val
 );
 
 const InfoWidget = ({ icon, title, children }: { icon: any, title: string, children: React.ReactNode }) => (
-  <div
-    className="bg-card rounded-2xl p-5"
-    style={{ border: '0.5px solid hsl(var(--border))', boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}
-  >
-    <h3
-      className="text-foreground mb-3 flex items-center gap-2"
-      style={{ fontSize: '15px', fontWeight: 600, letterSpacing: '-0.01em' }}
-    >
-      <span
-        className="inline-flex items-center justify-center rounded-lg"
-        style={{ width: '28px', height: '28px', backgroundColor: '#F4F7FE', color: '#3B5BDB' }}
-      >
-        <FontAwesomeIcon icon={icon} style={{ fontSize: '12px' }} />
+  <div className="bg-card rounded-2xl p-5 border border-border shadow-card-rest">
+    <h3 className="text-foreground mb-3 flex items-center gap-2 text-[15px] font-semibold tracking-[-0.01em]">
+      <span className="inline-flex items-center justify-center rounded-lg w-7 h-7 bg-soft-blue text-primary">
+        <FontAwesomeIcon icon={icon} className="text-[12px]" />
       </span>
       {title}
     </h3>
-    <div style={{ fontSize: '13px', color: 'hsl(var(--muted-foreground))', lineHeight: 1.55 }} className="space-y-2">
+    <div className="text-[13px] text-muted-foreground leading-[1.55] space-y-2">
       {children}
     </div>
   </div>
@@ -93,7 +81,7 @@ const InfoWidget = ({ icon, title, children }: { icon: any, title: string, child
 const TabButton = ({ label, isActive, onClick }: { label: string, isActive: boolean, onClick: () => void }) => (
     <button
         onClick={onClick}
-        className={`px-4 py-2 font-semibold text-sm rounded-t-lg focus:outline-none ${
+        className={`px-4 py-2 font-semibold text-sm rounded-t-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-colors ${
             isActive ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground hover:text-primary'
         }`}
     >
@@ -120,14 +108,14 @@ const VendorSettingsForm = ({ vendor }: { vendor: Vendor }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="bg-card p-6 rounded-lg shadow space-y-6 max-w-lg mx-auto">
+        <form onSubmit={handleSubmit} className="bg-card p-6 rounded-2xl border border-border shadow-card-rest space-y-6 max-w-lg mx-auto">
             <div>
                 <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">Nom de la boutique</label>
-                <input type="text" name="name" defaultValue={vendor.name} className="w-full px-3 py-2 border rounded-lg" />
+                <input type="text" name="name" defaultValue={vendor.name} className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" />
             </div>
             <div>
                 <label htmlFor="description" className="block text-sm font-medium text-foreground mb-1">Description</label>
-                <textarea name="description" defaultValue={vendor.description || ''} rows={4} className="w-full px-3 py-2 border rounded-lg"></textarea>
+                <textarea name="description" defaultValue={vendor.description || ''} rows={4} className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
             </div>
             <div>
                 <label htmlFor="logo" className="block text-sm font-medium text-foreground mb-1">Logo de la boutique</label>
@@ -200,13 +188,13 @@ export function BoutiqueClientPage({ vendor, initialProducts, monthlySales, mont
       case 'overview':
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <StatCard icon={faBoxOpen} title="Produits en ligne" value={products.length} color="bg-blue-500" />
-            <StatCard icon={faEye} title="Vues ce mois-ci" value={monthlyViews} color="bg-green-500" />
-            <StatCard icon={faChartLine} title="Ventes ce mois-ci" value={`€ ${monthlySales.toFixed(2)}`} color="bg-indigo-500" />
+            <StatCard icon={faBoxOpen} title="Produits en ligne" value={products.length} />
+            <StatCard icon={faEye} title="Vues ce mois-ci" value={monthlyViews} />
+            <StatCard icon={faChartLine} title="Ventes ce mois-ci" value={`€ ${monthlySales.toFixed(2)}`} />
             
             <div className="md:col-span-2 lg:col-span-3 space-y-6">
                 <InfoWidget icon={faUserCheck} title="Profil de votre boutique">
-                    {!vendor.logo_url && <p>💡 N'oubliez pas d'ajouter un logo pour personnaliser votre boutique !</p>}
+                    {!vendor.logo_url && <p>N&apos;oubliez pas d&apos;ajouter un logo pour personnaliser votre boutique.</p>}
                     <p>Pensez à rédiger une description complète et attrayante pour rassurer vos clients.</p>
                 </InfoWidget>
 
@@ -226,10 +214,10 @@ export function BoutiqueClientPage({ vendor, initialProducts, monthlySales, mont
                   Ajouter un produit
                 </Link>
             </div>
-            <div className="bg-card rounded-lg shadow overflow-hidden">
+            <div className="bg-card rounded-2xl border border-border shadow-card-rest overflow-hidden">
                 <table className="w-full text-left">
                 <thead>
-                    <tr className="border-b bg-muted/40">
+                    <tr className="border-b border-border bg-muted/40">
                     <th className="p-4 w-16">Image</th>
                     <th className="p-4">Produit</th>
                     <th className="p-4">Prix</th>
@@ -240,7 +228,7 @@ export function BoutiqueClientPage({ vendor, initialProducts, monthlySales, mont
                 <tbody>
                     {products.length > 0 ? (
                     products.map((product) => (
-                        <tr key={product.id} className="border-b last:border-b-0 hover:bg-muted/20">
+                        <tr key={product.id} className="border-b border-border last:border-b-0 hover:bg-muted/20">
                         <td className="p-2">
                             <div className="w-12 h-12 relative rounded-md overflow-hidden bg-muted flex items-center justify-center">
                             {product.image_urls?.[0] ? (
@@ -283,10 +271,10 @@ export function BoutiqueClientPage({ vendor, initialProducts, monthlySales, mont
         );
         case 'orders':
             return (
-                <div className="bg-card rounded-lg shadow overflow-hidden">
+                <div className="bg-card rounded-2xl border border-border shadow-card-rest overflow-hidden">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="border-b bg-muted/40">
+                            <tr className="border-b border-border bg-muted/40">
                                 <th className="p-4">Date</th>
                                 <th className="p-4">Produit</th>
                                 <th className="p-4">Client</th>
@@ -297,7 +285,7 @@ export function BoutiqueClientPage({ vendor, initialProducts, monthlySales, mont
                         <tbody>
                             {orders.length > 0 ? (
                                 orders.map(item => (
-                                    <tr key={item.id} className="border-b last:border-b-0">
+                                    <tr key={item.id} className="border-b border-border last:border-b-0">
                                         <td className="p-4">{new Date(item.orders.created_at).toLocaleDateString()}</td>
                                         <td className="p-4">{item.products.name} (x{item.quantity})</td>
                                         <td className="p-4">{item.orders.shipping_address?.name}</td>
@@ -326,11 +314,14 @@ export function BoutiqueClientPage({ vendor, initialProducts, monthlySales, mont
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold">{vendor.name}</h1>
-        <p className="text-lg text-muted-foreground mt-2">{vendor.description}</p>
+        <span className="block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground mb-1">
+          Ma boutique
+        </span>
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-[-0.02em] text-foreground">{vendor.name}</h1>
+        {vendor.description && <p className="text-lg text-muted-foreground mt-2">{vendor.description}</p>}
       </div>
 
-      <div className="border-b mb-6">
+      <div className="border-b border-border mb-6">
         <TabButton label="Vue d'ensemble" isActive={activeTab === 'overview'} onClick={() => setActiveTab('overview')} />
         <TabButton label="Produits" isActive={activeTab === 'products'} onClick={() => setActiveTab('products')} />
         <TabButton label="Commandes" isActive={activeTab === 'orders'} onClick={() => setActiveTab('orders')} />

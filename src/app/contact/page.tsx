@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPaperPlane,
@@ -128,7 +127,7 @@ export default function ContactPage() {
             Nous contacter
           </h1>
           <p className="text-muted-foreground text-base leading-relaxed">
-            Une question, un signalement ou une proposition ? Ecrivez-nous, nous repondons sous 48h.
+            Une question, un signalement ou une proposition ? Écrivez-nous, nous répondons sous 48h.
           </p>
         </div>
       </section>
@@ -136,24 +135,16 @@ export default function ContactPage() {
       {/* Form section */}
       <section className="container mx-auto px-4 py-12 max-w-xl">
         <div ref={formRef}>
-          <AnimatePresence mode="wait">
-            {status === 'success' ? (
+          {status === 'success' ? (
               /* ---- Success state ---- */
-              <motion.div
-                key="success"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.35 }}
-                className="bg-card rounded-2xl border border-border shadow-lg p-10 text-center space-y-4"
-              >
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-green-100 dark:bg-green-900/30 mb-2">
-                  <FontAwesomeIcon icon={faCircleCheck} className="text-green-500 text-3xl" />
+              <div className="bg-card rounded-2xl border border-border shadow-card-rest p-10 text-center space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300 motion-reduce:animate-none">
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-success/10 mb-2">
+                  <FontAwesomeIcon icon={faCircleCheck} className="text-success text-3xl" />
                 </div>
-                <h2 className="text-xl font-semibold text-foreground">Message envoye !</h2>
+                <h2 className="text-xl font-semibold text-foreground">Message envoyé !</h2>
                 <p className="text-muted-foreground text-sm leading-relaxed">
-                  Merci de nous avoir contactes. Nous vous repondrons dans les plus brefs delais
-                  (generalement sous 24-48h).
+                  Merci de nous avoir contactés. Nous vous répondrons dans les plus brefs délais
+                  (généralement sous 24-48h).
                 </p>
                 <Button
                   type="button"
@@ -163,17 +154,10 @@ export default function ContactPage() {
                 >
                   Envoyer un autre message
                 </Button>
-              </motion.div>
+              </div>
             ) : (
               /* ---- Form ---- */
-              <motion.div
-                key="form"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.35 }}
-                className="bg-card rounded-2xl border border-border shadow-lg p-6 md:p-10"
-              >
+              <div className="bg-card rounded-2xl border border-border shadow-card-rest p-6 md:p-10 animate-in fade-in slide-in-from-bottom-2 duration-300 motion-reduce:animate-none">
                 <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
                   {/* Name */}
                   <div>
@@ -246,61 +230,49 @@ export default function ContactPage() {
                       className="bg-muted/50 hover:border-primary/50 focus:bg-card resize-none"
                     />
                     <p className="text-xs text-muted-foreground mt-1 text-right">
-                      {form.message.length} / 2000 caracteres
+                      {form.message.length} / 2000 caractères
                     </p>
                   </div>
 
                   {/* Error message */}
-                  <AnimatePresence>
-                    {status === 'error' && errorMessage && (
-                      <motion.div
-                        key="error"
-                        initial={{ opacity: 0, y: -6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
-                        transition={{ duration: 0.2 }}
-                        className="flex items-start gap-2.5 bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-xl text-sm"
-                      >
-                        <FontAwesomeIcon
-                          icon={faCircleExclamation}
-                          className="mt-0.5 flex-shrink-0"
-                        />
-                        <span>{errorMessage}</span>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {status === 'error' && errorMessage && (
+                    <div className="flex items-start gap-2.5 bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-xl text-sm animate-in fade-in slide-in-from-top-1 duration-200 motion-reduce:animate-none">
+                      <FontAwesomeIcon
+                        icon={faCircleExclamation}
+                        className="mt-0.5 flex-shrink-0"
+                      />
+                      <span>{errorMessage}</span>
+                    </div>
+                  )}
 
                   {/* Submit */}
                   <div className="pt-1">
-                    <motion.div whileHover={{ scale: isLoading ? 1 : 1.01 }} whileTap={{ scale: isLoading ? 1 : 0.99 }}>
-                      <Button
-                        type="button"
-                        onClick={handleSubmit}
-                        disabled={isLoading}
-                        size="lg"
-                        className="w-full font-semibold"
-                      >
-                        {isLoading ? (
-                          <>
-                            <FontAwesomeIcon icon={faSpinner} className="mr-2 animate-spin" />
-                            Envoi en cours...
-                          </>
-                        ) : (
-                          <>
-                            <FontAwesomeIcon icon={faPaperPlane} className="mr-2" />
-                            Envoyer le message
-                          </>
-                        )}
-                      </Button>
-                    </motion.div>
+                    <Button
+                      type="button"
+                      onClick={handleSubmit}
+                      disabled={isLoading}
+                      size="lg"
+                      className="w-full font-semibold transition-transform hover:scale-[1.01] active:scale-[0.99] motion-reduce:hover:scale-100"
+                    >
+                      {isLoading ? (
+                        <>
+                          <FontAwesomeIcon icon={faSpinner} className="mr-2 animate-spin" />
+                          Envoi en cours...
+                        </>
+                      ) : (
+                        <>
+                          <FontAwesomeIcon icon={faPaperPlane} className="mr-2" />
+                          Envoyer le message
+                        </>
+                      )}
+                    </Button>
                     <p className="text-xs text-muted-foreground text-center mt-3">
-                      Nous repondons generalement sous 24-48h.
+                      Nous répondons généralement sous 24-48h.
                     </p>
                   </div>
                 </form>
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
         </div>
       </section>
     </main>

@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
+import { StatusMessage } from '@/components/shared/StatusMessage';
 import { redirect } from 'next/navigation';
 import { AddProductForm } from './AddProductForm';
 
@@ -32,10 +33,10 @@ export default async function NouveauProduitPage() {
 
   if (!vendor) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold">Accès non autorisé</h1>
-        <p>Vous devez avoir une boutique approuvée pour ajouter un produit.</p>
-      </div>
+      <StatusMessage
+        title="Accès non autorisé"
+        description="Vous devez avoir une boutique approuvée pour ajouter un produit."
+      />
     );
   }
 
@@ -44,7 +45,8 @@ export default async function NouveauProduitPage() {
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Ajouter un nouveau produit</h1>
+        <span className="block text-[13px] font-medium uppercase tracking-[0.08em] text-muted-foreground mb-1">Ma boutique</span>
+        <h1 className="text-3xl font-bold tracking-[-0.02em] text-foreground mb-8">Ajouter un nouveau produit</h1>
         <AddProductForm categories={categories} vendorId={vendor.id} />
       </div>
     </div>
