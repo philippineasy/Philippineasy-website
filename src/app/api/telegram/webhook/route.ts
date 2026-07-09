@@ -25,9 +25,9 @@ async function telegramSend(token: string, chatId: string | number, text: string
 }
 
 const HELP_TEXT =
-  'ℹ️ Pour répondre à un visiteur du chat philippineasy.com : utilise la fonction ' +
-  '"Répondre" de Telegram sur le message de notification (💬 Chat site …). ' +
-  'Ta réponse apparaîtra instantanément dans son fil sur le site.';
+  'ℹ️ Pour répondre à un visiteur du chat philippineasy.com : fais un appui long ' +
+  '(ou glisse vers la gauche) sur le message de notification (💬 Chat site …) puis ' +
+  '« Répondre », et tape ta réponse. Elle apparaîtra instantanément dans son fil sur le site.';
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       await telegramSend(
         token,
         ownerChatId,
-        '⚠️ Je ne retrouve pas la conversation liée à ce message. Réponds directement à une notification "💬 Chat site", ou passe par philippineasy.com/admin/chat.',
+        '⚠️ Je ne retrouve pas la conversation liée à ce message. Fais « Répondre » directement sur une notification "💬 Chat site", ou passe par philippineasy.com/admin/chat.',
         message.message_id
       );
       return NextResponse.json({ ok: true });
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     await telegramSend(
       token,
       ownerChatId,
-      `✅ Envoyé au visiteur (#${String(mapping.conversation_id).slice(0, 8)})`,
+      `✅ Envoyé au visiteur (réf ${String(mapping.conversation_id).slice(0, 8)})`,
       message.message_id
     );
 

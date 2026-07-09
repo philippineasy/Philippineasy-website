@@ -5,6 +5,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Polish — Chat multilingue + notifications Telegram plus claires (2026-07-09)
+
+**Chat multilingue** : l'IA détecte la langue du visiteur et répond dans sa langue (anglais, espagnol…) au lieu de forcer le français ; les accusés de réception des catégories relay (remboursement/partenariat/contact) incluent une ligne 🇬🇧. **Telegram** : le pied de notification explique le geste (« appui long → Répondre ») et la réf n'est plus formatée en #hashtag (Telegram la rendait cliquable vers une recherche vide, source de confusion).
+
 ### Feature — Chat maison (remplacement Tawk.to) (2026-07-09)
 
 **Widget de chat 100 % maison, zéro script/iframe tiers** : Tawk.to (script externe + iframe qui pénalisait les Core Web Vitals et échappait à notre contrôle) est remplacé par `ChatLauncher` (bulle ~2 Ko dans le bundle commun) + `ChatPanel` chargé en dynamic import au premier clic. Aucun host tiers ajouté à la CSP — les entrées tawk.to (script/style/font/connect/frame-src) sont retirées.

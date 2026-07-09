@@ -50,7 +50,10 @@ async function sendTelegram(params: NotifyParams): Promise<void> {
   if (aiReply) {
     lines.push('', `🤖 Réponse IA envoyée : ${aiReply.length > 400 ? aiReply.slice(0, 400) + '…' : aiReply}`);
   }
-  lines.push('', `↩️ Réponds à CE message pour répondre au visiteur (#${shortId})`);
+  lines.push(
+    '',
+    `↩️ Pour répondre au visiteur : appui long sur CE message → « Répondre » (réf ${shortId})`
+  );
 
   const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: 'POST',

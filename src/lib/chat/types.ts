@@ -71,11 +71,14 @@ export const DIRECT_ACK: Record<Exclude<ChatCategory, 'aide' | 'offres'>, string
   remboursement:
     "C'est transmis ✅ Hugo traite personnellement les demandes de remboursement, en général sous 24 h. " +
     'Tu peux garder cette fenêtre ouverte ou revenir plus tard : sa réponse apparaîtra ici même' +
-    " (et par email si tu l'as renseigné).",
+    " (et par email si tu l'as renseigné).\n\n" +
+    '🇬🇧 Your refund request has been sent to Hugo — he handles these personally, usually within 24h. His reply will appear right here (and by email if provided).',
   partenariat:
     'Merci pour ta proposition ✅ Elle vient d’être transmise à Hugo, qui te répondra ici même' +
-    " (et par email si tu l'as renseigné).",
+    " (et par email si tu l'as renseigné).\n\n" +
+    '🇬🇧 Thanks! Your proposal has been sent to Hugo — his reply will appear right here (and by email if provided).',
   contact:
     'Ton message est bien parti ✅ Hugo est notifié en direct et te répond ici même dès que possible' +
-    " (et par email si tu l'as renseigné).",
+    " (et par email si tu l'as renseigné).\n\n" +
+    '🇬🇧 Message sent ✅ Hugo has been notified and will reply right here (and by email if provided).',
 };
