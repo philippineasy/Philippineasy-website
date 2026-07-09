@@ -1,9 +1,13 @@
 'use server';
 
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
+import { requireAdmin } from '@/utils/auth/requireAdmin';
 import { revalidatePath } from 'next/cache';
 
 export async function createManualProfile(formData: FormData) {
+  // Crée un compte auth + peut octroyer premium en service_role : garde admin
+  // OBLIGATOIRE (une server action est un endpoint POST public — audit 07/09).
+  await requireAdmin();
   const supabase = createServiceRoleClient();
 
   const email = formData.get('email') as string;
