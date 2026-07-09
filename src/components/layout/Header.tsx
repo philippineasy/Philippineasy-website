@@ -57,6 +57,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
   const { user, isAdmin, loading } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -133,6 +134,30 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
     }
   }, [user]);
 
+  // Compteur de messages Rencontre non lus (badge sur le lien nav). Distinct de
+  // la cloche : il reflète l'état is_read des messages, pas les notifications.
+  useEffect(() => {
+    if (!user) {
+      setUnreadMessages(0);
+      return;
+    }
+    const refresh = async () => {
+      const { data } = await supabase.rpc('get_unread_message_count');
+      setUnreadMessages(typeof data === 'number' ? data : 0);
+    };
+    refresh();
+
+    const channel = supabase
+      .channel(`realtime:unread-messages:${user.id}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `to_user_id=eq.${user.id}` }, refresh)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: `to_user_id=eq.${user.id}` }, refresh)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   interface NavLinkProps {
     href: string;
     label: string;
@@ -174,12 +199,21 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
       );
     }
 
+    const msgCount = href.startsWith('/rencontre-philippines') ? unreadMessages : 0;
+
     return (
       <Link href={href} className={`${baseClasses} ${admin ? adminClasses : defaultClasses} ${isActive ? activeClasses : ''}`}>
         {special && <span aria-hidden="true">+</span>}
         <span className="relative inline-flex items-center">
           {label}
-          {badge && (
+          {msgCount > 0 ? (
+            <span
+              className="ml-1.5 inline-flex min-w-[18px] h-[18px] px-1 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
+              aria-label={`${msgCount} message${msgCount > 1 ? 's' : ''} non lu${msgCount > 1 ? 's' : ''}`}
+            >
+              {msgCount > 9 ? '9+' : msgCount}
+            </span>
+          ) : badge ? (
             <>
               <span
                 className="absolute -top-0.5 -right-2 w-1.5 h-1.5 rounded-full bg-accent animate-pulse-dot motion-reduce:animate-none"
@@ -188,7 +222,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
               />
               <span className="sr-only">({badge})</span>
             </>
-          )}
+          ) : null}
         </span>
       </Link>
     );
@@ -211,9 +245,19 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
       return null;
     }
 
+    const msgCount = href.startsWith('/rencontre-philippines') ? unreadMessages : 0;
+
     return (
-      <Link href={href} className={`${baseClasses} ${admin ? adminClasses : defaultClasses} ${isActive ? activeClasses : ''}`}>
+      <Link href={href} className={`${baseClasses} ${admin ? adminClasses : defaultClasses} ${isActive ? activeClasses : ''} inline-flex items-center gap-2`}>
         {label}
+        {msgCount > 0 && (
+          <span
+            className="inline-flex min-w-[18px] h-[18px] px-1 items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold"
+            aria-label={`${msgCount} message${msgCount > 1 ? 's' : ''} non lu${msgCount > 1 ? 's' : ''}`}
+          >
+            {msgCount > 9 ? '9+' : msgCount}
+          </span>
+        )}
       </Link>
     );
   };

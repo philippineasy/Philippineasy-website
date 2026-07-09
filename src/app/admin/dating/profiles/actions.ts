@@ -17,18 +17,36 @@ export async function validateProfile(userId: string, isValidated: boolean, reje
     return { error: error.message };
   }
 
-  // Notifie le membre du résultat de la modération (email, non bloquant).
+  // Synchronise la file de modération photos : valider un profil = approuver ses
+  // photos en attente (elles sont déjà publiques dès la validation, elles ne
+  // doivent plus apparaître comme « en attente »). Refuser = rejeter les photos
+  // + retirer la photo de profil publique. (Désync des 2 files, audit 07/09.)
   if (isValidated) {
+    await supabase
+      .from('dating_photos')
+      .update({ status: 'approved' })
+      .eq('user_id', userId)
+      .eq('status', 'pending');
     sendDatingProfileApproved(userId).catch((e) =>
       console.error('sendDatingProfileApproved:', e instanceof Error ? e.message : e)
     );
   } else {
+    await supabase
+      .from('dating_photos')
+      .update({ status: 'rejected' })
+      .eq('user_id', userId)
+      .neq('status', 'rejected');
+    await supabase
+      .from('dating_profiles')
+      .update({ profile_picture_url: null })
+      .eq('user_id', userId);
     sendDatingProfileRejected(userId, rejectionReason).catch((e) =>
       console.error('sendDatingProfileRejected:', e instanceof Error ? e.message : e)
     );
   }
 
   revalidatePath('/admin/dating/profiles');
+  revalidatePath('/admin/dating/photos');
   return { success: true };
 }
 

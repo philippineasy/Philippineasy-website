@@ -5,6 +5,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Feature/UX — Finitions Rencontre : brouillon inscription, compression photo, badge messages, resync modération (2026-07-09)
+
+**Brouillon d'inscription persisté** : le wizard 6 étapes sauvegarde les champs texte en localStorage à chaque changement et les restaure au montage (bannière « Brouillon restauré » + bouton « Recommencer »), purgé après soumission réussie. Quitter à l'étape 3 ne perd plus tout.
+
+**Compression photo côté client** : nouvel util `src/utils/image/compressImage.ts` (canvas, sans dépendance) — redimensionne à 1600px / qualité 0.82 avant upload, appliqué à l'inscription ET à l'ajout de photo en édition. Sur mobile PH, une photo brute de 5-12 Mo tombe à quelques centaines de Ko (upload plus rapide et fiable). Indicateur « Optimisation… » pendant le traitement. HEIC laissé tel quel (non décodable partout).
+
+**Badge messages non lus dans la nav** : nouveau RPC `get_unread_message_count` (SECURITY DEFINER) + compteur temps réel sur le lien « Rencontres » du Header (desktop + mobile), distinct de la cloche (reflète l'état `is_read` des messages, pas les notifications). Mis à jour via realtime sur INSERT/UPDATE de `messages`.
+
+**Resync des deux files de modération** : valider un profil (`validateProfile`) approuve désormais aussi ses photos en attente (elles étaient déjà publiques mais restaient « en attente » dans /admin/dating/photos) ; refuser un profil rejette ses photos et retire la photo publique. Les deux vues admin sont enfin cohérentes.
+
 ### Fix/Feature — Audit notifications + messagerie Rencontre : realtime, blocage, quota, sécurité (2026-07-09)
 
 **Realtime ressuscité (bug racine)** : AUCUNE table publique n'était dans la publication `supabase_realtime` → toutes les subscriptions postgres_changes du site étaient mortes (messages dating, cloche de notifications, chat CRM ne se mettaient à jour qu'au reload). Ajout de `messages`, `notifications`, `matches`, `message_reactions`, `crm_messages` à la publication + `REPLICA IDENTITY FULL` (pour que les événements UPDATE/DELETE filtrés — accusés de lecture — arrivent). Vérifié par un test WebSocket réel.

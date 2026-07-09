@@ -15,6 +15,7 @@ import { CustomSelect } from '@/components/shared/CustomSelect';
 import ConfirmationModal from '@/components/shared/ConfirmationModal';
 import { ORIENTATION_OPTIONS, RELIGION_OPTIONS, DATING_INTENT_OPTIONS, YES_NO_MAYBE_OPTIONS, FINANCIAL_STABILITY_OPTIONS, PARTNER_MOVE_OPTIONS, FOREINGNER_KINKY_OPTIONS, PARTNER_NOT_KINKY_OPTIONS, MONEY_IMPORTANCE_OPTIONS } from '@/config/dating';
 import { questionMap } from '@/utils/dating/questions';
+import { compressImage } from '@/utils/image/compressImage';
 
 type FormData = Omit<UpdateDatingProfilePayload, 'gender' | 'height'>;
 
@@ -142,8 +143,9 @@ const EditDatingProfilePage = () => {
     if (!file) return;
 
     setIsUploading(true);
+    const optimised = await compressImage(file, { maxDimension: 1600, quality: 0.82 });
     const formData = new FormData();
-    formData.append('photo', file);
+    formData.append('photo', optimised);
 
     try {
       const result = await uploadNewPhoto(formData);

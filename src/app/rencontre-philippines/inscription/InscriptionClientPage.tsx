@@ -10,6 +10,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import dynamic from 'next/dynamic';
 import { getInterests, checkExistingDatingProfile } from '@/services/datingService';
 import { createDatingProfile } from './actions';
+import { compressImage } from '@/utils/image/compressImage';
+
+// Brouillon d'inscription : le wizard fait 6 étapes ; sans persistance, quitter
+// à l'étape 3 perdait tout. On sauvegarde les champs texte (pas la photo — un
+// File n'est pas sérialisable) en localStorage, restaurés au montage.
+const DRAFT_KEY = 'pe_dating_signup_draft';
 import { CustomSelect } from '@/components/shared/CustomSelect';
 import { DATING_INTENT_OPTIONS, EDUCATION_OPTIONS, GENDER_OPTIONS, ORIENTATION_OPTIONS, RELIGION_OPTIONS, YES_NO_MAYBE_OPTIONS, FINANCIAL_STABILITY_OPTIONS, PARTNER_MOVE_OPTIONS, FOREINGNER_KINKY_OPTIONS, PARTNER_NOT_KINKY_OPTIONS, MONEY_IMPORTANCE_OPTIONS } from '@/config/dating';
 
@@ -62,7 +68,7 @@ type FormValues = {
 
 const InscriptionClientPage = () => {
   const [step, setStep] = useState(1);
-  const { register, handleSubmit, watch, formState: { errors }, trigger, control } = useForm<FormValues>({
+  const { register, handleSubmit, watch, formState: { errors }, trigger, control, reset, getValues } = useForm<FormValues>({
     defaultValues: {
       gender: '',
       orientation: '',
@@ -90,8 +96,11 @@ const InscriptionClientPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [photo, setPhoto] = useState<File | null>(null);
+  const [compressing, setCompressing] = useState(false);
   const [interests, setInterests] = useState<Interest[]>([]);
+  const [draftRestored, setDraftRestored] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const draftLoadedRef = useRef(false);
 
   useEffect(() => {
     const initializePage = async () => {
@@ -107,6 +116,40 @@ const InscriptionClientPage = () => {
     };
     initializePage();
   }, [user, router]);
+
+  // Restaure le brouillon une seule fois au montage.
+  useEffect(() => {
+    if (draftLoadedRef.current) return;
+    draftLoadedRef.current = true;
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (raw) {
+        const draft = JSON.parse(raw);
+        reset({ ...getValues(), ...draft.values });
+        if (typeof draft.step === 'number' && draft.step >= 1 && draft.step <= 6) {
+          setStep(draft.step);
+        }
+        setDraftRestored(true);
+      }
+    } catch {
+      // brouillon corrompu : on l'ignore
+    }
+  }, [reset, getValues]);
+
+  // Sauvegarde le brouillon (champs texte) à chaque changement, débounce léger.
+  const watchedAll = watch();
+  useEffect(() => {
+    if (!draftLoadedRef.current) return;
+    const t = setTimeout(() => {
+      try {
+        const { photo: _omit, ...serialisable } = watchedAll as Record<string, unknown>;
+        localStorage.setItem(DRAFT_KEY, JSON.stringify({ step, values: serialisable }));
+      } catch {
+        // quota localStorage plein : non bloquant
+      }
+    }, 400);
+    return () => clearTimeout(t);
+  }, [watchedAll, step]);
 
   const handleFormSubmit = async (data: any) => {
     setIsLoading(true);
@@ -137,7 +180,22 @@ const InscriptionClientPage = () => {
     if (result?.error) {
       setError(result.error);
       setIsLoading(false);
+    } else {
+      // Succès : purge le brouillon (sinon il ré-apparaîtrait à une future visite).
+      try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
     }
+  };
+
+  const handlePhotoChange = async (file: File | null) => {
+    if (!file) {
+      setPhoto(null);
+      return;
+    }
+    setError(null);
+    setCompressing(true);
+    const optimised = await compressImage(file, { maxDimension: 1600, quality: 0.82 });
+    setPhoto(optimised);
+    setCompressing(false);
   };
 
   const nextStep = async () => {
@@ -178,6 +236,22 @@ const InscriptionClientPage = () => {
           </span>
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground">Créez Votre Profil</h1>
           <p className="text-muted-foreground mt-2">Rejoignez notre communauté et trouvez votre moitié.</p>
+          {draftRestored && (
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm text-primary">
+              <Check className="h-4 w-4" />
+              Brouillon restauré — vous reprenez où vous en étiez.
+              <button
+                type="button"
+                onClick={() => {
+                  try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+                  window.location.reload();
+                }}
+                className="ml-1 font-medium underline underline-offset-2 hover:no-underline"
+              >
+                Recommencer
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -656,16 +730,21 @@ const InscriptionClientPage = () => {
                     <label className="block text-sm font-semibold text-foreground mb-2">Photo de profil (obligatoire)</label>
                     <input
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
                       ref={fileInputRef}
-                      onChange={(e) => setPhoto(e.target.files ? e.target.files[0] : null)}
+                      onChange={(e) => handlePhotoChange(e.target.files ? e.target.files[0] : null)}
                       className="hidden"
                     />
                     <div
                       onClick={() => fileInputRef.current?.click()}
                       className="border-2 border-dashed border-border rounded-2xl p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors"
                     >
-                      {photo ? (
+                      {compressing ? (
+                        <div className="flex flex-col items-center gap-3 py-4">
+                          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                          <p className="text-sm text-muted-foreground">Optimisation de la photo…</p>
+                        </div>
+                      ) : photo ? (
                         <div className="flex flex-col items-center gap-3">
                           <img
                             src={URL.createObjectURL(photo)}
@@ -673,7 +752,7 @@ const InscriptionClientPage = () => {
                             className="w-24 h-24 rounded-full object-cover ring-4 ring-primary/20"
                           />
                           <div>
-                            <p className="text-sm font-medium text-foreground">{photo.name}</p>
+                            <p className="text-sm font-medium text-foreground">Photo prête</p>
                             <p className="text-xs text-muted-foreground">Cliquez pour changer</p>
                           </div>
                         </div>
