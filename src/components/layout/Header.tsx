@@ -28,10 +28,18 @@ interface HeaderProps {
   navLinks: NavLink[];
 }
 
+type NotificationType =
+  | 'like'
+  | 'super_like'
+  | 'new_match'
+  | 'new_reply'
+  | 'new_message'
+  | 'crm_message';
+
 interface Notification {
   id: number;
   is_read: boolean;
-  type: 'like' | 'super_like' | 'new_match' | 'new_reply' | 'new_message';
+  type: NotificationType;
   link?: string;
   actor: {
     username: string;
@@ -93,15 +101,26 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
 
       const channel = supabase.channel(`realtime:notifications:${user.id}`)
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
-        async (payload) => {
-          const newNotif = payload.new as any;
-          const { data: actorProfile } = await supabase.from('profiles').select('username').eq('id', newNotif.actor_id).single();
-          const newNotificationWithActor = {
-            ...newNotif,
-            actor: { username: actorProfile?.username || 'Un utilisateur' }
-          };
-          setNotifications(prev => [newNotificationWithActor, ...prev]);
-          setUnreadCount(prev => prev + 1);
+        async () => {
+          // Le payload brut n'inclut pas la jointure topic (title/slug) : sans
+          // elle, une notif forum s'affichait « ...sujet "undefined" » avec un
+          // lien mort. On refetch la liste complète (avec jointures) au lieu de
+          // reconstruire à la main depuis payload.new.
+          const notifs = await getNotifications(supabase, user.id);
+          if (notifs && notifs.length > 0) {
+            const actorIds = [...new Set(notifs.map(n => n.actor_id).filter(id => id))];
+            const { data: profilesData } = await supabase
+              .from('profiles')
+              .select('id, username')
+              .in('id', actorIds);
+            const profilesMap = new Map(profilesData?.map(p => [p.id, p.username]));
+            setNotifications(notifs.map(n => ({
+              ...n,
+              actor: { username: profilesMap.get(n.actor_id) || 'Un utilisateur' },
+            })) as unknown as Notification[]);
+          }
+          const count = await getUnreadNotificationCount(supabase, user.id);
+          setUnreadCount(count);
         })
         .subscribe();
 
@@ -250,6 +269,7 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
                             if (user) {
                               await markAllAsRead(supabase, user.id);
                               setUnreadCount(0);
+                              setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
                             }
                           }} className="text-xs text-primary hover:underline">Tout marquer comme lu</button>
                         </div>
@@ -258,12 +278,14 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
                             <Link key={notif.id} href={
                               notif.type === 'new_reply' && notif.topic?.slug ? `/forum-sur-les-philippines/sujet/${notif.topic.slug}` :
                               (notif.type === 'like' || notif.type === 'super_like') ? `/rencontre-philippines/likes` :
+                              notif.type === 'crm_message' ? '/mon-espace/messages' :
                               (notif.type === 'new_match' || notif.type === 'new_message') && notif.link ? notif.link :
-                              '#'
+                              notif.link || '#'
                             } onClick={async () => {
                               if (!notif.is_read) {
                                 await markAsRead(supabase, notif.id.toString());
                                 setUnreadCount(prev => Math.max(0, prev - 1));
+                                setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, is_read: true } : n));
                               }
                               setIsNotificationsOpen(false);
                             }} className={`block p-3 hover:bg-muted ${!notif.is_read ? 'bg-primary/10' : ''}`}>
@@ -273,7 +295,9 @@ const Header = ({ activeMainCategory, navLinks }: HeaderProps) => {
                                 {notif.type === 'super_like' && ' vous a envoyé un Super Like !'}
                                 {notif.type === 'new_match' && ' a matché avec vous !'}
                                 {notif.type === 'new_message' && ' vous a envoyé un message.'}
-                                {notif.type === 'new_reply' && ` a répondu à votre sujet "${notif.topic?.title}"`}
+                                {notif.type === 'new_reply' && notif.topic?.title && ` a répondu à votre sujet "${notif.topic.title}"`}
+                                {notif.type === 'new_reply' && !notif.topic?.title && ' a répondu à votre sujet.'}
+                                {notif.type === 'crm_message' && ' — l\'équipe Philippin\'Easy vous a répondu.'}
                               </p>
                               <p className="text-xs text-muted-foreground mt-1">{new Date(notif.created_at).toLocaleString('fr-FR')}</p>
                             </Link>

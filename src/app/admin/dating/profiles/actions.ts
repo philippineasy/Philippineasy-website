@@ -2,9 +2,10 @@
 
 import { createServiceRoleClient } from '@/utils/supabase/service-role';
 import { requireAdmin } from '@/utils/auth/requireAdmin';
+import { sendDatingProfileApproved, sendDatingProfileRejected } from '@/emails/senders/dating';
 import { revalidatePath } from 'next/cache';
 
-export async function validateProfile(userId: string, isValidated: boolean) {
+export async function validateProfile(userId: string, isValidated: boolean, rejectionReason?: string) {
   await requireAdmin();
   const supabase = createServiceRoleClient();
   const { error } = await supabase
@@ -14,6 +15,17 @@ export async function validateProfile(userId: string, isValidated: boolean) {
 
   if (error) {
     return { error: error.message };
+  }
+
+  // Notifie le membre du résultat de la modération (email, non bloquant).
+  if (isValidated) {
+    sendDatingProfileApproved(userId).catch((e) =>
+      console.error('sendDatingProfileApproved:', e instanceof Error ? e.message : e)
+    );
+  } else {
+    sendDatingProfileRejected(userId, rejectionReason).catch((e) =>
+      console.error('sendDatingProfileRejected:', e instanceof Error ? e.message : e)
+    );
   }
 
   revalidatePath('/admin/dating/profiles');
@@ -59,6 +71,7 @@ export async function grantPremium(userId: string, plan: 'premium' | 'free') {
 }
 
 export async function banUser(userId: string, isBanned: boolean) {
+    await requireAdmin();
     const supabase = createServiceRoleClient();
     const { error } = await supabase
         .from('profiles')

@@ -5,6 +5,24 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fix/Feature — Audit notifications + messagerie Rencontre : realtime, blocage, quota, sécurité (2026-07-09)
+
+**Realtime ressuscité (bug racine)** : AUCUNE table publique n'était dans la publication `supabase_realtime` → toutes les subscriptions postgres_changes du site étaient mortes (messages dating, cloche de notifications, chat CRM ne se mettaient à jour qu'au reload). Ajout de `messages`, `notifications`, `matches`, `message_reactions`, `crm_messages` à la publication + `REPLICA IDENTITY FULL` (pour que les événements UPDATE/DELETE filtrés — accusés de lecture — arrivent). Vérifié par un test WebSocket réel.
+
+**Chat dating unifié** : `ConversationPanel` (inbox) et `ChatClientPage` (page conversation) divergeaient (réactions+typing d'un côté, accusés de lecture de l'autre, realtime cassé des deux) → fusionnés en un seul composant `ChatThread` complet : envoi optimiste, erreur quota affichée avec CTA Premium (au lieu d'un `console.error` muet), réactions emoji propagées en realtime, « en train d'écrire… » réparé (le broadcast se faisait sur un canal jamais souscrit → invisible), accusés ✓/✓✓ live, traduction FR/EN/Tagalog.
+
+**Blocage réellement appliqué** : le bouton « Bloquer » n'existait nulle part dans l'UI (action serveur morte) et `blocked_users` n'était consulté qu'au deck de swipe. Ajout : menu ⋯ dans le chat + option dans le profil (modales, plus de `prompt()`/`alert()`) ; RPC transactionnelles `block_user`/`unblock_user`/`unmatch_user` (SECURITY DEFINER, auth.uid()) ; `can_send_message` et `process_like` refusent/ignorent désormais les paires bloquées ; `get_matches_with_details` exclut les matchs bloqués/unmatch. Signalement d'un message précis (`reported_messages.message_id` renseigné, colonne passée nullable pour les signalements de profil qui échouaient tous).
+
+**Notifications** : nouveau type `crm_message` (trigger sur `crm_messages` → l'utilisateur est notifié in-app quand l'équipe répond dans /mon-espace, pas seulement par email) ; bug realtime forum corrigé (affichait « sujet "undefined" » + lien mort car le payload brut n'a pas la jointure → refetch avec jointures) ; « tout marquer comme lu » met à jour l'état visuel ; fallback pour types inconnus.
+
+**Sécurité (CRITIQUE)** : `banUser`, `rejectPhoto` et `createManualProfile` (admin dating) étaient des Server Actions **sans `requireAdmin()`** alors qu'elles écrivent en service_role → n'importe quel utilisateur connecté pouvait bannir, rejeter des photos ou créer des comptes premium. Gardes ajoutées.
+
+**Inscription Rencontre** : garde d'auth serveur (un visiteur déconnecté ne remplit plus 6 étapes pour échouer ; membre déjà validé redirigé vers le swipe) ; emails branchés (bienvenue à l'inscription, « profil validé » et « profil refusé » à la modération — promesse de la page en-attente enfin tenue) ; validation serveur (âge ≥ 18 réel, date de naissance valide, description ≥ 100 car., photo ≤ 8 Mo + type) ; messages d'erreur traduits en français ; casse du genre corrigée (`'Femme'`→`'femme'`) qui masquait le questionnaire en édition ; photo rejetée retirée du profil public ; liens admin 404 (`/rencontre/profil` → `/rencontre-philippines/profil`).
+
+**Tests** : lint + build OK ; 4 triggers DB (like→match→2 notifs, message→notif+quota, blocage→refus, like paire bloquée→ignoré) ; quota 2/jour hommes gratuits vs illimité premium ; abonnement realtime WebSocket réel. Code mort supprimé (ancien `/api/dating/messages`, `reportUser`/`unmatchUser`/`blockUser` à syntaxe `.or()` invalide).
+
+⚠️ Reste hors périmètre (audit, non corrigé cette passe) : brouillon d'inscription non persisté (quitter à l'étape 3 perd tout), pas de compression photo côté client, désync des deux files de modération (profil vs photos), pas de badge « messages non lus » dans la nav globale.
+
 ### Fix — Réponses Telegram silencieusement ignorées (env var avec \n final) (2026-07-09)
 
 Le webhook Telegram comparait strictement `message.chat.id` à `TELEGRAM_CHAT_ID`, or la valeur d'env contient un retour à la ligne final invisible (`"…\n"`) — l'API Telegram tolère à l'envoi, mais la comparaison échouait → les réponses de Hugo étaient ignorées sans erreur. Fix : `.trim()` sur `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID` dans le webhook et notify.

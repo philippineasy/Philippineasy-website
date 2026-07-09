@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { supabase } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import { Message, Profile } from '@/types';
-import ConversationPanel from '@/components/dating/ConversationPanel';
+import ChatThread from '@/components/dating/ChatThread';
 import ProfilePanel from '@/components/dating/ProfilePanel';
 
 interface MatchWithLastMessage {
@@ -45,9 +45,17 @@ const MessagesClientPage = ({ initialMatches, currentUserId }: { initialMatches:
           router.refresh();
         }
       )
+      // Les filtres realtime ne supportent pas or() : un listener par colonne.
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'matches', filter: `or(user_id_1.eq.${currentUserId},user_id_2.eq.${currentUserId})` },
+        { event: 'INSERT', schema: 'public', table: 'matches', filter: `user_id_1=eq.${currentUserId}` },
+        () => {
+          router.refresh();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'matches', filter: `user_id_2=eq.${currentUserId}` },
         () => {
           router.refresh();
         }
@@ -130,8 +138,15 @@ const MessagesClientPage = ({ initialMatches, currentUserId }: { initialMatches:
         {/* Conversation Panel */}
         <div className={`w-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm md:w-2/4 ${selectedMatch ? 'flex' : 'hidden md:flex'}`}>
           {selectedMatch ? (
-            <ConversationPanel
+            <ChatThread
+              key={selectedMatch.id}
+              currentUserId={currentUserId}
               otherUser={selectedMatch.user_id_1 === currentUserId ? selectedMatch.user2 : selectedMatch.user1}
+              variant="embedded"
+              onConversationEnd={() => {
+                setSelectedMatch(null);
+                router.refresh();
+              }}
             />
           ) : (
             <div className="flex h-full items-center justify-center">

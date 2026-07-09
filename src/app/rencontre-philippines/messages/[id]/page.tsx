@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { notFound, redirect } from 'next/navigation';
-import ChatClientPage from './ChatClientPage';
+import ChatThread from '@/components/dating/ChatThread';
 import { getProfileById, getDatingGateStatus } from '@/services/userService';
 
 export default async function MessagePage({
@@ -25,20 +25,17 @@ export default async function MessagePage({
     redirect('/rencontre-philippines/en-attente');
   }
 
-  const [otherUserProfile, currentUserProfile] = await Promise.all([
-    getProfileById(supabase, otherUserId),
-    getProfileById(supabase, user.id),
-  ]);
-
-  if (!otherUserProfile || !currentUserProfile) {
+  const otherUserProfile = await getProfileById(supabase, otherUserId);
+  if (!otherUserProfile) {
     return notFound();
   }
 
   return (
     <div className="max-w-3xl mx-auto p-4 mt-8">
-      <ChatClientPage
-        currentUser={currentUserProfile}
+      <ChatThread
+        currentUserId={user.id}
         otherUser={otherUserProfile}
+        variant="standalone"
       />
     </div>
   );

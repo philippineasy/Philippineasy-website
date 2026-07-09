@@ -39,7 +39,7 @@ export const PhotosClient = ({ photos }: { photos: any[] }) => {
           {getStatusBadge(photo.status)}
           <img src={photo.image_url} alt={`Photo de ${photo.profiles?.username || 'Utilisateur inconnu'}`} className="w-full h-48 object-cover rounded-md" />
           <div className="mt-2 text-center">
-            <Link href={`/rencontre/profil/${photo.user_id}`} className="text-sm font-medium text-indigo-600 hover:text-indigo-900">
+            <Link href={`/rencontre-philippines/profil/${photo.user_id}`} className="text-sm font-medium text-indigo-600 hover:text-indigo-900">
               {photo.profiles?.username || 'Utilisateur inconnu'}
             </Link>
             <div className="flex justify-around mt-2">

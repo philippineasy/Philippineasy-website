@@ -1,16 +1,17 @@
 'use client';
 
-import { Heart, Star, Flag, MessageCircle, MoreVertical } from 'lucide-react';
+import { Heart, Star, Flag, MessageCircle, MoreVertical, Ban } from 'lucide-react';
 
 interface ActionBarProps {
   onLike: () => void;
   onSuperLike: () => void;
   onReport: () => void;
   onMessage: () => void;
+  onBlock: () => void;
   isMatch: boolean;
 }
 
-const ActionBar = ({ onLike, onSuperLike, onReport, onMessage, isMatch }: ActionBarProps) => {
+const ActionBar = ({ onLike, onSuperLike, onReport, onMessage, onBlock, isMatch }: ActionBarProps) => {
   return (
     <div className="sticky bottom-0 lg:relative bg-card lg:bg-transparent w-full p-4 lg:p-0 shadow-lg lg:shadow-none rounded-t-lg lg:rounded-none">
       <div className="flex justify-center items-center space-x-4">
@@ -53,13 +54,20 @@ const ActionBar = ({ onLike, onSuperLike, onReport, onMessage, isMatch }: Action
             </div>
             <span className="text-sm mt-2 font-semibold">Plus</span>
           </button>
-          <div className="absolute bottom-full mb-2 right-1/2 translate-x-1/2 w-40 bg-card rounded-lg shadow-xl border border-border p-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
+          <div className="absolute bottom-full mb-2 right-1/2 translate-x-1/2 w-44 bg-card rounded-lg shadow-xl border border-border p-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto">
             <button
               onClick={onReport}
-              className="w-full flex items-center px-3 py-2 text-sm text-foreground hover:bg-destructive/10 hover:text-destructive rounded-md"
+              className="w-full flex items-center px-3 py-2 text-sm text-foreground hover:bg-muted rounded-md"
             >
               <Flag className="h-4 w-4 mr-2" />
               Signaler
+            </button>
+            <button
+              onClick={onBlock}
+              className="w-full flex items-center px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-md"
+            >
+              <Ban className="h-4 w-4 mr-2" />
+              Bloquer
             </button>
           </div>
         </div>

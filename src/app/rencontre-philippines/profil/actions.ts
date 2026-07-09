@@ -4,22 +4,8 @@ import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { DatingProfile } from '@/types';
 
-export async function reportUser(reporterId: string, reportedId: string, reason: string) {
-  const supabase = await createClient();
-  const { error } = await supabase.from('reported_messages').insert({
-    reporter_id: reporterId,
-    reported_user_id: reportedId,
-    reason: reason,
-    status: 'pending',
-  });
-
-  if (error) {
-    console.error('Error reporting user:', error);
-    return { error: error.message };
-  }
-
-  return { success: true };
-}
+// reportUser déplacé vers messages/actions.ts (reportUserAction) : auth.uid()
+// comme source de vérité + support du message_id (signalement d'un message précis).
 
 // Define a specific type for the update payload
 export type UpdateDatingProfilePayload = Partial<Omit<DatingProfile, 'interests' | 'answers'>> & {
@@ -278,69 +264,9 @@ export async function cancelSubscription(subscriptionId: string) {
   }
 }
 
-export async function unmatchUser(matchId: number) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'Unauthorized' };
-  }
-
-  // The RLS policy ensures the user is part of the match.
-  const { error } = await supabase
-    .from('matches')
-    .update({ status: 'unmatched' })
-    .eq('id', matchId);
-
-  if (error) {
-    console.error('Error unmatching user:', error);
-    return { error: error.message };
-  }
-
-  revalidatePath('/rencontre-philippines/messages');
-  return { success: true };
-}
-
-export async function blockUser(blockedUserId: string) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        return { error: 'Unauthorized' };
-    }
-
-    const blockerId = user.id;
-
-    // 1. Add to blocked_users table
-    const { error: blockError } = await supabase
-        .from('blocked_users')
-        .insert({ blocker_id: blockerId, blocked_id: blockedUserId });
-
-    if (blockError) {
-        console.error('Error blocking user:', blockError);
-        return { error: 'Failed to block user.' };
-    }
-
-    // 2. Find and update any existing match
-    const { data: match } = await supabase
-        .from('matches')
-        .select('id')
-        .or(`(user_id_1.eq.${blockerId},user_id_2.eq.${blockedUserId}),(user_id_1.eq.${blockedUserId},user_id_2.eq.${blockerId})`)
-        .single();
-
-    if (match) {
-        await supabase.from('matches').update({ status: 'unmatched' }).eq('id', match.id);
-    }
-
-    // 3. Delete any likes between the two users
-    await supabase
-        .from('likes')
-        .delete()
-        .or(`(from_user_id.eq.${blockerId},to_user_id.eq.${blockedUserId}),(from_user_id.eq.${blockedUserId},to_user_id.eq.${blockerId})`);
-
-  revalidatePath('/rencontre-philippines');
-  return { success: true };
-}
+// unmatchUser / blockUser déplacés vers messages/actions.ts (RPC transactionnelles
+// block_user/unmatch_user, SECURITY DEFINER). Les anciennes versions ici avaient
+// une syntaxe .or() PostgREST invalide et ne posaient pas matches.status='blocked'.
 
 export async function likeUser(toUserId: string) {
   const supabase = await createClient();

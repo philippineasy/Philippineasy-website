@@ -133,3 +133,68 @@ export async function sendDatingWelcome(userId: string, to: string, userName: st
     userId,
   });
 }
+
+/** Notify a user when their dating profile is approved and now visible */
+export async function sendDatingProfileApproved(userId: string) {
+  const info = await getUserEmail(userId);
+  if (!info) return { success: false, error: 'no email' };
+
+  const bodyHtml = `
+    <p style="font-size:14px;line-height:1.7;margin:0 0 16px;">
+      Bonne nouvelle ${info.name} — ton profil Rencontre vient d'etre valide par notre equipe. Il est desormais visible par les autres membres et tu apparais dans les suggestions.
+    </p>
+    ${emailHighlightBox("C'est le moment de swiper, de liker les profils qui te plaisent et de demarrer tes premieres conversations.", 'success')}
+  `;
+
+  const html = buildEmailHtml({
+    title: 'Ton profil est en ligne !',
+    preheader: `${info.name}, ton profil Rencontre est valide et visible.`,
+    userName: info.name,
+    bodyHtml,
+    ctaText: 'Voir les profils',
+    ctaUrl: `${BRAND.siteUrl}/rencontre-philippines/swipe`,
+  });
+
+  return sendEmail({
+    to: info.email,
+    from: 'communaute',
+    subject: 'Ton profil Rencontre est valide !',
+    html,
+    category: 'community',
+    userId,
+  });
+}
+
+/** Notify a user when their dating profile is rejected (with optional reason) */
+export async function sendDatingProfileRejected(userId: string, reason?: string) {
+  const info = await getUserEmail(userId);
+  if (!info) return { success: false, error: 'no email' };
+
+  const bodyHtml = `
+    <p style="font-size:14px;line-height:1.7;margin:0 0 16px;">
+      Bonjour ${info.name}, apres verification, ton profil Rencontre n'a pas pu etre valide en l'etat.
+    </p>
+    ${emailHighlightBox(reason && reason.trim() ? `Raison : ${reason.trim()}` : "La photo ou la description ne respecte pas notre charte (photo claire de toi, contenu respectueux).", 'warning')}
+    <p style="font-size:14px;line-height:1.7;margin:16px 0 0;">
+      Tu peux modifier ton profil et le soumettre a nouveau — nous le reverifierons rapidement.
+    </p>
+  `;
+
+  const html = buildEmailHtml({
+    title: 'Ton profil Rencontre',
+    preheader: `${info.name}, ton profil Rencontre necessite une modification.`,
+    userName: info.name,
+    bodyHtml,
+    ctaText: 'Modifier mon profil',
+    ctaUrl: `${BRAND.siteUrl}/rencontre-philippines/profil/modifier`,
+  });
+
+  return sendEmail({
+    to: info.email,
+    from: 'communaute',
+    subject: 'Ton profil Rencontre a besoin d\'une modification',
+    html,
+    category: 'community',
+    userId,
+  });
+}

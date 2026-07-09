@@ -69,7 +69,7 @@ export const ProfilesClient = ({ profiles }: { profiles: any[] }) => {
             {new Date(profile.created_at).toLocaleDateString('fr-FR')}
           </td>
           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-            <Link href={`/rencontre/profil/${profile.user_id}`} className="text-indigo-600 hover:text-indigo-900 mr-4">Voir</Link>
+            <Link href={`/rencontre-philippines/profil/${profile.user_id}`} className="text-indigo-600 hover:text-indigo-900 mr-4">Voir</Link>
             <button
               onClick={() => handleAction(banUser, profile.user_id, !profile.profiles.is_banned)}
               disabled={isSubmitting === profile.user_id}

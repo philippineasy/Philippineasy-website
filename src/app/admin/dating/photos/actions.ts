@@ -78,21 +78,35 @@ export async function approvePhoto(photoId: number) {
   }
 
   revalidatePath('/admin/dating/photos');
-  revalidatePath(`/rencontre/profil/${userId}`);
+  revalidatePath(`/rencontre-philippines/profil/${userId}`);
   return { success: true };
 }
 
 export async function rejectPhoto(photoId: number) {
+  await requireAdmin();
   const supabase = await createClient();
-  
-  const { error } = await supabase
+
+  const { data: rejected, error } = await supabase
     .from('dating_photos')
     .update({ status: 'rejected' })
-    .eq('id', photoId);
+    .eq('id', photoId)
+    .select('user_id, image_url')
+    .single();
 
   if (error) {
     console.error('Error rejecting photo:', error);
     return { error: error.message };
+  }
+
+  // Si la photo rejetée servait de photo de profil publique, la retirer :
+  // sinon un cliché refusé resterait affiché sur le profil (bug audit 07/09).
+  if (rejected) {
+    const admin = createServiceRoleClient();
+    await admin
+      .from('dating_profiles')
+      .update({ profile_picture_url: null })
+      .eq('user_id', rejected.user_id)
+      .eq('profile_picture_url', rejected.image_url);
   }
 
   revalidatePath('/admin/dating/photos');

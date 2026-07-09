@@ -6,7 +6,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { DatingProfile } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePremium } from '@/hooks/usePremium';
-import { reportUser, likeUser, superLikeUser } from '../actions';
+import { likeUser, superLikeUser } from '../actions';
+import { reportUserAction, blockUserAction } from '../../messages/actions';
 import { getFullProfile } from '@/services/datingService';
 
 import ProfileHeader from '@/components/dating/profile/ProfileHeader';
@@ -32,13 +33,39 @@ const ProfileClientPage = () => {
 
   const isOwnProfile = user?.id === id;
 
+  // Modales signalement / blocage (remplacent prompt()/alert() natifs).
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [blockOpen, setBlockOpen] = useState(false);
+  const [modalBusy, setModalBusy] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+
   // Action Handlers
-  const handleReport = async () => {
-    if (!user || !profile) return;
-    const reason = prompt("Veuillez indiquer la raison de votre signalement :");
-    if (reason) {
-      await reportUser(user.id, profile.user_id, reason);
-      alert('Utilisateur signalé. Merci pour votre contribution.');
+  const handleReport = () => {
+    setReportReason('');
+    setReportOpen(true);
+  };
+
+  const submitReport = async () => {
+    if (!profile || reportReason.trim().length < 5) return;
+    setModalBusy(true);
+    const res = await reportUserAction(profile.user_id, reportReason);
+    setModalBusy(false);
+    setReportOpen(false);
+    setFeedback(res.error || 'Signalement transmis. Merci — notre équipe va examiner ce profil.');
+  };
+
+  const submitBlock = async () => {
+    if (!profile) return;
+    setModalBusy(true);
+    const res = await blockUserAction(profile.user_id);
+    setModalBusy(false);
+    setBlockOpen(false);
+    if (res.error) {
+      setFeedback(res.error);
+    } else {
+      router.push('/rencontre-philippines/swipe');
+      router.refresh();
     }
   };
 
@@ -128,7 +155,7 @@ const ProfileClientPage = () => {
 
             {!isOwnProfile && (
               <div className="lg:hidden">
-                <ActionBar onLike={handleLike} onSuperLike={handleSuperLike} onReport={handleReport} onMessage={handleMessage} isMatch={isMatch} />
+                <ActionBar onLike={handleLike} onSuperLike={handleSuperLike} onReport={handleReport} onMessage={handleMessage} onBlock={() => setBlockOpen(true)} isMatch={isMatch} />
               </div>
             )}
 
@@ -211,7 +238,60 @@ const ProfileClientPage = () => {
       {/* Desktop Action Bar */}
       {!isOwnProfile && (
         <div className="hidden lg:block fixed right-8 bottom-8">
-           <ActionBar onLike={handleLike} onSuperLike={handleSuperLike} onReport={handleReport} onMessage={handleMessage} isMatch={isMatch} />
+           <ActionBar onLike={handleLike} onSuperLike={handleSuperLike} onReport={handleReport} onMessage={handleMessage} onBlock={() => setBlockOpen(true)} isMatch={isMatch} />
+        </div>
+      )}
+
+      {/* Modale — Signaler */}
+      {reportOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" onClick={() => setReportOpen(false)}>
+          <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-foreground">Signaler {profile.username ?? 'ce profil'}</h3>
+            <textarea
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              rows={3}
+              maxLength={500}
+              placeholder="Explique ce qui ne va pas (comportement, contenu inapproprié…)"
+              className="mt-3 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+            />
+            <div className="mt-4 flex justify-end gap-2">
+              <button type="button" onClick={() => setReportOpen(false)} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted">Annuler</button>
+              <button type="button" onClick={submitReport} disabled={modalBusy || reportReason.trim().length < 5} className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
+                {modalBusy ? '…' : 'Envoyer le signalement'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modale — Bloquer */}
+      {blockOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" onClick={() => setBlockOpen(false)}>
+          <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-foreground">Bloquer {profile.username ?? 'ce membre'} ?</h3>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              Vous ne pourrez plus vous écrire ni apparaître dans vos suggestions respectives. Cette personne ne sera pas notifiée.
+            </p>
+            <div className="mt-4 flex justify-end gap-2">
+              <button type="button" onClick={() => setBlockOpen(false)} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted">Annuler</button>
+              <button type="button" onClick={submitBlock} disabled={modalBusy} className="rounded-lg bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50">
+                {modalBusy ? '…' : 'Bloquer'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Feedback (remplace alert()) */}
+      {feedback && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" onClick={() => setFeedback(null)}>
+          <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <p className="text-sm leading-relaxed text-foreground">{feedback}</p>
+            <div className="mt-4 flex justify-end">
+              <button type="button" onClick={() => setFeedback(null)} className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">OK</button>
+            </div>
+          </div>
         </div>
       )}
     </div>

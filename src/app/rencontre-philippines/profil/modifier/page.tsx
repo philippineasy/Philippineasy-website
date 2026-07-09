@@ -279,7 +279,7 @@ const EditDatingProfilePage = () => {
               <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
                 <h2 className="text-xl font-bold text-foreground mb-6">Questionnaire</h2>
                 <div className="space-y-6">
-                  {staticProfileData.gender === 'Femme' && (
+                  {staticProfileData.gender?.toLowerCase() === 'femme' && (
                     <>
                       <div>
                         <label className="block text-sm font-semibold text-foreground mb-2">{questionMap.foreign_country}</label>
@@ -298,7 +298,7 @@ const EditDatingProfilePage = () => {
                       </div>
                     </>
                   )}
-                  {staticProfileData.gender === 'Homme' && (
+                  {staticProfileData.gender?.toLowerCase() === 'homme' && (
                     <>
                       <div>
                         <label className="block text-sm font-semibold text-foreground mb-2">{questionMap.partner_move}</label>
