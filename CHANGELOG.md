@@ -5,6 +5,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fix/SEO — VideoObject dédoublé dans le JSON-LD article (2026-07-10)
+
+GSC détectait chaque vidéo YouTube embarquée 2 fois (rapport Vidéos) : `JsonLd.tsx` émettait le `VideoObject` à la fois imbriqué dans le schema Article (`articleSchema.video`) ET en script standalone. Suppression de la version imbriquée ; seule la version standalone (plus riche : publisher + double thumbnail maxres/hq) est conservée. Aucun impact visuel.
+
 ### Fix/Refonte — Passe UI finale : îlots pré-refonte restants + bugs dark mode (2026-07-09)
 
 Audit UI complet du site (hors admin) → la refonte de juillet avait couvert la quasi-totalité ; 3 îlots pré-refonte restants + quelques bugs dark mode traités. Principe : conversion hex→tokens (les tokens SONT les mêmes hex en clair → rendu clair inchangé, dark mode réparé), Section Kit là où c'était propre.

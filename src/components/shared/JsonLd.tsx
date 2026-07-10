@@ -208,17 +208,9 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
     keywords: ['Philippines', article.category?.name, article.title].filter(Boolean).join(', '),
   };
 
-  if (videos.length > 0) {
-    articleSchema.video = videos.map((v) => ({
-      '@type': 'VideoObject',
-      name: v.caption || article.title,
-      description: v.caption || description.substring(0, 200),
-      thumbnailUrl: `https://img.youtube.com/vi/${v.id}/hqdefault.jpg`,
-      uploadDate: article.published_at,
-      embedUrl: v.embedUrl,
-      contentUrl: `https://www.youtube.com/watch?v=${v.id}`,
-    }));
-  }
+  // Les videos sont emises UNIQUEMENT via les scripts VideoObject standalone
+  // ci-dessous (version plus riche : publisher + double thumbnail). Ne pas les
+  // dupliquer dans articleSchema.video — GSC detectait chaque video 2 fois.
 
   const jsonLd = {
     '@context': 'https://schema.org',
