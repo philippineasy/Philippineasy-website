@@ -5,6 +5,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fix/UI — Drawer panier tronqué à la hauteur du header (2026-07-20)
+
+Le panneau « Votre panier » s'affichait coupé (~120px de haut), avec le ticker météo par-dessus et la page ni assombrie ni recouverte. Cause : la `<nav>` du header a un `backdrop-blur-md`, et un `backdrop-filter` fait de l'élément le containing block de tout descendant en `position: fixed` — l'overlay `fixed inset-0` du panier, rendu à l'intérieur de la nav, était donc confiné à la boîte du header au lieu du viewport. Fix : le drawer est rendu via `createPortal(..., document.body)` (`Cart.tsx`), ce qui le sort du header ; il retrouve le plein écran au-dessus du wrapper `z-50`. Les autres overlays du header vérifiés non affectés (modale recherche hors nav, dropdowns en `absolute`).
+
 ### Fix/SEO — VideoObject dédoublé dans le JSON-LD article (2026-07-10)
 
 GSC détectait chaque vidéo YouTube embarquée 2 fois (rapport Vidéos) : `JsonLd.tsx` émettait le `VideoObject` à la fois imbriqué dans le schema Article (`articleSchema.video`) ET en script standalone. Suppression de la version imbriquée ; seule la version standalone (plus riche : publisher + double thumbnail maxres/hq) est conservée. Aucun impact visuel.

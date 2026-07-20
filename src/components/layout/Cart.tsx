@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useCart } from '@/contexts/CartContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faShoppingCart, faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -66,7 +67,10 @@ export const Cart = () => {
         )}
       </button>
 
-      {isOpen && (
+      {/* Portal obligatoire : la nav du header a un backdrop-filter, qui fait
+          d'elle le containing block de tout descendant en position:fixed — sans
+          portal, l'overlay est confiné à la hauteur du header. */}
+      {isOpen && createPortal(
         <div
           className="fixed inset-0 z-[60] bg-night/60 backdrop-blur-sm animate-in fade-in duration-200"
           onClick={() => setIsOpen(false)}
@@ -235,7 +239,8 @@ export const Cart = () => {
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
