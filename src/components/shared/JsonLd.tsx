@@ -84,6 +84,60 @@ const extractHowToSteps = (
   };
 };
 
+// Meme convention que la route article : les titles utilisent **mot** pour
+// l'accent visuel du H1 ; en texte brut (headline, breadcrumb, keywords) les
+// asterisques doivent etre retires.
+const stripTitleAccent = (title: string): string => title.replace(/\*\*([^*]+)\*\*/g, '$1');
+
+/**
+ * Detecte une section FAQ et extrait les couples question/reponse pour un
+ * FAQPage schema. Trigger : un H2 contenant "questions frequentes" ou "faq",
+ * suivi de H3 se terminant par "?" dont les paragraphes (jusqu'au header
+ * suivant) forment la reponse. Minimum 2 questions, sinon null.
+ */
+const extractFaq = (
+  content: string | EditorJSContent,
+): { question: string; answer: string }[] | null => {
+  if (typeof content === 'string') return null;
+  const blocks = content?.blocks || [];
+  const norm = (s: string) =>
+    s.replace(/<[^>]+>/g, '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+  let start = -1;
+  for (let i = 0; i < blocks.length; i++) {
+    const b = blocks[i];
+    if (b.type === 'header' && b.data?.level === 2 && typeof b.data?.text === 'string') {
+      const t = norm(b.data.text);
+      if (t.includes('questions frequentes') || t.includes('faq')) {
+        start = i;
+        break;
+      }
+    }
+  }
+  if (start === -1) return null;
+
+  const faqs: { question: string; answer: string }[] = [];
+  let question: string | null = null;
+  let answer = '';
+  const push = () => {
+    if (question && answer.trim()) faqs.push({ question, answer: answer.trim() });
+  };
+  for (let i = start + 1; i < blocks.length; i++) {
+    const b = blocks[i];
+    if ((b.type === 'header' && b.data?.level === 2) || b.type === 'delimiter') break;
+    if (b.type === 'header' && b.data?.level === 3 && typeof b.data?.text === 'string') {
+      push();
+      const q = b.data.text.replace(/<[^>]+>/g, '').trim();
+      question = q.endsWith('?') ? q : null;
+      answer = '';
+    } else if (question && b.type === 'paragraph' && b.data?.text) {
+      answer += (answer ? ' ' : '') + b.data.text.replace(/<[^>]+>/g, '').trim();
+    }
+  }
+  push();
+  return faqs.length >= 2 ? faqs : null;
+};
+
 /** Extract all YouTube embeds from EditorJS content */
 const extractVideos = (content: string | EditorJSContent) => {
   if (typeof content === 'string') return [];
@@ -143,7 +197,7 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
       item: `/${basePath}/${article.category?.slug}`,
     },
     {
-      name: article.title,
+      name: stripTitleAccent(article.title),
       item: `/${basePath}/${article.category?.slug}/${article.slug}`,
     },
   ];
@@ -152,7 +206,8 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
   const readingTime = Math.ceil(wordCount / 200);
 
   const videos = extractVideos(article.content);
-  const howto = extractHowToSteps(article.content, article.title);
+  const howto = extractHowToSteps(article.content, stripTitleAccent(article.title));
+  const faqs = extractFaq(article.content);
 
   // CRITICAL : NewsArticle est reserve a l'info de presse (perissable, < 30j de
   // pertinence). Pour les guides evergreen (Sugba Lagoon, Buddy System, etc.)
@@ -169,7 +224,7 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
 
   const articleSchema: Record<string, unknown> = {
     '@type': articleType,
-    headline: article.title,
+    headline: stripTitleAccent(article.title),
     image: article.image ? [article.image] : undefined,
     datePublished: article.published_at,
     dateModified: article.updated_at || article.published_at,
@@ -205,7 +260,7 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
       '@id': articleUrl,
     },
     articleSection: article.category?.name,
-    keywords: ['Philippines', article.category?.name, article.title].filter(Boolean).join(', '),
+    keywords: ['Philippines', article.category?.name, stripTitleAccent(article.title)].filter(Boolean).join(', '),
   };
 
   // Les videos sont emises UNIQUEMENT via les scripts VideoObject standalone
@@ -245,6 +300,23 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
           }}
         />
       )}
+      {faqs && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              inLanguage: 'fr-FR',
+              mainEntity: faqs.map((f) => ({
+                '@type': 'Question',
+                name: f.question,
+                acceptedAnswer: { '@type': 'Answer', text: f.answer },
+              })),
+            }),
+          }}
+        />
+      )}
       {videos.map((v) => (
         <script
           key={v.id}
@@ -253,7 +325,7 @@ const JsonLd = ({ article, basePath }: JsonLdProps) => {
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'VideoObject',
-              name: v.caption || article.title,
+              name: v.caption || stripTitleAccent(article.title),
               description: v.caption || description.substring(0, 200),
               thumbnailUrl: [
                 `https://img.youtube.com/vi/${v.id}/maxresdefault.jpg`,

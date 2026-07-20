@@ -5,6 +5,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Feature/SEO — FAQPage JSON-LD auto-détecté + fix asterisques dans le schema (2026-07-20)
+
+`JsonLd.tsx` détecte désormais une section FAQ dans le contenu EditorJS (H2 contenant « questions fréquentes »/« FAQ », H3 se terminant par « ? », paragraphes = réponse, arrêt au H2 suivant ou au delimiter, minimum 2 questions) et émet un schema FAQPage. Au passage, `headline`, breadcrumb, `keywords` et le nom des VideoObject strippent maintenant la convention `**accent**` des titles (les astérisques markdown fuyaient en brut dans le JSON-LD).
+
+Côté contenu (DB, pas de commit) : l'article « Rencontrer une Philippine » (id 116) est passé de 13 k à 19,4 k caractères — accents français restaurés sur tout le corps (était intégralement désaccentué), 4 liens internes morts réparés, nouvelle section « Vivre avec une femme philippine au quotidien » (requête à ~200 imp/60 j en GSC), FAQ de 6 questions calée sur les requêtes-questions GSC (fidélité, réputation, Pinay, France…), 3 CTA vers `/rencontre-philippines` avec ancres exactes pour résoudre la cannibalisation article/landing. Backup du contenu original dans le scratchpad de session.
+
 ### Fix/SEO — Canonical articles construit depuis la vraie catégorie + 308 sur chemins obsolètes (2026-07-20)
 
 La route article matchait n'importe quel couple `main_category/category_slug` et déclarait un canonical auto-référent construit depuis l'URL demandée. Conséquence mesurée dans GSC : le même article indexé sous plusieurs chemins (Samal et « Partir aux Philippines » sous 2 URLs, Bohol rankant via l'ancienne URL `/meilleurs-plans-.../`, « Saison des pluies » sous `/actualites-.../`), diluant les signaux de ranking. Fix : canonical construit depuis la catégorie réelle en base (`generateArticleUrl`) dans `generateMetadata`, et `permanentRedirect` (308) vers le chemin canonique quand l'URL demandée ne correspond pas. Les anciens chemins indexés vont se consolider au fil du recrawl.
