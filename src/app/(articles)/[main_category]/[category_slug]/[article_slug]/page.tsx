@@ -3,11 +3,11 @@ import { getArticleBySlug, getRelatedArticles } from '@/services/articleService'
 import { createClient } from '@/utils/supabase/server';
 import { createBuildClient } from '@/utils/supabase/build-client';
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import JsonLd from '@/components/shared/JsonLd';
 import { Article, EditorJSContent } from '@/types';
 import { generateArticleMetaDescription } from '@/utils/seo/metaDescriptionGenerator';
-import { getMainCategoryPath } from '@/lib/utils';
+import { generateArticleUrl, getMainCategoryPath } from '@/lib/utils';
 import ViewTracker from '@/components/shared/ViewTracker';
 import { ArticleHero } from '@/components/articles/ArticleHero';
 import { ArticleTOC } from '@/components/articles/ArticleTOC';
@@ -67,7 +67,11 @@ export async function generateMetadata({
     { maxLength: 155, addEllipsis: true }
   );
 
-  const canonicalUrl = `https://philippineasy.com/${main_category}/${category_slug}/${article_slug}`;
+  // Canonical construit depuis la categorie reelle de l'article (DB), jamais
+  // depuis l'URL demandee : la route matche n'importe quel couple
+  // main/categorie, et un canonical auto-referent faisait indexer des
+  // doublons a Google (meme article sous /actualites-.../ et /voyager-.../).
+  const canonicalUrl = `https://philippineasy.com${generateArticleUrl(article)}`;
 
   return {
     // Pas de suffixe " | Philippin'Easy" manuel : le template du root layout
@@ -159,7 +163,15 @@ export default async function ArticlePage({
   }
 
   const typedArticle = article as Article;
-  const canonicalUrl = `https://philippineasy.com/${main_category}/${category_slug}/${article_slug}`;
+
+  // 308 vers le chemin canonique si l'URL demandee ne correspond pas a la
+  // vraie categorie de l'article (sinon la meme page repond en 200 sur des
+  // chemins de categorie obsoletes et Google indexe des doublons).
+  const canonicalPath = generateArticleUrl(typedArticle);
+  if (`/${main_category}/${category_slug}/${article_slug}` !== canonicalPath) {
+    permanentRedirect(canonicalPath);
+  }
+  const canonicalUrl = `https://philippineasy.com${canonicalPath}`;
 
   // Fetch related articles server-side
   const supabase = await createClient();

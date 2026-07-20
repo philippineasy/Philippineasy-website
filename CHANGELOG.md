@@ -5,6 +5,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fix/SEO — Canonical articles construit depuis la vraie catégorie + 308 sur chemins obsolètes (2026-07-20)
+
+La route article matchait n'importe quel couple `main_category/category_slug` et déclarait un canonical auto-référent construit depuis l'URL demandée. Conséquence mesurée dans GSC : le même article indexé sous plusieurs chemins (Samal et « Partir aux Philippines » sous 2 URLs, Bohol rankant via l'ancienne URL `/meilleurs-plans-.../`, « Saison des pluies » sous `/actualites-.../`), diluant les signaux de ranking. Fix : canonical construit depuis la catégorie réelle en base (`generateArticleUrl`) dans `generateMetadata`, et `permanentRedirect` (308) vers le chemin canonique quand l'URL demandée ne correspond pas. Les anciens chemins indexés vont se consolider au fil du recrawl.
+
 ### Fix/UI — Drawer panier tronqué à la hauteur du header (2026-07-20)
 
 Le panneau « Votre panier » s'affichait coupé (~120px de haut), avec le ticker météo par-dessus et la page ni assombrie ni recouverte. Cause : la `<nav>` du header a un `backdrop-blur-md`, et un `backdrop-filter` fait de l'élément le containing block de tout descendant en `position: fixed` — l'overlay `fixed inset-0` du panier, rendu à l'intérieur de la nav, était donc confiné à la boîte du header au lieu du viewport. Fix : le drawer est rendu via `createPortal(..., document.body)` (`Cart.tsx`), ce qui le sort du header ; il retrouve le plein écran au-dessus du wrapper `z-50`. Les autres overlays du header vérifiés non affectés (modale recherche hors nav, dropdowns en `absolute`).
