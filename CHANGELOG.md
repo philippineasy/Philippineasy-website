@@ -5,6 +5,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fix/SEO — Landing rencontre recentrée sur le transactionnel « site de rencontre philippines gratuit » (2026-07-20)
+
+La landing `/rencontre-philippines` (pos 22,9 sur « rencontre philippines ») se cannibalisait avec l'article guide-rencontrer-femmes (pos 7,1 sur la même requête). Spécialisation assumée : l'article capte l'informationnel et pousse vers la landing (3 CTA ancre exacte ajoutés la veille), la landing cible désormais le transactionnel — title/OG/Twitter « Site de rencontre Philippines gratuit : profils vérifiés », H1 « Site de rencontre Philippines », subtitle avec gratuité + traduction, nouvelle FAQ d'attaque « Le site de rencontre Philippines est-il gratuit ? » (valeurs conformes à `dating.ts` : 2 messages + 10 traductions/jour en gratuit).
+
 ### Feature/SEO — FAQPage JSON-LD auto-détecté + fix asterisques dans le schema (2026-07-20)
 
 `JsonLd.tsx` détecte désormais une section FAQ dans le contenu EditorJS (H2 contenant « questions fréquentes »/« FAQ », H3 se terminant par « ? », paragraphes = réponse, arrêt au H2 suivant ou au delimiter, minimum 2 questions) et émet un schema FAQPage. Au passage, `headline`, breadcrumb, `keywords` et le nom des VideoObject strippent maintenant la convention `**accent**` des titles (les astérisques markdown fuyaient en brut dans le JSON-LD).

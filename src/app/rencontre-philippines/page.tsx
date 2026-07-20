@@ -10,6 +10,10 @@ import RencontreClientPage from './RencontreClientPage';
 // est rendue par <FaqAccordion> côté client avec les mêmes données.
 const RENCONTRE_FAQS = [
   {
+    q: 'Le site de rencontre Philippines est-il gratuit ?',
+    a: "L'inscription et la création de profil sont gratuites pour tout le monde. Les femmes profitent d'une expérience 100 % gratuite et illimitée ; les hommes disposent de 2 messages et 10 traductions gratuits par jour, le Premium débloquant l'illimité.",
+  },
+  {
     q: 'La rencontre est-elle gratuite pour les femmes ?',
     a: "Oui, totalement. Pour les femmes, l'expérience est 100 % gratuite et sans limite : messages, découverte et rencontres, sans aucune restriction.",
   },
@@ -28,24 +32,27 @@ const RENCONTRE_FAQS = [
 ];
 
 export const metadata: Metadata = {
-  title: 'Rencontre Philippines : Trouvez l\'Amour',
-  description: 'Site de rencontre pour célibataires aux Philippines. Rencontrez des Philippins et expatriés, créez des connexions authentiques. Inscription gratuite.',
+  // Ciblage transactionnel « site de rencontre philippines (gratuit) » :
+  // l'informationnel « rencontre philippines » est capté par l'article
+  // guide-rencontrer-femmes-philippines (audit SEO 2026-07-20, la landing
+  // et l'article se cannibalisaient sur la même requête).
+  title: 'Site de rencontre Philippines gratuit : profils vérifiés',
+  description: 'Site de rencontre Philippines francophone : inscription gratuite, profils de Filipinas vérifiés à la main, messagerie avec traduction français-tagalog intégrée.',
   keywords: [
+    'site de rencontre Philippines',
+    'site de rencontre Philippines gratuit',
     'rencontre Philippines',
     'dating Philippines',
     'célibataires Philippines',
-    'mariage Philippines',
     'filipina rencontre',
-    'site rencontre Philippines',
     'expatriés Philippines',
-    'amour Philippines',
   ],
   alternates: {
     canonical: 'https://philippineasy.com/rencontre-philippines',
   },
   openGraph: {
-    title: 'Rencontre Philippines : Trouvez l\'Amour',
-    description: 'Communauté de rencontres pour célibataires aux Philippines. Créez des connexions authentiques avec des Philippins et expatriés.',
+    title: 'Site de rencontre Philippines gratuit : profils vérifiés',
+    description: 'Inscription gratuite, profils de Filipinas vérifiés à la main, messagerie avec traduction intégrée. La communauté francophone de rencontre aux Philippines.',
     url: 'https://philippineasy.com/rencontre-philippines',
     siteName: 'Philippin\'Easy',
     locale: 'fr_FR',
@@ -61,8 +68,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Rencontre Philippines : Trouvez l\'Amour',
-    description: 'Site de rencontre pour célibataires aux Philippines. Inscription gratuite.',
+    title: 'Site de rencontre Philippines gratuit : profils vérifiés',
+    description: 'Inscription gratuite, profils vérifiés à la main, traduction français-tagalog intégrée.',
     images: ['https://philippineasy.com/imagesHero/couple-rencontre-aux-philippines.webp'],
   },
 };

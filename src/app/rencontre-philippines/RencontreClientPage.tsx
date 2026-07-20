@@ -134,9 +134,9 @@ const RencontreClientPage = ({ faqs }: { faqs: RencontreFaq[] }) => {
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <PageHero
         eyebrow="Rencontre · Communauté vérifiée"
-        title="Rencontres aux"
+        title="Site de rencontre"
         titleAccent="Philippines"
-        subtitle="Des profils vérifiés à la main, des conversations qui comptent. Faites de belles rencontres au sein d'une communauté francophone et philippine."
+        subtitle="Inscription gratuite, profils vérifiés à la main, messagerie avec traduction français-tagalog. Faites de belles rencontres au sein d'une communauté francophone et philippine."
         imageUrl="/imagesHero/couple-rencontre-aux-philippines.webp"
         imageAlt="Couple heureux au coucher du soleil aux Philippines"
       />
