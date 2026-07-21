@@ -5,6 +5,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fix/Paiement — Checkout services cassé depuis son lancement : `NEXT_PUBLIC_BASE_URL` inexistante (2026-07-22)
+
+Tout achat de service (`/api/services/checkout` : Buddy System, Voyage Serein, packs, guides) échouait en 500 « Invalid URL: An explicit scheme (such as https) must be provided » : les `success_url`/`cancel_url` Stripe étaient construites avec `process.env.NEXT_PUBLIC_BASE_URL`, variable définie nulle part (ni local, ni Vercel) → Stripe recevait `undefined/checkout/...`. Les lignes `service_purchases` orphelines en base (pending, session_id null, dont 2 datant du 5 mars) prouvent que cette route n'a jamais fonctionné en prod. Fix : URLs construites depuis `req.nextUrl.origin`, même pattern que le checkout dating (qui, lui, fonctionnait). Les paiements dating (url.origin) et itinéraires (PaymentIntent, pas d'URL) n'étaient pas affectés.
+
 ### Fix/SEO — Landing rencontre recentrée sur le transactionnel « site de rencontre philippines gratuit » (2026-07-20)
 
 La landing `/rencontre-philippines` (pos 22,9 sur « rencontre philippines ») se cannibalisait avec l'article guide-rencontrer-femmes (pos 7,1 sur la même requête). Spécialisation assumée : l'article capte l'informationnel et pousse vers la landing (3 CTA ancre exacte ajoutés la veille), la landing cible désormais le transactionnel — title/OG/Twitter « Site de rencontre Philippines gratuit : profils vérifiés », H1 « Site de rencontre Philippines », subtitle avec gratuité + traduction, nouvelle FAQ d'attaque « Le site de rencontre Philippines est-il gratuit ? » (valeurs conformes à `dating.ts` : 2 messages + 10 traductions/jour en gratuit).

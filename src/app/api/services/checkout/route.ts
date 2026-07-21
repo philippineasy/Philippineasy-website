@@ -59,12 +59,13 @@ export async function POST(req: NextRequest) {
     }
 
     const stripe = getStripe();
+    const origin = req.nextUrl.origin;
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: config.mode,
       line_items: [{ price: config.priceId, quantity: 1 }],
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout/services/completion?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/services`,
+      success_url: `${origin}/checkout/services/completion?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/services`,
       customer_email: user.email,
       metadata: {
         purchase_id: purchase.id,
