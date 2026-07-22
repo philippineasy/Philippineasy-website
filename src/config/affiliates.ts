@@ -3,10 +3,10 @@
 // lien tracké fourni par le réseau : toutes les pages (partenaires, budget,
 // communication, carte-sim, santé, banque…) sont mises à jour d'un coup.
 //
-// État au 2026-07-03 :
+// État au 2026-07-22 :
 //   - klook  : AFFILIÉ (aid=118789) — géré séparément dans
 //              src/components/affiliate/klook-activities-data.ts (deep links par activité).
-//   - wise   : candidature Partnerize soumise (campagne EUR, statut requested).
+//   - wise   : AFFILIÉ Partnerize (camref:1011l5L36L, 10€ CPA par 1er transfert particulier).
 //   - booking/chapka : à candidater via Awin.
 //   - airalo : à candidater via Impact.
 //   - nordvpn: candidature CJ en attente (avril) — sinon Impact.
@@ -14,8 +14,8 @@
 // simplement sans commission.
 
 export const AFFILIATE_LINKS = {
-  /** Transferts d'argent — Partnerize (remplacer par le lien tracké prfm/pxf une fois Wise approuvé) */
-  wise: 'https://wise.com/fr/send-money/send-money-to-philippines',
+  /** Transferts d'argent — Partnerize (deep link tracké, redirige vers wise.com/fr/send-money/send-money-to-philippines) */
+  wise: 'https://wise.prf.hn/click/camref:1011l5L36L/destination:https%3A%2F%2Fwise.com%2Ffr%2Fsend-money%2Fsend-money-to-philippines',
 
   /** Hôtels Philippines — Awin (programme Booking.com) */
   booking: 'https://www.booking.com/country/ph.fr.html',
